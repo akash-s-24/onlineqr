@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Login – EventMate Portal{% endblock %}
+
+{% block content %}
+<div style="max-width: 480px; margin: 3rem auto;">
+    <div class="form-card" style="box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border-top: 4px solid var(--primary);">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div class="brand-icon" style="margin: 0 auto 1rem auto; width: 56px; height: 56px; font-size: 1.6rem; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);">EM</div>
+            <h2 style="font-size: 1.65rem; font-weight: 800; margin-bottom: 0.35rem; color: var(--secondary);">EventMate Portal</h2>
+            <p style="color: var(--text-muted); font-size: 0.92rem;">Administrator Sign In</p>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" method="POST" action="{{ url_for('login') }}">
+            <input type="hidden" name="action" value="login">
+            
+            <div class="form-group">
+                <label class="form-label" for="username">Username or Email</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Enter username" required autofocus autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 1.5rem; font-weight: 700; letter-spacing: 0.3px;">Sign In to Dashboard &rarr;</button>
+        </form>
+
+        <!-- Registration Link / Notice -->
+        <div style="margin-top: 1.75rem; text-align: center; font-size: 0.88rem; color: var(--text-muted); padding-top: 1.25rem; border-top: 1px solid #f1f5f9;">
+            <span>Looking to register for events? </span>
+            <a href="{{ url_for('register_participant') }}" style="color: var(--primary); font-weight: 700; text-decoration: none;">Go to Registration &rarr;</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

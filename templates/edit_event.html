@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Event – EventMate{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h1>Edit Event: {{ event.event_name }}</h1>
+        <p>Update competition timings, venue, or description details</p>
+    </div>
+    <div class="page-actions">
+        <a href="{{ url_for('events_list') }}" class="btn btn-secondary">&larr; Back to Events</a>
+    </div>
+</div>
+
+<div class="form-card">
+    <form method="POST" action="{{ url_for('edit_event', event_id=event.id) }}">
+        <div class="form-group">
+            <label class="form-label" for="event_name">Event Name *</label>
+            <input type="text" id="event_name" name="event_name" class="form-control" value="{{ event.event_name }}" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="event_type">Event Type / Category *</label>
+                <input type="text" id="event_type" name="event_type" class="form-control" value="{{ event.event_type }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="max_participants">Max Participants Capacity</label>
+                <input type="number" id="max_participants" name="max_participants" class="form-control" value="{{ event.max_participants }}" min="1">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="event_date">Event Date *</label>
+                <input type="text" id="event_date" name="event_date" class="form-control" value="{{ event.event_date }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="event_time">Event Time *</label>
+                <input type="text" id="event_time" name="event_time" class="form-control" value="{{ event.event_time }}" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="venue">Venue / Room *</label>
+                <input type="text" id="venue" name="venue" class="form-control" value="{{ event.venue }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="event_fee">Event Fee (₹)</label>
+                <input type="number" id="event_fee" name="event_fee" class="form-control" value="{{ event.event_fee }}" min="0">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="description">Event Description & Rules</label>
+            <textarea id="description" name="description" class="form-control" rows="4">{{ event.description }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 1rem;">Update Event</button>
+    </form>
+</div>
+{% endblock %}

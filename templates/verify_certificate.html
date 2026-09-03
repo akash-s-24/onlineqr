@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Certificate Verification – EventMate{% endblock %}
+
+{% block content %}
+<div class="verify-container">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Public Certificate Verification Portal</h1>
+        <p style="color: var(--text-muted);">Enter any EventMate Certificate ID to verify its authenticity and
+            participant credentials</p>
+    </div>
+
+    <!-- Verification Lookup Form -->
+    <div class="form-card" style="margin-bottom: 2.5rem; max-width: 600px;">
+        <form method="GET" action="{{ url_for('verify_certificate') }}">
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label class="form-label" for="cert_id_input">Certificate Identification Code</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="cert_id_input" name="id" class="form-control"
+                        placeholder="e.g. EM-2026-C-9A9D4E" value="{{ search_id if search_id else '' }}" required
+                        autofocus
+                        style="text-transform: uppercase; font-family: monospace; font-size: 1.05rem; font-weight: 600;">
+                    <button type="submit" class="btn btn-primary" style="padding: 0 1.5rem;">Verify</button>
+                </div>
+            </div>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Example codes to test:
+                <code>{{ sample_code if sample_code else 'EM-2026-CC-8742' }}</code></span>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    {% if search_id %}
+    {% if certificate_info %}
+    <!-- Valid Certificate Card -->
+    <div class="cert-card-preview">
+        <div class="cert-verified-badge">
+            <span>🛡️</span>
+            <span>OFFICIALLY VERIFIED & AUTHENTIC</span>
+        </div>
+
+        <h2 style="font-size: 1.8rem; color: var(--secondary); margin-bottom: 0.25rem;">{{ certificate_info.full_name }}
+        </h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">has successfully participated in the college symposium
+        </p>
+
+        <div class="cert-details-grid">
+            <div class="cert-detail-item">
+                <label>Event Name</label>
+                <p style="color: var(--primary);">{{ certificate_info.event_name }}</p>
+            </div>
+            <div class="cert-detail-item">
+                <label>Event Date</label>
+                <p>{{ certificate_info.event_date }}</p>
+            </div>
+            <div class="cert-detail-item">
+                <label>College / Institution</label>
+                <p>{{ certificate_info.college_name }}</p>
+            </div>
+            <div class="cert-detail-item">
+                <label>Department / Branch</label>
+                <p>{{ certificate_info.department }}</p>
+            </div>
+            <div class="cert-detail-item">
+                <label>Certificate ID</label>
+                <p style="font-family: monospace;">{{ certificate_info.certificate_code }}</p>
+            </div>
+            <div class="cert-detail-item">
+                <label>Issuing Authority</label>
+                <p>{{ config.COLLEGE_NAME }}</p>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-lg"
+                onclick="openCertModal('{{ url_for('download_certificate_file', filename=certificate_info.certificate_code + '.png') }}', '{{ certificate_info.certificate_code }}')">
+                👁️ Preview Certificate
+            </button>
+            <a href="{{ url_for('download_certificate_file', filename=certificate_info.certificate_code + '.png') }}"
+                download class="btn btn-primary btn-lg">
+                ⬇️ Download Official Certificate
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <!-- Invalid Certificate Card -->
+    <div class="form-card" style="text-align: center; border-color: #fca5a5; background: #fff5f5;">
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">⚠️</div>
+        <h3 style="color: #991b1b; font-size: 1.4rem; margin-bottom: 0.5rem;">Certificate Not Found</h3>
+        <p style="color: #7f1d1d; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">
+            No verified record matches the Certificate ID <code>{{ search_id }}</code>.<br>
+            Please double-check the ID printed on the certificate or contact the symposium coordinator.
+        </p>
+        <a href="{{ url_for('verify_certificate') }}" class="btn btn-secondary">Try Another ID</a>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

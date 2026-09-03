@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Management – EventMate{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h1>Attendance Tracker & Registration Sheet</h1>
+        <p>Mark attendee presence, manage squad participation, and remove registrations</p>
+    </div>
+    <div class="page-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+            <span style="font-size: 1.1rem;">&larr;</span> Previous
+        </button>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary">&larr; Back to Dashboard</a>
+        <a href="{{ url_for('certificates_manager') }}" class="btn btn-success">Proceed to Certificate Generation &rarr;</a>
+    </div>
+</div>
+
+<!-- Attendance Metric Summary -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Total Registrations</span>
+            <span class="stat-value" id="statTotalCount">{{ attendance_records|length }}</span>
+        </div>
+        <div class="stat-icon-wrapper">
+            <span>📋</span>
+        </div>
+    </div>
+    <div class="stat-card stat-success">
+        <div class="stat-info">
+            <span class="stat-label">Present Count</span>
+            <span class="stat-value" id="statPresentCount">{{ present_count }}</span>
+        </div>
+        <div class="stat-icon-wrapper success">
+            <span>✅</span>
+        </div>
+    </div>
+    <div class="stat-card stat-warning">
+        <div class="stat-info">
+            <span class="stat-label">Absent Count</span>
+            <span class="stat-value" id="statAbsentCount">{{ absent_count }}</span>
+        </div>
+        <div class="stat-icon-wrapper warning">
+            <span>❌</span>
+        </div>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-header">
+        <div class="table-filters">
+            <div class="search-input-group">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="tableSearchInput" placeholder="Search by name, team, event, or college...">
+            </div>
+
+            <select id="eventFilterSelect" class="form-control" style="width: auto; min-width: 220px;">
+                <option value="">All Events</option>
+                {% for ev in events %}
+                    <option value="{{ ev.event_name }}" {% if selected_event and selected_event == ev.event_name %}selected{% endif %}>
+                        {{ ev.event_name }} {% if ev.is_group %}(👥 Group){% endif %} – {{ ev.event_date }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Use <strong>🗑️ Delete</strong> to remove registrations or toggle attendance status</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="custom-table" id="attendanceTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Participant Name</th>
+                    <th>College & Dept</th>
+                    <th>Event & Team Info</th>
+                    <th>Attendance Status</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in attendance_records %}
+                <tr data-event-name="{{ row.event_name }}" id="attRow_{{ row.registration_id }}">
+                    <td class="row-index">{{ loop.index }}</td>
+                    <td>
+                        <strong>{{ row.full_name }}</strong><br>
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">{{ row.email }}</span>
+                    </td>
+                    <td>
+                        <span>{{ row.college_name }}</span><br>
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">{{ row.department }}</span>
+                    </td>
+                    <td>
+                        <span class="badge badge-primary">{{ row.event_name }}</span>
+                        {% if row.is_group or row.team_name %}
+                            <div style="margin-top: 4px;">
+                                <span class="badge badge-info" style="font-size: 0.72rem;">👥 Group ({{ row.team_size }} Participants)</span>
+                                <div style="font-size: 0.82rem; font-weight: 700; color: #1e40af; margin-top: 2px;">
+                                    Team: {{ row.team_name if row.team_name else 'Squad' }}
+                                </div>
+                                {% if row.team_members %}
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); max-width: 240px; line-height: 1.3;" title="{{ row.team_members }}">
+                                        <strong>Members:</strong> {{ row.team_members }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">👤 Individual Participant</div>
+                        {% endif %}
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">{{ row.event_date }}</div>
+                    </td>
+                    <td>
+                        {% if row.att_status == 'present' %}
+                            <span class="badge badge-success attendance-badge">PRESENT</span>
+                        {% else %}
+                            <span class="badge badge-danger attendance-badge">ABSENT</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                        <div style="display: inline-flex; gap: 0.4rem; align-items: center; justify-content: flex-end;">
+                            {% if row.att_status == 'present' %}
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="toggleAttendance({{ row.registration_id }}, 'present', this)">Mark Absent</button>
+                            {% else %}
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleAttendance({{ row.registration_id }}, 'absent', this)">Mark Present</button>
+                            {% endif %}
+
+                            <!-- Delete Symbol Button -->
+                            <button type="button" class="btn btn-outline-danger btn-sm delete-btn" 
+                                    onclick="deleteAttendanceRow({{ row.registration_id }}, '{{ row.full_name }}', this)" 
+                                    title="Delete this registration record">
+                                <span>🗑️</span> <span class="btn-text">Delete</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr id="emptyRow">
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem;">No attendance records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+async function deleteAttendanceRow(regId, participantName, btnElement) {
+    if (!confirm(`Are you sure you want to delete the attendance and registration record for "${participantName}"?\n\nThis will remove the participant from the attendance sheet and cancel their registration.`)) {
+        return;
+    }
+
+    btnElement.disabled = true;
+    const originalContent = btnElement.innerHTML;
+    btnElement.innerHTML = '⏳ Deleting...';
+
+    try {
+        const response = await fetch(`/admin/attendance/delete/${regId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            const row = document.getElementById(`attRow_${regId}`);
+            if (row) {
+                // Check if the deleted row was present or absent
+                const badge = row.querySelector('.attendance-badge');
+                const wasPresent = badge && badge.innerText.includes('PRESENT');
+
+                row.style.transition = 'all 0.4s ease';
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(20px)';
+                setTimeout(() => {
+                    row.remove();
+                    // Update counters
+                    const totalEl = document.getElementById('statTotalCount');
+                    const presEl = document.getElementById('statPresentCount');
+                    const absEl = document.getElementById('statAbsentCount');
+
+                    if (totalEl) totalEl.innerText = Math.max(0, parseInt(totalEl.innerText, 10) - 1);
+                    if (wasPresent && presEl) presEl.innerText = Math.max(0, parseInt(presEl.innerText, 10) - 1);
+                    if (!wasPresent && absEl) absEl.innerText = Math.max(0, parseInt(absEl.innerText, 10) - 1);
+
+                    // Re-index remaining rows
+                    document.querySelectorAll('#attendanceTable tbody tr:not(#emptyRow)').forEach((tr, idx) => {
+                        const idxCell = tr.querySelector('.row-index');
+                        if (idxCell) idxCell.innerText = idx + 1;
+                    });
+                }, 400);
+            }
+            showToast(data.message || 'Registration deleted successfully', 'info');
+        } else {
+            showToast(data.error || 'Failed to delete record', 'danger');
+            btnElement.disabled = false;
+            btnElement.innerHTML = originalContent;
+        }
+    } catch (err) {
+        showToast('Network error while deleting record', 'danger');
+        btnElement.disabled = false;
+        btnElement.innerHTML = originalContent;
+    }
+}
+</script>
+{% endblock %}

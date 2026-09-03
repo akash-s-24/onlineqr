@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EventMate – College Event Management System{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="brand">
+                <div class="brand-icon">EM</div>
+                <div class="brand-text">
+                    <span class="brand-title">Event<span>Mate</span></span>
+                    <span class="brand-subtitle">College Tech Hub</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <ul class="nav-links">
+                <li><a href="{{ url_for('events_list') }}"
+                        class="nav-link {% if request.path == '/events' %}active{% endif %}">Events</a></li>
+                <li><a href="{{ url_for('register_participant') }}"
+                        class="nav-link {% if request.path == '/register' %}active{% endif %}">Register</a></li>
+                <li><a href="{{ url_for('verify_certificate') }}"
+                        class="nav-link {% if request.path == '/verify' %}active{% endif %}">Verify Certificate</a></li>
+
+                {% if session.get('user_id') %}
+                    {% if session.get('role') == 'admin' %}
+                    <li><a href="{{ url_for('admin_dashboard') }}"
+                            class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a></li>
+                    <li><a href="{{ url_for('attendance_manager') }}"
+                            class="nav-link {% if request.path == '/admin/attendance' %}active{% endif %}">Attendance</a>
+                    </li>
+                    <li><a href="{{ url_for('certificates_manager') }}"
+                            class="nav-link {% if request.path == '/admin/certificates' %}active{% endif %}">Certificates</a>
+                    </li>
+                    {% elif session.get('role') == 'member' %}
+                    <li><a href="{{ url_for('member_dashboard') }}"
+                            class="nav-link {% if request.path == '/member/dashboard' %}active{% endif %}">Member Dashboard</a></li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+
+            <!-- Auth & User State -->
+            <div class="nav-auth">
+                {% if session.get('user_id') %}
+                <div class="user-badge">
+                    <span>{{ session.get('full_name', session.get('username')) }}</span>
+                    <span class="user-role-tag">{{ 'Admin' if session.get('role') == 'admin' else 'Member' }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+        <!-- Universal Quick Navigation -->
+        {% if request.path != '/' and request.path != '/events' %}
+        <div class="nav-breadcrumbs"
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="{{ url_for('events_list') }}" class="btn btn-outline-primary btn-sm"
+                    style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <span>🏠</span> <span>Events Home</span>
+                </a>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                <span>EventMate Portal</span> &rsaquo; <span style="color: var(--primary); font-weight: 600;">{{
+                    request.endpoint.replace('_', ' ').title() }}</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="alert-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ message }}</span>
+                <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Certificate Preview Modal -->
+    <div id="certPreviewModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalCertTitle" style="font-size: 1.15rem;">Certificate Preview</h3>
+                <button class="alert-close" onclick="closeCertModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <img id="modalCertImage" src="" alt="Certificate Preview">
+                <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; justify-content: center;">
+                    <a id="modalDownloadBtn" href="" download class="btn btn-primary">Download High-Res PNG</a>
+                    <button type="button" class="btn btn-secondary" onclick="closeCertModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div>
+                <strong>EventMate – Event Management System</strong>
+                <p style="margin-top: 4px; font-size: 0.8rem; color: #94a3b8;">Shree Daksha Academy &bull; Department of
+                    Computer Applications</p>
+            </div>
+            <div>
+                <span>Symposium 2026 &bull; CodeCraft &bull; CodeStorm &bull; CodeVerse &bull; ByteBattle</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Client Script -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

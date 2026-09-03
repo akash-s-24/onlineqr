@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block title %}Event Registration – EventMate{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h1>Event Registration</h1>
+        <p>Register for individual challenges and collaborative group events (Binary Brains, Digital Dynamos & more)</p>
+    </div>
+    <div class="page-actions" style="display: flex; gap: 0.5rem;">
+        <a href="{{ url_for('events_list') }}" class="btn btn-outline-primary">
+            <span>&larr;</span> Back to All Events
+        </a>
+    </div>
+</div>
+
+<div class="form-card" style="box-shadow: 0 20px 25px -5px rgba(0,0,0,0.06), 0 10px 10px -5px rgba(0,0,0,0.04);">
+    <form method="POST" action="{{ url_for('register_participant') }}" id="eventRegistrationForm">
+        <!-- Event Selection -->
+        <div class="form-group">
+            <label class="form-label" for="event_id">Select Event *</label>
+            <select id="event_id" name="event_id" class="form-control" onchange="handleEventSelectionChange(this)" required>
+                <option value="">-- Choose an Event --</option>
+                {% for ev in events %}
+                    <option value="{{ ev.id }}" 
+                            data-is-group="{{ ev.is_group }}" 
+                            data-min-team="{{ ev.min_team_size }}" 
+                            data-max-team="{{ ev.max_team_size }}"
+                            data-event-name="{{ ev.event_name }}"
+                            data-event-fee="{{ ev.event_fee }}"
+                            {% if selected_event_id and selected_event_id|int == ev.id %}selected{% endif %}>
+                        {{ ev.event_name }} {% if ev.is_group %}[👥 Group Event ({{ ev.min_team_size }}-{{ ev.max_team_size }} Participants)]{% else %}[👤 Individual Event]{% endif %} – {{ ev.event_date }} @ {{ ev.event_time }} – Fee: {% if ev.event_fee and ev.event_fee > 0 %}₹ {{ ev.event_fee }}{% else %}Free{% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Dynamic Group / Team Event Configuration Card -->
+        <div id="groupEventCard" style="display: none; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem; transition: all 0.3s ease;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.4rem;">👥</span>
+                    <strong style="color: #166534; font-size: 1.05rem;" id="groupEventHeading">Group Event Registration</strong>
+                </div>
+                <span class="badge badge-success" id="groupSizeBadge">Team Size: 2 - 4</span>
+            </div>
+            
+            <p style="font-size: 0.85rem; color: #166534; margin-bottom: 1rem;">
+                This competition is a team-based event. Please select the number of participants in your squad and enter your team details.
+            </p>
+
+            <div class="form-row">
+                <!-- Number of Participants Selector -->
+                <div class="form-group">
+                    <label class="form-label" for="team_size" style="color: #14532d; font-weight: 700;">
+                        Number of Participants in Event *
+                    </label>
+                    <select id="team_size" name="team_size" class="form-control" onchange="renderTeamMemberInputs()" style="border-color: #86efac; background: #ffffff;">
+                        <option value="2">2 Participants (Duo Squad)</option>
+                        <option value="3" selected>3 Participants (Trio Team)</option>
+                        <option value="4">4 Participants (Quad Squad)</option>
+                    </select>
+                    <small style="color: #15803d; font-size: 0.78rem;">Display & specify all participating members for official certificates & attendance</small>
+                </div>
+
+                <!-- Team Name Input -->
+                <div class="form-group">
+                    <label class="form-label" for="team_name" style="color: #14532d; font-weight: 700;">
+                        Team / Squad Name *
+                    </label>
+                    <input type="text" id="team_name" name="team_name" class="form-control" placeholder="e.g. Binary Beasts / CyberKnights" style="border-color: #86efac; background: #ffffff;">
+                </div>
+            </div>
+
+            <!-- Dynamic Additional Team Members Fields -->
+            <div id="teamMembersList" style="margin-top: 0.75rem;">
+                <label class="form-label" style="color: #14532d; font-weight: 700; margin-bottom: 0.5rem; display: block;">
+                    Squad Members List
+                </label>
+                <div style="background: rgba(255,255,255,0.7); border: 1px dashed #86efac; border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 0.75rem; font-size: 0.85rem; color: #166534;">
+                    <strong>Lead Participant (Member 1):</strong> Will be taken from the Full Name field below.
+                </div>
+                <div id="additionalMembersContainer" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <!-- Injected dynamically by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="full_name">Lead Registrant Full Name *</label>
+                <input type="text" id="full_name" name="full_name" class="form-control" placeholder="e.g. Your Full Name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address *</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="e.g. your.email@college.edu" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="phone">Phone / Mobile Number *</label>
+                <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g. Your Mobile Number" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="semester">Semester / Year</label>
+                <select id="semester" name="semester" class="form-control">
+                    <option value="1st Sem">1st Semester</option>
+                    <option value="2nd Sem">2nd Semester</option>
+                    <option value="3rd Sem">3rd Semester</option>
+                    <option value="4th Sem">4th Semester</option>
+                    <option value="5th Sem" selected>5th Semester</option>
+                    <option value="6th Sem">6th Semester</option>
+                    <option value="7th/8th Sem">Final Year (7th/8th Sem)</option>
+                    <option value="Postgraduate">MCA / PG Student</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="college_name">Institution / Academy / College Name *</label>
+            <input type="text" id="college_name" name="college_name" class="form-control" placeholder="e.g. Your College Name" required>
+        </div>
+
+        <!-- Department / Branch Selection with Structured Degree Courses -->
+        <div class="form-group">
+            <label class="form-label" for="department">Department / Branch / Course *</label>
+            <select id="department" name="department" class="form-control" onchange="handleDepartmentChange(this)" required>
+                <option value="">-- Select Course / Branch --</option>
+                <option value="BCA (Bachelor of Computer Applications)" selected>BCA (Bachelor of Computer Applications)</option>
+                <option value="B.Com (Bachelor of Commerce)">B.Com (Bachelor of Commerce)</option>
+                <option value="B.Tech (Bachelor of Technology)">B.Tech (Bachelor of Technology)</option>
+                <option value="B.E (Bachelor of Engineering)">B.E (Bachelor of Engineering)</option>
+                <option value="BSc (Bachelor of Science)">BSc (Bachelor of Science)</option>
+                <option value="BBA (Bachelor of Business Administration)">BBA (Bachelor of Business Administration)</option>
+                <option value="MCA (Master of Computer Applications)">MCA (Master of Computer Applications)</option>
+                <option value="M.Tech / MSc (Postgraduate Studies)">M.Tech / MSc (Postgraduate Studies)</option>
+                <option value="Other">Other Course / Branch (Specify below)</option>
+            </select>
+        </div>
+
+        <div id="otherDepartmentGroup" class="form-group" style="display: none;">
+            <label class="form-label" for="other_department">Specify Your Course / Branch *</label>
+            <input type="text" id="other_department" class="form-control" placeholder="e.g. Your Course Name">
+        </div>
+
+        <!-- UPI Payment Section -->
+        <div id="upiPaymentSection" style="display: none; background: #fffbeb; border: 1.5px solid #fcd34d; border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem; text-align: center;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <span style="font-size: 1.4rem;">📱</span>
+                <strong style="color: #b45309; font-size: 1.1rem;">UPI Payment Required</strong>
+            </div>
+            
+            <p style="font-size: 0.9rem; color: #92400e; margin-bottom: 1rem;">
+                This event has a registration fee of <strong id="displayEventFee">₹ 0</strong>. Please scan the QR code below using any UPI app (GPay, PhonePe, Paytm) to pay.
+            </p>
+
+            <img id="upiQrCode" src="" alt="UPI QR Code" style="width: 180px; height: 180px; margin: 0 auto 1rem; border: 4px solid #fff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+            
+            <p style="font-size: 0.85rem; color: #92400e; margin-bottom: 1rem;">
+                <strong>UPI ID:</strong> demopay@ybl
+            </p>
+
+            <div class="form-group" style="text-align: left;">
+                <label class="form-label" for="utr_number" style="color: #b45309; font-weight: 700;">Enter 12-Digit UTR / Transaction ID *</label>
+                <input type="text" id="utr_number" name="utr_number" class="form-control" placeholder="e.g. 123456789012" pattern="[0-9]{12}" title="Please enter a valid 12-digit UTR number" style="border-color: #fcd34d;">
+                <small style="color: #b45309; font-size: 0.75rem;">Your registration will be pending until this UTR is verified by our team.</small>
+            </div>
+        </div>
+
+        <div style="margin: 1.5rem 0; padding: 1rem; background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.85rem; color: #475569;">
+            <strong>📜 Certificate Assurance:</strong> Verified Certificate of Achievement with Shree Daksha Academy branding will be generated upon confirmed attendance.
+        </div>
+
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <button type="submit" class="btn btn-success btn-lg" style="flex: 1; font-weight: 700;">Submit Event Registration &rarr;</button>
+            <button type="button" class="btn btn-secondary btn-lg" onclick="window.history.back()">Cancel / &larr; Back</button>
+        </div>
+    </form>
+</div>
+
+<script>
+function handleEventSelectionChange(selectElement) {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const isGroup = selectedOption.getAttribute('data-is-group') === '1';
+    const minTeam = parseInt(selectedOption.getAttribute('data-min-team') || '2', 10);
+    const maxTeam = parseInt(selectedOption.getAttribute('data-max-team') || '4', 10);
+    const eventName = selectedOption.getAttribute('data-event-name') || '';
+    const eventFee = parseInt(selectedOption.getAttribute('data-event-fee') || '0', 10);
+
+    const groupCard = document.getElementById('groupEventCard');
+    const teamNameInput = document.getElementById('team_name');
+    const teamSizeSelect = document.getElementById('team_size');
+    const groupHeading = document.getElementById('groupEventHeading');
+    const groupSizeBadge = document.getElementById('groupSizeBadge');
+
+    const upiSection = document.getElementById('upiPaymentSection');
+    const displayFee = document.getElementById('displayEventFee');
+    const upiQrCode = document.getElementById('upiQrCode');
+    const utrInput = document.getElementById('utr_number');
+
+    if (eventFee > 0) {
+        upiSection.style.display = 'block';
+        displayFee.innerText = `₹ ${eventFee}`;
+        upiQrCode.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=demopay@ybl%26pn=EventMate%26am=${eventFee}%26cu=INR`;
+        utrInput.required = true;
+    } else {
+        upiSection.style.display = 'none';
+        utrInput.required = false;
+        utrInput.value = '';
+    }
+
+    if (isGroup) {
+        groupCard.style.display = 'block';
+        teamNameInput.required = true;
+        groupHeading.innerText = `👥 ${eventName} – Group Event Details`;
+        groupSizeBadge.innerText = `Capacity: ${minTeam} - ${maxTeam} Members`;
+
+        // Rebuild team_size dropdown options
+        teamSizeSelect.innerHTML = '';
+        for (let i = minTeam; i <= maxTeam; i++) {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.innerText = `${i} Participants (${i === 2 ? 'Duo' : (i === 3 ? 'Trio' : 'Squad')} Team)`;
+            if (i === Math.min(3, maxTeam)) opt.selected = true;
+            teamSizeSelect.appendChild(opt);
+        }
+
+        renderTeamMemberInputs();
+    } else {
+        groupCard.style.display = 'none';
+        teamNameInput.required = false;
+    }
+}
+
+function renderTeamMemberInputs() {
+    const teamSize = parseInt(document.getElementById('team_size').value || '2', 10);
+    const container = document.getElementById('additionalMembersContainer');
+    container.innerHTML = '';
+
+    for (let i = 2; i <= teamSize; i++) {
+        const row = document.createElement('div');
+        row.className = 'form-group';
+        row.style.marginBottom = '0.5rem';
+        row.innerHTML = `
+            <label class="form-label" for="member_${i}_name" style="font-size: 0.85rem; color: #166534;">
+                Participant #${i} Full Name *
+            </label>
+            <input type="text" id="member_${i}_name" name="member_${i}_name" class="form-control" 
+                   placeholder="Enter Member #${i} Full Name" required style="border-color: #86efac; background: #ffffff;">
+        `;
+        container.appendChild(row);
+    }
+}
+
+function handleDepartmentChange(selectElement) {
+    const otherGroup = document.getElementById('otherDepartmentGroup');
+    const otherInput = document.getElementById('other_department');
+    if (selectElement.value === 'Other') {
+        otherGroup.style.display = 'block';
+        otherInput.required = true;
+    } else {
+        otherGroup.style.display = 'none';
+        otherInput.required = false;
+    }
+}
+
+
+
+// Check initial state on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const eventSelect = document.getElementById('event_id');
+    if (eventSelect && eventSelect.value) {
+        handleEventSelectionChange(eventSelect);
+    }
+});
+
+// Ensure custom course value is submitted if "Other" is selected
+document.getElementById('eventRegistrationForm').addEventListener('submit', function(e) {
+    const deptSelect = document.getElementById('department');
+    const otherInput = document.getElementById('other_department');
+    if (deptSelect.value === 'Other' && otherInput.value.trim()) {
+        const tempOption = document.createElement('option');
+        tempOption.value = otherInput.value.trim();
+        tempOption.selected = true;
+        deptSelect.appendChild(tempOption);
+    }
+});
+</script>
+{% endblock %}

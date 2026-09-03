@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}My Registered Events – EventMate{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h1>My Registered Events</h1>
+        <p>Welcome back, {{ session.get('full_name') }}! Track your event participation and certificates.</p>
+    </div>
+    <div class="page-actions">
+        <a href="{{ url_for('events_list') }}" class="btn btn-primary">+ Explore More Events</a>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="table-title">Your Event Passes & Certificates</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Event Details</th>
+                    <th>Venue & Timing</th>
+                    <th>Attendance</th>
+                    <th>Certificate Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reg in my_registrations %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        <strong style="font-size: 1.05rem;">{{ reg.event_name }}</strong>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">{{ reg.event_type }}</div>
+                    </td>
+                    <td>
+                        <div>📍 {{ reg.venue }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">📅 {{ reg.event_date }} @ {{
+                            reg.event_time }}</div>
+                    </td>
+                    <td>
+                        {% if reg.att_status == 'present' %}
+                        <span class="badge badge-success">PRESENT</span>
+                        {% else %}
+                        <span class="badge badge-warning">AWAITING / ABSENT</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if reg.certificate_code %}
+                        <span class="badge badge-success">ISSUED</span>
+                        <div
+                            style="font-size: 0.78rem; font-family: monospace; color: var(--text-muted); margin-top: 2px;">
+                            {{ reg.certificate_code }}</div>
+                        {% else %}
+                        {% if reg.att_status == 'present' %}
+                        <span class="badge badge-info">IN QUEUE</span>
+                        {% else %}
+                        <span class="badge badge-danger">ATTENDANCE REQUIRED</span>
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if reg.certificate_code %}
+                        <div style="display: flex; gap: 0.4rem;">
+                            <button type="button" class="btn btn-secondary btn-sm"
+                                onclick="openCertModal('{{ url_for('download_certificate_file', filename=reg.certificate_code + '.png') }}', '{{ reg.certificate_code }}')">View</button>
+                            <a href="{{ url_for('download_certificate_file', filename=reg.certificate_code + '.png') }}"
+                                download class="btn btn-primary btn-sm">Download</a>
+                        </div>
+                        {% else %}
+                        <span style="font-size: 0.82rem; color: var(--text-muted);">Available after event</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                        <p style="margin-bottom: 1rem;">You haven't registered for any symposium events yet.</p>
+                        <a href="{{ url_for('events_list') }}" class="btn btn-primary">Browse & Register for Events</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

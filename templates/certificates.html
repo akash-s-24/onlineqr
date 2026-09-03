@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block title %}Certificates Hub – EventMate{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h1>Certificate of Achievement Hub</h1>
+        <p>Generate high-resolution Shree Daksha Academy certificates for present attendees and dispatch via SMTP email</p>
+    </div>
+    <div class="page-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+            <span style="font-size: 1.1rem;">&larr;</span> Previous
+        </button>
+        <a href="{{ url_for('attendance_manager') }}" class="btn btn-outline-primary">&larr; Back to Attendance Tracker</a>
+        <form method="POST" action="{{ url_for('generate_bulk_certificates') }}" style="display: inline;">
+            <button type="submit" class="btn btn-success"
+                onclick="return confirm('Generate certificates for all participants marked PRESENT?');">⚡ Generate All for Present Attendees</button>
+        </form>
+        <form method="POST" action="{{ url_for('send_bulk_certificate_emails') }}" style="display: inline;">
+            <button type="submit" class="btn btn-primary"
+                onclick="return confirm('Email all generated certificates to participants?');">📧 Email All Generated</button>
+        </form>
+    </div>
+</div>
+
+<!-- Email Dispatch Mode Banner -->
+<div style="background: var(--surface, #ffffff); border: 1px solid var(--border, #e2e8f0); border-radius: 12px; padding: 14px 20px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(37, 99, 235, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+            ✉️
+        </div>
+        <div>
+            <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                <span>Email Dispatch:</span>
+                {% if smtp_info and smtp_info.is_demo %}
+                <span class="badge badge-info" style="font-size: 0.78rem; padding: 3px 10px; border-radius: 20px;">Safe Demo Mode (Simulated)</span>
+                {% else %}
+                <span class="badge badge-success" style="font-size: 0.78rem; padding: 3px 10px; border-radius: 20px;">Live Gmail SMTP Active</span>
+                {% endif %}
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+                {% if smtp_info and smtp_info.is_demo %}
+                Clicking <strong>Email</strong> simulates full delivery with no SMTP credentials needed. Ideal for vivas & presentations.
+                {% else %}
+                Live delivery active via Gmail SMTP ({{ smtp_info.username }}).
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="openSmtpModal()" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span>⚙️</span> <span>Email Settings & Guide</span>
+        </button>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-header">
+        <div class="table-filters">
+            <div class="search-input-group">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="tableSearchInput" placeholder="Search by name, team, cert ID, or event...">
+            </div>
+
+            <select id="eventFilterSelect" class="form-control" style="width: auto; min-width: 220px;">
+                <option value="">All Events</option>
+                {% for ev in events %}
+                <option value="{{ ev.event_name }}">{{ ev.event_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Only participants marked
+                <strong>PRESENT</strong> are eligible for certificates</span>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Participant Details</th>
+                    <th>Event & Squad Details</th>
+                    <th>Attendance</th>
+                    <th>Certificate ID</th>
+                    <th>Email Status</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in cert_list %}
+                <tr data-event-name="{{ row.event_name }}">
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        <strong>{{ row.full_name }}</strong><br>
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">{{ row.email }}</span>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ row.department }} &bull; {{ row.semester }}</div>
+                    </td>
+                    <td>
+                        <span class="badge badge-primary">{{ row.event_name }}</span>
+                        {% if row.is_group or row.team_name %}
+                        <div style="margin-top: 4px;">
+                            <span class="badge badge-info" style="font-size: 0.72rem;">👥 Group ({{ row.team_size }} Participants)</span>
+                            <div style="font-size: 0.8rem; font-weight: 700; color: #1e40af;">
+                                Team: {{ row.team_name if row.team_name else 'Squad' }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">{{ row.event_date }}</div>
+                    </td>
+                    <td>
+                        {% if row.att_status == 'present' %}
+                        <span class="badge badge-success">PRESENT</span>
+                        {% else %}
+                        <span class="badge badge-danger">ABSENT</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if row.certificate_code %}
+                        <a href="{{ url_for('verify_certificate') }}?id={{ row.certificate_code }}" target="_blank"
+                            style="font-family: monospace; font-weight: 700; color: var(--primary);">
+                            {{ row.certificate_code }} ↗
+                        </a>
+                        {% else %}
+                        <span style="color: var(--text-muted); font-size: 0.82rem;">Not Generated</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if row.email_status == 'sent' %}
+                        <span class="badge badge-success">EMAIL SENT</span>
+                        {% elif row.email_status == 'failed' %}
+                        <span class="badge badge-danger">FAILED</span>
+                        {% elif row.certificate_code %}
+                        <span class="badge badge-warning">NOT SENT</span>
+                        {% else %}
+                        <span style="color: var(--text-muted); font-size: 0.82rem;">-</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                        <div style="display: inline-flex; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end;">
+                            {% if row.certificate_code %}
+                            <!-- View / Preview Modal -->
+                            <button type="button" class="btn btn-secondary btn-sm"
+                                onclick="openCertModal('{{ url_for('download_certificate_file', filename=row.certificate_code + '.png') }}', '{{ row.certificate_code }}')">
+                                👁️ Preview
+                            </button>
+
+                            <!-- Download Button -->
+                            <a href="{{ url_for('download_certificate_file', filename=row.certificate_code + '.png') }}"
+                                download class="btn btn-outline-primary btn-sm">
+                                ⬇️ Download
+                            </a>
+
+                            <!-- Send Email Button -->
+                            <form method="POST"
+                                action="{{ url_for('send_certificate_email_route', cert_id=row.cert_id) }}"
+                                style="display:inline;">
+                                <button type="submit" class="btn btn-primary btn-sm">📧 Email</button>
+                            </form>
+                            
+                            <!-- Send WA Cert Button -->
+                            {% set cert_url = request.url_root ~ "verify?id=" ~ row.certificate_code %}
+                            {% set wa_msg = "Hello " ~ row.full_name ~ ",\n\nCongratulations on completing the event *" ~ row.event_name ~ "*!\nYour official Certificate of Participation is now available.\n\nCertificate ID: " ~ row.certificate_code ~ "\nVerify & Download here: " ~ cert_url %}
+                            <a href="https://wa.me/?text={{ wa_msg | urlencode }}" target="_blank" class="btn btn-success btn-sm" style="background-color: #25D366; border-color: #25D366;">💬 WA Cert</a>
+                            {% else %}
+                            {% if row.att_status == 'present' %}
+                            <form method="POST"
+                                action="{{ url_for('generate_single_certificate', reg_id=row.registration_id) }}">
+                                <button type="submit" class="btn btn-success btn-sm">Generate Certificate</button>
+                            </form>
+                            {% else %}
+                            <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">Mark Present to Generate</span>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">No participants available for certification.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Email & SMTP Settings Modal -->
+<div id="smtpSettingsModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div style="background: #ffffff; width: 90%; max-width: 580px; border-radius: 16px; padding: 24px 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); max-height: 90vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 18px;">
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <span>⚙️</span> Email Dispatch Configuration
+            </h3>
+            <button type="button" onclick="closeSmtpModal()" style="background: none; border: none; font-size: 1.5rem; line-height: 1; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; color: #1e293b;">Active Configuration:</h4>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6;">
+                <div><strong>Current Mode:</strong> 
+                    {% if smtp_info and smtp_info.is_demo %}
+                    <span class="badge badge-info">DEMO (Simulated)</span>
+                    {% else %}
+                    <span class="badge badge-success">LIVE (Gmail SMTP)</span>
+                    {% endif %}
+                </div>
+                <div><strong>SMTP Server:</strong> <code>{{ smtp_info.server }}:{{ smtp_info.port }}</code></div>
+                <div><strong>Sender Email:</strong> <code>{{ smtp_info.sender }}</code></div>
+                <div><strong>Status:</strong> {{ smtp_info.reason }}</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; color: #1e293b;">Switch Dispatch Mode:</h4>
+            <div style="display: flex; gap: 10px;">
+                <form method="POST" action="{{ url_for('toggle_smtp_mode') }}" style="flex: 1;">
+                    <input type="hidden" name="mode" value="demo">
+                    <button type="submit" class="btn {% if smtp_info and smtp_info.is_demo %}btn-primary{% else %}btn-outline-primary{% endif %}" style="width: 100%;">
+                        ✔ Safe Demo Mode
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('toggle_smtp_mode') }}" style="flex: 1;">
+                    <input type="hidden" name="mode" value="live">
+                    <button type="submit" class="btn {% if smtp_info and not smtp_info.is_demo %}btn-primary{% else %}btn-outline-primary{% endif %}" style="width: 100%;">
+                        🚀 Live Gmail Mode
+                    </button>
+                </form>
+            </div>
+            <p style="font-size: 0.78rem; color: #64748b; margin-top: 6px;">
+                * In <strong>Safe Demo Mode</strong>, email dispatches are instantly simulated and marked successful without requiring a Gmail password.
+            </p>
+        </div>
+
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 14px 18px; margin-bottom: 18px;">
+            <h5 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #166534;">📖 How to Setup Live Gmail Delivery:</h5>
+            <ol style="margin: 0; padding-left: 18px; font-size: 0.82rem; color: #166534; line-height: 1.6;">
+                <li>Open your <strong>Google Account</strong> &rsaquo; <strong>Security</strong>.</li>
+                <li>Turn ON <strong>2-Step Verification</strong> if not already enabled.</li>
+                <li>Under 2-Step Verification, click <strong>App passwords</strong>.</li>
+                <li>Create an app named <code>EventMate</code> and copy the 16-letter password.</li>
+                <li>In your <code>.env</code> file, set:<br>
+                    <code>SMTP_MODE=live</code><br>
+                    <code>SMTP_PASSWORD=your_16_letter_code</code>
+                </li>
+            </ol>
+        </div>
+
+        <div style="text-align: right;">
+            <button type="button" class="btn btn-secondary" onclick="closeSmtpModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function openSmtpModal() {
+    const modal = document.getElementById('smtpSettingsModal');
+    if (modal) modal.style.display = 'flex';
+}
+function closeSmtpModal() {
+    const modal = document.getElementById('smtpSettingsModal');
+    if (modal) modal.style.display = 'none';
+}
+// Close modal on click outside
+window.addEventListener('click', function(e) {
+    const modal = document.getElementById('smtpSettingsModal');
+    if (e.target === modal) modal.style.display = 'none';
+});
+</script>
+{% endblock %}

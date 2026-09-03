@@ -1,0 +1,36 @@
+# Environment variables
+.env
+
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+eventmate.db
+
+# Generated certificates (keep folder with .gitkeep)
+certificates/*.png
+certificates/*.pdf
+!certificates/.gitkeep
+
+# Test output images
+kannada_test.png
+kannada_test_bold.png
+
+# IDE and OS files
+.vscode/
+.idea/
+*.sublime-workspace
+.DS_Store
+Thumbs.db
