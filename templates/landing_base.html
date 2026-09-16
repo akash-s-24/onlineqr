@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}EventMate – Shree Daksha Academy{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+
+    
+    <style>
+        /* CSS Reset for Landing */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+
+
+        /* First-Time Loading Screen */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #ffffff;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        .unique-loader {
+            display: flex;
+            gap: 15px;
+        }
+        .unique-loader div {
+            width: 20px;
+            height: 20px;
+            background-color: #dc2626;
+            border-radius: 4px;
+            animation: pulse-diamond 1.2s infinite ease-in-out;
+            transform: rotate(45deg);
+        }
+        .unique-loader div:nth-child(1) { animation-delay: -0.4s; }
+        .unique-loader div:nth-child(2) { animation-delay: -0.2s; }
+        .unique-loader div:nth-child(3) { animation-delay: 0s; }
+        @keyframes pulse-diamond {
+            0%, 100% { transform: rotate(45deg) scale(0.5); opacity: 0.3; }
+            50% { transform: rotate(45deg) scale(1.2); opacity: 1; box-shadow: 0 0 20px rgba(220, 38, 38, 0.4); }
+        }
+
+        /* Official Header */
+        .landing-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 8px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .landing-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            gap: 12px;
+            flex: 1;
+            min-width: 220px;
+        }
+        .landing-logo img {
+            height: 35px;
+        }
+        .landing-logo h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            color: #0f172a;
+            margin: 0;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        .header-nav-center {
+            display: flex;
+            gap: 0;
+            flex: 1 1 auto;
+            min-width: 0;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ── Animated Breadcrumb Nav ── */
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0;
+            transform: translateY(-8px);
+            animation: bc-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .breadcrumb-item:nth-child(1) { animation-delay: 0.1s; }
+        .breadcrumb-item:nth-child(2) { animation-delay: 0.2s; }
+        .breadcrumb-item:nth-child(3) { animation-delay: 0.3s; }
+        .breadcrumb-item:nth-child(4) { animation-delay: 0.4s; }
+        .breadcrumb-item:nth-child(5) { animation-delay: 0.5s; }
+        .breadcrumb-item:nth-child(6) { animation-delay: 0.6s; }
+        .breadcrumb-item:nth-child(7) { animation-delay: 0.7s; }
+
+        @keyframes bc-fade-in {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+
+        .pop-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.95rem !important;
+            color: #ffffff !important;
+            padding: 0.9rem 1.5rem !important;
+            border-radius: 0.6rem !important;
+            background-color: #3b82f6 !important;
+            border: 2px solid #1e3a8a !important;
+            transition: all 150ms cubic-bezier(0,0,0.58,1) !important;
+            box-shadow: 0 6px 0 -1px #60a5fa, 0 6px 0 0 #1e3a8a, 0 12px 0 0 #dbeafe !important;
+            text-decoration: none !important;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 12px; /* compensate for the smaller shadow */
+        }
+        .pop-btn:hover {
+            background-color: #2563eb !important;
+            transform: translateY(2px) !important;
+            box-shadow: 0 4px 0 -1px #60a5fa, 0 4px 0 0 #1e3a8a, 0 8px 0 0 #dbeafe !important;
+        }
+        .pop-btn:active {
+            background-color: #1d4ed8 !important;
+            transform: translateY(6px) !important;
+            box-shadow: 0 0px 0 -1px #60a5fa, 0 0px 0 0 #1e3a8a, 0 0px 0 0 #dbeafe !important;
+        }
+
+        /* Candy Button — glowing radial-gradient press animation */
+        .candy-btn {
+            position: relative;
+            display: inline-block;
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            line-height: 1.4;
+            letter-spacing: 0.02em;
+            padding: 0.75rem 2.25rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 200ms ease-out;
+            border: 1px solid #3b82f6;
+            background: radial-gradient(95% 60% at 50% 75%, #1e40af 0%, #1e3a8a 100%);
+            box-shadow: 0px 4px 48px -12px rgba(30, 58, 138, 0.8), inset 0px 1px 8px -4px rgba(255,255,255,0.4);
+            text-decoration: none;
+            text-align: center;
+            overflow: hidden;
+        }
+        .candy-btn::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            right: 10%;
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
+            pointer-events: none;
+        }
+        .candy-btn:hover {
+            filter: brightness(1.1);
+        }
+        .candy-btn:active {
+            transform: scale(0.95) rotate(1deg);
+        }
+
+        .breadcrumb-link {
+            color: #475569;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.88rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .breadcrumb-link:hover {
+            color: #dc2626;
+            background: rgba(220, 38, 38, 0.1);
+            box-shadow: none;
+        }
+
+        .image-like-nav {
+            position: relative;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: clamp(4px, 1vw, 8px);
+            margin: 0;
+            padding: 4px;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+            background: rgba(241, 245, 249, 0.8);
+            border-radius: 10px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+        }
+
+        /* Sliding pill indicator */
+        .nav-pill-indicator {
+            position: absolute;
+            top: 4px;
+            left: 0;
+            height: calc(100% - 8px);
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+            transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+        }
+        .nav-pill-indicator.visible {
+            opacity: 1;
+        }
+
+        .image-like-nav .nav-link {
+            position: relative;
+            z-index: 1;
+            color: #475569;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            padding: 7px 14px;
+            border-radius: 7px;
+            transition: color 0.25s ease;
+            cursor: pointer;
+        }
+
+        .image-like-nav .nav-link:hover {
+            color: #2563eb;
+        }
+        .image-like-nav .nav-link.active {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        /* Authenticated navigation */
+        body.authenticated-view .image-like-nav .nav-link:hover,
+        body.authenticated-view .image-like-nav .nav-link.active {
+            color: #2563eb;
+        }
+
+        /* Legacy header-nav-link kept for admin/member links below breadcrumbs */
+        .header-nav-link {
+            color: #334155;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .header-nav-link:hover {
+            color: #dc2626;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            justify-content: flex-end;
+            min-width: max-content;
+            white-space: nowrap;
+        }
+        .header-btn {
+            background: #dc2626;
+            color: #ffffff;
+            border: 1px solid #dc2626;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        .header-btn:hover {
+            background: #b91c1c;
+            border-color: #b91c1c;
+            box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
+        }
+
+        /* Flash Messages */
+        .landing-flash {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 10000;
+            width: 300px;
+        }
+
+        /* Mobile Menu */
+        .mobile-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: #0f172a;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 1002;
+        }
+        .mobile-visible {
+            display: none;
+        }
+        @media (max-width: 1150px) {
+            .mobile-toggle { display: block; }
+            .header-nav-center {
+                position: fixed;
+                top: 0; right: -100%;
+                width: 250px; height: 100vh;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                justify-content: flex-start;
+                padding-top: 80px;
+                transition: 0.3s ease;
+                z-index: 1000;
+                border-left: 1px solid rgba(15, 23, 42, 0.1);
+            }
+            .header-nav-center.open { right: 0; }
+            .header-actions { display: none; }
+            .header-actions.mobile-visible {
+                display: flex;
+                flex-direction: column;
+                padding: 20px;
+                border-top: 1px solid rgba(15, 23, 42, 0.1);
+                margin-top: auto;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .landing-header {
+                padding: 8px 14px;
+                min-height: 58px;
+            }
+            .landing-logo {
+                min-width: 0;
+                max-width: calc(100% - 54px);
+                gap: 8px;
+            }
+            .landing-logo img { height: 30px; width: auto; }
+            .landing-logo h1 {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: .82rem;
+                letter-spacing: .25px;
+            }
+            .mobile-toggle {
+                flex: 0 0 auto;
+                padding: 4px 6px;
+                font-size: 1.8rem;
+                line-height: 1;
+            }
+            .header-nav-center {
+                width: min(86vw, 320px);
+                padding: 74px 20px 20px;
+                align-items: stretch;
+            }
+            .image-like-nav {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+            }
+            .image-like-nav .nav-link { font-size: .92rem; }
+            .header-actions.mobile-visible {
+                width: 100%;
+                align-items: stretch;
+                padding: 16px 0 0;
+            }
+            .header-user-name { overflow-wrap: anywhere; white-space: normal; }
+            .landing-flash { left: 14px; right: 14px; width: auto; }
+        }
+
+        /* Three.js Background */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0; /* Behind content */
+            pointer-events: none; /* Let clicks pass through */
+        }
+
+        /* Scrolling Content Overlay */
+        .scroll-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Institutional Footer */
+        .l-footer {
+            background: #0f172a;
+            color: #f1f5f9;
+            padding: 60px 20px 30px;
+            position: relative;
+            z-index: 10;
+            border-top: 4px solid #fbbf24;
+        }
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+        .footer-col h4 {
+            color: #fbbf24;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            font-family: 'Space Grotesk', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .footer-col p {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        .footer-col a {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 10px;
+            transition: color 0.2s ease;
+        }
+        .footer-col a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+        .footer-col .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .footer-col .social-icons a {
+            display: inline-block;
+            font-size: 1.5rem;
+            color: #fbbf24;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .footer-col .social-icons a:hover {
+            transform: translateY(-3px);
+            color: #ffffff;
+        }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        /* Reusable UI Components */
+        .section-title {
+            text-align: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            color: #0f172a;
+            margin-bottom: 40px;
+        }
+
+        /* React Bits ScrollFloat (Vanilla JS Port) */
+        .scroll-float {
+            overflow: hidden;
+            line-height: 1.5;
+        }
+        .scroll-float-text {
+            display: inline-block;
+        }
+        .scroll-float .char {
+            display: inline-block;
+        }
+        
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body class="{% if session.get('role') in ('admin', 'member') %}authenticated-view{% endif %}">
+    <!-- Quick Loader -->
+    <div id="loader">
+        <div class="unique-loader">
+            <div></div><div></div><div></div>
+        </div>
+    </div>
+
+
+    <!-- Official Header -->
+    <header class="landing-header" style="box-sizing: border-box;">
+        <a href="https://shreedakshaacademyedu.in/" target="_blank" class="landing-logo">
+            <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Logo">
+            <h1>Shree Daksha Academy</h1>
+        </a>
+        
+        <button class="mobile-toggle" type="button" aria-label="Open navigation" aria-expanded="false" onclick="const nav=document.querySelector('.header-nav-center'); const open=nav.classList.toggle('open'); this.setAttribute('aria-expanded', String(open));">&#9776;</button>
+
+        <nav class="header-nav-center">
+            <!-- Standard Navigation -->
+            <ul class="image-like-nav" id="mainBreadcrumb">
+                <li><a href="{{ url_for('events_list') }}" class="nav-link" data-section="hero">Home</a></li>
+                <li><a href="{{ url_for('events_list') }}#events" class="nav-link" data-section="events">Events</a></li>
+                <li><a href="{{ url_for('events_list') }}#location" class="nav-link" data-section="location">Location</a></li>
+                <li><a href="{{ url_for('events_list') }}#contact" class="nav-link" data-section="contact">Contact</a></li>
+                
+                {% if session.get('user_id') %}
+                    {% if session.get('role') == 'admin' %}
+                        <li><a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a></li>
+                        <li><a href="{{ url_for('attendance_manager') }}" class="nav-link {% if request.path == '/admin/attendance' %}active{% endif %}">Attendance</a></li>
+                        <li><a href="{{ url_for('certificates_manager') }}" class="nav-link {% if request.path == '/admin/certificates' %}active{% endif %}">Certificates</a></li>
+                        <li><a href="{{ url_for('members_list') }}" class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a></li>
+                    {% elif session.get('role') == 'member' %}
+                        <li><a href="{{ url_for('member_dashboard') }}" class="nav-link {% if request.path == '/member/dashboard' %}active{% endif %}">Dashboard</a></li>
+                        <li><a href="{{ url_for('members_list') }}" class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a></li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+
+            <div class="header-actions mobile-visible">
+                {% if session.get('user_id') %}
+                    <div class="header-user-name" style="display:flex; align-items:center; gap:8px; color:#0f172a; font-weight:600; padding:10px 0;">
+                        <span>👤 {{ session.get('full_name', session.get('username')) }}</span>
+                    </div>
+                    <a href="{{ url_for('logout') }}" class="header-btn" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); width: 100%; text-align: center;">Logout</a>
+                {% endif %}
+            </div>
+        </nav>
+
+        <div class="header-actions">
+            {% if session.get('user_id') %}
+                <div class="header-user-name" style="display:flex; align-items:center; gap:8px; color:#0f172a; font-weight:600; padding:0 15px; border-left:1px solid #e2e8f0; margin-left:10px;">
+                    <span>{{ session.get('full_name', session.get('username')) }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="header-btn" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); min-width: max-content;">Logout</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Flash Messages (if any) -->
+    <div class="landing-flash">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" style="margin-bottom: 10px; padding: 15px; border-radius: 8px; background: #ffffff; backdrop-filter: blur(10px); color: #0f172a; border-left: 4px solid #dc2626; box-shadow: 0 10px 25px rgba(15,23,42,0.12);">
+                <span>{{ message }}</span>
+                <button class="alert-close" onclick="this.parentElement.remove()" style="float:right; background:none; border:none; color:#64748b; cursor:pointer;">&times;</button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- 3D Canvas Container -->
+    {% block gridscan_canvas %}
+    <div id="canvas-container"></div>
+    {% endblock %}
+
+    <!-- Scrolling Overlay Content -->
+    <div class="scroll-content">
+        {% block content %}{% endblock %}
+        
+        <!-- Footer -->
+        <footer class="l-footer">
+            <div class="footer-container">
+                <!-- Column 1: Identity -->
+                <div class="footer-col">
+                    <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy" style="height: 60px; margin-bottom: 15px;">
+                    <h4>Shree Daksha Academy</h4>
+                    <p>Empowering minds through innovation and excellence. Join us for a future shaped by knowledge.</p>
+                </div>
+                
+                <!-- Column 2: Quick Links -->
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <a href="{{ url_for('events_list') }}#hero">Home</a>
+                    <a href="{{ url_for('events_list') }}#events">Events</a>
+                    <a href="{{ url_for('events_list') }}#location">Location</a>
+                    <a href="{{ url_for('events_list') }}#contact">Contact</a>
+                    {% if not session.get('user_id') %}
+                        <a href="{{ url_for('login') }}" style="margin-top: 10px; color: #fbbf24;">Admin Login</a>
+                    {% endif %}
+                </div>
+                
+                <!-- Column 3: Contact & Socials -->
+                <div class="footer-col">
+                    <h4>Contact Us</h4>
+                    <p>📧 <a href="mailto:principal@shreedakshaacademyeveningcollege.edu.in" style="display:inline; margin:0;">principal@shreedakshaacademy...</a></p>
+                    <p>📞 <a href="https://wa.me/917892038099" style="display:inline; margin:0;">+91 7892038099 (WhatsApp)</a></p>
+                    
+                    <div class="social-icons">
+                        <a href="https://instagram.com/SHREEDAKSHAACADEMY" target="_blank" aria-label="Instagram">📸</a>
+                        <a href="https://wa.me/917892038099" target="_blank" aria-label="WhatsApp">💬</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 Shree Daksha Academy. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/postprocessing@6.34.1/build/postprocessing.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="{{ url_for('static', filename='js/gridscan.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/particletext.js') }}"></script>
+    
+    <script>
+        // --- 1. First-Time Loading Screen ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const loader = document.getElementById('loader');
+            if(loader) {
+                if(sessionStorage.getItem('site_visited')) {
+                    // Already visited, hide instantly
+                    loader.style.display = 'none';
+                } else {
+                    // First time, show for 2.5 seconds
+                    setTimeout(() => {
+                        loader.style.opacity = '0';
+                        setTimeout(() => { loader.style.display = 'none'; }, 500);
+                        sessionStorage.setItem('site_visited', 'true');
+                    }, 2000);
+                }
+            }
+        });
+
+        // Initialize GridScan Background
+        {% block gridscan_init %}
+        const gridScanReduceEffects = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const gridScanSaveData = navigator.connection && navigator.connection.saveData;
+        if (window.initGridScan && !gridScanReduceEffects && !gridScanSaveData) {
+            window.initGridScan('canvas-container');
+        }
+        {% endblock %}
+
+        // Register GSAP plugins
+        gsap.registerPlugin(ScrollTrigger);
+
+        // --- 3. React Bits ScrollFloat Component (Vanilla JS Port) ---
+        // Applied to any element with the .scroll-float class
+        document.querySelectorAll('.scroll-float').forEach(el => {
+            const text = el.innerText;
+            el.innerHTML = ''; // Clear original text
+            
+            const textSpan = document.createElement('span');
+            textSpan.className = 'scroll-float-text';
+            
+            // Split text into individual characters
+            text.split('').forEach(char => {
+                const span = document.createElement('span');
+                span.className = 'char';
+                span.innerHTML = char === ' ' ? '&nbsp;' : char;
+                textSpan.appendChild(span);
+            });
+            el.appendChild(textSpan);
+
+            // Animate using GSAP
+            const charElements = el.querySelectorAll('.char');
+            gsap.fromTo(
+                charElements,
+                {
+                    willChange: 'opacity, transform',
+                    opacity: 0,
+                    yPercent: 120,
+                    scaleY: 2.3,
+                    scaleX: 0.7,
+                    transformOrigin: '50% 0%'
+                },
+                {
+                    duration: 1.5,
+                    ease: 'back.out(1.5)',
+                    opacity: 1,
+                    yPercent: 0,
+                    scaleY: 1,
+                    scaleX: 1,
+                    stagger: 0.04,
+                    scrollTrigger: {
+                        trigger: el,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    }
+                }
+            );
+        });
+
+        // --- 4. Event Cards Stagger Animation ---
+        gsap.utils.toArray('.futuristic-grid').forEach(grid => {
+            const cards = grid.querySelectorAll('.futuristic-card');
+            if (cards.length > 0) {
+                gsap.fromTo(cards, 
+                    { opacity: 0, y: 60 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.8,
+                        stagger: 0.15,
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: grid,
+                            start: "top 85%",
+                            toggleActions: "play none none none"
+                        }
+                    }
+                );
+            }
+        });
+
+        // --- 5. Animated Nav Scroll Tracker ---
+        (function() {
+            const bcLinks = document.querySelectorAll('#mainBreadcrumb .nav-link');
+            if (!bcLinks.length) return;
+
+            // Map section names to DOM IDs (hero = top of page)
+            const sectionMap = { hero: null, about: 'about', events: 'events', features: 'features', location: 'location', contact: 'contact' };
+
+            // --- Nav Pill Indicator ---
+            const navContainer = document.getElementById('mainBreadcrumb');
+            let pill = navContainer ? navContainer.querySelector('.nav-pill-indicator') : null;
+            if (navContainer && !pill) {
+                pill = document.createElement('div');
+                pill.className = 'nav-pill-indicator';
+                navContainer.prepend(pill);
+            }
+
+            function movePillTo(linkEl, animate) {
+                if (!pill || !linkEl) return;
+                const navRect = navContainer.getBoundingClientRect();
+                const linkRect = linkEl.getBoundingClientRect();
+                const offsetX = linkRect.left - navRect.left;
+                if (!animate) pill.style.transition = 'none';
+                pill.style.width = linkRect.width + 'px';
+                pill.style.transform = 'translateX(' + offsetX + 'px)';
+                pill.classList.add('visible');
+                if (!animate) {
+                    pill.offsetHeight; /* force reflow */
+                    pill.style.transition = '';
+                }
+            }
+
+            let currentActiveLink = null;
+
+            function setActiveBreadcrumb(activeSectionName) {
+                currentActiveLink = null;
+                bcLinks.forEach(link => {
+                    const section = link.getAttribute('data-section');
+                    if (section === activeSectionName) {
+                        link.classList.add('active');
+                        currentActiveLink = link;
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+                if (currentActiveLink) movePillTo(currentActiveLink, true);
+            }
+
+            // Hover: move pill to hovered link
+            bcLinks.forEach(link => {
+                link.addEventListener('mouseenter', () => movePillTo(link, true));
+                link.addEventListener('mouseleave', () => {
+                    if (currentActiveLink) movePillTo(currentActiveLink, true);
+                });
+            });
+
+            let isAutoScrolling = false;
+            let scrollTimeout;
+
+            // Observe sections with IntersectionObserver
+            const observer = new IntersectionObserver((entries) => {
+                if (isAutoScrolling) return; // Skip updating active tab during click-initiated scroll
+                
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        // Find which data-section maps to this id
+                        for (const [name, domId] of Object.entries(sectionMap)) {
+                            if (domId === id) {
+                                setActiveBreadcrumb(name);
+                                break;
+                            }
+                        }
+                    }
+                });
+            }, { rootMargin: '-20% 0px -50% 0px', threshold: 0 });
+
+            // Observe each section that has a matching id
+            Object.values(sectionMap).forEach(id => {
+                if (id) {
+                    const el = document.getElementById(id);
+                    if (el) observer.observe(el);
+                }
+            });
+
+            // Also track when user is near the top (hero section)
+            window.addEventListener('scroll', () => {
+                if (isAutoScrolling) return; // Skip updating during auto-scroll
+                if (window.scrollY < 300) {
+                    setActiveBreadcrumb('hero');
+                }
+            }, { passive: true });
+
+            // Default: mark Home as active on load
+            setActiveBreadcrumb('hero');
+
+            // Smooth scroll on click
+            bcLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    
+                    // Allow normal navigation for non-hash links or empty hashes
+                    if (!href || !href.includes('#')) {
+                        document.querySelector('.header-nav-center')?.classList.remove('open');
+                        return; // Let the browser handle the navigation normally
+                    }
+
+                    const hash = href.split('#')[1];
+                    if (hash) {
+                        const target = document.getElementById(hash);
+                        if (target) {
+                            e.preventDefault();
+                            isAutoScrolling = true;
+                            clearTimeout(scrollTimeout);
+                            scrollTimeout = setTimeout(() => { isAutoScrolling = false; }, 800);
+                            
+                            const sectionName = this.getAttribute('data-section');
+                            if (sectionName) setActiveBreadcrumb(sectionName);
+
+                            document.querySelector('.header-nav-center')?.classList.remove('open');
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            // Small pulse animation on the clicked breadcrumb
+                            this.style.transform = 'scale(1.1)';
+                            setTimeout(() => { this.style.transform = ''; }, 200);
+                        } else {
+                            // Target not on page, allow normal navigation
+                        }
+                    } else if (href === '#' || href.endsWith('#')) {
+                        // Home link (just '#') — scroll to top
+                        e.preventDefault();
+                        isAutoScrolling = true;
+                        clearTimeout(scrollTimeout);
+                        scrollTimeout = setTimeout(() => { isAutoScrolling = false; }, 800);
+                        
+                        setActiveBreadcrumb('hero');
+
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        this.style.transform = 'scale(1.1)';
+                        setTimeout(() => { this.style.transform = ''; }, 200);
+                    }
+                });
+            });
+        })();
+    </script>
+
+
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,13 +1,25 @@
 import os
+import secrets
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class Config:
     # Flask Secret Key
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'eventmate-super-secret-key-2026')
+    _configured_secret = os.environ.get('SECRET_KEY', '').strip()
+    SECRET_KEY = (
+        _configured_secret
+        if len(_configured_secret) >= 32
+        and not _configured_secret.lower().startswith(('change-me', 'eventmate-'))
+        else secrets.token_urlsafe(48)
+    )
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', '').lower() in ('1', 'true', 'yes')
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024
 
     # PostgreSQL Database Configuration
+    APP_ENV = os.environ.get('APP_ENV', 'development').strip().lower()
     DATABASE_URL = os.environ.get('DATABASE_URL')
     
     # Optional fallback for distinct parameters if DATABASE_URL isn't used
@@ -20,6 +32,11 @@ class Config:
     # Academy / College Branding
     COLLEGE_NAME = os.environ.get('COLLEGE_NAME', 'Shree Daksha Academy')
     COLLEGE_SUBTITLE = os.environ.get('COLLEGE_SUBTITLE', 'Department of Computer Applications')
+    EVENT_TITLE = os.environ.get('EVENT_TITLE', 'SDA 2026 2027').strip() or 'SDA 2026 2027'
+    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '').strip()
+    # Temporary lead contacts for the demo site. Replace these values before launch.
+    CONTACT_PHONE_PRIMARY = os.environ.get('CONTACT_PHONE_PRIMARY', '').strip() or '+91 90000 00001'
+    CONTACT_PHONE_SECONDARY = os.environ.get('CONTACT_PHONE_SECONDARY', '').strip() or '+91 90000 00002'
     SIGNATORY_NAME = os.environ.get('SIGNATORY_NAME', 'Naveen Reddy')
     SIGNATORY_TITLE = os.environ.get('SIGNATORY_TITLE', 'Head of Department (HOD)')
 

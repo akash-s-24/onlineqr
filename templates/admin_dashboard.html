@@ -1,6 +1,59 @@
 {% extends 'base.html' %}
 
-{% block title %}Admin Dashboard – EventMate{% endblock %}
+{% block title %}Admin Dashboard – EventMate
+<!-- Clear All Registrations Modal -->
+<div id="clearModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div style="background: #ffffff; width: 90%; max-width: 500px; border-radius: 16px; padding: 24px 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 18px;">
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #ef4444; display: flex; align-items: center; gap: 8px;">
+                <span>⚠️</span> Warning: Clear All Data
+            </h3>
+            <button type="button" onclick="closeClearModal()" style="background: none; border: none; font-size: 1.5rem; line-height: 1; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <p style="color: #334155; line-height: 1.5; margin-bottom: 1rem;">
+            You are about to permanently delete <strong>ALL</strong> registrations, participants, attendance records, and certificates.
+        </p>
+        <p style="color: #ef4444; font-weight: bold; margin-bottom: 1.5rem;">
+            This action cannot be undone!
+        </p>
+        
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;">
+            <p style="margin: 0; font-size: 0.9rem; color: #1e293b; font-weight: 600;">Step 1: Download Backup</p>
+            <p style="margin: 5px 0 10px 0; font-size: 0.8rem; color: #64748b;">Please download a CSV backup of all registrations before proceeding.</p>
+            <a href="{{ url_for('export_registrations_csv') }}" class="btn btn-outline-primary btn-sm" onclick="enableClearBtn()" style="width: 100%;">⬇️ Download CSV File</a>
+        </div>
+
+        <form method="POST" action="{{ url_for('clear_all_registrations') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" id="confirmClearBtn" class="btn btn-lg" style="width: 100%; background: #ef4444; color: white; opacity: 0.5; pointer-events: none; border: none;">Delete All Registrations</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openClearModal() {
+    const modal = document.getElementById('clearModal');
+    if (modal) modal.style.display = 'flex';
+}
+function closeClearModal() {
+    const modal = document.getElementById('clearModal');
+    if (modal) modal.style.display = 'none';
+    // Reset button state
+    document.getElementById('confirmClearBtn').style.opacity = '0.5';
+    document.getElementById('confirmClearBtn').style.pointerEvents = 'none';
+}
+function enableClearBtn() {
+    document.getElementById('confirmClearBtn').style.opacity = '1';
+    document.getElementById('confirmClearBtn').style.pointerEvents = 'auto';
+}
+// Close modal on click outside
+window.addEventListener('click', function(e) {
+    const modal = document.getElementById('clearModal');
+    if (e.target === modal) closeClearModal();
+});
+</script>
+
+{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -10,7 +63,7 @@
     </div>
     <div class="page-actions">
         <a href="{{ url_for('add_event') }}" class="btn btn-primary">+ Create New Event</a>
-        <a href="{{ url_for('certificates_manager') }}" class="btn btn-secondary">Certificate Hub</a>
+        <a href="{{ url_for('members_list') }}" class="btn btn-secondary">Members List</a>
     </div>
 </div>
 
@@ -25,6 +78,18 @@
         </div>
         <div class="stat-icon-wrapper">
             <span>📅</span>
+        </div>
+    </div>
+
+    <!-- Total Approved (New) -->
+    <div class="stat-card" style="background: linear-gradient(135deg, rgba(16,185,129,0.1), transparent); border-color: rgba(16,185,129,0.3);">
+        <div class="stat-info">
+            <span class="stat-label" style="color: #10b981;">Total Approved</span>
+            <span class="stat-value" style="color: #10b981;">{{ stats.total_approved }}</span>
+            <span class="stat-subtext">Approved Final Participants</span>
+        </div>
+        <div class="stat-icon-wrapper success" style="box-shadow: 0 0 15px rgba(16,185,129,0.4);">
+            <span>🏆</span>
         </div>
     </div>
 
@@ -77,45 +142,61 @@
     </div>
 </div>
 
-<!-- Quick Navigation Bar -->
-<div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-    <a href="{{ url_for('events_list') }}" class="btn btn-outline-primary">Manage Events</a>
-    <a href="{{ url_for('attendance_manager') }}" class="btn btn-outline-primary">Mark Attendance</a>
-    <a href="{{ url_for('certificates_manager') }}" class="btn btn-outline-primary">Issue & Email Certificates</a>
-    <a href="{{ url_for('verify_certificate') }}" class="btn btn-secondary" target="_blank">Open Public Verification Portal ↗</a>
-</div>
+<div class="dashboard-tools-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Quick Navigation Bar -->
+    <div class="table-card" style="padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1);">
+        <h3 class="table-title" style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; color: #fff;">Quick Tools</h3>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="{{ url_for('events_list') }}" class="candy-btn">Manage Events</a>
+            <a href="{{ url_for('attendance_manager') }}" class="candy-btn">Mark Attendance</a>
+            <a href="{{ url_for('certificates_manager') }}" class="candy-btn">Issue Certificates</a>
+            <a href="{{ url_for('members_list') }}" class="candy-btn candy-btn-secondary">Members List</a>
+        </div>
+    </div>
 
-<!-- Data Export Section -->
-<div class="table-card" style="margin-bottom: 2rem; padding: 1.5rem;">
-    <h3 class="table-title" style="margin-bottom: 1rem;">Export Data (CSV / Excel)</h3>
-    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-        <a href="{{ url_for('export_csv', status='all') }}" class="btn btn-primary">⬇️ Download All Participants</a>
-        <a href="{{ url_for('export_csv', status='approved') }}" class="btn btn-outline-primary" style="border-color: #166534; color: #166534;">⬇️ Download Approved Only</a>
-        <a href="{{ url_for('export_csv', status='pending') }}" class="btn btn-outline-primary" style="border-color: #d97706; color: #d97706;">⬇️ Download Pending/Unapproved</a>
+    <!-- Data Export Section -->
+    <div class="table-card" style="padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1);">
+        <h3 class="table-title" style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; color: #fff;">Export Data (CSV / Excel)</h3>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="{{ url_for('export_csv', status='all') }}" class="candy-btn">⬇️ All</a>
+            <a href="{{ url_for('export_csv', status='approved') }}" class="candy-btn candy-btn-success">⬇️ Approved</a>
+            <a href="{{ url_for('export_csv', status='pending') }}" class="candy-btn candy-btn-warning">⬇️ Pending</a>
+        </div>
+        <hr style="margin: 1.5rem 0; border: none; border-top: 1px dashed rgba(255,255,255,0.1);">
+        <h4 style="margin-bottom: 0.8rem; color: #ef4444;">Danger Zone</h4>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <button onclick="openClearModal()" class="candy-btn candy-btn-danger">⚠️ Clear All Registrations</button>
+        </div>
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
-    <!-- Pending Approvals (Upload Section) -->
-    <div class="table-card" style="grid-column: 1 / -1; margin-bottom: 0;">
+<div style="display: flex; flex-direction: column; gap: 2rem;">
+    <!-- SECTION 1: Pending Approvals -->
+    <div class="table-card" style="border-left: 4px solid #d97706;">
         <div class="table-header">
-            <h3 class="table-title" style="color: #d97706;">Pending Approvals (Upload Section)</h3>
+            <h3 class="table-title" style="color: #d97706;">Task 1: Pending Approvals</h3>
+            <span class="badge badge-warning">{{ stats.total_pending }} Pending</span>
         </div>
         <div class="table-responsive">
-            <table class="custom-table">
+            <table class="custom-table" style="width: 100%;">
                 <thead>
                     <tr>
+                        <th>#</th>
+                        <th>Reg ID</th>
                         <th>Participant</th>
                         <th>College / Dept</th>
                         <th>Registered Event</th>
                         <th>Registered By</th>
-                        <th>Payment Info</th>
+                        <th>Payment Method</th>
+                        <th>UTR / Txn ID</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for reg in pending_registrations %}
                     <tr>
+                        <td style="color: var(--text-muted);">{{ loop.index }}</td>
+                        <td><span style="font-family: monospace; font-weight: bold; color: #a855f7;">{{ reg.registration_uid }}</span></td>
                         <td>
                             <strong>{{ reg.full_name }}</strong><br>
                             <span style="font-size: 0.78rem; color: var(--text-muted);">{{ reg.email }}</span>
@@ -131,54 +212,68 @@
                             <span class="badge badge-secondary">{{ reg.registered_by_name or 'Unknown' }}</span>
                         </td>
                         <td>
+                            <span class="badge badge-secondary">{{ reg.payment_method or 'None' }}</span>
+                            <br>
                             {% if reg.payment_status == 'paid' %}
                                 <span class="badge badge-success">Paid</span><br>
-                                <span style="font-size: 0.78rem; color: var(--text-muted);">₹{{ reg.amount_paid }} ({{ reg.payment_method }})</span>
+                                <span style="font-size: 0.78rem; color: var(--text-muted);">₹{{ reg.amount_paid }}</span>
+                            {% elif reg.payment_status == 'pending' %}
+                                <span class="badge badge-warning" style="color: #664d03;">UPI Pending Verification</span>
                             {% else %}
                                 <span class="badge badge-warning" style="color: #664d03;">Unpaid</span>
                             {% endif %}
+                        </td>
+                        <td>
                             {% if reg.utr_number %}
-                                <div style="margin-top: 0.25rem; font-size: 0.75rem; color: #b45309; font-weight: 700;">
-                                    UTR: {{ reg.utr_number }}
-                                </div>
+                                <span style="font-family: monospace; font-weight: bold; color: #b45309;">{{ reg.utr_number }}</span>
+                            {% else %}
+                                <span style="color: var(--text-muted); font-size: 0.8rem;">N/A</span>
                             {% endif %}
                         </td>
                         <td>
                             <form action="{{ url_for('approve_registration', reg_id=reg.registration_id) }}" method="POST" style="margin: 0;">
-                                <button type="submit" class="btn btn-sm btn-primary" style="background-color: #d97706; border-color: #d97706;">Approve (OK)</button>
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="candy-btn candy-btn-success" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">Approve (OK)</button>
                             </form>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">No pending approvals at the moment.</td>
+                        <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">No pending approvals at the moment.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-    <!-- Recent Registrations Table -->
-    <div class="table-card" style="margin-bottom: 0;">
+    <!-- SECTION 2: Approved Final Participants -->
+    <div class="table-card" style="border-left: 4px solid #10b981;">
         <div class="table-header">
-            <h3 class="table-title">Approved Event Registrations (Completed List)</h3>
-            <a href="{{ url_for('attendance_manager') }}" class="btn btn-sm btn-secondary">View Attendance Sheet</a>
+            <h3 class="table-title" style="color: #10b981;">Final Confirmation List (All Approved Participants: {{ stats.total_approved }} Total)</h3>
+            <a href="{{ url_for('attendance_manager') }}" class="candy-btn candy-btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 6px;">Manage Attendance</a>
         </div>
+        
+        <!-- Online Payments Table -->
+        <h4 style="margin: 1.5rem 1.5rem 0.5rem; color: #6366f1;">Online Payments (UPI) - {{ online_approved|length }} Participants</h4>
         <div class="table-responsive">
-            <table class="custom-table">
+            <table class="custom-table" style="width: 100%;">
                 <thead>
                     <tr>
+                        <th>#</th>
+                        <th>Reg ID</th>
                         <th>Participant</th>
                         <th>College / Dept</th>
                         <th>Registered Event</th>
-                        <th>Registered By</th>
-                        <th>Payment</th>
-                        <th style="text-align: right;">Receipt Actions</th>
+                        <th>Payment Method</th>
+                        <th>UTR / Txn ID</th>
+                        <th style="text-align: right;">Receipt & Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for reg in recent_registrations %}
+                    {% for reg in online_approved %}
                     <tr>
+                        <td style="color: var(--text-muted);">{{ loop.index }}</td>
+                        <td><span style="font-family: monospace; font-weight: bold; color: #a855f7;">{{ reg.registration_uid }}</span></td>
                         <td>
                             <strong>{{ reg.full_name }}</strong><br>
                             <span style="font-size: 0.78rem; color: var(--text-muted);">{{ reg.email }}</span>
@@ -187,118 +282,234 @@
                             <span>{{ reg.college_name }}</span><br>
                             <span style="font-size: 0.78rem; color: var(--text-muted);">{{ reg.department }}</span>
                         </td>
+                        <td><span class="badge badge-primary">{{ reg.event_name }}</span></td>
                         <td>
-                            <span class="badge badge-primary">{{ reg.event_name }}</span>
-                        </td>
-                        <td>
-                            {% if reg.registered_by_name %}
-                                <span class="badge badge-secondary">{{ reg.registered_by_name }}</span>
-                            {% else %}
-                                <span style="font-size: 0.8rem; color: var(--text-muted);">Self / Public</span>
-                            {% endif %}
-                        </td>
-                        <td>
+                            <span class="badge badge-secondary">Online</span><br>
                             {% if reg.payment_status == 'paid' %}
-                                <span class="badge badge-success">Paid</span><br>
-                                <span style="font-size: 0.78rem; color: var(--text-muted);">₹{{ reg.amount_paid }} ({{ reg.payment_method }})</span>
-                                {% if reg.utr_number %}
-                                    <div style="margin-top: 0.25rem; font-size: 0.75rem; color: #b45309; font-weight: 700;">
-                                        UTR: {{ reg.utr_number }}
-                                    </div>
-                                {% endif %}
+                                <span class="badge badge-success">Paid (₹{{ reg.amount_paid }})</span>
+                            {% elif reg.payment_status == 'pending' %}
+                                <span class="badge badge-warning" style="color: #664d03;">Pending Verification</span>
                             {% else %}
                                 <span class="badge badge-warning" style="color: #664d03;">Unpaid</span>
                             {% endif %}
-                            <form action="{{ url_for('toggle_payment', reg_id=reg.registration_id) }}" method="POST" style="display: inline-block; margin-top: 4px;">
-                                {% if reg.payment_status == 'paid' %}
-                                    <button type="submit" class="btn btn-sm" style="font-size: 0.7rem; padding: 2px 6px; border: 1px solid #ffc107; background: transparent; color: #ffc107; cursor: pointer;">Undo</button>
-                                {% else %}
-                                    <button type="submit" class="btn btn-sm" style="font-size: 0.7rem; padding: 2px 6px; border: 1px solid #198754; background: transparent; color: #198754; cursor: pointer;">Pay</button>
-                                {% endif %}
-                            </form>
+                        </td>
+                        <td>
+                            <span style="font-family: monospace; font-weight: bold; color: #b45309;">{{ reg.utr_number or 'Missing' }}</span>
                         </td>
                         <td style="text-align: right;">
+                            <form action="{{ url_for('toggle_payment', reg_id=reg.registration_id) }}" method="POST" style="display: inline-block; margin-bottom: 4px;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                {% if reg.payment_status == 'paid' %}
+                                    <button type="submit" class="btn btn-sm" style="font-size: 0.7rem; padding: 2px 6px; border: 1px solid #ffc107; background: transparent; color: #ffc107;">Undo</button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-sm" style="font-size: 0.7rem; padding: 2px 6px; border: 1px solid #198754; background: transparent; color: #198754;">Mark Paid</button>
+                                {% endif %}
+                            </form>
                             {% if reg.payment_status == 'paid' %}
-                            <div style="display: inline-flex; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end;">
+                            <div style="display: inline-flex; gap: 0.4rem; justify-content: flex-end; margin-top: 5px;">
                                 <form method="POST" action="{{ url_for('send_receipt_email_route', reg_id=reg.registration_id) }}" style="display:inline;">
-                                    <button type="submit" class="btn btn-primary btn-sm">📧 Email</button>
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="candy-btn" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 4px;">📧 Email</button>
                                 </form>
-                                {% set wa_msg = "Hello " ~ reg.full_name ~ ",\n\nYour payment of ₹" ~ reg.amount_paid ~ " for the event *" ~ reg.event_name ~ "* has been successfully received and confirmed.\nPayment Mode: " ~ reg.payment_method ~ (("\nTransaction / UTR: " ~ reg.utr_number) if reg.utr_number else "") ~ "\n\nThank you for registering. We look forward to seeing you!" %}
-                                <a href="https://wa.me/?text={{ wa_msg | urlencode }}" target="_blank" class="btn btn-success btn-sm" style="background-color: #25D366; border-color: #25D366;">💬 WA Receipt</a>
+                                <a href="https://wa.me/91{{ reg.phone|replace(' ', '')|replace('+91', '') }}?text=Hello {{ reg.full_name|urlencode }}, your registration for {{ reg.event_name|urlencode }} is confirmed! We have received your online payment. See you at Shree Daksha Academy!" target="_blank" class="candy-btn candy-btn-success" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 4px;">📱 WA</a>
                             </div>
-                            {% else %}
-                            <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">Awaiting Payment</span>
                             {% endif %}
                         </td>
                     </tr>
                     {% else %}
-                    <tr>
-                        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No registrations recorded yet.</td>
-                    </tr>
+                    <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 1rem;">No online payments approved yet.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-    </div>
 
-    <!-- Active Symposium Events Quick List -->
-    <div class="table-card" style="margin-bottom: 0;">
-        <div class="table-header">
-            <h3 class="table-title">Symposium Events</h3>
-            <a href="{{ url_for('events_list') }}" class="btn btn-sm btn-secondary">View All</a>
-        </div>
-        <div style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
-            {% for ev in events %}
-            <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: #f8fafc;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <strong style="font-size: 1.05rem; color: var(--secondary);">{{ ev.event_name }}</strong>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">{{ ev.event_type }}</div>
-                    </div>
-                    <span class="badge badge-info">{{ ev.event_date }}</span>
-                </div>
-                <div style="margin-top: 0.75rem; font-size: 0.82rem; color: var(--text-muted); display: flex; gap: 1rem;">
-                    <span>📍 {{ ev.venue }}</span>
-                    <span>⏰ {{ ev.event_time }}</span>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    
-    <!-- Team Member Performance Quick List -->
-    <div class="table-card" style="margin-top: 1.5rem; margin-bottom: 0;">
-        <div class="table-header">
-            <h3 class="table-title">Team Performance</h3>
-        </div>
+        <!-- Cash Payments Table -->
+        <h4 style="margin: 1.5rem 1.5rem 0.5rem; color: #10b981;">Cash Payments (On Spot) - {{ cash_approved|length }} Participants</h4>
         <div class="table-responsive">
-            <table class="custom-table">
+            <table class="custom-table" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th>Member</th>
-                        <th>Registered</th>
-                        <th>Paid</th>
+                        <th>#</th>
+                        <th>Reg ID</th>
+                        <th>Participant</th>
+                        <th>College / Dept</th>
+                        <th>Registered Event</th>
+                        <th>Payment Method</th>
+                        <th>UTR / Txn ID</th>
+                        <th style="text-align: right;">Receipt & Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for member in team_performance %}
+                    {% for reg in cash_approved %}
                     <tr>
+                        <td style="color: var(--text-muted);">{{ loop.index }}</td>
+                        <td><span style="font-family: monospace; font-weight: bold; color: #a855f7;">{{ reg.registration_uid }}</span></td>
                         <td>
-                            <strong>{{ member.full_name }}</strong><br>
-                            <span style="font-size: 0.78rem; color: var(--text-muted);">{{ member.username }}</span>
+                            <strong>{{ reg.full_name }}</strong><br>
+                            <span style="font-size: 0.78rem; color: var(--text-muted);">{{ reg.email }}</span>
                         </td>
-                        <td><span class="badge badge-secondary">{{ member.total_registered }}</span></td>
-                        <td><span class="badge badge-success">{{ member.total_paid }}</span></td>
+                        <td>
+                            <span>{{ reg.college_name }}</span><br>
+                            <span style="font-size: 0.78rem; color: var(--text-muted);">{{ reg.department }}</span>
+                        </td>
+                        <td><span class="badge badge-primary">{{ reg.event_name }}</span></td>
+                        <td>
+                            <span class="badge badge-secondary">Cash</span><br>
+                            {% if reg.payment_status == 'paid' %}
+                                <span class="badge badge-success">Paid (₹{{ reg.amount_paid }})</span>
+                            {% else %}
+                                <span class="badge badge-warning" style="color: #664d03;">Unpaid</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span style="color: var(--text-muted); font-size: 0.8rem; font-style: italic;">Not Applicable</span>
+                        </td>
+                        <td style="text-align: right;">
+                            <form action="{{ url_for('toggle_payment', reg_id=reg.registration_id) }}" method="POST" style="display: inline-block; margin-bottom: 4px;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                {% if reg.payment_status == 'paid' %}
+                                    <button type="submit" class="btn btn-sm" style="font-size: 0.7rem; padding: 2px 6px; border: 1px solid #ffc107; background: transparent; color: #ffc107;">Undo</button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-sm" style="font-size: 0.7rem; padding: 2px 6px; border: 1px solid #198754; background: transparent; color: #198754;">Mark Paid</button>
+                                {% endif %}
+                            </form>
+                            <div style="display: inline-flex; gap: 0.4rem; justify-content: flex-end; margin-top: 5px;">
+                            {% if reg.payment_status == 'paid' %}
+                                <form method="POST" action="{{ url_for('send_receipt_email_route', reg_id=reg.registration_id) }}" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="candy-btn" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 4px;">📧 Email</button>
+                                </form>
+                                <a href="https://wa.me/91{{ reg.phone|replace(' ', '')|replace('+91', '') }}?text=Hello {{ reg.full_name|urlencode }}, your cash payment for {{ reg.event_name|urlencode }} is confirmed! See you at Shree Daksha Academy!" target="_blank" class="candy-btn candy-btn-success" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 4px;">📱 WA</a>
+                            {% else %}
+                                <a href="https://wa.me/91{{ reg.phone|replace(' ', '')|replace('+91', '') }}?text=Hello {{ reg.full_name|urlencode }}, you are registered for {{ reg.event_name|urlencode }}. Please complete your cash payment at the venue desk to receive your certificate." target="_blank" class="candy-btn candy-btn-warning" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 4px;">📱 WA Reminder</a>
+                            {% endif %}
+                            </div>
+                        </td>
                     </tr>
                     {% else %}
-                    <tr>
-                        <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">No team members found.</td>
-                    </tr>
+                    <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 1rem;">No cash payments approved yet.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 
+    <!-- Summary Grids (Events & Team Performance) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <!-- Active Symposium Events Quick List -->
+        <div class="table-card" style="margin-bottom: 0;">
+            <div class="table-header">
+                <h3 class="table-title">Symposium Events</h3>
+                <a href="{{ url_for('events_list') }}" class="candy-btn candy-btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">View All</a>
+            </div>
+            <div style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+                {% for ev in events %}
+                <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: #f8fafc;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <strong style="font-size: 1.05rem; color: var(--secondary);">{{ ev.event_name }}</strong>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">{{ ev.event_type }}</div>
+                        </div>
+                        <span class="badge badge-info">{{ ev.event_date }}</span>
+                    </div>
+                    <div style="margin-top: 0.75rem; font-size: 0.82rem; color: var(--text-muted); display: flex; gap: 1rem; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; gap: 1rem;">
+                            <span>📍 {{ ev.venue }}</span>
+                            <span>⏰ {{ ev.event_time }}</span>
+                        </div>
+                        <a href="{{ url_for('edit_event', event_id=ev.id) }}" class="candy-btn candy-btn-sm">✏️ Edit</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Team Member Performance Quick List -->
+        <div class="table-card" style="margin-bottom: 0;">
+            <div class="table-header">
+                <h3 class="table-title">Team Performance</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="custom-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Registered</th>
+                            <th>Paid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in team_performance %}
+                        <tr>
+                            <td>
+                                <strong>{{ member.full_name }}</strong><br>
+                                <span style="font-size: 0.78rem; color: var(--text-muted);">{{ member.username }}</span>
+                            </td>
+                            <td><span class="badge badge-secondary">{{ member.total_registered }}</span></td>
+                            <td><span class="badge badge-success">{{ member.total_paid }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">No team members found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Clear All Registrations Modal -->
+<div id="clearModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div style="background: #ffffff; width: 90%; max-width: 500px; border-radius: 16px; padding: 24px 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 18px;">
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #ef4444; display: flex; align-items: center; gap: 8px;">
+                <span>⚠️</span> Warning: Clear All Data
+            </h3>
+            <button type="button" onclick="closeClearModal()" style="background: none; border: none; font-size: 1.5rem; line-height: 1; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <p style="color: #334155; line-height: 1.5; margin-bottom: 1rem;">
+            You are about to permanently delete <strong>ALL</strong> registrations, participants, attendance records, and certificates.
+        </p>
+        <p style="color: #ef4444; font-weight: bold; margin-bottom: 1.5rem;">
+            This action cannot be undone!
+        </p>
+        
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;">
+            <p style="margin: 0; font-size: 0.9rem; color: #1e293b; font-weight: 600;">Step 1: Download Backup</p>
+            <p style="margin: 5px 0 10px 0; font-size: 0.8rem; color: #64748b;">Please download a CSV backup of all registrations before proceeding.</p>
+            <a href="{{ url_for('export_registrations_csv') }}" class="btn btn-outline-primary btn-sm" onclick="enableClearBtn()" style="width: 100%;">⬇️ Download CSV File</a>
+        </div>
+
+        <form method="POST" action="{{ url_for('clear_all_registrations') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" id="confirmClearBtn" class="btn btn-lg" style="width: 100%; background: #ef4444; color: white; opacity: 0.5; pointer-events: none; border: none;">Delete All Registrations</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openClearModal() {
+    const modal = document.getElementById('clearModal');
+    if (modal) modal.style.display = 'flex';
+}
+function closeClearModal() {
+    const modal = document.getElementById('clearModal');
+    if (modal) modal.style.display = 'none';
+    // Reset button state
+    document.getElementById('confirmClearBtn').style.opacity = '0.5';
+    document.getElementById('confirmClearBtn').style.pointerEvents = 'none';
+}
+function enableClearBtn() {
+    document.getElementById('confirmClearBtn').style.opacity = '1';
+    document.getElementById('confirmClearBtn').style.pointerEvents = 'auto';
+}
+// Close modal on click outside
+window.addEventListener('click', function(e) {
+    const modal = document.getElementById('clearModal');
+    if (e.target === modal) closeClearModal();
+});
+</script>
+
 {% endblock %}

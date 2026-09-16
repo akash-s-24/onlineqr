@@ -189,11 +189,9 @@ http://127.0.0.1:5000
 
 ---
 
-## 🔑 Admin Login Credentials
+## 🔑 Admin Login Configuration
 
-| Role | Username / Email | Password | Access Level |
-|---|---|---|---|
-| **Administrator / Coordinator** | `varshitha` | `Varshitha@2007` | Full Dashboard, Events CRUD, Attendance, Certificates, Emails |
+Set `ADMIN_PASSWORD` to a strong, private value before creating or provisioning the administrator account. Credentials are intentionally not documented in this repository.
 
 > **Note on Student Registration**: Students and symposium attendees do not need to create accounts or log in. They simply navigate to the **Register** tab to sign up for any competition directly.
 
@@ -203,7 +201,7 @@ http://127.0.0.1:5000
 
 1. **User Authentication Module (`app.py`, `templates/login.html`)**:
    - Uses Flask session management with cryptographic signing.
-   - Dedicated Admin authentication for **Varshitha** (`varshitha` / `Varshitha@2007`).
+   - Dedicated administrator authentication configured through environment variables.
    - Features an interactive **Login Credentials Sheet** on the login page for effortless evaluation and testing.
    - Decorators `@login_required` and `@admin_required` protect administrative endpoints.
 
@@ -234,7 +232,7 @@ http://127.0.0.1:5000
 
 1. **Test Admin Flow**:
    - Navigate to **Admin Login** (`/login`).
-   - Click **⚡ Auto-Fill Credentials** (or enter `varshitha` / `Varshitha@2007`).
+   - Enter the administrator credentials configured in the environment.
    - Click **Sign In** to access the **Admin Dashboard**.
    - View metric counters for Events, Participants, Attendance, and Certificates.
    - Go to **Events** -> Click **+ Add New Event** and add a test event.

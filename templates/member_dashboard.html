@@ -61,9 +61,10 @@
         <h3 class="table-title">Your Registrations</h3>
     </div>
     <div class="table-responsive">
-        <table class="custom-table">
+        <table class="custom-table" style="width: 100%;">
             <thead>
                 <tr>
+                    <th>Reg ID</th>
                     <th>Participant</th>
                     <th>College / Dept</th>
                     <th>Registered Event</th>
@@ -74,6 +75,7 @@
             <tbody>
                 {% for reg in registrations %}
                 <tr>
+                    <td><span style="font-family: monospace; font-weight: bold; color: #a855f7;">{{ reg.registration_uid }}</span></td>
                     <td>
                         <strong>{{ reg.full_name }}</strong><br>
                         <span style="font-size: 0.78rem; color: var(--text-muted);">{{ reg.email }}</span>
@@ -96,34 +98,25 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if reg.payment_status == 'paid' %}
-                            <span class="badge badge-success">Paid</span><br>
-                            <span style="font-size: 0.78rem; color: var(--text-muted);">₹{{ reg.amount_paid }} ({{ reg.payment_method }})</span>
-                        {% else %}
-                            <span class="badge badge-warning" style="color: #664d03;">Unpaid</span>
-                        {% endif %}
+                                                                                {% if reg.payment_status == 'paid' %}
+                                <span class="badge badge-success" style="background-color: #d1fae5; color: #065f46; margin-bottom: 5px; display: inline-block;">Paid (₹{{ reg.amount_paid }})</span><br>
+                                <a href="https://wa.me/91{{ reg.phone|replace(' ', '')|replace('+91', '') }}?text=Hello {{ reg.full_name|urlencode }}, your cash payment for {{ reg.event_name|urlencode }} is confirmed! See you at Shree Daksha Academy!" target="_blank" class="btn btn-sm" style="background: #25D366; color: white; padding: 4px 8px; font-size: 0.75rem; text-decoration: none; border-radius: 4px;">📱 WA</a>
+                            {% else %}
+                                <span class="badge badge-warning" style="background-color: #fef3c7; color: #92400e; margin-bottom: 5px; display: inline-block;">Unpaid</span><br>
+                                <a href="https://wa.me/91{{ reg.phone|replace(' ', '')|replace('+91', '') }}?text=Hello {{ reg.full_name|urlencode }}, you are registered for {{ reg.event_name|urlencode }}. Please complete your cash payment at the venue desk to receive your certificate." target="_blank" class="btn btn-sm" style="background: #25D366; color: white; padding: 4px 8px; font-size: 0.75rem; text-decoration: none; border-radius: 4px;">📱 WA Reminder</a>
+                            {% endif %}
                         {% if reg.utr_number %}
                             <div style="margin-top: 0.25rem; font-size: 0.75rem; color: #b45309; font-weight: 700;">
                                 UTR: {{ reg.utr_number }}
                             </div>
                         {% endif %}
                         
-                        {% if reg.approval_status == 'approved' %}
-                            <form action="{{ url_for('toggle_payment', reg_id=reg.registration_id) }}" method="POST" style="display: inline-block; margin-top: 4px;">
-                                {% if reg.payment_status == 'paid' %}
-                                    <button type="submit" class="btn btn-sm" style="font-size: 0.7rem; padding: 2px 6px; border: 1px solid #ffc107; background: transparent; color: #ffc107; cursor: pointer;">Undo</button>
-                                {% else %}
-                                    <button type="submit" class="btn btn-sm" style="font-size: 0.7rem; padding: 2px 6px; border: 1px solid #198754; background: transparent; color: #198754; cursor: pointer;">Pay</button>
-                                {% endif %}
-                            </form>
-                        {% else %}
-                            <span style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-top: 4px;">(Awaiting approval)</span>
-                        {% endif %}
+                        <span style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-top: 4px;">Payment status is verified by an administrator.</span>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">You haven't registered any participants yet.</td>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">You haven't registered any participants yet.</td>
                 </tr>
                 {% endfor %}
             </tbody>

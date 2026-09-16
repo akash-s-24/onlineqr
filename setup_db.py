@@ -25,7 +25,7 @@ def setup():
     print("\n[*] Initializing Database & Seed Data...")
     try:
         database.init_db()
-        print(f"[OK] Admin / Coordinator Account: varshitha / Varshitha@2007")
+        print("[OK] Database initialized. Set ADMIN_PASSWORD in the environment before creating accounts.")
         print(f"[OK] Core Events: CodeCraft, CodeStorm, CodeVerse, ByteBattle")
     except Exception as e:
         print(f"[ERROR] Database initialization encountered an error: {e}")

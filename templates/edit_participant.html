@@ -15,6 +15,7 @@
 
 <div class="form-card">
     <form method="POST" action="{{ url_for('edit_participant', participant_id=participant.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-row">
             <div class="form-group">
                 <label class="form-label" for="full_name">Participant Full Name *</label>

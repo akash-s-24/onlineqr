@@ -1,4 +1,6 @@
 import os
+import re
+import secrets
 import sqlite3
 import psycopg2
 import psycopg2.extras
@@ -34,8 +36,20 @@ def get_sqlite_connection():
     return conn
 
 def get_db():
-    """Return an active database connection, favoring PostgreSQL if available."""
+    """Return a connection, never silently falling back from configured Postgres."""
     global DB_MODE, POSTGRES_AVAILABLE
+
+    # A hosted deployment must never write registrations to an ephemeral local
+    # SQLite file because a configured database is temporarily unavailable.
+    if Config.DATABASE_URL or Config.APP_ENV == 'production':
+        if not Config.DATABASE_URL:
+            raise RuntimeError('DATABASE_URL is required in production.')
+        pg_conn = get_postgres_connection()
+        if pg_conn is None:
+            raise RuntimeError('DATABASE_URL is configured, but PostgreSQL is unavailable.')
+        POSTGRES_AVAILABLE = True
+        DB_MODE = 'postgres'
+        return pg_conn
     
     if POSTGRES_AVAILABLE is False:
         DB_MODE = 'sqlite'
@@ -125,10 +139,204 @@ def execute_db(query, args=()):
     """Helper to execute write query and commit."""
     return query_db(query, args, commit=True)
 
+
+def create_registration(*, full_name, email, phone, college_name, department,
+                        semester, event_id, team_name, team_size,
+                        team_members, payment_status, amount_paid,
+                        payment_method, utr_number, registered_by,
+                        is_group_event):
+    """Create a participant, registration, and attendance row atomically.
+
+    Capacity, duplicate-registration, and duplicate-UTR checks happen inside
+    the same transaction as the inserts. This prevents two simultaneous form
+    submissions from creating conflicting payment records.
+    """
+    conn = get_db()
+    is_sqlite = DB_MODE == 'sqlite'
+    cursor = None
+
+    def execute(query, args=()):
+        if is_sqlite:
+            query = query.replace('%s', '?')
+        cursor.execute(query, args)
+
+    try:
+        if is_sqlite:
+            conn.execute('BEGIN IMMEDIATE')
+            cursor = conn.cursor()
+        else:
+            conn.autocommit = False
+            cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        event_query = """
+            SELECT id, max_participants
+            FROM events
+            WHERE id = %s
+        """
+        if not is_sqlite:
+            event_query += ' FOR UPDATE'
+        execute(event_query, (event_id,))
+        event = cursor.fetchone()
+        if not event:
+            conn.rollback()
+            return {'ok': False, 'reason': 'invalid_event'}
+
+        execute("SELECT id FROM participants WHERE email = %s", (email,))
+        participant = cursor.fetchone()
+        if participant:
+            participant_id = participant['id']
+            execute(
+                "SELECT id FROM registrations WHERE participant_id = %s AND event_id = %s",
+                (participant_id, event_id)
+            )
+            if cursor.fetchone():
+                conn.rollback()
+                return {'ok': False, 'reason': 'duplicate_registration'}
+            execute(
+                """
+                UPDATE participants
+                SET full_name = %s, phone = %s, college_name = %s,
+                    department = %s, semester = %s,
+                    user_id = COALESCE(%s, user_id)
+                WHERE id = %s
+                """,
+                (full_name, phone, college_name, department, semester,
+                 registered_by, participant_id)
+            )
+        else:
+            if is_sqlite:
+                execute(
+                    """
+                    INSERT INTO participants
+                        (user_id, full_name, email, phone, college_name, department, semester)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (registered_by, full_name, email, phone, college_name,
+                     department, semester)
+                )
+                participant_id = cursor.lastrowid
+            else:
+                execute(
+                    """
+                    INSERT INTO participants
+                        (user_id, full_name, email, phone, college_name, department, semester)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    RETURNING id
+                    """,
+                    (registered_by, full_name, email, phone, college_name,
+                     department, semester)
+                )
+                participant_id = cursor.fetchone()['id']
+
+        if utr_number:
+            execute(
+                "SELECT id FROM registrations WHERE utr_number = %s",
+                (utr_number,)
+            )
+            if cursor.fetchone():
+                conn.rollback()
+                return {'ok': False, 'reason': 'duplicate_utr'}
+
+        max_participants = int(event['max_participants'] or 0)
+        execute(
+            """
+            SELECT COALESCE(SUM(CASE WHEN team_size > 0 THEN team_size ELSE 1 END), 0) AS participant_count
+            FROM registrations
+            WHERE event_id = %s AND COALESCE(status, 'pending') <> 'cancelled'
+            """,
+            (event_id,)
+        )
+        current_count = int((cursor.fetchone() or {'participant_count': 0})['participant_count'] or 0)
+        if max_participants > 0 and current_count + team_size > max_participants:
+            conn.rollback()
+            return {
+                'ok': False,
+                'reason': 'capacity_reached',
+                'remaining': max(0, max_participants - current_count)
+            }
+
+        registration_uid = 'REG-' + secrets.token_hex(5).upper()
+        registration_query = """
+            INSERT INTO registrations
+                (registration_uid, participant_id, event_id, registered_by,
+                 is_group, team_name, team_size, team_members,
+                 payment_status, status, amount_paid, payment_method, utr_number)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        if is_sqlite:
+            execute(
+                registration_query,
+                (registration_uid, participant_id, event_id, registered_by,
+                 is_group_event, team_name, team_size, team_members,
+                 payment_status, 'approved' if registered_by else 'pending',
+                 amount_paid, payment_method, utr_number)
+            )
+            registration_id = cursor.lastrowid
+        else:
+            execute(
+                registration_query + ' RETURNING id',
+                (registration_uid, participant_id, event_id, registered_by,
+                 is_group_event, team_name, team_size, team_members,
+                 payment_status, 'approved' if registered_by else 'pending',
+                 amount_paid, payment_method, utr_number)
+            )
+            registration_id = cursor.fetchone()['id']
+
+        execute(
+            "INSERT INTO attendance (registration_id, status, marked_by) VALUES (%s, %s, %s)",
+            (registration_id, 'absent', 'system')
+        )
+
+        conn.commit()
+        return {
+            'ok': True,
+            'registration_id': registration_id,
+            'registration_uid': registration_uid
+        }
+    except Exception:
+        if conn:
+            conn.rollback()
+        raise
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 def init_db():
     """Initialize database tables and initial seed data."""
     # Run table creation
     create_tables_and_seed()
+
+
+def normalize_legacy_banner_filenames():
+    """Normalize legacy banner filenames so generated URLs are portable."""
+    rows = query_db(
+        "SELECT id, banner_image FROM events WHERE banner_image IS NOT NULL AND banner_image <> ''"
+    )
+    images_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static', 'images')
+
+    for row in rows:
+        original = row['banner_image']
+        if '/' in original or '\\' in original:
+            continue
+
+        normalized = re.sub(r'[^A-Za-z0-9._-]+', '_', original).strip('_')
+        if not normalized or normalized == original:
+            continue
+
+        source = os.path.join(images_dir, original)
+        target = os.path.join(images_dir, normalized)
+        if os.path.isfile(source) and not os.path.exists(target):
+            os.replace(source, target)
+
+        # Point the database at the normalized asset whether the target already
+        # existed or was just moved into place.
+        if os.path.exists(target):
+            execute_db(
+                "UPDATE events SET banner_image = %s WHERE id = %s",
+                (normalized, row['id'])
+            )
 
 def create_tables_and_seed():
     """Create all required tables and seed default data."""
@@ -159,6 +367,8 @@ def create_tables_and_seed():
             min_team_size INTEGER DEFAULT 1,
             max_team_size INTEGER DEFAULT 1,
             banner_image VARCHAR(255) DEFAULT 'event_default.jpg',
+            event_fee INTEGER DEFAULT 0,
+            upi_id VARCHAR(100) DEFAULT 'admin@upi',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """,
@@ -178,6 +388,7 @@ def create_tables_and_seed():
         """
         CREATE TABLE IF NOT EXISTS registrations (
             id SERIAL PRIMARY KEY,
+            registration_uid VARCHAR(20) UNIQUE,
             participant_id INTEGER NOT NULL,
             event_id INTEGER NOT NULL,
             registered_by INTEGER NULL,
@@ -189,7 +400,8 @@ def create_tables_and_seed():
             status VARCHAR(20) DEFAULT 'pending',
             payment_status VARCHAR(20) DEFAULT 'unpaid',
             amount_paid INTEGER DEFAULT 0,
-            payment_method VARCHAR(50) DEFAULT 'None'
+            payment_method VARCHAR(50) DEFAULT 'None',
+            utr_number VARCHAR(100) NULL
         );
         """,
         """
@@ -221,6 +433,8 @@ def create_tables_and_seed():
         try:
             execute_db(table_sql)
         except Exception as e:
+            if Config.DATABASE_URL:
+                raise RuntimeError(f'PostgreSQL schema initialization failed: {e}') from e
             # For SQLite PRIMARY KEY AUTOINCREMENT syntax compatibility
             if 'SERIAL' in table_sql and DB_MODE == 'sqlite':
                 sqlite_sql = table_sql.replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT')
@@ -233,42 +447,168 @@ def create_tables_and_seed():
         ("events", "is_group", "INTEGER DEFAULT 0"),
         ("events", "min_team_size", "INTEGER DEFAULT 1"),
         ("events", "max_team_size", "INTEGER DEFAULT 1"),
+        ("events", "event_fee", "INTEGER DEFAULT 0"),
+        ("events", "upi_id", "VARCHAR(100) DEFAULT 'admin@upi'"),
+        ("events", "banner_image", "VARCHAR(255) DEFAULT 'event_default.jpg'"),
+        ("events", "qr_code_image", "VARCHAR(255) NULL"),
         ("registrations", "is_group", "INTEGER DEFAULT 0"),
         ("registrations", "team_name", "VARCHAR(100) NULL"),
         ("registrations", "team_size", "INTEGER DEFAULT 1"),
         ("registrations", "team_members", "TEXT NULL"),
         ("registrations", "registered_by", "INTEGER NULL"),
-        ("registrations", "payment_status", "VARCHAR(20) DEFAULT 'unpaid'")
+        ("registrations", "registration_date", "TIMESTAMP NULL"),
+        ("registrations", "status", "VARCHAR(20) DEFAULT 'pending'"),
+        ("registrations", "payment_status", "VARCHAR(20) DEFAULT 'unpaid'"),
+        ("registrations", "amount_paid", "INTEGER DEFAULT 0"),
+        ("registrations", "payment_method", "VARCHAR(50) DEFAULT 'None'"),
+        ("registrations", "utr_number", "VARCHAR(100) NULL"),
+        ("registrations", "registration_uid", "VARCHAR(20) NULL"),
+        # Event contact & rules fields
+        ("events", "rules_text", "TEXT NULL"),
+        ("events", "faculty_name", "VARCHAR(100) NULL"),
+        ("events", "faculty_phone", "VARCHAR(20) NULL"),
+        ("events", "student_name", "VARCHAR(100) NULL"),
+        ("events", "student_phone", "VARCHAR(20) NULL"),
     ]
-    for tbl, col, col_def in migration_columns:
-        try:
-            execute_db(f"ALTER TABLE {tbl} ADD COLUMN {col} {col_def};")
-            print(f"[Migration] Added column {col} to {tbl}")
-        except Exception:
-            # Column already exists
-            pass
-
-    # Seed Default Admin and Team Members
-    admin_pass = generate_password_hash('Varshitha@2007')
-    users_to_seed = [
-        ('varshitha', 'varshitha@eventmate.college', 'admin', 'Varshitha H')
-    ]
-    for i in range(1, 11):
-        users_to_seed.append((f'member{i}', f'member{i}@eventmate.college', 'member', f'Team Member {i}'))
-
-    for un, em, role, fn in users_to_seed:
-        existing = query_db("SELECT id FROM users WHERE username = %s", (un,), one=True)
-        if not existing:
-            execute_db(
-                "INSERT INTO users (username, email, password_hash, role, full_name) VALUES (%s, %s, %s, %s, %s)",
-                (un, em, admin_pass, role, fn)
-            )
+    # Inspect the schema before changing it.  This keeps startup quiet and avoids
+    # repeatedly attempting ALTER TABLE on every application restart.
+    table_columns = {}
+    for table_name in {table for table, _, _ in migration_columns}:
+        if DB_MODE == 'sqlite':
+            rows = query_db(f"PRAGMA table_info({table_name})")
+            table_columns[table_name] = {row['name'] for row in rows}
         else:
-            execute_db(
-                "UPDATE users SET password_hash = %s, role = %s, full_name = %s WHERE username = %s",
-                (admin_pass, role, fn, un)
+            rows = query_db(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = %s",
+                (table_name,)
             )
-    print("[DB Seed] Synced Admin & 10 Team Members")
+            table_columns[table_name] = {row['column_name'] for row in rows}
+
+    for tbl, col, col_def in migration_columns:
+        if col in table_columns.get(tbl, set()):
+            continue
+        execute_db(f"ALTER TABLE {tbl} ADD COLUMN {col} {col_def};")
+        table_columns.setdefault(tbl, set()).add(col)
+
+    duplicate_pairs = query_db(
+        """
+        SELECT participant_id, event_id, COUNT(*) AS duplicate_count
+        FROM registrations
+        GROUP BY participant_id, event_id
+        HAVING COUNT(*) > 1
+        """
+    )
+    if duplicate_pairs:
+        raise RuntimeError(
+            'Duplicate participant/event registrations exist; resolve them before enabling registration.'
+        )
+
+    execute_db(
+        "UPDATE registrations SET utr_number = NULL "
+        "WHERE utr_number IS NOT NULL AND TRIM(utr_number) = ''"
+    )
+    duplicate_uids = query_db(
+        """
+        SELECT registration_uid, COUNT(*) AS duplicate_count
+        FROM registrations
+        WHERE registration_uid IS NOT NULL
+        GROUP BY registration_uid
+        HAVING COUNT(*) > 1
+        """
+    )
+    if duplicate_uids:
+        raise RuntimeError(
+            'Duplicate registration references exist; resolve them before enabling registration.'
+        )
+
+    execute_db(
+        "CREATE UNIQUE INDEX IF NOT EXISTS registrations_participant_event_unique "
+        "ON registrations (participant_id, event_id)"
+    )
+    execute_db(
+        "CREATE UNIQUE INDEX IF NOT EXISTS registrations_utr_unique "
+        "ON registrations (utr_number)"
+    )
+    execute_db(
+        "CREATE UNIQUE INDEX IF NOT EXISTS registrations_uid_unique "
+        "ON registrations (registration_uid)"
+    )
+
+    # Backfill the event copy with complete, useful descriptions without
+    # overwriting descriptions that an administrator has already authored.
+    event_descriptions = {
+        'BGMI': 'A strategic battle royale team tournament testing communication, survival skills, and tactical decision-making.',
+        'Ramp Walk': 'A confident fashion showcase judged on presentation, creativity, stage presence, and styling.',
+        'Free Fire': 'A fast-paced battle royale competition where teams compete through precision, strategy, and teamwork.',
+        'Pencil Sketch': 'An individual sketching challenge celebrating observation, composition, detail, and artistic expression.',
+        'Get the Shield': 'A spirited general-knowledge and challenge event where participants compete for the championship shield.',
+        'Photography': 'Capture a compelling visual story using composition, lighting, timing, and creative perspective.',
+        'Content Creator': 'Create an engaging short-form piece that combines originality, storytelling, visual quality, and audience appeal.',
+        'Solo Dance': 'A solo performance judged on choreography, rhythm, expression, stage presence, and originality.',
+        'Group Dance': 'A coordinated team performance judged on synchronization, formation, energy, expression, and creativity.',
+        'Beat Boxing': 'Showcase rhythm, vocal percussion, musicality, and originality in a live beatboxing performance.',
+        'Face Painting': 'Transform a face into an expressive artwork through concept, technique, color, and finishing detail.',
+        'Tech Quiz': 'A rapid-fire technology quiz covering computing fundamentals, innovation, logic, and current digital trends.',
+        'Mad Adds': 'Develop and perform a memorable advertisement that combines a clear message, creativity, humor, and teamwork.',
+        'Mono Acting': 'A solo acting performance focused on character, voice, body language, expression, and storytelling.',
+    }
+    for event_name, description in event_descriptions.items():
+        execute_db(
+            """
+            UPDATE events
+            SET description = %s
+            WHERE event_name = %s
+              AND (description IS NULL OR TRIM(description) = '' OR LOWER(TRIM(description)) IN ('desc', 'description'))
+            """,
+            (description, event_name)
+        )
+
+    # Never leave a card with a placeholder or blank copy, including events
+    # created later through the admin form. Known events use the tailored copy
+    # above; unknown names receive a safe, name-aware baseline description.
+    placeholder_events = query_db(
+        """
+        SELECT id, event_name
+        FROM events
+        WHERE description IS NULL
+           OR TRIM(description) = ''
+           OR LOWER(TRIM(description)) IN ('desc', 'description')
+        """
+    )
+    for event in placeholder_events:
+        event_name = (event.get('event_name') or 'This event').strip()
+        execute_db(
+            "UPDATE events SET description = %s WHERE id = %s",
+            (f'{event_name} is a curated college competition focused on participation, creativity, and skill.', event['id'])
+        )
+
+    normalize_legacy_banner_filenames()
+
+    # Seed demo users only when an administrator explicitly supplies a password.
+    # Never create or overwrite accounts with a password embedded in source code.
+    if Config.ADMIN_PASSWORD:
+        admin_pass = generate_password_hash(Config.ADMIN_PASSWORD)
+        users_to_seed = [
+            ('varshitha', 'varshitha@eventmate.college', 'admin', 'Varshitha H')
+        ]
+        for i in range(1, 11):
+            users_to_seed.append((f'member{i}', f'member{i}@eventmate.college', 'member', f'Team Member {i}'))
+
+        for un, em, role, fn in users_to_seed:
+            existing = query_db("SELECT id FROM users WHERE username = %s", (un,), one=True)
+            if not existing:
+                execute_db(
+                    "INSERT INTO users (username, email, password_hash, role, full_name) VALUES (%s, %s, %s, %s, %s)",
+                    (un, em, admin_pass, role, fn)
+                )
+            else:
+                execute_db(
+                    "UPDATE users SET password_hash = %s, role = %s, full_name = %s WHERE username = %s",
+                    (admin_pass, role, fn, un)
+                )
+        print("[DB Seed] Synced configured admin and team member accounts")
+    else:
+        print("[DB Seed] Account password sync skipped; set ADMIN_PASSWORD in the environment")
 
     # Clean up any legacy admin user if exists
     legacy_admin = query_db("SELECT id FROM users WHERE username = 'admin'", one=True)
@@ -285,74 +625,25 @@ def create_tables_and_seed():
         ('ByteBattle', 'Speed Coding Knockout', '20-sep-2026', '11:00 AM', 'Advanced Computing Lab', '1-on-1 fast-paced knockout speed coding rounds on algorithms, data structures, and mathematical puzzles.', 40, 0, 1, 1)
     ]
 
-    for ev_data in required_events:
-        ev_name = ev_data[0]
-        existing_ev = query_db("SELECT id FROM events WHERE event_name = %s", (ev_name,), one=True)
-        if not existing_ev:
-            execute_db(
-                """
-                INSERT INTO events (event_name, event_type, event_date, event_time, venue, description, max_participants, is_group, min_team_size, max_team_size)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """,
-                ev_data
-            )
-            print(f"[DB Seed] Created event: {ev_name} (Group: {ev_data[7]})")
-        else:
-            execute_db(
-                """
-                UPDATE events 
-                SET event_type = %s, event_date = %s, event_time = %s, venue = %s, description = %s, max_participants = %s, is_group = %s, min_team_size = %s, max_team_size = %s
-                WHERE id = %s
-                """,
-                (ev_data[1], ev_data[2], ev_data[3], ev_data[4], ev_data[5], ev_data[6], ev_data[7], ev_data[8], ev_data[9], existing_ev['id'])
-            )
+    # Only seed events if the table is completely empty to prevent overwriting user edits/renames
+    events_count = query_db("SELECT COUNT(*) as count FROM events", one=True)
+    if events_count and events_count.get('count', 0) == 0:
+        for ev_data in required_events:
+            ev_name = ev_data[0]
+            existing_ev = query_db("SELECT id FROM events WHERE event_name = %s", (ev_name,), one=True)
+            if not existing_ev:
+                execute_db(
+                    """
+                    INSERT INTO events (event_name, event_type, event_date, event_time, venue, description, max_participants, is_group, min_team_size, max_team_size)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    ev_data
+                )
+                print(f"[DB Seed] Created event: {ev_name} (Group: {ev_data[7]})")
 
     # Seed Sample Participants if none exist
-    parts_count = query_db("SELECT COUNT(*) as count FROM participants", one=True)
-    if parts_count and parts_count.get('count', 0) == 0:
-        sample_parts = [
-            (2, 'Varshitha H', 'varshitha@college.edu', '9876543210', 'Shree Daksha Academy', 'BCA', '5th Sem'),
-            (None, 'Rahul Kumar', 'rahul.k@univ.ac.in', '9845123456', 'City College of Technology', 'BSc Computer Science', '3rd Sem'),
-            (None, 'Ananya Sharma', 'ananya.s@tech.edu', '9123456780', 'Shree Daksha Academy', 'BCA', '5th Sem'),
-            (None, 'Karthik Rao', 'karthik.rao@gmail.com', '9880011223', 'National Institute of Engineering', 'B.Tech IT', '7th Sem'),
-            (None, 'Sneha Patel', 'sneha.patel@college.edu', '9771122334', 'Shree Daksha Academy', 'MCA', '1st Sem')
-        ]
-        part_ids = []
-        for p in sample_parts:
-            pid = execute_db(
-                "INSERT INTO participants (user_id, full_name, email, phone, college_name, department, semester) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                p
-            )
-            part_ids.append(pid)
-
-        # Binary Brains is event_id for 'Binary Brains'
-        bb_ev = query_db("SELECT id FROM events WHERE event_name = 'Binary Brains'", one=True)
-        bb_id = bb_ev['id'] if bb_ev else 1
-        dd_ev = query_db("SELECT id FROM events WHERE event_name = 'Digital Dynamos'", one=True)
-        dd_id = dd_ev['id'] if dd_ev else 2
-        cc_ev = query_db("SELECT id FROM events WHERE event_name = 'CodeCraft'", one=True)
-        cc_id = cc_ev['id'] if cc_ev else 3
-
-        # Seed sample registrations with group event details
-        registrations_data = [
-            (part_ids[0], bb_id, None, 1, 'CyberKnights', 3, 'Varshitha H, Sneha Patel, Ananya Sharma', 'present', 'paid', 1500, 'Online'),
-            (part_ids[0], cc_id, None, 0, None, 1, None, 'present', 'paid', 250, 'Cash'),
-            (part_ids[1], dd_id, None, 1, 'Tech Titans', 2, 'Rahul Kumar, Karthik Rao', 'present', 'paid', 1000, 'Online'),
-            (part_ids[2], bb_id, None, 1, 'Binary Beasts', 3, 'Ananya Sharma, Rahul Kumar, Sneha Patel', 'present', 'paid', 1500, 'Online'),
-            (part_ids[3], cc_id, None, 0, None, 1, None, 'absent', 'paid', 250, 'Cash'),
-            (part_ids[4], dd_id, None, 1, 'Pixel Pioneers', 4, 'Sneha Patel, Varshitha H, Ananya Sharma, Karthik Rao', 'present', 'paid', 2000, 'Offline')
-        ]
-
-        for pid, eid, reg_by, is_grp, tname, tsize, tmembers, att_status, pay_status, amount, method in registrations_data:
-            reg_id = execute_db(
-                "INSERT INTO registrations (participant_id, event_id, registered_by, is_group, team_name, team_size, team_members, status, payment_status, amount_paid, payment_method) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                (pid, eid, reg_by, is_grp, tname, tsize, tmembers, 'approved', pay_status, amount, method)
-            )
-            execute_db(
-                "INSERT INTO attendance (registration_id, status, marked_by) VALUES (%s, %s, %s)",
-                (reg_id, att_status, 'admin')
-            )
-        print("[DB Seed] Seeded sample participants, registrations with group teams, and attendance.")
+    # (Disabled per user request to start with a completely clean slate)
+    pass
 
 if __name__ == '__main__':
     init_db()

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Members List – EventMate{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h1>Members List</h1>
+        <p>Track team performance and registrations across all active events.</p>
+    </div>
+    <div class="page-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="{{ url_for('admin_dashboard') }}" class="candy-btn candy-btn-secondary" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">&larr; Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="table-title" style="color: var(--primary);">Member Contributions</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="custom-table" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Member Details</th>
+                    <th>Role</th>
+                    <th>Total Registrations</th>
+                    <th>Paid Registrations</th>
+                    <th>Total Revenue (INR)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        <strong>{{ member.full_name }}</strong><br>
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">{{ member.username }}</span>
+                    </td>
+                    <td>
+                        {% if member.role == 'admin' %}
+                            <span class="badge badge-primary">Admin</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Member</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span style="font-size: 1.1rem; font-weight: bold; color: var(--text);">{{ member.total_registrations }}</span>
+                    </td>
+                    <td>
+                        <span class="badge badge-success">{{ member.paid_registrations }} Paid</span>
+                    </td>
+                    <td>
+                        <span style="font-size: 1.1rem; font-weight: bold; color: #10b981;">₹{{ member.total_collected }}</span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 4rem 1rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 1rem;">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <h4 style="margin: 0; color: var(--secondary); font-size: 1.1rem; font-weight: 600;">No Members Found</h4>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem;">There are no team members registered on the platform yet.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

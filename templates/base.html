@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}EventMate – College Event Management System{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,60 +15,219 @@
         rel="stylesheet">
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Official Header */
+        .landing-header {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 8px clamp(18px, 3vw, 30px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+        }
+        .landing-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            gap: 12px;
+            flex: 1;
+            min-width: 220px;
+        }
+        .landing-logo img {
+            height: 35px;
+        }
+        .landing-logo h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            color: #0f172a;
+            margin: 0;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        .header-nav-center {
+            display: flex;
+            gap: clamp(10px, 1.5vw, 18px);
+            flex: 1 1 auto;
+            min-width: 0;
+            justify-content: center;
+            flex-wrap: nowrap;
+        }
+        .header-nav-link {
+            position: relative;
+            color: #475569;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.84rem;
+            transition: color 0.3s ease;
+            padding: 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .header-nav-link:hover {
+            color: #2563eb;
+        }
+        .header-nav-link::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 100%;
+            bottom: 2px;
+            height: 2px;
+            border-radius: 999px;
+            background: #2563eb;
+            transition: right 0.25s ease;
+        }
+        .header-nav-link:hover::after,
+        .header-nav-link.active::after { right: 0; }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            justify-content: flex-end;
+            min-width: max-content;
+            white-space: nowrap;
+        }
+        .header-btn {
+            background: rgba(37, 99, 235, 0.08);
+            color: #1d4ed8;
+            border: 1px solid rgba(37, 99, 235, 0.25);
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            font-size: 0.9rem;
+        }
+        .header-btn:hover {
+            background: rgba(37, 99, 235, 0.14);
+            border-color: #2563eb;
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.2);
+            color: #ffffff;
+        }
+        .header-btn.active {
+            background: rgba(37, 99, 235, 0.18);
+            color: #ffffff;
+            border-color: #2563eb;
+        }
+
+        /* Mobile Menu */
+        .mobile-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: #0f172a;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 1002;
+        }
+        .mobile-visible {
+            display: none;
+        }
+        @media (max-width: 1150px) {
+            .mobile-toggle { display: block; }
+            .header-nav-center {
+                position: fixed;
+                top: 0; right: -100%;
+                width: 250px; height: 100vh;
+                background: rgba(255,255,255,0.98);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                justify-content: flex-start;
+                padding-top: 80px;
+                transition: 0.3s ease;
+                z-index: 1000;
+                border-left: 1px solid #e2e8f0;
+            }
+            .header-nav-center.open { right: 0; }
+            .header-actions { display: none; }
+            .header-actions.mobile-visible {
+                display: flex;
+                flex-direction: column;
+                padding: 20px;
+                border-top: 1px solid rgba(255,255,255,0.1);
+                margin-top: auto;
+            }
+        }
+
+        /* Standard Footer */
+        .l-footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #64748b;
+            position: relative;
+            z-index: 10;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: auto;
+        }
+    </style>
     {% block extra_css %}{% endblock %}
 </head>
 
-<body>
+<body class="light-theme">
 
-    <!-- Top Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="{{ url_for('index') }}" class="brand">
-                <div class="brand-icon">EM</div>
-                <div class="brand-text">
-                    <span class="brand-title">Event<span>Mate</span></span>
-                    <span class="brand-subtitle">College Tech Hub</span>
-                </div>
-            </a>
+    <!-- Official Header -->
+    <header class="landing-header" style="box-sizing: border-box;">
+        <a href="https://shreedakshaacademyedu.in/" target="_blank" class="landing-logo">
+            <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Logo">
+            <h1>Shree Daksha Academy</h1>
+        </a>
 
-            <!-- Navigation Links -->
-            <ul class="nav-links">
-                <li><a href="{{ url_for('events_list') }}"
-                        class="nav-link {% if request.path == '/events' %}active{% endif %}">Events</a></li>
-                <li><a href="{{ url_for('register_participant') }}"
-                        class="nav-link {% if request.path == '/register' %}active{% endif %}">Register</a></li>
-                <li><a href="{{ url_for('verify_certificate') }}"
-                        class="nav-link {% if request.path == '/verify' %}active{% endif %}">Verify Certificate</a></li>
-
+        <button class="mobile-toggle" onclick="document.querySelector('.header-nav-center').classList.toggle('open')">&#9776;</button>
+        
+        <nav class="header-nav-center">
+            <ul class="image-like-nav">
+                <div class="nav-pill-indicator"></div>
+                <a href="{{ url_for('events_list') }}" class="nav-link">Home</a>
+                <a href="{{ url_for('events_list') }}#events" class="nav-link">Event</a>
+                <a href="{{ url_for('events_list') }}#location" class="nav-link">Location</a>
+                
                 {% if session.get('user_id') %}
                     {% if session.get('role') == 'admin' %}
-                    <li><a href="{{ url_for('admin_dashboard') }}"
-                            class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a></li>
-                    <li><a href="{{ url_for('attendance_manager') }}"
-                            class="nav-link {% if request.path == '/admin/attendance' %}active{% endif %}">Attendance</a>
-                    </li>
-                    <li><a href="{{ url_for('certificates_manager') }}"
-                            class="nav-link {% if request.path == '/admin/certificates' %}active{% endif %}">Certificates</a>
-                    </li>
+                        <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a>
+                        <a href="{{ url_for('attendance_manager') }}" class="nav-link {% if request.path == '/admin/attendance' %}active{% endif %}">Attendance</a>
+                        <a href="{{ url_for('certificates_manager') }}" class="nav-link {% if request.path == '/admin/certificates' %}active{% endif %}">Certificate</a>
+                        <a href="{{ url_for('members_list') }}" class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a>
                     {% elif session.get('role') == 'member' %}
-                    <li><a href="{{ url_for('member_dashboard') }}"
-                            class="nav-link {% if request.path == '/member/dashboard' %}active{% endif %}">Member Dashboard</a></li>
+                        <a href="{{ url_for('member_dashboard') }}" class="nav-link {% if request.path == '/member/dashboard' %}active{% endif %}">Dashboard</a>
+                        <a href="{{ url_for('members_list') }}" class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a>
                     {% endif %}
                 {% endif %}
             </ul>
 
-            <!-- Auth & User State -->
-            <div class="nav-auth">
+            <div class="header-actions mobile-visible">
                 {% if session.get('user_id') %}
-                <div class="user-badge">
-                    <span>{{ session.get('full_name', session.get('username')) }}</span>
-                    <span class="user-role-tag">{{ 'Admin' if session.get('role') == 'admin' else 'Member' }}</span>
-                </div>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
+                    <div class="header-user-name" style="display:flex; align-items:center; gap:8px; color:#0f172a; font-weight:600; padding:10px 0;">
+                        <span>👤 {{ session.get('full_name', session.get('username')) }}</span>
+                    </div>
+                    <a href="{{ url_for('logout') }}" class="header-btn" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); width: 100%; text-align: center;">Logout</a>
                 {% endif %}
             </div>
+        </nav>
+
+        <div class="header-actions">
+            {% if session.get('user_id') %}
+                <div class="header-user-name" style="display:flex; align-items:center; gap:8px; color:#0f172a; font-weight:600; padding:0 15px; border-left:1px solid #e2e8f0; margin-left:10px;">
+                    <span>{{ session.get('full_name', session.get('username')) }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="header-btn" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); min-width: max-content;">Logout</a>
+            {% else %}
+                <div style="width: 1px;"></div>
+            {% endif %}
         </div>
-    </nav>
+    </header>
 
     <!-- Main Content Area -->
     <main class="main-wrapper">
@@ -90,11 +251,11 @@
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        <div class="alert-container">
+        <div class="alert-container" style="position: fixed; top: 80px; right: 20px; z-index: 10000; width: 300px;">
             {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
+            <div class="alert alert-{{ category }}" style="margin-bottom: 10px; padding: 15px; border-radius: 8px; background: #ffffff; backdrop-filter: blur(10px); color: #0f172a; border-left: 4px solid #dc2626; box-shadow: 0 10px 25px rgba(15,23,42,0.12);">
                 <span>{{ message }}</span>
-                <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+                <button class="alert-close" onclick="this.parentElement.remove()" style="float:right; background:none; border:none; color:#64748b; cursor:pointer;">&times;</button>
             </div>
             {% endfor %}
         </div>
@@ -122,22 +283,74 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div>
-                <strong>EventMate – Event Management System</strong>
-                <p style="margin-top: 4px; font-size: 0.8rem; color: #94a3b8;">Shree Daksha Academy &bull; Department of
-                    Computer Applications</p>
-            </div>
-            <div>
-                <span>Symposium 2026 &bull; CodeCraft &bull; CodeStorm &bull; CodeVerse &bull; ByteBattle</span>
-            </div>
-        </div>
+    <footer class="l-footer">
+        <p>&copy; 2026 Shree Daksha Academy. All rights reserved.</p>
+        <p style="margin-top: 10px;">
+            <a href="{{ url_for('events_list') }}#events" style="color:#2563eb; text-decoration:none; margin:0 8px;">Events</a>
+            <a href="{{ url_for('verify_certificate') }}" style="color:#2563eb; text-decoration:none; margin:0 8px;">Verify Certificate</a>
+        </p>
+        {% if not session.get('user_id') %}
+        <p style="margin-top: 10px;"><a href="{{ url_for('login') }}" style="color: #64748b; text-decoration: none;">Admin Login</a></p>
+        {% endif %}
     </footer>
 
     <!-- Client Script -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     {% block extra_js %}{% endblock %}
+
+    <!-- Pill Navigation Animation Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nav = document.querySelector('.image-like-nav');
+            if (!nav) return;
+            const indicator = nav.querySelector('.nav-pill-indicator');
+            const links = nav.querySelectorAll('.nav-link');
+            
+            function moveIndicator(el) {
+                if (!el || !indicator) return;
+                const navRect = nav.getBoundingClientRect();
+                const linkRect = el.getBoundingClientRect();
+                
+                indicator.style.width = `${linkRect.width}px`;
+                indicator.style.transform = `translateX(${linkRect.left - navRect.left}px)`;
+                indicator.classList.add('visible');
+            }
+
+            // Initialization
+            let activeLink = Array.from(links).find(l => l.classList.contains('active'));
+            if (!activeLink && links.length > 0) {
+                // Determine active link based on URL if not explicitly set
+                const path = window.location.pathname;
+                activeLink = Array.from(links).find(l => l.getAttribute('href') === path) || links[0];
+            }
+            
+            // Give layout time to settle
+            setTimeout(() => {
+                if (activeLink) moveIndicator(activeLink);
+            }, 50);
+
+            // Hover interactions
+            links.forEach(link => {
+                link.addEventListener('mouseenter', (e) => {
+                    moveIndicator(e.target);
+                });
+            });
+
+            // Reset to active link when mouse leaves nav
+            nav.addEventListener('mouseleave', () => {
+                if (activeLink) {
+                    moveIndicator(activeLink);
+                } else {
+                    indicator.classList.remove('visible');
+                }
+            });
+            
+            // Update on resize
+            window.addEventListener('resize', () => {
+                if (activeLink) moveIndicator(activeLink);
+            });
+        });
+    </script>
 </body>
 
 </html>

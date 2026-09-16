@@ -1,4 +1,5 @@
 import os
+import datetime
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -63,7 +64,7 @@ def get_smtp_info():
         'has_password': not is_demo
     }
 
-def send_certificate_email(recipient_email, participant_name, event_name, certificate_path, certificate_code):
+def send_certificate_email(recipient_email, participant_name, event_name, certificate_path, certificate_code, attachment_bytes=None, attachment_filename=None):
     """
     Send an email with the attached Certificate of Participation.
     If credentials are missing or in Demo Mode, safely simulates dispatch with full verification.
@@ -128,18 +129,11 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
                 </div>
                 <div class="content">
                     <h2>Hello {participant_name},</h2>
-                    <p>Thank you for actively participating in <strong>{event_name}</strong> during our college tech symposium!</p>
+                    <p>Thank you for attending <strong>{event_name}</strong>!</p>
                     
                     <div class="highlight-box">
-                        <p style="margin: 0 0 8px 0;"><strong>Event:</strong> {event_name}</p>
-                        <p style="margin: 0 0 8px 0;"><strong>Certificate ID:</strong> <code>{certificate_code}</code></p>
-                        <p style="margin: 0;"><strong>Status:</strong> <span class="badge">Verified & Issued</span></p>
-                    </div>
-
-                    <p>Your official Certificate of Participation is attached to this email as a high-resolution document. You can also verify or download it anytime using our online portal.</p>
-                    
-                    <div style="text-align: center;">
-                        <a href="{verify_url}" class="btn">Verify Certificate Online</a>
+                        <p style="margin: 0 0 8px 0;"><strong>Status:</strong> Verified</p>
+                        <p style="margin: 0;"><strong>Issue Date:</strong> {datetime.date.today().strftime('%B %d, %Y')}</p>
                     </div>
                 </div>
                 <div class="footer">
@@ -153,7 +147,16 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
         msg.attach(MIMEText(html_content, 'html'))
 
         # Attach Certificate File if exists
-        if certificate_path and os.path.exists(certificate_path):
+        if attachment_bytes and attachment_filename:
+            part = MIMEBase("application", "octet-stream")
+            part.set_payload(attachment_bytes)
+            encoders.encode_base64(part)
+            part.add_header(
+                "Content-Disposition",
+                f"attachment; filename={attachment_filename}"
+            )
+            msg.attach(part)
+        elif certificate_path and os.path.exists(certificate_path):
             with open(certificate_path, "rb") as attachment:
                 part = MIMEBase("application", "octet-stream")
                 part.set_payload(attachment.read())
@@ -296,3 +299,4 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
     except Exception as e:
         print(f"[SMTP Connection Error] {e}. Falling back to Safe Demo Mode.")
         return True, f"Receipt dispatched in Safe Demo Mode to {recipient_email}!"
+

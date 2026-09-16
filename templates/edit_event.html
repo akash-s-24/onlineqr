@@ -14,7 +14,8 @@
 </div>
 
 <div class="form-card">
-    <form method="POST" action="{{ url_for('edit_event', event_id=event.id) }}">
+    <form method="POST" action="{{ url_for('edit_event', event_id=event.id) }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-group">
             <label class="form-label" for="event_name">Event Name *</label>
             <input type="text" id="event_name" name="event_name" class="form-control" value="{{ event.event_name }}" required>
@@ -44,21 +45,110 @@
 
         <div class="form-row">
             <div class="form-group">
+                <label class="form-label">
+                    <input type="checkbox" id="is_group" name="is_group" value="true" onchange="toggleTeamSize(this)" {% if event.is_group %}checked{% endif %}>
+                    Is this a Group/Team Event?
+                </label>
+            </div>
+        </div>
+
+        <div class="form-row" id="teamSizeRow" style="display: {% if event.is_group %}flex{% else %}none{% endif %}; background: #fef2f2; border: 1px solid #fecaca; padding: 15px; border-radius: 8px; margin-bottom: 1.5rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" for="min_team_size" style="color: #b91c1c;">Min Team Size</label>
+                <input type="number" id="min_team_size" name="min_team_size" class="form-control" value="{{ event.min_team_size or 2 }}" min="2">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" for="max_team_size" style="color: #b91c1c;">Max Team Size</label>
+                <input type="number" id="max_team_size" name="max_team_size" class="form-control" value="{{ event.max_team_size or 4 }}" min="2">
+            </div>
+        </div>
+
+        <script>
+        function toggleTeamSize(cb) {
+            document.getElementById('teamSizeRow').style.display = cb.checked ? 'flex' : 'none';
+        }
+        </script>
+
+        <div class="form-row">
+            <div class="form-group" style="flex: 1;">
                 <label class="form-label" for="venue">Venue / Room *</label>
                 <input type="text" id="venue" name="venue" class="form-control" value="{{ event.venue }}" required>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="flex: 0.5;">
                 <label class="form-label" for="event_fee">Event Fee (₹)</label>
                 <input type="number" id="event_fee" name="event_fee" class="form-control" value="{{ event.event_fee }}" min="0">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label" for="upi_id">UPI ID (For Payments)</label>
+                <input type="text" id="upi_id" name="upi_id" class="form-control" value="{{ event.upi_id }}" placeholder="e.g. yourname@upi">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label" for="banner_image">Event Banner Image</label>
+                <input type="file" id="banner_image" name="banner_image" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif,image/*">
+                <small class="form-hint">Upload a new image to replace the current banner. Leave blank to keep it.</small>
+                {% if event.banner_image %}
+                    <div style="margin-top: 10px;">
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">Current Banner:</p>
+                        <img src="{{ url_for('static', filename='images/' ~ event.banner_image) }}" alt="{{ event.event_name }} banner" style="width: 160px; height: 90px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    </div>
+                {% endif %}
             </div>
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="description">Event Description & Rules</label>
-            <textarea id="description" name="description" class="form-control" rows="4">{{ event.description }}</textarea>
+            <label class="form-label" for="qr_code">Custom QR Code Image</label>
+            <input type="file" id="qr_code" name="qr_code" class="form-control" accept="image/*">
+            <small class="form-hint">Upload custom QR code to overwrite. If blank, existing one or dynamically generated will be used.</small>
+            {% if event.qr_code_image %}
+                <div style="margin-top: 10px;">
+                    <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">Currently Uploaded QR Code:</p>
+                    <img src="{{ url_for('static', filename=event.qr_code_image) }}" alt="QR Code" style="width: 100px; height: 100px; border-radius: 8px; border: 2px solid #fecaca;">
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="description">Event Description</label>
+            <textarea id="description" name="description" class="form-control" rows="3">{{ event.description }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="rules_text">📜 Rules & Regulations (one rule per line)</label>
+            <textarea id="rules_text" name="rules_text" class="form-control" rows="5" placeholder="Enter each rule on a new line...">{{ event.rules_text or '' }}</textarea>
+            <small class="form-hint">These rules will be shown when participants click "View Rules" on the event card.</small>
+        </div>
+
+        <div style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 20px; border-radius: 8px; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0 0 15px 0; color: #0369a1; font-size: 1.1rem;">📞 Event Contact Information</h3>
+            <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label" for="faculty_name">Faculty In Charge (Name)</label>
+                    <input type="text" id="faculty_name" name="faculty_name" class="form-control" value="{{ event.faculty_name or '' }}" placeholder="e.g. Prof. Rajesh Kumar">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label" for="faculty_phone">Faculty Phone</label>
+                    <input type="tel" id="faculty_phone" name="faculty_phone" class="form-control" value="{{ event.faculty_phone or '' }}" placeholder="e.g. 9876543210">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label" for="student_name">Student In Charge (Name)</label>
+                    <input type="text" id="student_name" name="student_name" class="form-control" value="{{ event.student_name or '' }}" placeholder="e.g. Akash S">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label" for="student_phone">Student Phone</label>
+                    <input type="tel" id="student_phone" name="student_phone" class="form-control" value="{{ event.student_phone or '' }}" placeholder="e.g. 8050774071">
+                </div>
+            </div>
+            <small class="form-hint">Participants will see this contact info when they click "📞 Contact" on the event card.</small>
         </div>
 
         <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 1rem;">Update Event</button>
+    </form>
+
+    <form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" onsubmit="return confirm('Are you sure you want to delete this event? This action cannot be undone.');" style="margin-top: 1rem;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-block btn-lg" style="background-color: #ef4444; color: white; border: none;">Delete Event</button>
     </form>
 </div>
 {% endblock %}

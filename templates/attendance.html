@@ -9,11 +9,11 @@
         <p>Mark attendee presence, manage squad participation, and remove registrations</p>
     </div>
     <div class="page-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+        <button type="button" class="candy-btn candy-btn-secondary" onclick="window.history.back()" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">
             <span style="font-size: 1.1rem;">&larr;</span> Previous
         </button>
-        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary">&larr; Back to Dashboard</a>
-        <a href="{{ url_for('certificates_manager') }}" class="btn btn-success">Proceed to Certificate Generation &rarr;</a>
+        <a href="{{ url_for('admin_dashboard') }}" class="candy-btn" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">&larr; Back to Dashboard</a>
+        <a href="{{ url_for('certificates_manager') }}" class="candy-btn candy-btn-success" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">Proceed to Certificate Generation &rarr;</a>
     </div>
 </div>
 
@@ -65,7 +65,7 @@
                 {% endfor %}
             </select>
         </div>
-        <span style="font-size: 0.85rem; color: var(--text-muted);">Use <strong>🗑️ Delete</strong> to remove registrations or toggle attendance status</span>
+        
     </div>
 
     <div class="table-responsive">
@@ -121,23 +121,26 @@
                     <td style="text-align: right;">
                         <div style="display: inline-flex; gap: 0.4rem; align-items: center; justify-content: flex-end;">
                             {% if row.att_status == 'present' %}
-                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="toggleAttendance({{ row.registration_id }}, 'present', this)">Mark Absent</button>
+                                <button type="button" class="candy-btn candy-btn-warning" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;" onclick="toggleAttendance({{ row.registration_id }}, 'present', this)">Mark Absent</button>
                             {% else %}
-                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleAttendance({{ row.registration_id }}, 'absent', this)">Mark Present</button>
+                                <button type="button" class="candy-btn candy-btn-success" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;" onclick="toggleAttendance({{ row.registration_id }}, 'absent', this)">Mark Present</button>
                             {% endif %}
 
-                            <!-- Delete Symbol Button -->
-                            <button type="button" class="btn btn-outline-danger btn-sm delete-btn" 
-                                    onclick="deleteAttendanceRow({{ row.registration_id }}, '{{ row.full_name }}', this)" 
-                                    title="Delete this registration record">
-                                <span>🗑️</span> <span class="btn-text">Delete</span>
-                            </button>
+                            
                         </div>
                     </td>
                 </tr>
                 {% else %}
                 <tr id="emptyRow">
-                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem;">No attendance records found.</td>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 4rem 1rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 1rem;">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg>
+                        <h4 style="margin: 0; color: var(--secondary); font-size: 1.1rem; font-weight: 600;">No Records Found</h4>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem;">There are no registrations to display for this event.</p>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -160,7 +163,8 @@ async function deleteAttendanceRow(regId, participantName, btnElement) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
             }
         });
 
@@ -205,5 +209,16 @@ async function deleteAttendanceRow(regId, participantName, btnElement) {
         btnElement.innerHTML = originalContent;
     }
 }
+</script>
+<script>
+document.addEventListener('click', (event) => {
+    const deleteButton = event.target.closest('.delete-attendance-btn');
+    if (!deleteButton) return;
+    deleteAttendanceRow(
+        deleteButton.dataset.registrationId,
+        deleteButton.dataset.participantName,
+        deleteButton
+    );
+});
 </script>
 {% endblock %}

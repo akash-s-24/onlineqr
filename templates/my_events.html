@@ -66,8 +66,9 @@
                     <td>
                         {% if reg.certificate_code %}
                         <div style="display: flex; gap: 0.4rem;">
-                            <button type="button" class="btn btn-secondary btn-sm"
-                                onclick="openCertModal('{{ url_for('download_certificate_file', filename=reg.certificate_code + '.png') }}', '{{ reg.certificate_code }}')">View</button>
+                            <button type="button" class="btn btn-secondary btn-sm cert-preview-trigger"
+                                data-image-src="{{ url_for('download_certificate_file', filename=reg.certificate_code + '.png')|e }}"
+                                data-cert-code="{{ reg.certificate_code|e }}">View</button>
                             <a href="{{ url_for('download_certificate_file', filename=reg.certificate_code + '.png') }}"
                                 download class="btn btn-primary btn-sm">Download</a>
                         </div>

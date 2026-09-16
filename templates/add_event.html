@@ -14,7 +14,8 @@
 </div>
 
 <div class="form-card">
-    <form method="POST" action="{{ url_for('add_event') }}">
+    <form method="POST" action="{{ url_for('add_event') }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-group">
             <label class="form-label" for="event_name">Event Name *</label>
             <input type="text" id="event_name" name="event_name" class="form-control" placeholder="e.g. CodeCraft / ByteBattle" required>
@@ -44,12 +45,52 @@
 
         <div class="form-row">
             <div class="form-group">
+                <label class="form-label">
+                    <input type="checkbox" id="is_group" name="is_group" value="true" onchange="toggleTeamSize(this)">
+                    Is this a Group/Team Event?
+                </label>
+            </div>
+        </div>
+
+        <div class="form-row" id="teamSizeRow" style="display: none; background: #fef2f2; border: 1px solid #fecaca; padding: 15px; border-radius: 8px; margin-bottom: 1.5rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" for="min_team_size" style="color: #b91c1c;">Min Team Size</label>
+                <input type="number" id="min_team_size" name="min_team_size" class="form-control" value="2" min="2">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" for="max_team_size" style="color: #b91c1c;">Max Team Size</label>
+                <input type="number" id="max_team_size" name="max_team_size" class="form-control" value="4" min="2">
+            </div>
+        </div>
+
+        <script>
+        function toggleTeamSize(cb) {
+            document.getElementById('teamSizeRow').style.display = cb.checked ? 'flex' : 'none';
+        }
+        </script>
+
+        <div class="form-row">
+            <div class="form-group" style="flex: 1;">
                 <label class="form-label" for="venue">Venue / Room *</label>
                 <input type="text" id="venue" name="venue" class="form-control" placeholder="e.g. CS Lab 1 / Auditorium" required>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="flex: 0.5;">
                 <label class="form-label" for="event_fee">Event Fee (₹)</label>
                 <input type="number" id="event_fee" name="event_fee" class="form-control" value="0" min="0">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label" for="upi_id">UPI ID (For Payments)</label>
+                <input type="text" id="upi_id" name="upi_id" class="form-control" placeholder="e.g. yourname@upi">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label" for="banner_image">Event Banner Image</label>
+                <input type="file" id="banner_image" name="banner_image" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif,image/*">
+                <small class="form-hint">Use a JPG, PNG, WEBP, or GIF image. A local fallback is used if this is skipped.</small>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label" for="qr_code">QR Code Image</label>
+                <input type="file" id="qr_code" name="qr_code" class="form-control" accept="image/*">
+                <small class="form-hint">Upload custom QR code. If skipped, one is generated automatically.</small>
             </div>
         </div>
 

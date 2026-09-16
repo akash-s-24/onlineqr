@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS participants (
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS registrations (
     id SERIAL PRIMARY KEY,
+    registration_uid VARCHAR(20) UNIQUE,
     participant_id INT NOT NULL,
     event_id INT NOT NULL,
     registered_by INT NULL,
@@ -88,6 +89,9 @@ CREATE TABLE IF NOT EXISTS registrations (
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
     FOREIGN KEY (registered_by) REFERENCES users(id) ON DELETE SET NULL
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS registrations_utr_unique
+    ON registrations (utr_number);
 
 -- ---------------------------------------------------------
 -- Table: attendance
@@ -124,21 +128,6 @@ CREATE TABLE IF NOT EXISTS certificates (
 -- Seed Data
 -- ---------------------------------------------------------
 
--- 1. Default Admin User and 10 Team Members (Password: Varshitha@2007)
-INSERT INTO users (id, username, email, password_hash, role, full_name) VALUES
-(1, 'varshitha', 'varshitha@eventmate.college', 'scrypt:32768:8:1$JubfokMAnmu6wGTB$bbcce5ca52616d19152a9481254be4d4bc6ba5a0fd05564366a9d9d6c34481a04954eb6c847a647333ae1f1c3fcb296ebfac0d7a0f26640943c2aa520bbb69a8', 'admin', 'Varshitha H'),
-(2, 'member1', 'member1@eventmate.college', 'scrypt:32768:8:1$JubfokMAnmu6wGTB$bbcce5ca52616d19152a9481254be4d4bc6ba5a0fd05564366a9d9d6c34481a04954eb6c847a647333ae1f1c3fcb296ebfac0d7a0f26640943c2aa520bbb69a8', 'member', 'Team Member 1'),
-(3, 'member2', 'member2@eventmate.college', 'scrypt:32768:8:1$JubfokMAnmu6wGTB$bbcce5ca52616d19152a9481254be4d4bc6ba5a0fd05564366a9d9d6c34481a04954eb6c847a647333ae1f1c3fcb296ebfac0d7a0f26640943c2aa520bbb69a8', 'member', 'Team Member 2'),
-(4, 'member3', 'member3@eventmate.college', 'scrypt:32768:8:1$JubfokMAnmu6wGTB$bbcce5ca52616d19152a9481254be4d4bc6ba5a0fd05564366a9d9d6c34481a04954eb6c847a647333ae1f1c3fcb296ebfac0d7a0f26640943c2aa520bbb69a8', 'member', 'Team Member 3'),
-(5, 'member4', 'member4@eventmate.college', 'scrypt:32768:8:1$JubfokMAnmu6wGTB$bbcce5ca52616d19152a9481254be4d4bc6ba5a0fd05564366a9d9d6c34481a04954eb6c847a647333ae1f1c3fcb296ebfac0d7a0f26640943c2aa520bbb69a8', 'member', 'Team Member 4'),
-(6, 'member5', 'member5@eventmate.college', 'scrypt:32768:8:1$JubfokMAnmu6wGTB$bbcce5ca52616d19152a9481254be4d4bc6ba5a0fd05564366a9d9d6c34481a04954eb6c847a647333ae1f1c3fcb296ebfac0d7a0f26640943c2aa520bbb69a8', 'member', 'Team Member 5'),
-(7, 'member6', 'member6@eventmate.college', 'scrypt:32768:8:1$JubfokMAnmu6wGTB$bbcce5ca52616d19152a9481254be4d4bc6ba5a0fd05564366a9d9d6c34481a04954eb6c847a647333ae1f1c3fcb296ebfac0d7a0f26640943c2aa520bbb69a8', 'member', 'Team Member 6'),
-(8, 'member7', 'member7@eventmate.college', 'scrypt:32768:8:1$JubfokMAnmu6wGTB$bbcce5ca52616d19152a9481254be4d4bc6ba5a0fd05564366a9d9d6c34481a04954eb6c847a647333ae1f1c3fcb296ebfac0d7a0f26640943c2aa520bbb69a8', 'member', 'Team Member 7'),
-(9, 'member8', 'member8@eventmate.college', 'scrypt:32768:8:1$JubfokMAnmu6wGTB$bbcce5ca52616d19152a9481254be4d4bc6ba5a0fd05564366a9d9d6c34481a04954eb6c847a647333ae1f1c3fcb296ebfac0d7a0f26640943c2aa520bbb69a8', 'member', 'Team Member 8'),
-(10, 'member9', 'member9@eventmate.college', 'scrypt:32768:8:1$JubfokMAnmu6wGTB$bbcce5ca52616d19152a9481254be4d4bc6ba5a0fd05564366a9d9d6c34481a04954eb6c847a647333ae1f1c3fcb296ebfac0d7a0f26640943c2aa520bbb69a8', 'member', 'Team Member 9'),
-(11, 'member10', 'member10@eventmate.college', 'scrypt:32768:8:1$JubfokMAnmu6wGTB$bbcce5ca52616d19152a9481254be4d4bc6ba5a0fd05564366a9d9d6c34481a04954eb6c847a647333ae1f1c3fcb296ebfac0d7a0f26640943c2aa520bbb69a8', 'member', 'Team Member 10');
-
-
 -- 2. Core Events Required by User (including Binary Brains, Digital Dynamos, CodeCraft, etc.)
 INSERT INTO events (id, event_name, event_type, event_date, event_time, venue, description, max_participants, is_group, min_team_size, max_team_size) VALUES
 (1, 'Binary Brains', 'Technical Quiz & Logic Duel', '18-sep-2026', '11:00 AM', 'Seminar Hall 1', 'Rapid-fire technical quiz, logic reasoning puzzles, and algorithmic brain teasers for dynamic teams.', 60, 1, 2, 4),
@@ -156,12 +145,12 @@ INSERT INTO participants (id, user_id, full_name, email, phone, college_name, de
 (4, NULL, 'Karthik Rao', 'karthik.rao@gmail.com', '9880011223', 'National Institute of Engineering', 'B.Tech IT', '7th Sem');
 
 -- 4. Initial Registrations
-INSERT INTO registrations (id, participant_id, event_id, registered_by, is_group, team_name, team_size, team_members, status, payment_status) VALUES
-(1, 1, 1, 2, 1, 'CyberKnights', 3, 'Varshitha H, Sneha Patel, Ananya Sharma', 'confirmed', 'paid'),
-(2, 1, 3, 2, 0, NULL, 1, NULL, 'confirmed', 'unpaid'),
-(3, 2, 2, 3, 1, 'Tech Titans', 2, 'Rahul Kumar, Karthik Rao', 'confirmed', 'paid'),
-(4, 3, 1, NULL, 1, 'Binary Beasts', 3, 'Ananya Sharma, Rahul Kumar, Sneha Patel', 'confirmed', 'unpaid'),
-(5, 4, 3, 4, 0, NULL, 1, NULL, 'confirmed', 'paid');
+INSERT INTO registrations (id, registration_uid, participant_id, event_id, registered_by, is_group, team_name, team_size, team_members, status, payment_status) VALUES
+(1, 'REG-1001', 1, 1, 2, 1, 'CyberKnights', 3, 'Varshitha H, Sneha Patel, Ananya Sharma', 'confirmed', 'paid'),
+(2, 'REG-1002', 1, 3, 2, 0, NULL, 1, NULL, 'confirmed', 'unpaid'),
+(3, 'REG-1003', 2, 2, 3, 1, 'Tech Titans', 2, 'Rahul Kumar, Karthik Rao', 'confirmed', 'paid'),
+(4, 'REG-1004', 3, 1, NULL, 1, 'Binary Beasts', 3, 'Ananya Sharma, Rahul Kumar, Sneha Patel', 'confirmed', 'unpaid'),
+(5, 'REG-1005', 4, 3, 4, 0, NULL, 1, NULL, 'confirmed', 'paid');
 
 -- 5. Initial Attendance
 INSERT INTO attendance (id, registration_id, status, marked_by) VALUES

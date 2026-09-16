@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang=en>
+  <head>
+    <title>werkzeug.routing.exceptions.BuildError: Could not build url for endpoint &#39;events&#39;. Did you mean &#39;my_events&#39; instead?
+ // Werkzeug Debugger</title>
+    <link rel="stylesheet" href="?__debugger__=yes&amp;cmd=resource&amp;f=style.css">
+    <link rel="shortcut icon"
+        href="?__debugger__=yes&amp;cmd=resource&amp;f=console.png">
+    <script src="?__debugger__=yes&amp;cmd=resource&amp;f=debugger.js"></script>
+    <script>
+      var CONSOLE_MODE = false,
+          EVALEX = true,
+          EVALEX_TRUSTED = false,
+          SECRET = "k0S1EiINhieA8OUHjT3o";
+    </script>
+  </head>
+  <body style="background-color: #fff">
+    <div class="debugger">
+<h1>werkzeug.routing.exceptions.BuildError</h1>
+<div class="detail">
+  <p class="errormsg">werkzeug.routing.exceptions.BuildError: Could not build url for endpoint &#39;events&#39;. Did you mean &#39;my_events&#39; instead?
+</p>
+</div>
+<h2 class="traceback">Traceback <em>(most recent call last)</em></h2>
+<div class="traceback">
+  <h3></h3>
+  <ul><li><div class="frame" id="frame-4523653248">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py"</cite>,
+      line <em class="line">1536</em>,
+      in <code class="function">__call__</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">    </span>) -&gt; cabc.Iterable[bytes]:</pre>
+<pre class="line before"><span class="ws">        </span>&#34;&#34;&#34;The WSGI server calls the Flask application object as the</pre>
+<pre class="line before"><span class="ws">        </span>WSGI application. This calls :meth:`wsgi_app`, which can be</pre>
+<pre class="line before"><span class="ws">        </span>wrapped to apply middleware.</pre>
+<pre class="line before"><span class="ws">        </span>&#34;&#34;&#34;</pre>
+<pre class="line current"><span class="ws">        </span>return self.wsgi_app(environ, start_response)
+<span class="ws">        </span>       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523653568">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py"</cite>,
+      line <em class="line">1514</em>,
+      in <code class="function">wsgi_app</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">            </span>try:</pre>
+<pre class="line before"><span class="ws">                </span>ctx.push()</pre>
+<pre class="line before"><span class="ws">                </span>response = self.full_dispatch_request()</pre>
+<pre class="line before"><span class="ws">            </span>except Exception as e:</pre>
+<pre class="line before"><span class="ws">                </span>error = e</pre>
+<pre class="line current"><span class="ws">                </span>response = self.handle_exception(e)
+<span class="ws">                </span>           ^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<pre class="line after"><span class="ws">            </span>except:</pre>
+<pre class="line after"><span class="ws">                </span>error = sys.exc_info()[1]</pre>
+<pre class="line after"><span class="ws">                </span>raise</pre>
+<pre class="line after"><span class="ws">            </span>return response(environ, start_response)</pre>
+<pre class="line after"><span class="ws">        </span>finally:</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523652768">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py"</cite>,
+      line <em class="line">1511</em>,
+      in <code class="function">wsgi_app</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">        </span>ctx = self.request_context(environ)</pre>
+<pre class="line before"><span class="ws">        </span>error: BaseException | None = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line before"><span class="ws">            </span>try:</pre>
+<pre class="line before"><span class="ws">                </span>ctx.push()</pre>
+<pre class="line current"><span class="ws">                </span>response = self.full_dispatch_request()
+<span class="ws">                </span>           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<pre class="line after"><span class="ws">            </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">                </span>error = e</pre>
+<pre class="line after"><span class="ws">                </span>response = self.handle_exception(e)</pre>
+<pre class="line after"><span class="ws">            </span>except:</pre>
+<pre class="line after"><span class="ws">                </span>error = sys.exc_info()[1]</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523652928">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py"</cite>,
+      line <em class="line">919</em>,
+      in <code class="function">full_dispatch_request</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">            </span>request_started.send(self, _async_wrapper=self.ensure_sync)</pre>
+<pre class="line before"><span class="ws">            </span>rv = self.preprocess_request()</pre>
+<pre class="line before"><span class="ws">            </span>if rv is None:</pre>
+<pre class="line before"><span class="ws">                </span>rv = self.dispatch_request()</pre>
+<pre class="line before"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line current"><span class="ws">            </span>rv = self.handle_user_exception(e)
+<span class="ws">            </span>     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<pre class="line after"><span class="ws">        </span>return self.finalize_request(rv)</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">    </span>def finalize_request(</pre>
+<pre class="line after"><span class="ws">        </span>self,</pre>
+<pre class="line after"><span class="ws">        </span>rv: ft.ResponseReturnValue | HTTPException,</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523652608">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py"</cite>,
+      line <em class="line">917</em>,
+      in <code class="function">full_dispatch_request</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line before"><span class="ws">            </span>request_started.send(self, _async_wrapper=self.ensure_sync)</pre>
+<pre class="line before"><span class="ws">            </span>rv = self.preprocess_request()</pre>
+<pre class="line before"><span class="ws">            </span>if rv is None:</pre>
+<pre class="line current"><span class="ws">                </span>rv = self.dispatch_request()
+<span class="ws">                </span>     ^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>rv = self.handle_user_exception(e)</pre>
+<pre class="line after"><span class="ws">        </span>return self.finalize_request(rv)</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">    </span>def finalize_request(</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523651328">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py"</cite>,
+      line <em class="line">902</em>,
+      in <code class="function">dispatch_request</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">            </span>and req.method == &#34;OPTIONS&#34;</pre>
+<pre class="line before"><span class="ws">        </span>):</pre>
+<pre class="line before"><span class="ws">            </span>return self.make_default_options_response()</pre>
+<pre class="line before"><span class="ws">        </span># otherwise dispatch to the handler for that endpoint</pre>
+<pre class="line before"><span class="ws">        </span>view_args: dict[str, t.Any] = req.view_args  # type: ignore[assignment]</pre>
+<pre class="line current"><span class="ws">        </span>return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+<span class="ws">        </span>       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">    </span>def full_dispatch_request(self) -&gt; Response:</pre>
+<pre class="line after"><span class="ws">        </span>&#34;&#34;&#34;Dispatches the request and on top of that performs request</pre>
+<pre class="line after"><span class="ws">        </span>pre and postprocessing as well as HTTP exception catching and</pre>
+<pre class="line after"><span class="ws">        </span>error handling.</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523650208">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/app.py"</cite>,
+      line <em class="line">843</em>,
+      in <code class="function">register_participant</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>flash(f&#39;{confirmation} Reference: {registration[&#34;registration_uid&#34;]}{team_info_msg}&#39;, &#39;success&#39;)</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span># Always redirect to the events list on success so users can keep browsing events</pre>
+<pre class="line before"><span class="ws">        </span>return redirect(url_for(&#39;events_list&#39;))</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line current"><span class="ws">    </span>return render_template(&#39;register.html&#39;, events=events, selected_event_id=selected_event_id, user_info=user_info)
+<span class="ws">    </span>       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws"></span># ---------------------------------------------------------</pre>
+<pre class="line after"><span class="ws"></span># Participant Management (Admin)</pre>
+<pre class="line after"><span class="ws"></span># ---------------------------------------------------------</pre>
+<pre class="line after"><span class="ws"></span>@app.route(&#39;/admin/participants&#39;)</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523652128">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/templating.py"</cite>,
+      line <em class="line">151</em>,
+      in <code class="function">render_template</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">        </span>a list is given, the first name to exist will be rendered.</pre>
+<pre class="line before"><span class="ws">    </span>:param context: The variables to make available in the template.</pre>
+<pre class="line before"><span class="ws">    </span>&#34;&#34;&#34;</pre>
+<pre class="line before"><span class="ws">    </span>app = current_app._get_current_object()  # type: ignore[attr-defined]</pre>
+<pre class="line before"><span class="ws">    </span>template = app.jinja_env.get_or_select_template(template_name_or_list)</pre>
+<pre class="line current"><span class="ws">    </span>return _render(app, template, context)
+<span class="ws">    </span>       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws"></span>def render_template_string(source: str, **context: t.Any) -&gt; str:</pre>
+<pre class="line after"><span class="ws">    </span>&#34;&#34;&#34;Render a template from the given source string with the given</pre>
+<pre class="line after"><span class="ws">    </span>context.</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523651008">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/templating.py"</cite>,
+      line <em class="line">132</em>,
+      in <code class="function">_render</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws"></span>def _render(app: Flask, template: Template, context: dict[str, t.Any]) -&gt; str:</pre>
+<pre class="line before"><span class="ws">    </span>app.update_template_context(context)</pre>
+<pre class="line before"><span class="ws">    </span>before_render_template.send(</pre>
+<pre class="line before"><span class="ws">        </span>app, _async_wrapper=app.ensure_sync, template=template, context=context</pre>
+<pre class="line before"><span class="ws">    </span>)</pre>
+<pre class="line current"><span class="ws">    </span>rv = template.render(context)
+<span class="ws">    </span>     ^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<pre class="line after"><span class="ws">    </span>template_rendered.send(</pre>
+<pre class="line after"><span class="ws">        </span>app, _async_wrapper=app.ensure_sync, template=template, context=context</pre>
+<pre class="line after"><span class="ws">    </span>)</pre>
+<pre class="line after"><span class="ws">    </span>return rv</pre>
+<pre class="line after"><span class="ws"></span> </pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523651808">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/jinja2/environment.py"</cite>,
+      line <em class="line">1295</em>,
+      in <code class="function">render</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">        </span>ctx = self.new_context(dict(*args, **kwargs))</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line before"><span class="ws">            </span>return self.environment.concat(self.root_render_func(ctx))  # type: ignore</pre>
+<pre class="line before"><span class="ws">        </span>except Exception:</pre>
+<pre class="line current"><span class="ws">            </span>self.environment.handle_exception()
+<span class="ws">            </span>^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">    </span>async def render_async(self, *args: t.Any, **kwargs: t.Any) -&gt; str:</pre>
+<pre class="line after"><span class="ws">        </span>&#34;&#34;&#34;This works similar to :meth:`render` but returns a coroutine</pre>
+<pre class="line after"><span class="ws">        </span>that when awaited returns the entire rendered template string.  This</pre>
+<pre class="line after"><span class="ws">        </span>requires the async feature to be enabled.</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523651168">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/jinja2/environment.py"</cite>,
+      line <em class="line">942</em>,
+      in <code class="function">handle_exception</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">        </span>&#34;&#34;&#34;Exception handling helper.  This is used internally to either raise</pre>
+<pre class="line before"><span class="ws">        </span>rewritten exceptions or return a rendered traceback for the template.</pre>
+<pre class="line before"><span class="ws">        </span>&#34;&#34;&#34;</pre>
+<pre class="line before"><span class="ws">        </span>from .debug import rewrite_traceback_stack</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line current"><span class="ws">        </span>raise rewrite_traceback_stack(source=source)
+<span class="ws">        </span>^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">    </span>def join_path(self, template: str, parent: str) -&gt; str:</pre>
+<pre class="line after"><span class="ws">        </span>&#34;&#34;&#34;Join a template with the parent.  By default all the lookups are</pre>
+<pre class="line after"><span class="ws">        </span>relative to the loader root so this method returns the `template`</pre>
+<pre class="line after"><span class="ws">        </span>parameter unchanged, but if the paths should be relative to the</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523644448">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/templates/register.html"</cite>,
+      line <em class="line">1</em>,
+      in <code class="function">top-level template code</code></h4>
+  <div class="source "><pre class="line current"><span class="ws"></span>{% extends &#39;landing_base.html&#39; %}</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws"></span>{% block title %}Event Registration – EventMate{% endblock %}</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws"></span>{% block extra_css %}</pre>
+<pre class="line after"><span class="ws"></span>.registration-section {</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523643648">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/templates/landing_base.html"</cite>,
+      line <em class="line">480</em>,
+      in <code class="function">top-level template code</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">    </span>&lt;div id=&#34;canvas-container&#34;&gt;&lt;/div&gt;</pre>
+<pre class="line before"><span class="ws">    </span>{% endblock %}</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">    </span>&lt;!-- Scrolling Overlay Content --&gt;</pre>
+<pre class="line before"><span class="ws">    </span>&lt;div class=&#34;scroll-content&#34;&gt;</pre>
+<pre class="line current"><span class="ws">        </span>{% block content %}{% endblock %}</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>&lt;!-- Footer --&gt;</pre>
+<pre class="line after"><span class="ws">        </span>&lt;footer class=&#34;l-footer&#34;&gt;</pre>
+<pre class="line after"><span class="ws">            </span>&lt;p&gt;&amp;copy; 2026 Shree Daksha Academy. All rights reserved.&lt;/p&gt;</pre>
+<pre class="line after"><span class="ws">            </span>&lt;p style=&#34;margin-top: 10px;&#34;&gt;</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523643328">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/templates/register.html"</cite>,
+      line <em class="line">457</em>,
+      in <code class="function">block &#39;content&#39;</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">                                </span>{{ ns.ev_name }}</pre>
+<pre class="line before"><span class="ws">                                </span>&lt;span style=&#34;color: #64748b; font-weight: 500; font-size: 0.9em;&#34;&gt;</pre>
+<pre class="line before"><span class="ws">                                    </span>{% if ns.is_group %}[👥 Group ({{ ns.min_t }}-{{ ns.max_t }})]{% else %}[👤 Individual]{% endif %}</pre>
+<pre class="line before"><span class="ws">                                </span>&lt;/span&gt;</pre>
+<pre class="line before"><span class="ws">                            </span>&lt;/span&gt;</pre>
+<pre class="line current"><span class="ws">                            </span>&lt;a href=&#34;{{ url_for(&#39;events&#39;) }}&#34; style=&#34;font-size: 0.85rem; color: #2563eb; text-decoration: none; font-weight: 500; background: #dbeafe; padding: 4px 10px; border-radius: 6px;&#34;&gt;Change&lt;/a&gt;</pre>
+<pre class="line after"><span class="ws">                        </span>&lt;/div&gt;</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">                        </span>&lt;!-- Trigger the change event on load so the form updates dynamically for the fixed event --&gt;</pre>
+<pre class="line after"><span class="ws">                        </span>&lt;script&gt;</pre>
+<pre class="line after"><span class="ws">                            </span>document.addEventListener(&#34;DOMContentLoaded&#34;, function() {</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523644128">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py"</cite>,
+      line <em class="line">1121</em>,
+      in <code class="function">url_for</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">            </span>)</pre>
+<pre class="line before"><span class="ws">        </span>except BuildError as error:</pre>
+<pre class="line before"><span class="ws">            </span>values.update(</pre>
+<pre class="line before"><span class="ws">                </span>_anchor=_anchor, _method=_method, _scheme=_scheme, _external=_external</pre>
+<pre class="line before"><span class="ws">            </span>)</pre>
+<pre class="line current"><span class="ws">            </span>return self.handle_url_build_error(error, endpoint, values)
+<span class="ws">            </span>       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>if _anchor is not None:</pre>
+<pre class="line after"><span class="ws">            </span>_anchor = _url_quote(_anchor, safe=&#34;%!#$&amp;&#39;()*+,/:;=?@&#34;)</pre>
+<pre class="line after"><span class="ws">            </span>rv = f&#34;{rv}#{_anchor}&#34;</pre>
+<pre class="line after"><span class="ws"></span> </pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523643168">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py"</cite>,
+      line <em class="line">1110</em>,
+      in <code class="function">url_for</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">            </span>raise ValueError(&#34;When specifying &#39;_scheme&#39;, &#39;_external&#39; must be True.&#34;)</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>self.inject_url_defaults(endpoint, values)</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>rv = url_adapter.build(  # type: ignore[union-attr]
+<span class="ws">            </span>     </pre>
+<pre class="line after"><span class="ws">                </span>endpoint,</pre>
+<pre class="line after"><span class="ws">                </span>values,</pre>
+<pre class="line after"><span class="ws">                </span>method=_method,</pre>
+<pre class="line after"><span class="ws">                </span>url_scheme=_scheme,</pre>
+<pre class="line after"><span class="ws">                </span>force_external=_external,</pre></div>
+</div>
+
+<li><div class="frame" id="frame-4523410752">
+  <h4>File <cite class="filename">"/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/werkzeug/routing/map.py"</cite>,
+      line <em class="line">901</em>,
+      in <code class="function">build</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">        </span>else:</pre>
+<pre class="line before"><span class="ws">            </span>values = {}</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>rv = self._partial_build(endpoint, values, method, append_unknown)</pre>
+<pre class="line before"><span class="ws">        </span>if rv is None:</pre>
+<pre class="line current"><span class="ws">            </span>raise BuildError(endpoint, values, method, self)
+<span class="ws">            </span>^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>domain_part, path, websocket = rv</pre>
+<pre class="line after"><span class="ws">        </span>host = self.get_host(domain_part)</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>if url_scheme is None:</pre></div>
+</div>
+</ul>
+  <blockquote>werkzeug.routing.exceptions.BuildError: Could not build url for endpoint &#39;events&#39;. Did you mean &#39;my_events&#39; instead?
+</blockquote>
+</div>
+
+<div class="plain">
+    <p>
+      This is the Copy/Paste friendly version of the traceback.
+    </p>
+    <textarea cols="50" rows="10" name="code" readonly>Traceback (most recent call last):
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py&#34;, line 1536, in __call__
+    return self.wsgi_app(environ, start_response)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py&#34;, line 1514, in wsgi_app
+    response = self.handle_exception(e)
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py&#34;, line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py&#34;, line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py&#34;, line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py&#34;, line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File &#34;/Users/akash/Documents/manager/app.py&#34;, line 843, in register_participant
+    return render_template(&#39;register.html&#39;, events=events, selected_event_id=selected_event_id, user_info=user_info)
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/templating.py&#34;, line 151, in render_template
+    return _render(app, template, context)
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/templating.py&#34;, line 132, in _render
+    rv = template.render(context)
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/jinja2/environment.py&#34;, line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/jinja2/environment.py&#34;, line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File &#34;/Users/akash/Documents/manager/templates/register.html&#34;, line 1, in top-level template code
+    {% extends &#39;landing_base.html&#39; %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &#34;/Users/akash/Documents/manager/templates/landing_base.html&#34;, line 480, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^
+  File &#34;/Users/akash/Documents/manager/templates/register.html&#34;, line 457, in block &#39;content&#39;
+    &lt;a href=&#34;{{ url_for(&#39;events&#39;) }}&#34; style=&#34;font-size: 0.85rem; color: #2563eb; text-decoration: none; font-weight: 500; background: #dbeafe; padding: 4px 10px; border-radius: 6px;&#34;&gt;Change&lt;/a&gt;
+    
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py&#34;, line 1121, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py&#34;, line 1110, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+    
+  File &#34;/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/werkzeug/routing/map.py&#34;, line 901, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint &#39;events&#39;. Did you mean &#39;my_events&#39; instead?
+</textarea>
+</div>
+<div class="explanation">
+  The debugger caught an exception in your WSGI application.  You can now
+  look at the traceback which led to the error.  <span class="nojavascript">
+  If you enable JavaScript you can also use additional features such as code
+  execution (if the evalex feature is enabled), automatic pasting of the
+  exceptions and much more.</span>
+</div>
+      <div class="footer">
+        Brought to you by <strong class="arthur">DON'T PANIC</strong>, your
+        friendly Werkzeug powered traceback interpreter.
+      </div>
+    </div>
+
+    <div class="pin-prompt">
+      <div class="inner">
+        <h3>Console Locked</h3>
+        <p>
+          The console is locked and needs to be unlocked by entering the PIN.
+          You can find the PIN printed out on the standard output of your
+          shell that runs the server.
+        <form>
+          <p>PIN:
+            <input type=text name=pin size=14>
+            <input type=submit name=btn value="Confirm Pin">
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
+
+<!--
+
+Traceback (most recent call last):
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py", line 1536, in __call__
+    return self.wsgi_app(environ, start_response)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py", line 1514, in wsgi_app
+    response = self.handle_exception(e)
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/akash/Documents/manager/app.py", line 843, in register_participant
+    return render_template('register.html', events=events, selected_event_id=selected_event_id, user_info=user_info)
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/templating.py", line 151, in render_template
+    return _render(app, template, context)
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/templating.py", line 132, in _render
+    rv = template.render(context)
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/akash/Documents/manager/templates/register.html", line 1, in top-level template code
+    {% extends 'landing_base.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/akash/Documents/manager/templates/landing_base.html", line 480, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^
+  File "/Users/akash/Documents/manager/templates/register.html", line 457, in block 'content'
+    <a href="{{ url_for('events') }}" style="font-size: 0.85rem; color: #2563eb; text-decoration: none; font-weight: 500; background: #dbeafe; padding: 4px 10px; border-radius: 6px;">Change</a>
+    
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py", line 1121, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/flask/app.py", line 1110, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+    
+  File "/Users/akash/Documents/manager/.venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 901, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'events'. Did you mean 'my_events' instead?
+
+
+-->

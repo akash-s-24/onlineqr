@@ -72,6 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('.cert-preview-trigger');
+    if (!trigger) return;
+    openCertModal(trigger.dataset.imageSrc, trigger.dataset.certCode);
+  });
+
   // Close modal when clicking outside
   const modalOverlay = document.getElementById('certPreviewModal');
   if (modalOverlay) {
@@ -94,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '',
         },
         body: JSON.stringify({
           registration_id: registrationId,
@@ -110,7 +117,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (newStatus === 'present') {
           badge.className = 'badge badge-success attendance-badge';
           badge.innerText = 'PRESENT';
-          buttonElement.className = 'btn btn-outline-danger btn-sm';
+          buttonElement.className = 'candy-btn candy-btn-warning';
+          buttonElement.style.padding = '0.4rem 1rem';
+          buttonElement.style.fontSize = '0.85rem';
+          buttonElement.style.borderRadius = '6px';
           buttonElement.innerHTML = 'Mark Absent';
           buttonElement.setAttribute('onclick', `toggleAttendance(${registrationId}, 'present', this)`);
 
@@ -122,7 +132,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           badge.className = 'badge badge-danger attendance-badge';
           badge.innerText = 'ABSENT';
-          buttonElement.className = 'btn btn-outline-primary btn-sm';
+          buttonElement.className = 'candy-btn candy-btn-success';
+          buttonElement.style.padding = '0.4rem 1rem';
+          buttonElement.style.fontSize = '0.85rem';
+          buttonElement.style.borderRadius = '6px';
           buttonElement.innerHTML = 'Mark Present';
           buttonElement.setAttribute('onclick', `toggleAttendance(${registrationId}, 'absent', this)`);
 
@@ -163,20 +176,82 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.appendChild(container);
     }
 
+    // Limit to 3 toasts
+    if (container.children.length >= 3) {
+      container.removeChild(container.firstChild);
+    }
+
     const toast = document.createElement('div');
     toast.className = `alert alert-${type}`;
     toast.style.minWidth = '280px';
     toast.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.1)';
+    toast.style.transform = 'translateY(20px)';
+    toast.style.opacity = '0';
+    toast.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
     toast.innerHTML = `
       <span>${message}</span>
-      <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+      <button class="alert-close" onclick="this.parentElement.style.opacity='0'; setTimeout(()=>this.parentElement.remove(), 400);">&times;</button>
     `;
 
     container.appendChild(toast);
+    
+    // Animate in
+    requestAnimationFrame(() => {
+      toast.style.transform = 'translateY(0)';
+      toast.style.opacity = '1';
+    });
+
     setTimeout(() => {
       toast.style.opacity = '0';
-      toast.style.transition = 'opacity 0.4s ease';
+      toast.style.transform = 'translateY(-10px)';
       setTimeout(() => toast.remove(), 400);
     }, 4000);
+  };
+
+  // 7. Global Loading Overlay
+  window.showGlobalLoading = function(message = 'Processing...') {
+    let loader = document.getElementById('globalLoader');
+    if (!loader) {
+      loader = document.createElement('div');
+      loader.id = 'globalLoader';
+      loader.style.position = 'fixed';
+      loader.style.top = '0';
+      loader.style.left = '0';
+      loader.style.width = '100vw';
+      loader.style.height = '100vh';
+      loader.style.background = 'rgba(255, 255, 255, 0.7)';
+      loader.style.backdropFilter = 'blur(8px)';
+      loader.style.zIndex = '10000';
+      loader.style.display = 'flex';
+      loader.style.flexDirection = 'column';
+      loader.style.justifyContent = 'center';
+      loader.style.alignItems = 'center';
+      loader.style.opacity = '0';
+      loader.style.transition = 'opacity 0.3s ease';
+      
+      loader.innerHTML = `
+        <div class="spinner" style="width: 50px; height: 50px; border: 4px solid rgba(37, 99, 235, 0.2); border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <p id="globalLoaderText" style="margin-top: 15px; font-weight: 600; color: #1e293b; font-size: 1.1rem; letter-spacing: 0.5px;">${message}</p>
+        <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+      `;
+      document.body.appendChild(loader);
+    } else {
+      document.getElementById('globalLoaderText').innerText = message;
+      loader.style.display = 'flex';
+    }
+    
+    requestAnimationFrame(() => {
+      loader.style.opacity = '1';
+    });
+  };
+
+  window.hideGlobalLoading = function() {
+    const loader = document.getElementById('globalLoader');
+    if (loader) {
+      loader.style.opacity = '0';
+      setTimeout(() => {
+        loader.style.display = 'none';
+      }, 300);
+    }
   };
 });
