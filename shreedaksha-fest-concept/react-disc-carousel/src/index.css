@@ -1,0 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+:root { font-family: Manrope, sans-serif; color: #f2ede2; background: #11131b; font-synthesis: none; }
+* { box-sizing: border-box; }
+html, body, #root { min-height: 100%; margin: 0; }
+body { min-width: 320px; background: #11131b; }
+.app-shell { min-height: 100vh; position: relative; }
+.app-note { position: fixed; left: 28px; bottom: 24px; margin: 0; color: rgba(242,237,226,.45); font: 10px/1.4 "DM Mono", monospace; letter-spacing: .16em; text-transform: uppercase; z-index: 8; pointer-events: none; }
+@media (max-width: 720px) { .app-note { left: 16px; bottom: 16px; font-size: 9px; } }
+

@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: eventmate
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 app:app
+    healthCheckPath: /healthz
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: SESSION_COOKIE_SECURE
+        value: "True"
+      - key: SMTP_MODE
+        value: demo
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: BASE_URL
+        sync: false
+      - key: COLLEGE_NAME
+        value: Shree Daksha Academy
+      - key: COLLEGE_SUBTITLE
+        value: Department of Computer Applications
+      - key: EVENT_TITLE
+        value: SDA 2026 2027

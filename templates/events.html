@@ -3,22 +3,208 @@
 {% block title %}{{ config.EVENT_TITLE }}{% endblock %}
 
 {% block extra_css %}
-/* Hero Section (Cinematic Scroll) */
+/* ═══════════════════════════════════════
+   EVENTS PAGE — Mobile-first & Desktop styles
+   ═══════════════════════════════════════ */
+
+/* ── Mobile Animations & Overrides ── */
+@media (max-width: 639px) {
+    :root {
+        --m-text-xs: 0.75rem;
+        --m-text-sm: 0.875rem;
+        --m-text-base: 1rem;
+        --m-text-lg: 1.125rem;
+        --m-text-xl: 1.375rem;
+        --m-text-2xl: 1.75rem;
+        --m-text-3xl: 2.25rem;
+        --m-space-section: 90px;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    .scroll-reveal {
+        opacity: 0;
+        transform: translateY(30px) scale(0.98);
+        transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: transform, opacity;
+    }
+    .scroll-reveal.visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .hero-wrapper, .hero-section { min-height: 100svh; height: auto !important; }
+    .hero-section { 
+        padding: clamp(86px, 12vh, 108px) 16px 40px !important; 
+        pointer-events: auto !important;
+        justify-content: flex-start !important;
+    }
+    .bg-3d-logo {
+        height: 55vh !important;
+        max-width: 85vw !important;
+        opacity: 0.15 !important;
+        animation: none !important;
+    }
+    .hero-title { font-size: clamp(2.4rem, 10vw, 5rem) !important; margin-top: 0 !important; margin-bottom: 16px !important; line-height: 1.15 !important; color: #000000 !important; }
+    .hero-subtitle { font-size: var(--m-text-base) !important; max-width: 34rem !important; line-height: 1.6 !important; margin: 0 auto 20px auto !important; }
+
+    .hero-actions { width: 100% !important; flex-direction: row !important; gap: 10px !important; justify-content: center !important; padding: 0 4px !important; margin-top: 0 !important; margin-bottom: 20px !important; }
+    .hero-actions button, .hero-actions .candy-btn {
+        min-width: 0 !important; flex: 1 !important;
+        padding: 13px 16px !important; font-size: var(--m-text-sm) !important;
+        border-radius: 12px !important; font-weight: 600 !important;
+    }
+
+    #hero-particle-text { height: clamp(110px, 26vw, 160px) !important; margin-top: 0 !important; margin-bottom: 16px !important; position: relative; z-index: 5; }
+
+    .about-section {
+        padding: var(--m-space-section) 20px !important;
+        flex-direction: column !important;
+        gap: 32px !important;
+        align-items: stretch !important;
+        max-width: 100% !important;
+    }
+    .about-section h2.section-title { text-align: left !important; font-size: var(--m-text-2xl) !important; margin-bottom: 12px !important; }
+    .about-section h3 { font-size: var(--m-text-xl) !important; margin-bottom: 12px !important; }
+    .about-section p { font-size: var(--m-text-base) !important; line-height: 1.7 !important; }
+
+    .events-section { padding: var(--m-space-section) 16px !important; border-top: none !important; }
+    .section-title { font-size: var(--m-text-2xl) !important; margin-bottom: 28px !important; text-align: center !important; }
+    .event-search-container { 
+        margin: 0 auto 36px auto !important; 
+        position: relative !important; 
+        width: 100% !important;
+        max-width: calc(100% - 32px) !important;
+        display: block !important;
+    }
+    .event-search-input {
+        width: 100% !important;
+        padding: 14px 16px 14px 44px !important;
+        font-size: var(--m-text-base) !important;
+        border-radius: 14px !important;
+        text-align: left !important;
+    }
+    .event-search-icon { left: 16px !important; }
+
+    .embla__container { height: auto !important; min-height: 590px !important; }
+    .embla__slide { flex: 0 0 90% !important; margin: 0 8px !important; height: auto !important; }
+    .unified-event-card { height: 100% !important; min-height: 565px !important; border-radius: 20px !important; display: flex !important; flex-direction: column !important; }
+    .unified-card-body { overflow: visible !important; padding: 18px 16px 20px !important; display: flex !important; flex-direction: column !important; flex-grow: 1 !important; justify-content: space-between !important; }
+    .unified-card-image { height: 185px !important; }
+    .card-content-top { width: 100% !important; display: flex !important; flex-direction: column !important; }
+
+    .f-card-header { align-items: center !important; gap: 6px !important; }
+    .f-card-title { font-size: var(--m-text-xl) !important; line-height: 1.3 !important; font-weight: 800 !important; color: #000000 !important; }
+    .f-desc { font-size: var(--m-text-sm) !important; line-height: 1.5 !important; margin-bottom: 12px !important; -webkit-line-clamp: 2 !important; min-height: auto !important; }
+    .f-meta-item { align-items: center !important; gap: 8px !important; font-size: var(--m-text-sm) !important; line-height: 1.5 !important; }
+
+    .event-info-table { margin-bottom: 10px !important; }
+    .card-secondary-btns { margin-bottom: 0 !important; }
+    .unified-buttons-row { gap: 8px !important; margin-top: auto !important; padding-top: 12px !important; width: 100% !important; }
+    .rules-trigger {
+        padding: 9px 14px !important; min-height: 40px !important; border-radius: 8px !important;
+        font-size: var(--m-text-sm) !important; font-weight: 600 !important;
+        display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;
+    }
+    .pop-btn {
+        min-height: 46px !important;
+        font-size: var(--m-text-base) !important;
+        font-weight: 700 !important;
+    }
+
+    .map-section { padding: var(--m-space-section) 16px !important; }
+    .map-section h2.section-title { text-align: center !important; font-size: var(--m-text-2xl) !important; }
+    .map-container { border-radius: 14px !important; margin: 0 auto !important; width: 100% !important; max-width: calc(100% - 32px) !important; display: block !important; }
+    #college-info { border-radius: 16px !important; padding: 28px 20px !important; margin: 24px auto 0 !important; max-width: 92% !important; }
+
+    #contact.map-section { padding: var(--m-space-section) 16px !important; border-top: none !important; }
+    #contact.map-section h2.section-title { text-align: center !important; font-size: var(--m-text-2xl) !important; }
+    .contact-grid { gap: 12px !important; grid-template-columns: 1fr !important; }
+    .contact-card { padding: 20px 18px !important; border-radius: 16px !important; }
+
+    .modal-drag-handle { width: 36px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 0 auto 16px; }
+}
+
+/* ── Fully Pitch Black Theme ── */
+html, body { background:#000000 !important; color:#ffffff !important; }
+#loader { background:#000000 !important; }
+.landing-header { background:#000000 !important; border-bottom-color:rgba(255,255,255,.1) !important; box-shadow:0 1px 14px rgba(0,0,0,.8) !important; }
+.landing-logo h1, .mobile-toggle, .image-like-nav .nav-link, .header-user-name { color:#ffffff !important; }
+.header-nav-center { background:#000000 !important; }
+.image-like-nav .nav-link:hover, .image-like-nav .nav-link:active { background:rgba(255,255,255,.1) !important; color:#ffffff !important; }
+.header-cta-classic { color:#ffffff !important; background:#2563eb !important; border-color:#3b82f6 !important; }
+.hero-wrapper { background:#000000 !important; }
+.hero-title, #heroFallbackTitle { color:#ffffff !important; }
+.hero-subtitle { color:#cbd5e1 !important; }
+.hero-badge-pill { background:rgba(255,255,255,0.06) !important; border-color:rgba(255,255,255,0.15) !important; color:#ffffff !important; }
+.hero-actions button:nth-child(2) { color:#ffffff !important; border-color:rgba(255,255,255,0.4) !important; background:rgba(255,255,255,0.06) !important; }
+.about-section { background:#000000 !important; color:#ffffff !important; }
+.section-title, .about-section h2, .about-section h3, .about-section h4, .map-section h2 { color:#ffffff !important; }
+.about-section p, .contact-card p, .dock-title p { color:#cbd5e1 !important; }
+.principal-message-card { background:#000000 !important; border-color:rgba(255,255,255,.15) !important; color:#ffffff !important; box-shadow:0 20px 48px rgba(0,0,0,.9) !important; }
+.principal-message-logo { border-color:#000000 !important; }
+.disc-cascade-section { --dcc-bg:#000000 !important; background:#000000 !important; color:#ffffff !important; }
+.disc-cascade-stage { background:#000000 !important; border-color:rgba(255,255,255,.12) !important; }
+.disc-cascade-index > button { background:#000000 !important; color:#ffffff !important; }
+.disc-cascade-index-menu { background:#000000 !important; border-color:rgba(255,255,255,.15) !important; box-shadow:0 14px 40px rgba(0,0,0,.8) !important; }
+.disc-cascade-index-menu button { color:#ffffff !important; }
+.map-section, #location, #contact { background:#000000 !important; color:#ffffff !important; }
+.unified-map-wrapper, .contact-card { background:#000000 !important; border-color:rgba(255,255,255,.14) !important; color:#ffffff !important; }
+.map-corner-dock { background:#000000 !important; border-color:rgba(255,255,255,.16) !important; box-shadow:0 14px 34px rgba(0,0,0,.8) !important; }
+.dock-icon-btn { background:#111111 !important; border-color:rgba(255,255,255,.16) !important; }
+.dock-title h4, .contact-card h3, .contact-role-badge { color:#ffffff !important; }
+.dock-directions-btn { background:#2563eb !important; color:#ffffff !important; width:100% !important; }
+.l-footer { background:#000000 !important; color:#e2e8f0 !important; border-top-color:rgba(255,255,255,.12) !important; }
+.footer-col h4, .footer-col p, .footer-col a, .footer-bottom, .footer-back-to-top { color:#e2e8f0 !important; }
+.rulesModal > div, #contactModal > div { background:#000000 !important; color:#ffffff !important; border-color:rgba(255,255,255,.16) !important; box-shadow:0 24px 60px rgba(0,0,0,.95) !important; }
+#rulesModalTitle, #contactModalTitle { color:#ffffff !important; border-bottom-color:rgba(255,255,255,.16) !important; }
+#rulesModalContent, #contactModalContent { color:#cbd5e1 !important; }
+.modal-drag-handle { background:#64748b !important; }
+
+/* ── Hero Section (Separate Viewports: Desktop, Laptop, Mobile) ── */
 .hero-wrapper {
-    height: 100vh;
+    min-height: 100vh;
+    height: auto;
     position: relative;
-    background: #ffffff; /* Fallback */
+    background: #000000;
     overflow: hidden;
 }
 .hero-section {
-    height: 100vh;
+    min-height: 100vh;
+    height: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 0 20px;
+    padding: 100px 24px 80px;
     perspective: 1000px;
+}
+
+/* Lockup View for Desktop (More space, allowing additional content & webstrings) */
+@media (min-width: 1200px) {
+    .hero-wrapper, .hero-section {
+        min-height: 100vh;
+        padding: 110px 24px 85px;
+    }
+}
+
+/* Laptop View (Distinct calibrated space) */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .hero-wrapper, .hero-section {
+        min-height: 90vh;
+        padding: 85px 20px 65px;
+    }
+}
+
+/* Mobile View (Slightly less space than lockup/laptop) */
+@media (max-width: 767px) {
+    .hero-wrapper, .hero-section {
+        min-height: 82vh !important;
+        padding: 70px 16px 50px !important;
+    }
 }
 .bg-3d-logo {
     position: absolute;
@@ -40,79 +226,116 @@
     50% { transform: translate(-50%, -53%) rotateY(8deg) rotateX(-6deg) scale(1.03); }
     100% { transform: translate(-50%, -50%) rotateY(-8deg) rotateX(6deg) scale(1); }
 }
+
 .hero-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 5rem;
+    font-size: clamp(3rem, 6.5vw, 5.5rem);
     font-weight: 800;
-    color: #0f172a;
+    letter-spacing: -0.03em;
     margin-bottom: 20px;
+    line-height: 1.15;
+    color: #000000 !important;
+    font-family: 'Space Grotesk', sans-serif;
 }
 .hero-subtitle {
-    font-size: 1.5rem;
+    font-size: clamp(1rem, 2vw, 1.25rem);
     color: #475569;
-    max-width: 600px;
+    max-width: 650px;
+    margin: 0 auto 36px auto;
+    line-height: 1.6;
+    font-weight: 500;
 }
 .hero-actions {
     display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+    gap: 16px;
     justify-content: center;
-    margin-top: 1.25rem;
+    align-items: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 10;
 }
-.hero-actions button {
-    width: auto;
-    min-width: 160px;
+.hero-actions button, .hero-actions .candy-btn {
+    min-width: 170px;
+    padding: 14px 28px;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 9999px;
+    cursor: pointer;
 }
 .scroll-indicator {
-    position: absolute;
-    bottom: 40px;
+    margin-top: 40px;
+    color: #94a3b8;
     animation: bounce 2s infinite;
-    color: #dc2626;
-    font-size: 2rem;
+    cursor: pointer;
 }
 @keyframes bounce {
     0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-20px); }
-    60% { transform: translateY(-10px); }
+    40% { transform: translateY(-8px); }
+    60% { transform: translateY(-4px); }
 }
 
-/* Events Section */
-.events-section {
-    padding: 100px 5%;
-    background: rgba(255, 255, 255, 0.95); /* Opaque enough to not need blur */
-    min-height: 100vh;
-    border-top: 1px solid rgba(15, 23, 42, 0.1);
+
+/* ── About Institution ── */
+.about-section {
+    padding: 90px 20px 70px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
-/* Event Search Bar */
+
+/* ── Events Section (Restored Structure from Yesterday) ── */
+section[id], .events-section, .about-section, .map-section {
+    scroll-margin-top: 90px;
+}
+.events-section {
+    padding: 85px 20px 95px;
+    position: relative;
+    overflow: hidden;
+    background: 
+        radial-gradient(circle at 50% -5%, rgba(59, 130, 246, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 12% 45%, rgba(239, 68, 68, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 88% 65%, rgba(59, 130, 246, 0.08) 0%, transparent 55%),
+        radial-gradient(circle at 50% 100%, rgba(15, 23, 42, 0.03) 0%, transparent 60%),
+        linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+}
+.section-title {
+    font-size: clamp(2.4rem, 5vw, 3.2rem);
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #0f172a;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: -0.02em;
+}
 .event-search-container {
     max-width: 600px;
-    margin: 0 auto 40px auto;
+    margin: 0 auto 36px;
     position: relative;
 }
 .event-search-input {
     width: 100%;
-    padding: 15px 20px 15px 50px;
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 30px;
-    color: #0f172a;
-    font-size: 1.1rem;
-    transition: all 0.3s;
-    font-family: 'Space Grotesk', sans-serif;
+    padding: 15px 20px 15px 48px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(18, 26, 40, 0.85);
+    font-size: 1rem;
+    font-family: inherit;
+    color: #f8fafc;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 .event-search-input:focus {
     outline: none;
-    border-color: #dc2626;
-    box-shadow: 0 0 10px rgba(220, 38, 38, 0.2);
-    background: #ffffff;
+    background: rgba(24, 34, 52, 0.95);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25);
 }
 .event-search-icon {
     position: absolute;
-    left: 20px;
-    top: 50%;
+    left: 18px; top: 50%;
     transform: translateY(-50%);
     color: #94a3b8;
-    font-size: 1.2rem;
+    display: inline-flex;
+    align-items: center;
 }
 
 /* Native Carousel styles */
@@ -120,89 +343,142 @@
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 40px 0;
+    padding: 35px 0 45px 0;
     position: relative;
     overflow: hidden;
+}
+
+.embla::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 70%;
+    background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .embla__container {
     display: flex;
-    height: 720px; /* Increased to ensure register button is fully visible */
+    height: 680px; /* Spacious height allowing active card to scale cleanly */
     align-items: center; /* Center the cards vertically */
+    position: relative;
+    z-index: 1;
 }
 
 .embla__slide {
-    flex: 0 0 85%; /* mobile basis */
-    margin: 0 10px;
+    flex: 0 0 88%; /* mobile basis */
+    margin: 0 12px;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 680px; /* Fixed height large enough to fit all content */
+    height: 630px; /* Taller, classic portrait rectangle shape */
     will-change: transform;
 }
 
-/* Arrange in a 3-card row on desktop */
-@media (min-width: 640px) { .embla__slide { flex: 0 0 50%; } }
-@media (min-width: 768px) { .embla__slide { flex: 0 0 33.333%; } }
-@media (min-width: 1024px) { .embla__slide { flex: 0 0 33.333%; } }
-@media (min-width: 1280px) { .embla__slide { flex: 0 0 33.333%; } }
+/* Arrange in responsive rows */
+@media (min-width: 640px) { .embla__slide { flex: 0 0 50%; height: 620px; } }
+@media (min-width: 768px) { .embla__slide { flex: 0 0 46%; height: 620px; } }
+@media (min-width: 1024px) { .embla__slide { flex: 0 0 33.333%; height: 635px; } }
+@media (min-width: 1280px) { .embla__slide { flex: 0 0 33.333%; height: 640px; } }
 
 .unified-event-card {
     width: 100%;
     height: 100%; /* Fill the slide */
-    background: rgba(255, 255, 255, 0.98);
+    background: #000000;
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px -6px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.12);
     display: flex;
     flex-direction: column;
-    /* Inactive style: scaled down slightly and faded */
-    transform: scale(0.85);
-    opacity: 0.6;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+    /* Inactive style: handsome portrait rectangle with clear content and visibility */
+    transform: scale(0.93);
+    opacity: 0.72;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease, box-shadow 0.45s ease;
     will-change: transform, opacity;
+    position: relative;
+    z-index: 1;
 }
 
 .embla__slide.is-active .unified-event-card {
-    /* Active style: prominent */
+    /* Active style: prominent with focused lighting */
     transform: scale(1);
     opacity: 1;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1.5px rgba(59, 130, 246, 0.4), 0 0 36px rgba(59, 130, 246, 0.2);
 }
 
 .unified-card-image {
     width: 100%;
-    height: 220px; /* fixed height for image */
-    background-size: cover; /* changed from contain so it fills the top nicely */
-    background-position: center;
+    height: 195px; /* Clean proportional height */
+    position: relative;
+    overflow: hidden;
+    background: #000000;
     flex-shrink: 0;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.banner-full-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.unified-event-card:hover .banner-full-img {
+    transform: scale(1.04);
 }
 
 .card-number-badge {
     position: absolute;
-    top: 15px;
-    left: 15px;
-    background: rgba(15, 23, 42, 0.85);
+    top: 14px;
+    left: 14px;
+    z-index: 3;
+    background: rgba(15, 23, 42, 0.88);
     color: #ffffff;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 800;
     padding: 6px 12px;
     border-radius: 8px;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.18);
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.card-type-tag {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 3;
 }
 
 .unified-card-body {
-    padding: 25px 20px;
+    padding: 20px 20px 22px 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     flex-grow: 1;
-    overflow-y: auto; /* Allow scrolling if content is too long */
+    box-sizing: border-box;
+    justify-content: space-between; /* Fully distributes space, eliminating bottom gap */
+    width: 100%;
+}
+
+.card-content-top {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex-grow: 1;
 }
 
 /* Numbered Pagination */
@@ -220,9 +496,9 @@
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    border: none;
-    background: #f5f5f5;
-    color: #525252;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
@@ -230,16 +506,17 @@
     font-family: 'Space Grotesk', sans-serif;
 }
 .embla__page-btn:hover {
-    background: #e5e5e5;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
 }
 .embla__page-btn:active {
     transform: scale(0.95);
 }
 .embla__page-btn.is-active {
-    background: #ffffff;
-    color: #0f172a;
+    background: #2563eb;
+    color: #ffffff;
     font-weight: 700;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
 }
 .embla__page-arrow {
     width: 36px;
@@ -248,14 +525,15 @@
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    border: none;
-    background: #f5f5f5;
-    color: #525252;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
 }
 .embla__page-arrow:hover {
-    background: #e5e5e5;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
 }
 .embla__page-arrow:active {
     transform: scale(0.95);
@@ -265,10 +543,12 @@
 .unified-buttons-row {
     display: flex;
     gap: 10px;
-    margin-top: 15px;
+    margin-top: auto;
+    padding-top: 14px;
     flex-wrap: wrap;
     justify-content: center;
     width: 100%;
+    flex-shrink: 0;
 }
 .unified-buttons-row > * {
     flex-grow: 1;
@@ -285,644 +565,1141 @@
     .futuristic-grid { grid-template-columns: 1fr; }
 }
 
-.f-card-header { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; }
-.f-card-title { font-size: 1.5rem; color: #000000; margin: 0; }
-.f-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-.f-badge-solo { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-.f-badge-group { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
-.f-desc { color: #475569; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px; }
-.rules-trigger {
-    align-self: flex-start;
-    margin: 0 0 15px;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: #dc2626;
-    font: inherit;
-    font-size: .85rem;
-    font-weight: 600;
-    text-align: center;
-    align-self: center;
+/* ── Hero Registration Open Badge ── */
+.hero-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 18px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 9999px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    margin: 0 auto 18px auto;
     cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    z-index: 10;
 }
-.rules-trigger:hover { text-decoration: underline; }
-
-.f-meta { margin-bottom: 25px; }
-.f-meta-item { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; font-size: 0.9rem; color: #475569; }
-.f-meta-item strong { color: #0f172a; flex: 0 0 auto; }
-
-.event-card-actions {
-    display: flex;
-    gap: 15px;
-    margin-top: auto;
+.hero-badge-pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+    border-color: #3b82f6;
 }
-
-.f-btn {
-    display: inline-block;
-    width: 100%;
-    padding: 12px;
-    text-align: center;
-    background: #2563eb;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: 0.3s;
-    border: none;
-    cursor: pointer;
-}
-.f-btn:hover {
-    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
-    transform: scale(1.02);
-    background: #1d4ed8;
+.hero-badge-text {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #0f172a;
+    font-family: 'Space Grotesk', sans-serif;
+    text-transform: uppercase;
 }
 
-/* Map Section */
-.map-section {
-    padding: 80px 5%;
-    background: #ffffff;
-    text-align: center;
+/* ── Card Styling & Table Layout ── */
+.card-type-tag {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 2;
 }
-.map-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    border-radius: 16px;
+.f-card-header { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; margin-bottom: 8px; width: 100%; }
+.f-card-title { font-size: 1.35rem; color: #000000 !important; margin: 0 0 6px 0; font-weight: 800; font-family: 'Space Grotesk', sans-serif; line-height: 1.25; letter-spacing: -0.01em; }
+.f-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; backdrop-filter: blur(4px); }
+.f-badge-solo { background: rgba(220, 252, 231, 0.95); color: #166534; border: 1px solid #bbf7d0; box-shadow: 0 2px 6px rgba(22, 101, 52, 0.15); }
+.f-badge-group { background: rgba(219, 234, 254, 0.95); color: #1e40af; border: 1px solid #bfdbfe; box-shadow: 0 2px 6px rgba(30, 64, 175, 0.15); }
+.f-desc { 
+    color: #475569; 
+    font-size: 0.85rem; 
+    line-height: 1.45; 
+    margin-bottom: 12px; 
+    text-align: center; 
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 36px;
+}
+
+/* Table-like Information Matrix */
+.event-info-table {
+    width: 100%;
+    margin: 0 0 12px 0;
+    background: #f8fafc;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    text-align: left;
+}
+.info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 11px;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 0.83rem;
+}
+.info-row:last-child {
+    border-bottom: none;
+}
+.info-row.highlight-row {
+    background: rgba(34, 197, 94, 0.05);
+}
+.info-cell-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.82rem;
+}
+.info-cell-label svg {
+    color: #3b82f6;
+    flex-shrink: 0;
+}
+.info-cell-val {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.85rem;
+    text-align: right;
+}
+.info-cell-val.fee-val {
+    color: #15803d;
+    font-weight: 800;
+    font-size: 0.92rem;
+}
+
+/* Secondary Button Row (Rules & Direct Call) */
+.card-secondary-btns {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 12px;
+}
+.card-action-pill {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: #e2e8f0;
+    font-family: inherit;
+    text-decoration: none !important;
+    min-height: 40px;
+}
+.card-action-pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.card-action-pill.rules-btn {
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+}
+.card-action-pill.rules-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+}
+.card-action-pill.call-btn {
+    color: #60a5fa;
+    border-color: rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.1);
+}
+.card-action-pill.call-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: #3b82f6;
+}
+
+/* ── 3D Tactile Pop Button (Maintaining Current Design) ── */
+.pop-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.90rem !important;
+    color: #ffffff !important;
+    padding: 0.8rem 1.25rem !important;
+    border-radius: 12px !important;
+    background-color: #2563eb !important;
+    border: 2px solid #1e40af !important;
+    transition: all 150ms cubic-bezier(0, 0, 0.58, 1) !important;
+    box-shadow: 0 4px 0 0 #1e40af, 0 6px 14px rgba(30, 64, 175, 0.22) !important;
+    text-decoration: none !important;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 0px !important;
+    min-height: 46px;
+    letter-spacing: 0.04em;
+    box-sizing: border-box;
+}
+.pop-btn:hover {
+    background-color: #1d4ed8 !important;
+    transform: translateY(2px) !important;
+    box-shadow: 0 2px 0 0 #1e40af, 0 3px 8px rgba(30, 64, 175, 0.2) !important;
+    color: #ffffff !important;
+}
+.pop-btn:active {
+    background-color: #1e40af !important;
+    transform: translateY(4px) !important;
+    box-shadow: 0 0 0 0 #1e40af !important;
+    color: #ffffff !important;
+}
+
+/* ── Location Section (Unified Map with Glassmorphic Quick Dock) ── */
+.map-section {
+    padding: 65px 20px 55px;
+    background: #000000;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.unified-map-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #000000;
+}
+.unified-map-iframe {
+    width: 100%;
+    height: 440px;
+    border: 0;
+    display: block;
+}
+.map-corner-dock {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    background: #000000;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.8);
+    border-radius: 18px;
+    padding: 16px 20px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 320px;
+    text-align: left;
+}
+.dock-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.dock-logo {
+    width: 44px;
+    height: auto;
+    object-fit: contain;
+}
+.dock-title h4 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.25;
+}
+.dock-title p {
+    margin: 2px 0 0;
+    font-size: 0.78rem;
+    color: #64748b;
+}
+.dock-social-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.dock-icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dock-icon-btn:hover {
+    transform: translateY(-2px) scale(1.08);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    background: rgba(37, 99, 235, 0.25);
+    border-color: #3b82f6;
+}
+.dock-icon-btn img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+.dock-directions-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #ffffff !important;
+    font-size: 0.88rem;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    text-decoration: none !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 100%;
+}
+.dock-directions-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+}
+
+@media (max-width: 640px) {
+    .map-corner-dock {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        border-radius: 16px;
+        margin: 16px auto 0;
+        max-width: 100%;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+    .unified-map-wrapper {
+        box-shadow: none;
+        border: none;
+        border-radius: 14px;
+    }
+    .unified-map-iframe {
+        height: 280px;
+        border-radius: 14px;
+    }
+}
+
+/* ── Contact Us Section (Compact, Smooth, and Refined) ── */
+#contact.map-section {
+    padding: 48px 20px 45px;
+    background: #000000;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 .contact-grid {
-    max-width: 1000px;
-    margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-    text-align: center;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    max-width: 780px;
+    margin: 0 auto;
 }
 .contact-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: #000000;
     border-radius: 14px;
-    padding: 1.25rem;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-}
-.contact-card h3 { margin: 0 0 0.4rem; color: #0f172a; font-size: 1rem; }
-.contact-card p { margin: 0; color: #64748b; line-height: 1.55; }
-.contact-card a { color: #2563eb; font-weight: 600; text-decoration: none; }
-.contact-card a:hover { text-decoration: underline; }
-.venue-placeholder {
-    min-height: 220px;
+    padding: 18px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    text-align: center;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    background: linear-gradient(135deg, #eff6ff, #ffffff);
-    text-align: center;
 }
-.venue-placeholder-icon { font-size: 2.5rem; margin-bottom: .5rem; }
-.venue-placeholder h3 { margin-bottom: .5rem; color: #0f172a; }
-.venue-placeholder p { max-width: 560px; margin: 0; color: #64748b; line-height: 1.6; }
+.contact-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+    border-color: #bfdbfe;
+}
+.contact-role-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 9px;
+    border-radius: 9999px;
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #dbeafe;
+    margin-bottom: 6px;
+}
+.contact-card h3 {
+    margin: 0 0 4px;
+    font-size: 1.1rem;
+    color: #0f172a;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+}
+.contact-card p {
+    margin: 0 0 12px;
+    font-size: 0.82rem;
+    color: #64748b;
+}
+.animated-call-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.24);
+    transition: all 0.2s ease;
+}
+.animated-call-btn:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.36);
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+.phone-svg {
+    animation: phoneWiggle 2.8s infinite ease-in-out;
+    transform-origin: 50% 50%;
+}
+@keyframes phoneWiggle {
+    0%, 70%, 100% { transform: rotate(0deg); }
+    75% { transform: rotate(-16deg); }
+    80% { transform: rotate(16deg); }
+    85% { transform: rotate(-10deg); }
+    90% { transform: rotate(10deg); }
+    95% { transform: rotate(0deg); }
+}
+@keyframes callPulseRing {
+    0% { box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28); }
+    50% { box-shadow: 0 4px 20px rgba(37, 99, 235, 0.55), 0 0 0 5px rgba(37, 99, 235, 0.15); }
+    100% { box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28); }
+}
 
-@media (max-width: 600px) {
-    .hero-wrapper, .hero-section { min-height: 680px; height: 100svh; }
-    .hero-section { padding: 70px 16px 36px; }
-    #hero-particle-text {
-        height: clamp(120px, 34vw, 170px) !important;
-        margin-bottom: 8px !important;
+/* ── Modals Pop In ── */
+@keyframes modalScaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(12px);
     }
-    .hero-subtitle {
-        max-width: 34rem;
-        font-size: clamp(1rem, 4.5vw, 1.2rem);
-        line-height: 1.5;
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
     }
-    .hero-actions {
-        width: 100%;
-        flex-direction: row;
-        gap: .5rem;
+}
+#rulesModal.active > div, #contactModal.active > div {
+    animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Disc-cascade CD carousel showcase ── */
+.disc-cascade-helper { background:#000000; color:rgba(242,237,226,.6); padding:12px clamp(18px,6vw,90px) 18px; text-align:center; font:500 10px 'DM Mono',monospace; letter-spacing:.04em; }
+.disc-cascade-section { --dcc-ink:#ffffff; --dcc-muted:rgba(242,237,226,.7); position:relative; overflow:hidden; background:#000000 !important; color:var(--dcc-ink); padding:clamp(52px,7vw,100px) clamp(16px,6vw,90px) 48px; isolation:isolate; }
+.disc-cascade-section::before { content:''; position:absolute; inset:0; z-index:-2; background-image:var(--dcc-banner,none); background-size:cover; background-position:center; opacity:.1; mix-blend-mode:screen; }
+.disc-cascade-section::after { display: none; }
+.disc-cascade-intro { display:grid; grid-template-columns:minmax(180px,.6fr) minmax(280px,1fr); gap:42px; align-items:end; max-width:1320px; margin:0 auto 24px; }
+.disc-cascade-kicker { margin:0 0 12px; color:#c8f34a; font:500 10px 'DM Mono',monospace; letter-spacing:.15em; text-transform:uppercase; }
+.disc-cascade-intro h2 { margin:0; font:600 clamp(44px,6vw,86px)/.9 'Space Grotesk',sans-serif; letter-spacing:-.08em; max-width:650px; }
+.disc-cascade-intro h2 em { color:#fb6b4d; font-family:Georgia,serif; font-weight:400; }
+.disc-cascade-intro p { max-width:320px; margin:0 0 6px; color:var(--dcc-muted); font-size:14px; line-height:1.65; }
+.disc-cascade-stage { position:relative; max-width:1320px; height:min(720px,72vw); min-height:530px; margin:0 auto; border:1px solid rgba(255,255,255,.12); background:#000000; outline:none; container-type:inline-size; overflow:hidden; touch-action:pan-y; }
+.disc-cascade-stage:focus-visible { box-shadow:inset 0 0 0 2px #c8f34a; }
+.disc-cascade-topbar { position:absolute; top:22px; left:26px; right:42px; z-index:8; display:flex; align-items:center; justify-content:flex-end; font:500 11px 'DM Mono',monospace; }
+.disc-cascade-topbar-label { margin-right:auto; color:rgba(242,237,226,.48); letter-spacing:.12em; text-transform:uppercase; }
+.disc-cascade-index { position:relative; }
+.disc-cascade-index > button { border:0; background:transparent; color:inherit; font:inherit; opacity:.7; cursor:pointer; }
+.disc-cascade-index > button:hover,.disc-cascade-index.open > button { opacity:1; }
+.disc-cascade-index-menu { display:none; position:absolute; right:0; top:26px; min-width:210px; max-height:280px; overflow:auto; padding:6px; background:#000000; border:1px solid rgba(255,255,255,.15); box-shadow:0 14px 40px rgba(0,0,0,.8); z-index:10; }
+.disc-cascade-index.open .disc-cascade-index-menu { display:block; }
+.disc-cascade-index-menu button { display:flex; justify-content:space-between; width:100%; padding:8px 10px; border:0; background:transparent; color:#f2ede2; text-align:left; font:500 11px 'DM Mono',monospace; cursor:pointer; }
+.disc-cascade-index-menu button:hover,.disc-cascade-index-menu button.active { background:rgba(200,243,74,.14); color:#c8f34a; }
+.disc-cascade-head { position:absolute; top:80px; left:26px; z-index:5; width:min(290px,28cqw); pointer-events:none; }
+.disc-cascade-head h3 { margin:0 0 12px; font:400 clamp(22px,3cqw,36px)/.98 'Space Grotesk',sans-serif; letter-spacing:-.04em; text-transform:uppercase; }
+.disc-cascade-meta { margin:0; }
+.disc-cascade-meta-row { display:flex; justify-content:space-between; gap:14px; padding:6px 0; border-top:1px solid rgba(242,237,226,.35); font-size:10px; }
+.disc-cascade-meta-row dt { color:rgba(242,237,226,.7); font:600 8px 'DM Mono',monospace; letter-spacing:.12em; text-transform:uppercase; }
+.disc-cascade-meta-row dd { margin:0; text-align:right; }
+.disc-cascade-track { position:absolute; left:50%; top:54%; z-index:6; width:var(--dcc-size); height:var(--dcc-size); transform:translate(-50%,-50%); perspective:calc(var(--dcc-size) * 3); pointer-events:auto; }
+.disc-cascade-disc { position:absolute; inset:0; width:100%; height:100%; padding:0; border:0; border-radius:50%; background:transparent; cursor:pointer; transform:translate3d(var(--dcc-x),var(--dcc-y),var(--dcc-z)) rotateX(var(--dcc-tilt)) rotateY(var(--dcc-yaw)) rotateZ(var(--dcc-roll)); opacity:var(--dcc-opacity); z-index:var(--dcc-zindex); transition:none; will-change:transform,opacity; transform-style:preserve-3d; pointer-events:auto; }
+.disc-cascade-disc-shell { position:absolute; inset:0; border-radius:50%; overflow:hidden; transform:translateZ(0); background:#cfd2d6; border:1px solid rgba(255,255,255,.5); box-shadow:inset 0 0 0 10px rgba(255,255,255,.08), inset 0 0 0 12px rgba(17,19,27,.28), 12px 22px 30px rgba(0,0,0,.28); }
+.disc-cascade-disc img { position:relative; z-index:1; width:100%; height:100%; object-fit:cover; display:block; opacity:.92; }
+.disc-cascade-disc-art { position:absolute; z-index:2; inset:0; background:conic-gradient(from 20deg,#fb6b4d 0 12deg,#11131b 12deg 24deg,#fb6b4d 24deg 36deg,#11131b 36deg 48deg,#fb6b4d 48deg 60deg,#11131b 60deg 72deg,#fb6b4d 72deg 84deg,#11131b 84deg 96deg,#fb6b4d 96deg 108deg,#11131b 108deg 120deg,#fb6b4d 120deg 132deg,#11131b 132deg 144deg,#fb6b4d 144deg 156deg,#11131b 156deg 168deg,#fb6b4d 168deg 180deg,#11131b 180deg 192deg,#fb6b4d 192deg 204deg,#11131b 204deg 216deg,#fb6b4d 216deg 228deg,#11131b 228deg 240deg,#fb6b4d 240deg 252deg,#11131b 252deg 264deg,#fb6b4d 264deg 276deg,#11131b 276deg 288deg,#fb6b4d 288deg 300deg,#11131b 300deg 312deg,#fb6b4d 312deg 324deg,#11131b 324deg 336deg,#fb6b4d 336deg 348deg,#11131b 348deg 360deg); opacity:.16; mix-blend-mode:multiply; }
+.disc-cascade-disc:nth-child(3n) .disc-cascade-disc-art { background:conic-gradient(from 20deg,#c8f34a 0 12deg,#16443f 12deg 24deg,#c8f34a 24deg 36deg,#16443f 36deg 48deg,#c8f34a 48deg 60deg,#16443f 60deg 72deg,#c8f34a 72deg 84deg,#16443f 84deg 96deg,#c8f34a 96deg 108deg,#16443f 108deg 120deg,#c8f34a 120deg 132deg,#16443f 132deg 144deg,#c8f34a 144deg 156deg,#16443f 156deg 168deg,#c8f34a 168deg 180deg,#16443f 180deg 192deg,#c8f34a 192deg 204deg,#16443f 204deg 216deg,#c8f34a 216deg 228deg,#16443f 228deg 240deg,#c8f34a 240deg 252deg,#16443f 252deg 264deg,#c8f34a 264deg 276deg,#16443f 276deg 288deg,#c8f34a 288deg 300deg,#16443f 300deg 312deg,#c8f34a 312deg 324deg,#16443f 324deg 336deg,#c8f34a 336deg 348deg,#16443f 348deg 360deg); }
+.disc-cascade-disc:nth-child(4n) .disc-cascade-disc-art { background:conic-gradient(from 20deg,#6c9fff 0 12deg,#f2ede2 12deg 24deg,#6c9fff 24deg 36deg,#f2ede2 36deg 48deg,#6c9fff 48deg 60deg,#f2ede2 60deg 72deg,#6c9fff 72deg 84deg,#f2ede2 84deg 96deg,#6c9fff 96deg 108deg,#f2ede2 108deg 120deg,#6c9fff 120deg 132deg,#f2ede2 132deg 144deg,#6c9fff 144deg 156deg,#f2ede2 156deg 168deg,#6c9fff 168deg 180deg,#f2ede2 180deg 192deg,#6c9fff 192deg 204deg,#f2ede2 204deg 216deg,#6c9fff 216deg 228deg,#f2ede2 228deg 240deg,#6c9fff 240deg 252deg,#f2ede2 252deg 264deg,#6c9fff 264deg 276deg,#f2ede2 276deg 288deg,#6c9fff 288deg 300deg,#f2ede2 300deg 312deg,#6c9fff 312deg 324deg,#f2ede2 324deg 336deg,#6c9fff 336deg 348deg,#f2ede2 348deg 360deg); }
+.disc-cascade-disc-title-arc { position:absolute; z-index:4; inset:1% 1% auto; width:98%; height:48%; overflow:visible; pointer-events:none; }
+.disc-cascade-disc-title-arc path { fill:none; }
+.disc-cascade-disc-title-arc text { fill:#fff; font:900 52px 'Space Grotesk',sans-serif; letter-spacing:.15px; text-anchor:middle; text-transform:uppercase; paint-order:stroke; stroke:rgba(17,19,27,.9); stroke-width:7px; stroke-linejoin:round; }
+.disc-cascade-disc-label { display:none; }
+.disc-cascade-disc-hub { position:absolute; left:50%; top:50%; width:22%; aspect-ratio:1; transform:translate(-50%,-50%); border-radius:50%; background:radial-gradient(circle,#11131b 0 18%,#f2ede2 19% 31%,#a9adb3 32% 42%,#eef0f2 43% 58%,#8f949a 59% 62%,transparent 63%); box-shadow:0 0 0 2px rgba(255,255,255,.7); }
+.disc-cascade-disc[data-active] { --dcc-tilt:0deg; }
+.disc-cascade-disc[data-active] .disc-cascade-disc-shell { box-shadow:inset 0 0 0 10px rgba(255,255,255,.08), inset 0 0 0 12px rgba(17,19,27,.28), 18px 28px 42px rgba(0,0,0,.42); }
+.disc-cascade-disc[data-active] .disc-cascade-disc-shell::after { content:''; position:absolute; inset:0; border-radius:50%; background:conic-gradient(from 50deg,transparent 0 26deg,rgba(255,255,255,.4) 35deg,transparent 56deg,transparent 160deg,rgba(150,215,255,.22) 185deg,transparent 215deg); mix-blend-mode:screen; }
+@keyframes dcc-banner-orbit { from { transform:rotate(0deg) scale(1.03); } to { transform:rotate(360deg) scale(1.03); } }
+.disc-cascade-disc-art { animation:dcc-banner-orbit 24s linear infinite; animation-play-state:paused; }
+.disc-cascade-disc[data-active] .disc-cascade-disc-art { animation-play-state:running; }
+.disc-cascade-disc-roll,.disc-cascade-disc-idle { position:absolute; inset:0; border-radius:50%; }
+.disc-cascade-disc-roll { transform:rotate(var(--dcc-roll,0deg)); }
+.disc-cascade-disc-idle { overflow:hidden; animation:dcc-banner-spin 30s linear infinite; animation-play-state:paused; }
+.disc-cascade-disc[data-active] .disc-cascade-disc-idle { animation-play-state:running; }
+.disc-cascade-disc.is-activated[data-active] .disc-cascade-disc-sheen { opacity:.62; }
+.disc-cascade-disc-idle > img { position:absolute; inset:0; z-index:1; width:100%; height:100%; max-width:none; object-fit:cover; display:block; opacity:.95; }
+.disc-cascade-disc-sheen { position:absolute; z-index:6; inset:0; border-radius:50%; pointer-events:none; opacity:.24; mix-blend-mode:screen; transition:opacity .5s; background:conic-gradient(from calc(var(--dcc-glint,0deg) + var(--dcc-px,0) * 70deg),transparent 0deg,rgba(255,255,255,.52) 16deg,transparent 38deg,transparent 140deg,rgba(150,215,255,.32) 168deg,rgba(255,170,225,.32) 186deg,rgba(255,236,170,.26) 200deg,transparent 224deg,transparent 360deg),radial-gradient(circle at 32% 24%,rgba(255,255,255,.3),transparent 46%); }
+.disc-cascade-disc[data-active] .disc-cascade-disc-sheen { opacity:.42; }
+@keyframes dcc-banner-spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+.disc-cascade-reviews { position:absolute; left:50%; bottom:42px; width:min(520px,calc(100% - 300px)); transform:translateX(-50%); text-align:center; pointer-events:none; }
+.disc-cascade-review { width:100%; }
+.disc-cascade-review strong { display:block; margin-bottom:6px; font:700 8px 'DM Mono',monospace; letter-spacing:.14em; text-transform:uppercase; }
+.disc-cascade-review p { display:-webkit-box; overflow:hidden; max-width:430px; margin:0 auto; font:400 clamp(12px,1.05cqw,14px)/1.18 Georgia,serif; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+.disc-cascade-fee-badge { display:inline-flex; margin:0 0 14px; padding:7px 10px; border:1px solid #c8f34a; background:#c8f34a; color:#11131b; font:800 11px 'DM Mono',monospace; letter-spacing:.05em; text-transform:uppercase; }
+.disc-cascade-actions { position:absolute; left:26px; bottom:22px; z-index:20; display:flex; align-items:center; gap:8px; flex-wrap:wrap; max-width:calc(100% - 52px); }
+.disc-cascade-rules,.disc-cascade-call { border:1px solid rgba(242,237,226,.4); color:#f2ede2; background:#000000; padding:11px 16px; font:700 11px 'DM Mono',monospace; text-decoration:none; text-transform:uppercase; cursor:pointer; }
+.disc-cascade-rules:hover,.disc-cascade-call:hover { background:#f2ede2; color:#11131b; }
+.disc-cascade-controls { position:absolute; right:24px; bottom:22px; z-index:20; display:flex; align-items:center; gap:12px; }
+.disc-cascade-controls button { width:36px; height:36px; border-radius:50%; border:1px solid rgba(242,237,226,.25); background:transparent; color:inherit; cursor:pointer; font-size:18px; }
+.disc-cascade-controls button:hover { background:#c8f34a; color:#11131b; }
+.disc-cascade-count { min-width:56px; text-align:center; font:500 11px 'DM Mono',monospace; }
+.disc-cascade-register { border:1px solid #c8f34a; color:#11131b; background:#c8f34a; padding:10px 13px; font:600 10px 'DM Mono',monospace; text-decoration:none; text-transform:uppercase; }
+.disc-cascade-register:hover { background:#f2ede2; border-color:#f2ede2; }
+@media (max-width: 720px) {
+    .disc-cascade-helper { padding:10px 16px 14px; }
+    .disc-cascade-stage { min-height:560px; height:145vw; max-height:700px; }
+    .disc-cascade-intro { display:block; margin-bottom:20px; }
+    .disc-cascade-intro p { margin-top:18px; }
+    .disc-cascade-head { top:72px; left:16px; width:56cqw; }
+    .disc-cascade-topbar { left:16px; right:24px; }
+    .disc-cascade-track { --dcc-size:54vw; top:53%; }
+    .disc-cascade-reviews { bottom:75px; width:calc(100% - 32px); }
+    .disc-cascade-controls { right:16px; bottom:16px; }
+    .disc-cascade-actions { left:16px; bottom:16px; max-width:calc(100% - 32px); }
+    .disc-cascade-controls { bottom:72px; }
+}
+
+/* Tablet/mobile landscape and browser "desktop site" widths need the same
+   vertical composition as phones. This prevents the CD from covering the
+   selected event metadata or the action row when the viewport is narrow but
+   taller than the phone breakpoint. */
+@media (max-width: 1100px) {
+    .disc-cascade-section { padding-left: 18px; padding-right: 18px; }
+    .disc-cascade-intro {
+        display: block;
+        max-width: 760px;
+        margin-bottom: 22px;
+    }
+    .disc-cascade-intro p { max-width: 560px; margin-top: 16px; }
+    .disc-cascade-stage {
+        height: 840px;
+        min-height: 840px;
+        max-width: 760px;
+    }
+    .disc-cascade-topbar { top: 18px; left: 20px; right: 20px; }
+    .disc-cascade-head {
+        top: 68px;
+        left: 20px;
+        width: calc(100% - 40px);
+        max-width: none;
+        padding-right: 0;
+    }
+    .disc-cascade-head h3 { max-width: 100%; font-size: clamp(28px, 5vw, 42px); }
+    .disc-cascade-meta-row { font-size: 12px; padding: 8px 0; }
+    .disc-cascade-meta-row dt { font-size: 9px; }
+    .disc-cascade-track {
+        top: 56%;
+        --dcc-size: min(46vw, 300px) !important;
+    }
+    .disc-cascade-reviews {
+        bottom: 146px;
+        width: calc(100% - 40px);
+        max-width: 640px;
+    }
+    .disc-cascade-review p { -webkit-line-clamp: 3; font-size: 14px; line-height: 1.35; }
+    .disc-cascade-actions {
+        left: 20px;
+        right: 20px;
+        bottom: 18px;
+        max-width: none;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .disc-cascade-rules,
+    .disc-cascade-call,
+    .disc-cascade-register {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
         justify-content: center;
+        box-sizing: border-box;
+        text-align: center;
     }
-    .hero-actions button { min-width: 0; flex: 1; padding: 10px 12px; font-size: 0.9rem; }
-    .scroll-indicator { bottom: 18px; font-size: 1.6rem; }
-
-    .events-section { padding: 64px 16px; }
-    .section-title { font-size: clamp(1.8rem, 8vw, 2.35rem) !important; margin-bottom: 24px !important; }
-    .event-search-container { margin-bottom: 26px; }
-    .event-search-input { padding: 13px 16px 13px 44px; font-size: 1rem; }
-    .event-search-icon { left: 16px; }
-    .swiper-slide { border-radius: 16px; }
-    .card-image-wrapper { height: 180px; }
-    .f-card-header { align-items: flex-start; gap: 10px; }
-    .f-card-title { font-size: 1.25rem; line-height: 1.25; }
-    .f-desc { font-size: .9rem; }
-    .f-meta-item { align-items: flex-start; gap: 8px; font-size: .86rem; line-height: 1.45; }
-    .f-meta-item strong { flex-basis: 54px; width: 54px; }
-    .event-card-actions { flex-direction: column; gap: 9px !important; }
-    .event-card-actions .f-btn { width: 100% !important; }
-
-    .map-section { padding: 56px 16px; }
-    .map-container { border-radius: 12px; }
-    .venue-placeholder { min-height: 180px; padding: 1.5rem; }
-    .contact-grid { grid-template-columns: 1fr; }
-    .contact-card { padding: 1rem; }
+    .disc-cascade-register { grid-column: 1 / -1; }
+    .disc-cascade-controls {
+        top: 54px;
+        right: 20px;
+        bottom: auto;
+    }
 }
+
+@media (max-width: 640px) {
+    .disc-cascade-stage {
+        height: 820px;
+        min-height: 820px;
+    }
+    .disc-cascade-head { top: 58px; }
+    .disc-cascade-head h3 { font-size: clamp(25px, 8vw, 34px); line-height: 1; }
+    .disc-cascade-track {
+        top: 55%;
+        --dcc-size: min(46vw, 190px) !important;
+    }
+    .disc-cascade-reviews {
+        bottom: 148px;
+        width: calc(100% - 32px);
+    }
+    .disc-cascade-actions { left: 16px; right: 16px; bottom: 16px; }
+    .disc-cascade-controls { top: 52px; right: 16px; }
+    .disc-cascade-rules,
+    .disc-cascade-call,
+    .disc-cascade-register { font-size: 10px; padding: 10px 8px; }
+}
+
+/* Keep the campus/social controls centered and easy to reach on touch screens. */
+@media (max-width: 640px) {
+    .map-section,
+    #contact.map-section { padding-left: 16px !important; padding-right: 16px !important; }
+    .contact-grid { max-width: 520px; }
+    .contact-card { text-align: center; }
+    .contact-role-badge { margin-left: auto; margin-right: auto; }
+    .animated-call-btn { width: 100%; justify-content: center; box-sizing: border-box; }
+    .dock-social-row,
+    .footer-social-row { justify-content: center; }
+    .dock-header { justify-content: center; text-align: center; }
+    .dock-title { min-width: 0; }
+    .dock-title h4 { overflow-wrap: anywhere; }
+}
+@media (prefers-reduced-motion: reduce) { .disc-cascade-disc { transition:none; } .disc-cascade-disc[data-active] .disc-cascade-disc-art,.disc-cascade-disc[data-active] .disc-cascade-disc-idle { animation:none; } }
+
+/* Space theme & Hero Starfield */
+.hero-wrapper { background: #000000 !important; min-height: 100vh; position: relative; overflow: hidden; }
+.hero-starfield { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 0; }
+.bg-3d-logo { display: none !important; }
+.hero-section { position: relative; z-index: 2; padding-top: 110px !important; }
+.hero-title, #heroFallbackTitle { color: #f8fafc !important; }
+.hero-subtitle { color: #cbd5e1 !important; max-width: 680px; }
+.hero-badge-pill {
+    background: #000000 !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6) !important;
+}
+.hero-badge-text { color: #f8fafc !important; }
+.registration-dot { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.9); }
+
+.about-section { background: #000000 !important; color: #ffffff !important; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.about-section h2, .about-section h3, .about-section h4 { color: #ffffff !important; }
+.about-section p { color: #cbd5e1 !important; }
+
+/* ── Centered College Logo Divider with Sidelines Above the Institution ── */
+.institution-logo-divider-section {
+    background: #000000 !important;
+    padding: 60px 20px 24px !important;
+    position: relative;
+    z-index: 3;
+    overflow: hidden;
+}
+.logo-sideline-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 32px;
+}
+.logo-sideline {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.6), rgba(255, 255, 255, 0.3));
+    position: relative;
+}
+.logo-sideline.right {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.3), rgba(59, 130, 246, 0.6), transparent);
+}
+.logo-sideline::after {
+    content: '';
+    position: absolute;
+    top: -2.5px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #60a5fa;
+    box-shadow: 0 0 10px #60a5fa, 0 0 20px #3b82f6;
+}
+.logo-sideline.left::after { right: 0; }
+.logo-sideline.right::after { left: 0; }
+
+.institution-center-crest {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.institution-center-crest:hover {
+    transform: translateY(-4px) scale(1.03);
+}
+.crest-emblem-disc {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: #ffffff;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 35px rgba(59, 130, 246, 0.35), 0 16px 36px rgba(0, 0, 0, 0.95);
+    border: 3px solid rgba(59, 130, 246, 0.5);
+    position: relative;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.institution-center-crest:hover .crest-emblem-disc {
+    box-shadow: 0 0 45px rgba(59, 130, 246, 0.55), 0 20px 40px rgba(0, 0, 0, 0.95);
+    border-color: #60a5fa;
+}
+.crest-emblem-disc img {
+    width: 82%;
+    height: 82%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+}
+.crest-orbit-ring {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 1px dashed rgba(96, 165, 250, 0.45);
+    pointer-events: none;
+    animation: spin-slow 24s linear infinite;
+}
+.crest-institution-name {
+    margin-top: 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.crest-institution-sub {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 3px;
+}
+
+@keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+    .institution-logo-divider-section { padding: 40px 16px 16px !important; }
+    .logo-sideline-container { gap: 14px !important; }
+    .crest-emblem-disc { width: 85px !important; height: 85px !important; padding: 8px !important; }
+    .crest-institution-name { font-size: 0.95rem !important; }
+}
+
+/* ── Principal's Message & Sidelines ── */
+.principal-message-card {
+    background: #000000 !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 25px rgba(59, 130, 246, 0.15) !important;
+    position: relative;
+}
+.principal-message-card h4 { color: #ffffff !important; }
+.principal-message-card p { color: #cbd5e1 !important; }
+.principal-message-logo {
+    background: #ffffff !important;
+    border: 4px solid #000000 !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9), 0 0 25px rgba(59, 130, 246, 0.45) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.principal-message-logo img {
+    width: 78% !important;
+    height: 78% !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2)) !important;
+}
+.principal-quote-sideline {
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 3px solid #3b82f6;
+    border-radius: 0 14px 14px 0;
+    padding: 18px 20px;
+    margin: 16px 0 20px;
+    text-align: left;
+    position: relative;
+}
+.principal-quote-sideline p {
+    font-style: italic;
+    color: #e2e8f0 !important;
+    font-size: 0.98rem;
+    line-height: 1.7;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.map-section { background: #000000 !important; color: #ffffff !important; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.unified-map-wrapper, .contact-card {
+    background: #000000 !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    color: #ffffff !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8) !important;
+}
+.contact-card h3, .dock-title h4 { color: #ffffff !important; }
+.contact-card p, .dock-title p { color: #cbd5e1 !important; }
+.contact-role-badge {
+    background: rgba(37, 99, 235, 0.2) !important;
+    color: #93c5fd !important;
+    border: 1px solid rgba(96, 165, 250, 0.35) !important;
+}
+.campus-desk-panel {
+    background: #000000 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+.dock-icon-btn {
+    background: #111111 !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+}
+.dock-icon-btn:hover {
+    background: rgba(37, 99, 235, 0.25) !important;
+    border-color: #3b82f6 !important;
+}
+
+.l-footer {
+    background: #000000 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #e2e8f0 !important;
+}
+.l-footer .footer-col h4 { color: #ffffff !important; }
+.l-footer .footer-col a, .l-footer .footer-col p { color: #94a3b8 !important; }
+.l-footer .footer-col a:hover { color: #60a5fa !important; }
+.footer-bottom {
+    border-top-color: rgba(255, 255, 255, 0.1) !important;
+    color: #94a3b8 !important;
+}
+
+#rulesModal > div, #contactModal > div {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.95) !important;
+}
+#rulesModalTitle, #contactModalTitle {
+    color: #ffffff !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+#rulesModalContent, #contactModalContent { color: #cbd5e1 !important; }
+.modal-drag-handle { background: #475569 !important; }
+
 {% endblock %}
 
 {% block content %}
 <!-- Hero -->
 <div class="hero-wrapper" id="vanta-bg" style="perspective: 1000px;">
-    <!-- 3D Background Logo Watermark -->
-    <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="College Logo Watermark" class="bg-3d-logo">
+    <canvas id="heroStarfield" class="hero-starfield" aria-hidden="true"></canvas>
     
-    <section class="hero-section" style="position: relative; z-index: 2;">
-        <!-- Particle Text Container -->
-        <div id="hero-particle-text" style="width: 100%; height: 200px; margin-bottom: 20px;"></div>
+    <section class="hero-section" id="hero" style="position: relative; z-index: 2;">
+        <!-- Registration Open Indicator Badge -->
+        <div class="hero-badge-pill" onclick="document.getElementById('events').scrollIntoView({behavior: 'smooth'})" title="Explore Events">
+            <span class="registration-dot" aria-hidden="true"></span>
+            <span class="hero-badge-text">Registration Open &bull; Annual Symposium 2026-27</span>
+        </div>
+
+        <!-- Interactive Animated Main Event Title (Particle Animation) -->
+        <div id="hero-particle-text" style="width: 100%; max-width: 850px; height: clamp(130px, 20vw, 200px); margin: 0 auto 16px; position: relative; z-index: 5; display: flex; align-items: center; justify-content: center;">
+            <h1 class="hero-title" id="heroFallbackTitle" style="margin: 0; line-height: 1.15; color: #f8fafc !important;">{{ config.EVENT_TITLE }}</h1>
+        </div>
+        
         <p class="hero-subtitle">Experience the future of innovation. Join us for a monumental symposium of technology, ideas, and competition.</p>
+        
         <div class="hero-actions">
             <button onclick="document.getElementById('events').scrollIntoView({behavior: 'smooth'})" class="candy-btn">Explore Events</button>
-            <button onclick="document.getElementById('contact').scrollIntoView({behavior: 'smooth'})" class="candy-btn" style="background: transparent; color: #1e293b; border: 1px solid #cbd5e1; box-shadow: none;">Contact Organizers</button>
+            <button onclick="document.getElementById('contact').scrollIntoView({behavior: 'smooth'})" class="candy-btn" style="background: rgba(255, 255, 255, 0.08); color: #f8fafc; border: 2px solid rgba(255, 255, 255, 0.35); box-shadow: none; font-weight: 700;">Contact Organizers</button>
         </div>
-        <div class="scroll-indicator">&darr;</div>
+        
+        <div class="scroll-indicator" onclick="document.getElementById('events').scrollIntoView({behavior: 'smooth'})" aria-label="Scroll down">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
     </section>
 </div>
 
-<!-- About Institution -->
-<section class="about-section" id="about" style="padding: 80px 20px 60px; max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 40px; align-items: center;">
-    <div style="flex: 1; min-width: 300px;">
-        <h2 class="section-title scroll-float" style="text-align: left; margin-bottom: 20px; color: var(--primary-dark);">About the Institution</h2>
-        <h3 style="color: var(--primary); font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; margin-bottom: 15px;">Shree Daksha Academy</h3>
-        <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.7; margin-bottom: 20px;">
-            Established with a vision to nurture future leaders, Shree Daksha Academy stands as a beacon of academic excellence and innovation. Our campus is a vibrant community where technology, arts, and science converge. 
+<!-- Centered College Logo with Sidelines Above the Institution -->
+<div class="institution-logo-divider-section" id="institution-crest-section">
+    <div class="logo-sideline-container">
+        <div class="logo-sideline left" aria-hidden="true"></div>
+        
+        <a href="https://shreedakshaacademyedu.in/" target="_blank" rel="noopener noreferrer" class="institution-center-crest" title="Visit Shree Daksha Academy Official Website">
+            <div class="crest-emblem-disc">
+                <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Logo">
+                <div class="crest-orbit-ring" aria-hidden="true"></div>
+            </div>
+            <span class="crest-institution-name">Shree Daksha Academy</span>
+            <span class="crest-institution-sub">Affiliated & Accredited Institution</span>
+        </a>
+        
+        <div class="logo-sideline right" aria-hidden="true"></div>
+    </div>
+</div>
+
+<!-- About Institution & Principal's Message (Restored Structure, Centered Crest & Pure Dark Aesthetic) -->
+<section class="about-section" id="about" style="padding: 60px 20px 70px; max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 48px; align-items: center; background: #000000;">
+    <div class="scroll-reveal" style="flex: 1.2; min-width: 320px;">
+        <div style="border-left: 4px solid #3b82f6; padding-left: 20px; margin-bottom: 24px;">
+            <span style="display: inline-block; font-size: 0.82rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #60a5fa; margin-bottom: 6px;">Institution Spotlight</span>
+            <h2 class="section-title scroll-reveal" style="text-align: left; margin: 0; color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: clamp(2rem, 3.5vw, 2.6rem); font-weight: 800;">About the Institution</h2>
+        </div>
+        <h3 style="color: #60a5fa; font-family: 'Space Grotesk', sans-serif; font-size: 1.45rem; margin-bottom: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 10px #3b82f6;"></span>
+            Shree Daksha Academy
+        </h3>
+        <p style="color: #cbd5e1; font-size: 1.08rem; line-height: 1.75; margin-bottom: 18px;">
+            Established with a vision to nurture future leaders, Shree Daksha Academy stands as a beacon of academic excellence and innovation. Our campus is a vibrant community where technology, arts, and science converge.
         </p>
-        <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.7;">
-            This year's symposium is a testament to our commitment to experiential learning. We invite students from across the region to collaborate, compete, and create in an environment that celebrates intellectual curiosity.
+        <p style="color: #94a3b8; font-size: 1.05rem; line-height: 1.75; margin-bottom: 18px;">
+            This year's symposium is a testament to our commitment to experiential learning, leadership excellence, and collaborative growth. We invite students from across the region to collaborate, compete, and create in an environment that celebrates intellectual curiosity and practical mastery.
         </p>
     </div>
-    <div style="flex: 1; min-width: 300px; display: flex; justify-content: center;">
-        <div style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); padding: 40px 30px 30px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 20px 40px rgba(30,58,138,0.08); text-align: center; max-width: 400px; position: relative;">
-            <div style="width: 80px; height: 80px; background: var(--primary-gradient); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: -80px auto 20px; box-shadow: 0 10px 20px rgba(30, 58, 138, 0.3); border: 4px solid white;">🏛️</div>
-            <h4 style="color: var(--primary-dark); margin: 0 0 10px; font-size: 1.2rem; font-family: 'Space Grotesk', sans-serif;">Principal's Message</h4>
-            <p style="font-style: italic; color: #475569; font-size: 0.95rem; line-height: 1.6;">"Welcome to our annual symposium. I encourage every participant to push the boundaries of their creativity and engage fully with the challenges ahead. Let this be a platform where your brightest ideas take flight."</p>
+    
+    <div class="scroll-reveal" style="flex: 1; min-width: 320px; display: flex; justify-content: center; margin-top: 35px;">
+        <div class="principal-message-card" style="background: #000000; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 50px 32px 36px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 25px rgba(59, 130, 246, 0.15); text-align: center; max-width: 440px; width: 100%; position: relative;">
+            <!-- Official College Crest Floating Badge -->
+            <div class="principal-message-logo" style="width: 92px; height: 92px; background: #ffffff !important; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -96px auto 18px; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8), 0 0 25px rgba(59, 130, 246, 0.4); border: 4px solid #000000 !important; position: relative; overflow: hidden; padding: 8px;">
+                <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Crest" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            
+            <!-- Header & Designation -->
+            <span style="display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #60a5fa; margin-bottom: 6px;">From the Principal's Desk</span>
+            <h4 style="color: #ffffff; margin: 0 0 4px; font-size: 1.35rem; font-family: 'Space Grotesk', sans-serif; font-weight: 800; letter-spacing: -0.02em;">Principal's Message</h4>
+            <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 18px; font-weight: 500;">Shree Daksha Academy</div>
+
+            <!-- Quote Block with Sideline (Only College Logo & Message) -->
+            <div class="principal-quote-sideline" style="position: relative; background: rgba(255, 255, 255, 0.03); border-left: 3px solid #3b82f6; border-radius: 0 14px 14px 0; padding: 20px 22px; margin: 0; text-align: left;">
+                <span style="position: absolute; top: 6px; right: 12px; font-size: 2.6rem; line-height: 1; font-family: serif; color: rgba(59, 130, 246, 0.25); user-select: none;">“</span>
+                <p style="font-style: italic; color: #e2e8f0; font-size: 1.02rem; line-height: 1.75; margin: 0; position: relative; z-index: 1;">
+                    "Welcome to our annual symposium. I encourage every participant to push the boundaries of their creativity and engage fully with the challenges ahead. Let this be a platform where your brightest ideas take flight."
+                </p>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Events List -->
-<section class="events-section" id="events">
-    <h2 class="section-title scroll-float">Events</h2>
-    <!-- Search Bar -->
-    <div class="event-search-container">
-        <span class="event-search-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        </span>
-        <input type="text" id="eventSearchInput" class="event-search-input" placeholder="Search events by name..." onkeyup="executeEventSearch()">
-    </div>
-    
-    <!-- Not Found Message -->
-    <div id="eventNotFoundMsg" style="display: none; text-align: center; color: #dc2626; font-size: 1.2rem; font-weight: 600; margin-bottom: 25px;">
-        ⚠️ Event not available
+{% if not showcase_section or showcase_section.is_enabled %}
+{% set showcase_color = showcase_section.background_color if showcase_section and showcase_section.background_color else '#000000' %}
+<section class="disc-cascade-section" id="events" style="--dcc-bg: {{ showcase_color }};{% if showcase_section and showcase_section.banner_image %} --dcc-banner: url('{{ url_for('static', filename='images/' ~ showcase_section.banner_image) }}');{% endif %}" aria-labelledby="disc-cascade-title">
+    <div class="disc-cascade-intro">
+        <div>
+            <p class="disc-cascade-kicker">{{ showcase_section.eyebrow if showcase_section else 'THE LINEUP' }}</p>
+            <h2 id="disc-cascade-title">{{ showcase_section.title if showcase_section else 'Pick your frequency.' }}</h2>
+        </div>
+        <p>{{ showcase_section.description if showcase_section else 'A living catalog of every stage, skill, and squad at Shree Daksha Academy.' }}</p>
     </div>
 
-    <div class="embla" id="eventsSwiperContainer">
-        <div class="embla__container" id="eventsGrid">
-            {% for ev in events %}
-            <div class="embla__slide event-item" 
-                data-title="{{ ev.event_name|e }}"
-                data-desc="{{ ev.description|e }}"
-                data-date="{{ ev.event_date|e }}"
-                data-time="{{ ev.event_time|e }}"
-                data-venue="{{ ev.venue|e }}"
-                data-fee="{{ ev.event_fee|e }}"
-                data-rules="{{ ev.rules_text|default('', true)|e }}"
-                data-faculty-name="{{ ev.faculty_name|default('', true)|e }}"
-                data-faculty-phone="{{ ev.faculty_phone|default('', true)|e }}"
-                data-student-name="{{ ev.student_name|default('', true)|e }}"
-                data-student-phone="{{ ev.student_phone|default('', true)|e }}"
-                data-is-group="{{ 'true' if ev.is_group else 'false' }}"
-                data-register-url="{{ url_for('register_participant') }}?event_id={{ ev.id }}"
-                data-edit-url="{% if session.get('role') == 'admin' %}{{ url_for('edit_event', event_id=ev.id) }}{% endif %}"
-                data-banner-url="{{ url_for('static', filename='images/' ~ (ev.banner_image or '')) }}"
-                data-fallback-banner-url="{{ url_for('static', filename='images/hero_bg.jpg') }}"
-            >
-                <!-- Unified Card Container -->
-                <div class="unified-event-card">
-                    <!-- Top Half: Image -->
-                    <div class="unified-card-image" style="background-image: url('{{ url_for('static', filename='images/' ~ (ev.banner_image or '')) }}'), url('{{ url_for('static', filename='images/hero_bg.jpg') }}'); position: relative;">
-                        <div class="card-number-badge">{{ "%02d" % loop.index }}</div>
-                    </div>
-                    
-                    <!-- Bottom Half: Content -->
-                    <div class="unified-card-body" style="padding: 20px; overflow: hidden; display: flex; flex-direction: column;">
-                        <h3 class="f-card-title" style="margin-bottom: 5px; font-size: 1.6rem; font-weight: 800;">{{ ev.event_name }}</h3>
-                        <div style="margin-top: 2px; margin-bottom: 10px;">
-                            {% if ev.is_group %}
-                                <span class="f-badge f-badge-group">Group</span>
-                            {% else %}
-                                <span class="f-badge f-badge-solo">Solo</span>
-                            {% endif %}
-                        </div>
-                        
-                        <p class="f-desc" style="font-size: 1rem; margin-bottom: 15px; line-height: 1.4; color: #334155;">{{ ev.description or 'Event details will be announced soon.' }}</p>
-                        
-                        <div class="f-meta" style="display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 0.9rem; margin-top: 10px; margin-bottom: 20px; color: #475569; width: 100%;">
-                            <div class="f-meta-item"><strong>Date:</strong> {{ ev.event_date }} &bull; {{ ev.event_time }}</div>
-                            <div class="f-meta-item"><strong>Venue:</strong> {{ ev.venue }}</div>
-                            <div class="f-meta-item"><strong>Fee:</strong> {% if ev.event_fee and ev.event_fee > 0 %}₹ {{ ev.event_fee }}{% else %}Free{% endif %}</div>
-                        </div>
-                        
-                        <div class="unified-buttons-row">
-                            <button type="button" class="rules-trigger" 
-                                data-event-name="{{ ev.event_name|e }}" 
-                                data-rules="{{ ev.rules_text|default('', true)|e }}"
-                                aria-label="View rules for {{ ev.event_name|e }}">📜 Rules</button>
-                            <button type="button" class="rules-trigger contact-trigger"
-                                data-contact-event="{{ ev.event_name|e }}"
-                                data-faculty-name="{{ ev.faculty_name|default('', true)|e }}"
-                                data-faculty-phone="{{ ev.faculty_phone|default('', true)|e }}"
-                                data-student-name="{{ ev.student_name|default('', true)|e }}"
-                                data-student-phone="{{ ev.student_phone|default('', true)|e }}"
-                                aria-label="Contact for {{ ev.event_name|e }}">📞 Contact</button>
-                        </div>
-                        
-                        <div class="unified-buttons-row" style="margin-top: auto; padding-top: 10px;">
-                            <a href="{{ url_for('register_participant') }}?event_id={{ ev.id }}" class="pop-btn" style="flex: 1;">
-                                Register Now
-                            </a>
-                            {% if session.get('role') == 'admin' %}
-                            <a href="{{ url_for('edit_event', event_id=ev.id) }}" class="candy-btn" style="flex: 1; padding: 12px; font-size: 1rem;">
-                                Edit Event
-                            </a>
-                            {% endif %}
-                        </div>
-                    </div>
+    <div class="disc-cascade-stage" id="discCascadeStage" tabindex="0" role="region" aria-label="Event catalogue. Use arrow keys to browse.">
+        <div class="disc-cascade-topbar">
+            <span class="disc-cascade-topbar-label">14 event cassettes</span>
+            <div class="disc-cascade-index" id="discCascadeIndex">
+                <button type="button" id="discCascadeIndexButton" aria-expanded="false">14 events <span aria-hidden="true">⌄</span></button>
+                <div class="disc-cascade-index-menu" id="discCascadeIndexMenu" role="menu">
+                    {% for ev in events[:14] %}
+                    <button type="button" role="menuitem" data-index="{{ loop.index0 }}"><span>{{ '%02d' % loop.index }} / {{ ev.event_name }}</span><span>↗</span></button>
+                    {% endfor %}
                 </div>
-                
             </div>
+        </div>
+
+        <div class="disc-cascade-head" aria-live="polite">
+            <span class="disc-cascade-fee-badge" id="discCascadeFeeBadge">ENTRY · {% if events and events[0].event_fee and events[0].event_fee > 0 %}₹ {{ events[0].event_fee }}{% else %}FREE{% endif %}</span>
+            <h3 id="discCascadeTitle">{{ events[0].event_name if events else 'Event lineup' }}</h3>
+            <dl class="disc-cascade-meta">
+                <div class="disc-cascade-meta-row"><dt>Format</dt><dd id="discCascadeFormat">{{ 'Group event' if events and events[0].is_group else 'Solo event' }}</dd></div>
+                <div class="disc-cascade-meta-row"><dt>When</dt><dd id="discCascadeWhen">{{ events[0].event_date if events else 'Registration open' }} · {{ events[0].event_time if events else 'Details inside' }}</dd></div>
+                <div class="disc-cascade-meta-row"><dt>Venue</dt><dd id="discCascadeVenue">{{ events[0].venue if events else 'Main stage' }}</dd></div>
+            </dl>
+        </div>
+
+        <div class="disc-cascade-track" id="discCascadeTrack" style="--dcc-size:clamp(190px, 28cqw, 360px);">
+            {% for ev in events[:14] %}
+            <button type="button" class="disc-cascade-disc" data-index="{{ loop.index0 }}" data-title="{{ ev.event_name|e }}" data-format="{{ 'Group event' if ev.is_group else 'Solo event' }}" data-fee="{% if ev.event_fee and ev.event_fee > 0 %}₹ {{ ev.event_fee }}{% else %}Free entry{% endif %}" data-venue="{{ ev.venue|e }}" data-date="{{ ev.event_date|e }}" data-time="{{ ev.event_time|e }}" data-description="{{ (ev.description or 'Bring your best idea and make the stage yours.')|e }}" data-rules="{{ ev.rules_text|default('', true)|e }}" data-faculty-name="{{ ev.faculty_name|default('', true)|e }}" data-faculty-phone="{{ ev.faculty_phone|default('', true)|e }}" data-student-name="{{ ev.student_name|default('', true)|e }}" data-student-phone="{{ ev.student_phone|default('', true)|e }}" data-register-url="{{ url_for('register_participant') }}?event_id={{ ev.id }}" aria-label="{{ ev.event_name|e }}">
+                <span class="disc-cascade-disc-shell">
+                    <span class="disc-cascade-disc-roll">
+                        <span class="disc-cascade-disc-idle">
+                            {% if ev.banner_image %}<img src="{{ url_for('static', filename='images/' ~ ev.banner_image) }}" alt="{{ ev.event_name|e }} banner" loading="lazy" decoding="async" draggable="false" onerror="this.style.display='none'">{% endif %}
+                            <svg class="disc-cascade-disc-title-arc" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+                                <path id="discArcPath{{ loop.index }}" d="M 18 105 Q 100 12 182 105"></path>
+                                <text textLength="190" lengthAdjust="spacingAndGlyphs"><textPath href="#discArcPath{{ loop.index }}" startOffset="50%">{{ ev.event_name }}</textPath></text>
+                            </svg>
+                            <span class="disc-cascade-disc-label">{{ '%02d' % loop.index }}</span>
+                        </span>
+                    </span>
+                    <span class="disc-cascade-disc-hub"></span>
+                    <span class="disc-cascade-disc-sheen" aria-hidden="true"></span>
+                </span>
+            </button>
             {% endfor %}
         </div>
+
+        <div class="disc-cascade-reviews" aria-live="polite">
+            <div class="disc-cascade-review"><strong id="discCascadeReviewSource">EVENT DESCRIPTION</strong><p id="discCascadeDescription">{{ (events[0].description if events else 'Bring your best idea and make the stage yours.')|truncate(220, true, '…') }}</p></div>
+        </div>
+        <div class="disc-cascade-actions">
+            <button type="button" id="discCascadeRules" class="disc-cascade-rules">Rules</button>
+            <button type="button" id="discCascadeCall" class="disc-cascade-call">Contact</button>
+            <a id="discCascadeRegister" class="disc-cascade-register" href="{{ url_for('register_participant') }}{% if events %}?event_id={{ events[0].id }}{% endif %}">Register for this event ↗</a>
+        </div>
+        <div class="disc-cascade-controls">
+            <button type="button" id="discCascadePrev" aria-label="Previous event">←</button>
+            <span class="disc-cascade-count" id="discCascadeCount">01 / {{ '%02d' % ([events|length, 14]|min) }}</span>
+            <button type="button" id="discCascadeNext" aria-label="Go to next event">→</button>
+        </div>
     </div>
-    
-    <!-- Embla Numbered Pagination -->
-    <div class="embla__pagination" id="emblaPagination"></div>
-    </div>
-
-    <!-- Embla JS -->
-    <script src="https://cdn.jsdelivr.net/npm/embla-carousel@8.0.0/embla-carousel.umd.js"></script>
-    <script>
-        let searchTimeout = null;
-        function executeEventSearch() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                const input = document.getElementById('eventSearchInput').value.toLowerCase().trim();
-                const msg = document.getElementById('eventNotFoundMsg');
-                
-                if (!input) {
-                    msg.style.display = 'none';
-                    return;
-                }
-
-                let foundIndex = -1;
-                
-                if (window.emblaApi) {
-                    const slideNodes = window.emblaApi.slideNodes();
-                    for (let i = 0; i < slideNodes.length; i++) {
-                        const title = slideNodes[i].getAttribute('data-title').toLowerCase();
-                        if (title.includes(input)) {
-                            foundIndex = i;
-                            break;
-                        }
-                    }
-                    
-                    if (foundIndex !== -1) {
-                        msg.style.display = 'none';
-                        window.emblaApi.scrollTo(foundIndex);
-                    } else {
-                        msg.style.display = 'block';
-                    }
-                }
-            }, 300);
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const emblaNode = document.querySelector('.embla');
-            const options = { align: 'center', containScroll: false, loop: true };
-            const emblaApi = EmblaCarousel(emblaNode, options);
-            window.emblaApi = emblaApi;
-            
-            const paginationNode = document.getElementById('emblaPagination');
-            let prevArrow, nextArrow;
-
-            const buildPaginationShell = () => {
-                paginationNode.innerHTML = '';
-
-                // Left arrow
-                prevArrow = document.createElement('button');
-                prevArrow.classList.add('embla__page-arrow');
-                prevArrow.type = 'button';
-                prevArrow.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>';
-                prevArrow.addEventListener('click', () => emblaApi.scrollPrev());
-                paginationNode.appendChild(prevArrow);
-
-                // 3 number slots (will be filled dynamically)
-                for (let i = 0; i < 3; i++) {
-                    const btn = document.createElement('button');
-                    btn.classList.add('embla__page-btn');
-                    btn.type = 'button';
-                    btn.dataset.slot = i; // 0=prev, 1=current, 2=next
-                    paginationNode.appendChild(btn);
-                }
-
-                // Right arrow
-                nextArrow = document.createElement('button');
-                nextArrow.classList.add('embla__page-arrow');
-                nextArrow.type = 'button';
-                nextArrow.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
-                nextArrow.addEventListener('click', () => emblaApi.scrollNext());
-                paginationNode.appendChild(nextArrow);
-            };
-
-            const updatePaginationNumbers = () => {
-                const selected = emblaApi.selectedScrollSnap();
-                const total = emblaApi.scrollSnapList().length;
-                if (total === 0) return;
-
-                const prevIndex = (selected - 1 + total) % total;
-                const nextIndex = (selected + 1) % total;
-                const indices = [prevIndex, selected, nextIndex];
-
-                const slots = paginationNode.querySelectorAll('.embla__page-btn');
-                slots.forEach((btn, i) => {
-                    const idx = indices[i];
-                    btn.textContent = idx + 1;
-
-                    // Active styling for the center (current) slot
-                    btn.classList.toggle('is-active', i === 1);
-
-                    // Remove old listeners by cloning
-                    const newBtn = btn.cloneNode(true);
-                    btn.parentNode.replaceChild(newBtn, btn);
-
-                    // Attach directional click handlers
-                    if (i === 0) {
-                        newBtn.addEventListener('click', () => emblaApi.scrollPrev());
-                    } else if (i === 2) {
-                        newBtn.addEventListener('click', () => emblaApi.scrollNext());
-                    }
-                    // Center button (i === 1) = already on this slide, no action needed
-                });
-            };
-
-            const toggleActiveClass = () => {
-                const selected = emblaApi.selectedScrollSnap();
-                const slideNodes = emblaApi.slideNodes();
-                
-                slideNodes.forEach((slide, index) => {
-                    if (index === selected) {
-                        slide.classList.add('is-active');
-                    } else {
-                        slide.classList.remove('is-active');
-                    }
-                    
-                    if (!slide.dataset.clickBound) {
-                        slide.addEventListener('click', () => {
-                            if (emblaApi.selectedScrollSnap() !== index) {
-                                emblaApi.scrollTo(index);
-                            }
-                        });
-                        slide.dataset.clickBound = "true";
-                        slide.style.cursor = "pointer";
-                    }
-                });
-            };
-
-            emblaApi.on('init', buildPaginationShell);
-            emblaApi.on('reInit', buildPaginationShell);
-            emblaApi.on('init', updatePaginationNumbers);
-            emblaApi.on('reInit', updatePaginationNumbers);
-            emblaApi.on('select', updatePaginationNumbers);
-
-            emblaApi.on('init', toggleActiveClass);
-            emblaApi.on('select', toggleActiveClass);
-            emblaApi.on('reInit', toggleActiveClass);
-            
-            // Trigger init events
-            emblaApi.reInit();
-        });
-    </script>
 </section>
+{% endif %}
 
-<!-- Location & College Info Section -->
+<div class="disc-cascade-helper">Select a disc · move through the lineup</div>
+
+<!-- Location Section (Unified Map with Glassmorphic Corner Dock) -->
 <section id="location" class="map-section">
-    <h2 class="section-title scroll-float" style="margin-bottom: 30px; font-size: 2.5rem;">Find Us</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 1100px; margin: 0 auto; align-items: start;">
-        <!-- Left: Map -->
-        <div>
-            <div style="border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-                <iframe 
-                    src="https://maps.google.com/maps?width=100%25&height=350&hl=en&q=Shree%20Daksha%20Academy%2C%20No%20596%2C%20Andrahalli%20Main%20Rd%2C%20Lingadeeranahalli%2C%20Bengaluru%20560091&t=&z=16&ie=UTF8&iwloc=B&output=embed" 
-                    width="100%" 
-                    height="350" 
-                    frameborder="0" 
-                    style="border:0; display:block;" 
-                    allowfullscreen="">
-                </iframe>
+    <h2 class="section-title scroll-reveal" style="margin-bottom: 25px; text-align: center;">Find Us</h2>
+    
+    <div class="unified-map-wrapper scroll-reveal">
+        <!-- Campus Desk panel -->
+        <div class="map-corner-dock campus-desk-panel">
+            <div class="dock-header">
+                <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy" class="dock-logo">
+                <div class="dock-title">
+                    <h4>{{ config.COLLEGE_NAME }}</h4>
+                    <p>Lingadeeranahalli, Bengaluru</p>
+                </div>
             </div>
-            <div style="text-align: center; margin-top: 15px;">
-                <a href="https://www.google.com/maps/search/?api=1&query=Shree+Daksha+Academy+No+596+Andrahalli+Main+Rd+Lingadeeranahalli+Bengaluru+560091"
-                   target="_blank"
-                   class="candy-btn" style="border-radius: 30px; font-size: 0.9rem; padding: 10px 22px;">
-                    🗺️ Get Directions
+            
+            <div class="dock-social-row">
+                <a href="https://www.instagram.com/shreedakshaacademy/" target="_blank" rel="noopener noreferrer" class="dock-icon-btn" title="Follow on Instagram" aria-label="Instagram">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram">
+                </a>
+                <a href="https://wa.me/917892038099" target="_blank" rel="noopener noreferrer" class="dock-icon-btn" title="Connect on WhatsApp" aria-label="WhatsApp">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+                </a>
+                <a href="mailto:principal@shreedakshaacademyeveningcollege.edu.in" class="dock-icon-btn" title="Send Official Email" aria-label="Email">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Email">
+                </a>
+                <a href="https://shreedakshaacademyedu.in/" target="_blank" rel="noopener noreferrer" class="dock-icon-btn" title="Visit College Portal" aria-label="Website">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Chrome_icon_%28February_2022%29.svg" alt="Website">
                 </a>
             </div>
+            
+            <a href="https://www.google.com/maps/search/?api=1&query=Shree+Daksha+Academy+No+596+Andrahalli+Main+Rd+Lingadeeranahalli+Bengaluru+560091"
+               target="_blank" rel="noopener noreferrer" class="dock-directions-btn" aria-label="Get Direction in Google Maps">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>Get Direction</span>
+            </a>
         </div>
 
-        <!-- Right: College Info Panel -->
-        <div id="college-info" style="background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%); border-radius: 16px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <!-- Logo & Name -->
-            <div style="margin-bottom: 30px;">
-                <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy" style="width: 90px; height: auto; margin-bottom: 12px;">
-                <h3 style="color: #0f172a; font-size: 1.4rem; margin: 0; font-weight: 700;">{{ config.COLLEGE_NAME }}</h3>
-            </div>
-
-            <!-- Social Icons with Hover Popup -->
-            <style>
-                .social-icon-wrap {
-                    position: relative;
-                    display: inline-flex;
-                    flex-direction: column;
-                    align-items: center;
-                }
-                .social-icon-wrap .social-icon {
-                    width: 50px;
-                    height: 50px;
-                    border-radius: 14px;
-                    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
-                    cursor: pointer;
-                }
-                .social-icon-wrap:hover .social-icon {
-                    transform: scale(1.25);
-                }
-                .social-icon-wrap .social-popup {
-                    position: absolute;
-                    bottom: -38px;
-                    left: 50%;
-                    transform: translateX(-50%) scale(0.8);
-                    background: #0f172a;
-                    color: #fff;
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    padding: 5px 12px;
-                    border-radius: 8px;
-                    white-space: nowrap;
-                    opacity: 0;
-                    pointer-events: none;
-                    transition: opacity 0.25s ease, transform 0.25s ease;
-                }
-                .social-icon-wrap .social-popup::before {
-                    content: '';
-                    position: absolute;
-                    top: -5px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    border-left: 5px solid transparent;
-                    border-right: 5px solid transparent;
-                    border-bottom: 5px solid #0f172a;
-                }
-                .social-icon-wrap:hover .social-popup {
-                    opacity: 1;
-                    transform: translateX(-50%) scale(1);
-                }
-                @keyframes peekBounce {
-                    0%   { transform: scale(1); }
-                    50%  { transform: scale(0.8); }
-                    100% { transform: scale(1); }
-                }
-                .social-icon-wrap.peek .social-icon {
-                    animation: peekBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-                }
-            </style>
-            <script>
-                function socialPeek(el, url, isEmail) {
-                    navigator.vibrate && navigator.vibrate(50);
-                    el.classList.add('peek');
-                    
-                    // Navigate synchronously to prevent browser popup blockers from intercepting the action
-                    if (isEmail) {
-                        window.location.href = url;
-                    } else {
-                        window.open(url, '_blank');
-                    }
-                    
-                    el.addEventListener('animationend', function handler() {
-                        el.classList.remove('peek');
-                        el.removeEventListener('animationend', handler);
-                    });
-                }
-            </script>
-            <div style="display: flex; gap: 20px; justify-content: center; padding-bottom: 10px;">
-                <!-- Instagram -->
-                <div class="social-icon-wrap" onclick="socialPeek(this, 'https://www.instagram.com/shreedakshaacademy/')" style="cursor: pointer;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram" class="social-icon" style="box-shadow: 0 4px 12px rgba(220,39,67,0.3);">
-                    <span class="social-popup">Find us on Instagram</span>
-                </div>
-                <!-- WhatsApp -->
-                <div class="social-icon-wrap" onclick="socialPeek(this, 'https://wa.me/917892038099')" style="cursor: pointer;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="social-icon" style="box-shadow: 0 4px 12px rgba(37,211,102,0.3);">
-                    <span class="social-popup">Chat on WhatsApp</span>
-                </div>
-                <!-- Email -->
-                <div class="social-icon-wrap" onclick="socialPeek(this, 'mailto:principal@shreedakshaacademyeveningcollege.edu.in', true)" style="cursor: pointer;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Email" class="social-icon" style="box-shadow: 0 4px 12px rgba(234,67,53,0.3);">
-                    <span class="social-popup">Send us an Email</span>
-                </div>
-                <!-- Website -->
-                <div class="social-icon-wrap" onclick="socialPeek(this, 'https://shreedakshaacademyedu.in/')" style="cursor: pointer;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Chrome_icon_%28February_2022%29.svg" alt="Website" class="social-icon" style="box-shadow: 0 4px 12px rgba(66,133,244,0.3);">
-                    <span class="social-popup">Visit our Website</span>
-                </div>
-            </div>
-        </div>
+        <!-- Google Maps Embed -->
+        <iframe 
+            class="unified-map-iframe"
+            src="https://maps.google.com/maps?width=100%25&height=440&hl=en&q=Shree%20Daksha%20Academy%2C%20No%20596%2C%20Andrahalli%20Main%20Rd%2C%20Lingadeeranahalli%2C%20Bengaluru%20560091&t=&z=16&ie=UTF8&iwloc=B&output=embed" 
+            allowfullscreen=""
+            loading="lazy"
+            title="Campus Location Map">
+        </iframe>
     </div>
 </section>
 
-<!-- Contact Section -->
-<section id="contact" class="map-section" style="background: #f8fafc; border-top: 1px solid #e2e8f0;">
-    <h2 class="section-title scroll-float" style="margin-bottom: 30px; font-size: 2.5rem;">Contact Us</h2>
+<!-- Contact Us Section (Compact, Smooth, and Refined) -->
+<section id="contact" class="map-section">
+        <h2 class="section-title scroll-reveal" style="margin-bottom: 22px; text-align: center;">Contact Us</h2>
     <div class="contact-grid">
-        <div class="contact-card">
-            <h3>Venue</h3>
-            <p>Our College</p>
+        <!-- Faculty Coordinator -->
+        <div class="contact-card scroll-reveal">
+            <span class="contact-role-badge">Faculty Coordinator</span>
+            <h3>Prof. R. Narayana Swamy</h3>
+            <p>Primary Symposium Desk</p>
+            <a href="tel:{{ config.CONTACT_PHONE_PRIMARY|replace(' ', '') }}" class="animated-call-btn" aria-label="Call Faculty Coordinator">
+                <svg class="phone-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span>Call {{ config.CONTACT_PHONE_PRIMARY }}</span>
+            </a>
         </div>
-        <div class="contact-card">
-            <h3>Contact 1</h3>
-            <p><a href="tel:{{ config.CONTACT_PHONE_PRIMARY|replace(' ', '') }}">{{ config.CONTACT_PHONE_PRIMARY }}</a></p>
-        </div>
-        <div class="contact-card">
-            <h3>Contact 2</h3>
-            <p><a href="tel:{{ config.CONTACT_PHONE_SECONDARY|replace(' ', '') }}">{{ config.CONTACT_PHONE_SECONDARY }}</a></p>
+
+        <!-- Student Coordinator -->
+        <div class="contact-card scroll-reveal">
+            <span class="contact-role-badge">Student Coordinator</span>
+            <h3>Akash S.</h3>
+            <p>Student Operations Desk</p>
+            <a href="tel:{{ config.CONTACT_PHONE_SECONDARY|replace(' ', '') }}" class="animated-call-btn" aria-label="Call Student Coordinator">
+                <svg class="phone-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span>Call {{ config.CONTACT_PHONE_SECONDARY }}</span>
+            </a>
         </div>
     </div>
 </section>
-
-<style>
-@media (max-width: 768px) {
-    #location > div:nth-child(3) {
-        grid-template-columns: 1fr !important;
-    }
-}
-</style>
 
 <!-- Rules Modal -->
-<div id="rulesModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.55); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
-    <div style="background: #ffffff; border: 1px solid #fecaca; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 30px; position: relative; box-shadow: 0 10px 40px rgba(15, 23, 42, 0.2);">
-        <button onclick="closeRulesModal()" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: #64748b; font-size: 1.5rem; cursor: pointer;">&times;</button>
-        <h3 id="rulesModalTitle" style="color: #0f172a; margin-bottom: 20px; font-size: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Rules & Regulations</h3>
-        <ul id="rulesModalContent" style="color: #475569; font-size: 0.95rem; line-height: 1.6; padding-left: 20px;">
+<div id="rulesModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 9999; justify-content: center; align-items: flex-end; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+    <div style="background: #000000; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 20px 20px 0 0; max-width: 500px; width: 100%; max-height: 80vh; max-height: 80dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 28px 20px; position: relative; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.9);">
+        <div class="modal-drag-handle" style="background: #475569;"></div>
+        <button onclick="closeRulesModal()" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">&times;</button>
+        <h3 id="rulesModalTitle" style="color: #ffffff; margin-bottom: 20px; font-size: 1.4rem; border-bottom: 1px solid rgba(255, 255, 255, 0.12); padding-bottom: 10px; font-family: 'Space Grotesk', sans-serif;">Rules & Regulations</h3>
+        <ul id="rulesModalContent" style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; padding-left: 20px;">
         </ul>
     </div>
 </div>
 
 <!-- Contact Modal -->
-<div id="contactModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.55); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
-    <div style="background: #ffffff; border: 1px solid #bae6fd; border-radius: 12px; max-width: 450px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 30px; position: relative; box-shadow: 0 10px 40px rgba(15, 23, 42, 0.2);">
-        <button onclick="closeContactModal()" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: #64748b; font-size: 1.5rem; cursor: pointer;">&times;</button>
-        <h3 id="contactModalTitle" style="color: #0f172a; margin-bottom: 20px; font-size: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">📞 Event Contact</h3>
-        <div id="contactModalContent" style="color: #475569; font-size: 0.95rem; line-height: 1.8;">
+<div id="contactModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 9999; justify-content: center; align-items: flex-end; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+    <div style="background: #000000; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 20px 20px 0 0; max-width: 450px; width: 100%; max-height: 80vh; max-height: 80dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 28px 20px; position: relative; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.9);">
+        <div class="modal-drag-handle" style="background: #475569;"></div>
+        <button onclick="closeContactModal()" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">&times;</button>
+        <h3 id="contactModalTitle" style="color: #ffffff; margin-bottom: 20px; font-size: 1.4rem; border-bottom: 1px solid rgba(255, 255, 255, 0.12); padding-bottom: 10px; font-family: 'Space Grotesk', sans-serif;">Event Contact</h3>
+        <div id="contactModalContent" style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.8;">
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
-<!-- Three.js and Vanta.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+<!-- Three.js and Vanta.js for 3D Background Red Web Strings -->
 <script>
+    // Master Event Rules Lookup
     const eventRules = {
         "BGMI": [
-            "Teams must use the registered members and carry valid college IDs.",
-            "The match format, map, and scoring will be announced before the round.",
-            "Unauthorized devices, exploits, or teaming outside the registered squad are prohibited.",
-            "The referee's decision is final after result verification."
-        ],
-        "Ramp Walk": [
-            "Each participant must prepare an original outfit and a short introduction.",
-            "Participants are judged on confidence, presentation, creativity, and stage presence.",
-            "Props and music cues must be submitted to organizers before the event.",
-            "Respectful, inclusive, and safe presentation standards apply."
+            "Team participation only (Squad format: 4 players).",
+            "Emulators and iPad tablets are strictly prohibited. Only mobile devices permitted.",
+            "Use of any third-party plugins, hacks, or cheats will lead to immediate disqualification.",
+            "Room ID and Password will be shared 15 minutes before match start."
         ],
         "Free Fire": [
-            "Teams must use the registered members and carry valid college IDs.",
-            "The match format, map, and scoring will be announced before the round.",
-            "Exploits, unauthorized software, and outside assistance are prohibited.",
-            "The referee's decision is final after result verification."
+            "Squad format (4 players per team).",
+            "Mobile devices only. No emulators or external triggers allowed.",
+            "Any exploit or glitch abuse results in immediate forfeiture.",
+            "Organizers' decisions on point calculation are final."
         ],
         "Pencil Sketch": [
-            "Participants must bring their own approved drawing materials.",
-            "The theme will be announced at the start and the artwork must be completed in time.",
-            "Only original work created during the event will be evaluated.",
-            "Judging considers composition, detail, creativity, and relevance to the theme."
+            "Solo participation event.",
+            "Drawing sheets will be provided by the organizers; bring your own drawing pencils and erasers.",
+            "Time limit is strictly 90 minutes from briefing.",
+            "Theme will be announced on the spot."
+        ],
+        "Ramp Walk": [
+            "Traditional, Western, or Creative Theme attire is accepted.",
+            "Props are permitted with advance organizer check-in.",
+            "Judging based on posture, confidence, outfit relevance, and stage presence.",
+            "Time per walk: maximum 2 minutes."
         ],
         "Get the Shield": [
             "Participants must report to the venue before the briefing begins.",
@@ -983,42 +1760,6 @@
             "The act must be prepared and performed by one participant.",
             "Judging considers character, voice, expression, body language, and storytelling.",
             "Unsafe or discriminatory content is not permitted."
-        ],
-        "Binary Brains": [
-            "Teams must consist of 2-4 members.",
-            "The quiz will cover Computer Science fundamentals, logic, and reasoning.",
-            "Use of mobile phones or internet is strictly prohibited during the quiz.",
-            "Ties will be resolved via a sudden-death rapid-fire round."
-        ],
-        "Digital Dynamos": [
-            "Participants must build a functional web app/UI within the given timeframe.",
-            "Any modern web framework (React, Vue, HTML/CSS) is permitted.",
-            "Evaluation is based on User Experience (UX), design aesthetics, and functionality.",
-            "Pre-built templates are not allowed."
-        ],
-        "CodeCraft": [
-            "This is a solo hackathon event.",
-            "Participants must bring their own laptops and chargers.",
-            "All code must be written from scratch during the event hours.",
-            "Projects will be judged on innovation, technical complexity, and completeness."
-        ],
-        "CodeStorm": [
-            "Solo participation only.",
-            "Participants will face 5 algorithmic problem-solving tasks.",
-            "Allowed languages: C, C++, Java, and Python.",
-            "Any form of plagiarism or unauthorized internet usage will lead to instant disqualification."
-        ],
-        "CodeVerse": [
-            "Solo app development and presentation event.",
-            "Participants must present a working prototype of a mobile or desktop application.",
-            "A strict 10-minute presentation limit applies per participant.",
-            "Focus must be on real-world utility and problem-solving."
-        ],
-        "ByteBattle": [
-            "Fast-paced speed coding knockout tournament.",
-            "Each round lasts strictly 15 minutes.",
-            "The participant who submits the fastest correct solution advances to the next round.",
-            "Only one submission allowed per round."
         ]
     };
 
@@ -1028,7 +1769,6 @@
         content.innerHTML = '';
         
         let rules;
-        // Use DB rules if available, otherwise fall back to hardcoded
         if (rulesFromDb && rulesFromDb.trim()) {
             rules = rulesFromDb.split('\n').filter(r => r.trim());
         } else {
@@ -1047,31 +1787,33 @@
             content.appendChild(li);
         });
         
-        document.getElementById('rulesModal').style.display = 'flex';
+        const modal = document.getElementById('rulesModal');
+        modal.style.display = 'flex';
+        modal.classList.add('active');
     }
 
     function closeRulesModal() {
-        document.getElementById('rulesModal').style.display = 'none';
+        const modal = document.getElementById('rulesModal');
+        modal.classList.remove('active');
+        modal.style.display = 'none';
     }
 
     function openContactModal(eventName, facultyName, facultyPhone, studentName, studentPhone) {
-        document.getElementById('contactModalTitle').innerText = eventName + " - Contact";
+        document.getElementById('contactModalTitle').innerText = 'Contact Call Desk';
         const content = document.getElementById('contactModalContent');
         let html = '';
 
-        if (facultyName || facultyPhone) {
-            html += '<div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 12px;">';
-            html += '<p style="font-weight: 700; color: #0369a1; margin: 0 0 5px 0;">👨‍🏫 Faculty In Charge</p>';
-            if (facultyName) html += '<p style="margin: 0 0 3px 0;"><strong>' + facultyName + '</strong></p>';
-            if (facultyPhone) html += '<p style="margin: 0;"><a href="tel:' + facultyPhone + '" style="color: #2563eb; text-decoration: none; font-weight: 600;">📱 ' + facultyPhone + '</a></p>';
+        if (facultyPhone) {
+            html += '<div style="background: rgba(30, 58, 138, 0.25); border: 1px solid rgba(59, 130, 246, 0.3); padding: 15px; border-radius: 8px; margin-bottom: 12px;">';
+            html += '<p style="font-weight: 700; color: #93c5fd; margin: 0 0 5px 0;">Faculty Coordinator</p>';
+            if (facultyPhone) html += '<p style="margin: 0;"><a href="tel:' + facultyPhone + '" style="color: #60a5fa; text-decoration: none; font-weight: 600;">📱 ' + facultyPhone + '</a></p>';
             html += '</div>';
         }
 
-        if (studentName || studentPhone) {
-            html += '<div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin-bottom: 12px;">';
-            html += '<p style="font-weight: 700; color: #92400e; margin: 0 0 5px 0;">🎓 Student In Charge</p>';
-            if (studentName) html += '<p style="margin: 0 0 3px 0;"><strong>' + studentName + '</strong></p>';
-            if (studentPhone) html += '<p style="margin: 0;"><a href="tel:' + studentPhone + '" style="color: #2563eb; text-decoration: none; font-weight: 600;">📱 ' + studentPhone + '</a></p>';
+        if (studentPhone) {
+            html += '<div style="background: rgba(180, 83, 9, 0.2); border: 1px solid rgba(245, 158, 11, 0.3); padding: 15px; border-radius: 8px; margin-bottom: 12px;">';
+            html += '<p style="font-weight: 700; color: #fde047; margin: 0 0 5px 0;">Student Coordinator</p>';
+            if (studentPhone) html += '<p style="margin: 0;"><a href="tel:' + studentPhone + '" style="color: #fbbf24; text-decoration: none; font-weight: 600;">📱 ' + studentPhone + '</a></p>';
             html += '</div>';
         }
 
@@ -1080,15 +1822,28 @@
         }
 
         content.innerHTML = html;
-        document.getElementById('contactModal').style.display = 'flex';
+        const modal = document.getElementById('contactModal');
+        modal.style.display = 'flex';
+        modal.classList.add('active');
     }
 
     function closeContactModal() {
-        document.getElementById('contactModal').style.display = 'none';
+        const modal = document.getElementById('contactModal');
+        modal.classList.remove('active');
+        modal.style.display = 'none';
     }
 
+    // Escape key listener for closing modals
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeRulesModal();
+            closeContactModal();
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
-        // Rules buttons
+
+        // 2. Rules & Contact buttons
         document.querySelectorAll('.rules-trigger[data-event-name]').forEach(button => {
             button.addEventListener('click', () => openRulesModal(
                 button.dataset.eventName || 'This Event',
@@ -1096,7 +1851,6 @@
             ));
         });
 
-        // Contact buttons
         document.querySelectorAll('[data-contact-event]').forEach(button => {
             button.addEventListener('click', () => openContactModal(
                 button.dataset.contactEvent,
@@ -1107,57 +1861,404 @@
             ));
         });
 
-        // Close modals on backdrop click
+        // 3. Close modals on backdrop click
         ['rulesModal', 'contactModal'].forEach(id => {
-            document.getElementById(id).addEventListener('click', (e) => {
-                if (e.target.id === id) e.target.style.display = 'none';
-            });
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('click', (e) => {
+                    if (e.target.id === id) e.target.style.display = 'none';
+                });
+            }
         });
 
+        // 4. Device Detection
+        const isMobileDevice = (window.innerWidth <= 768) || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // 5. Mobile scroll logo observer
+        if (isMobileDevice) {
+            const logo = document.getElementById('mobileScrollLogo');
+            if (logo) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                observer.observe(logo);
+            }
+        }
+        
+        // 6. Main Event-Name Particle Text Animation (Works on ALL devices: Laptop & Mobile)
         const container = document.getElementById('hero-particle-text');
-        const isSmallScreen = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+        const fallbackTitle = document.getElementById('heroFallbackTitle');
         if (container && window.initParticleText) {
+            if (fallbackTitle) fallbackTitle.style.display = 'none';
             window.initParticleText(container, {
                 text: {{ config.EVENT_TITLE|tojson }},
-                particleSize: isSmallScreen ? 2 : 3,
-                density: isSmallScreen ? 2 : 3,
-                color: '#000000',
-                highlightColor: '#000000',
-                scatter: isSmallScreen ? 260 : 500,
-                gatherDuration: 2000,
-                stagger: 420,
+                particleSize: isMobileDevice ? 4 : 3,
+                density: isMobileDevice ? 2 : 3,
+                color: '#ffffff',
+                highlightColor: '#ffffff',
+                scatter: 220,
+                gatherDuration: 1400,
+                stagger: 250,
                 pointerRepel: 50,
-                repelRadius: 150,
-                idleDrift: 0.8,
+                repelRadius: 160,
+                idleDrift: 1.2,
                 trigger: 'mount',
-                fontSize: 'clamp(3rem, 12vw, 5rem)',
+                fontSize: isMobileDevice ? 'clamp(2.6rem, 10vw, 4.5rem)' : 'clamp(3.6rem, 6.5vw, 5.5rem)',
                 fontWeight: 800,
                 fontFamily: '"Space Grotesk", sans-serif',
                 glow: true
             });
         }
         
-        // Initialize Vanta.js Dynamic Background
-        const vantaReduceEffects = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const vantaSaveData = navigator.connection && navigator.connection.saveData;
-        if (typeof window.VANTA !== 'undefined' && !vantaReduceEffects && !vantaSaveData) {
-            VANTA.NET({
-                el: "#vanta-bg",
-                mouseControls: true,
-                touchControls: true,
-                gyroControls: false,
-                minHeight: 200.00,
-                minWidth: 200.00,
-                scale: 1.00,
-                scaleMobile: 1.00,
-                color: 0xff0000,
-                backgroundColor: 0xffffff,
-                points: isSmallScreen ? 8.00 : 12.00,
-                maxDistance: isSmallScreen ? 18.00 : 25.00,
-                spacing: 18.00,
-                showDots: true
+        // 7. Scroll Reveal for Mobile
+        if (isMobileDevice && 'IntersectionObserver' in window) {
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { root: null, rootMargin: '0px 0px -50px 0px', threshold: 0.15 });
+
+            document.querySelectorAll('.scroll-reveal').forEach(el => {
+                revealObserver.observe(el);
             });
         }
+
+        // 9. Modal Center on Desktop
+        if (!isMobileDevice) {
+            const desktopModalStyle = document.createElement('style');
+            desktopModalStyle.textContent = `
+                #rulesModal, #contactModal { align-items: center !important; }
+                #rulesModal > div, #contactModal > div {
+                    border-radius: 16px !important;
+                    max-width: 500px !important;
+                    width: 90% !important;
+                }
+            `;
+            document.head.appendChild(desktopModalStyle);
+        }
+
+        // 7. Animated background-only starfield: continuous space travel, no pointer input.
+        const starfield = document.getElementById('heroStarfield');
+        const hero = document.getElementById('vanta-bg');
+        if (starfield && hero) {
+            const ctx = starfield.getContext('2d');
+            const stars = [];
+            let lastTime = performance.now();
+            let frame = 0;
+            const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+            const makeStar = () => {
+                let x = (Math.random() * 2 - 1) * 1.15;
+                let y = (Math.random() * 2 - 1) * .86;
+                if (Math.hypot(x, y) < .14) { x += x < 0 ? -.2 : .2; y += y < 0 ? -.12 : .12; }
+                return { x, y, z: Math.random() * .94 + .06, px: 0, py: 0, seen: false };
+            };
+            const resizeStarfield = () => {
+                const rect = hero.getBoundingClientRect();
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                starfield.width = Math.max(1, Math.floor(rect.width * dpr));
+                starfield.height = Math.max(1, Math.floor(rect.height * dpr));
+                starfield.style.width = `${rect.width}px`;
+                starfield.style.height = `${rect.height}px`;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                const count = Math.min(950, Math.max(480, Math.floor(rect.width * rect.height / 2400)));
+                stars.length = 0;
+                for (let i = 0; i < count; i += 1) stars.push(makeStar());
+            };
+            const paintStarfield = (time) => {
+                const rect = hero.getBoundingClientRect();
+                ctx.clearRect(0, 0, rect.width, rect.height);
+                const delta = Math.min((time - lastTime) / 1000, .05);
+                lastTime = time;
+                const vanishX = rect.width / 2;
+                const vanishY = rect.height / 2;
+                const projection = Math.min(rect.width, rect.height) * .75;
+                stars.forEach((star) => {
+                    if (!reducedMotion) star.z -= delta * .48;
+                    if (star.z < .035) Object.assign(star, makeStar(), { z: 1, seen: false });
+                    const x = vanishX + star.x / star.z * projection;
+                    const y = vanishY + star.y / star.z * projection;
+                    const alpha = Math.min(1.0, 0.55 + (1 - star.z) * 0.45);
+                    const radius = Math.max(1.1, (1 - star.z) * 3.2);
+                    if (star.seen && !reducedMotion) {
+                        ctx.beginPath();
+                        ctx.moveTo(star.px, star.py);
+                        ctx.lineTo(x, y);
+                        ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.85})`;
+                        ctx.lineWidth = Math.max(0.9, radius * 0.7);
+                        ctx.stroke();
+                    }
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius * 0.55, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+                    ctx.fill();
+                    star.px = x;
+                    star.py = y;
+                    star.seen = true;
+                });
+                ctx.globalAlpha = 1;
+                if (!reducedMotion) frame = window.requestAnimationFrame(paintStarfield);
+            };
+            resizeStarfield();
+            paintStarfield(performance.now());
+            window.addEventListener('resize', () => { window.cancelAnimationFrame(frame); resizeStarfield(); lastTime = performance.now(); paintStarfield(lastTime); }, { passive: true });
+        }
+
+        // 10. Instant Jump Scroll if hash or ?jump exists
+        const jumpId = (new URLSearchParams(window.location.search)).get('jump') || (window.location.hash ? window.location.hash.substring(1) : null);
+        if (jumpId) {
+            const targetEl = document.getElementById(jumpId);
+            if (targetEl) {
+                targetEl.scrollIntoView({ behavior: 'instant', block: 'start' });
+            }
+        }
+
+        // 11. Disc cascade event catalogue. The target is a single index; the
+        // discs derive their pose from signed distance to that index so arrows,
+        // clicks, keyboard input, and touch drag all share the same motion.
+        (function initDiscCascade() {
+            const stage = document.getElementById('discCascadeStage');
+            const track = document.getElementById('discCascadeTrack');
+            if (!stage || !track) return;
+            const discs = Array.from(track.querySelectorAll('.disc-cascade-disc'));
+            if (!discs.length) return;
+            const total = discs.length;
+            let active = 0;
+            let hasInteracted = false;
+            let autoTimer = 0;
+            const autoDelay = 5000;
+            const motion = { a: 0, va: 0, b: 0, vb: 0, target: 0, raf: 0, last: 0, size: 300, drag: null, clickBlock: false };
+            const config = { spacing: 1.08, rise: .34, depth: .50, yaw: 18, fan: -8, tilt: -6, roll: 110, bounce: 0, duration: 1.05, loop: true };
+
+            const wrap = (value) => ((value % total) + total) % total;
+            const offset = (index, position) => {
+                let d = index - position;
+                return config.loop ? d - total * Math.round(d / total) : d;
+            };
+            const spring = (x, v, target, omega, damping, dt) => {
+                const steps = Math.max(1, Math.ceil(dt / (1 / 240)));
+                const h = dt / steps;
+                for (let k = 0; k < steps; k += 1) {
+                    v += (-omega * omega * (x - target) - 2 * damping * omega * v) * h;
+                    x += v * h;
+                }
+                return [x, v];
+            };
+            const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value || ''; };
+            const activeData = () => discs[active].dataset;
+
+            function updateDetails() {
+                const data = activeData();
+                setText('discCascadeTitle', data.title);
+                setText('discCascadeFormat', data.format);
+                setText('discCascadeFee', data.fee);
+                setText('discCascadeFeeBadge', `ENTRY · ${data.fee || 'Free entry'}`);
+                setText('discCascadeWhen', `${data.date || 'Registration open'} · ${data.time || 'Details inside'}`);
+                setText('discCascadeVenue', data.venue);
+                setText('discCascadeDescription', data.description || 'Bring your best idea and make the stage yours.');
+                setText('discCascadeCount', `${String(active + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`);
+                const register = document.getElementById('discCascadeRegister');
+                if (register) register.href = data.registerUrl || '#';
+                const rules = document.getElementById('discCascadeRules');
+                if (rules) { rules.dataset.eventName = data.title || 'This event'; rules.dataset.rules = data.rules || ''; }
+                const call = document.getElementById('discCascadeCall');
+                if (call) {
+                    call.dataset.contactEvent = data.title || 'This event';
+                    call.dataset.facultyName = data.facultyName || '';
+                    call.dataset.facultyPhone = data.facultyPhone || '';
+                    call.dataset.studentName = data.studentName || '';
+                    call.dataset.studentPhone = data.studentPhone || '';
+                    call.textContent = 'Contact';
+                }
+                document.querySelectorAll('#discCascadeIndexMenu [data-index]').forEach((item) => item.classList.toggle('active', Number(item.dataset.index) === active));
+            }
+
+            function paint() {
+                const size = Math.min(track.clientWidth || 420, 480);
+                motion.size = size;
+                const compact = stage.clientWidth < 720;
+                const spacing = compact ? .82 : config.spacing;
+                const rise = compact ? .22 : config.rise;
+                const pointerX = Number(stage.style.getPropertyValue('--dcc-px')) || 0;
+                const pointerY = Number(stage.style.getPropertyValue('--dcc-py')) || 0;
+                discs.forEach((disc, i) => {
+                    const dx = offset(i, motion.a);
+                    const d = offset(i, motion.b);
+                    const near = Math.min(d, 2.2);
+                    const distance = Math.abs(dx);
+                    const edgeFade = Math.max(0, Math.min(1, (2.8 - distance) / .7));
+                    const opacity = distance > 2.15 ? .16 + edgeFade * .84 : distance > 1.45 ? .72 + edgeFade * .28 : 1;
+                    const scale = .78 + Math.max(0, 1 - Math.min(distance, 2.2) / 2.2) * .22;
+                    const hidden = dx < -3.05 || dx > 2.8;
+                    const cursorYaw = i === active ? pointerX * 10 : 0;
+                    const cursorTilt = i === active ? pointerY * -8 : 0;
+                    const poseYaw = config.yaw + d * config.fan + cursorYaw;
+                    const poseTilt = config.tilt;
+                    const posePitch = 8 + cursorTilt;
+                    disc.style.transform = `translate3d(${(dx * spacing * size).toFixed(2)}px,${(-dx * rise * size).toFixed(2)}px,${(near * config.depth * size).toFixed(2)}px) rotateZ(${poseTilt.toFixed(2)}deg) rotateY(${poseYaw.toFixed(2)}deg) rotateX(${posePitch.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+                    disc.style.zIndex = String(100 + Math.round(d * 10));
+                    disc.style.opacity = opacity < 1 ? opacity.toFixed(3) : '1';
+                    disc.style.visibility = hidden ? 'hidden' : 'visible';
+                    disc.style.setProperty('--dcc-roll', `${(d * config.roll).toFixed(2)}deg`);
+                    disc.style.setProperty('--dcc-glint', `${(config.yaw + d * config.fan) * 3 + dx * 40}deg`);
+                    disc.style.pointerEvents = hidden ? 'none' : 'auto';
+                    disc.toggleAttribute('data-active', i === active);
+                    disc.classList.toggle('is-activated', hasInteracted && i === active);
+                    disc.setAttribute('aria-current', i === active ? 'true' : 'false');
+                });
+            }
+
+            function frame(now) {
+                const dt = Math.min((now - (motion.last || now)) / 1000, 1 / 20);
+                motion.last = now;
+                const omega = (2 * Math.PI) / config.duration;
+                if (!motion.drag) [motion.a, motion.va] = spring(motion.a, motion.va, motion.target, omega, 1 - config.bounce / 2, dt);
+                [motion.b, motion.vb] = spring(motion.b, motion.vb, motion.a, omega * 1.05, 1 - config.bounce, dt);
+                paint();
+                const settled = !motion.drag && Math.abs(motion.a - motion.target) < .001 && Math.abs(motion.va) < .01 && Math.abs(motion.b - motion.a) < .001 && Math.abs(motion.vb) < .01;
+                if (settled) { motion.a = motion.b = motion.target; motion.va = motion.vb = 0; paint(); motion.raf = 0; motion.last = 0; return; }
+                motion.raf = requestAnimationFrame(frame);
+            }
+            function kick() { if (!motion.raf) motion.raf = requestAnimationFrame(frame); }
+            function armAutoplay(reset = false) {
+                if (reset && autoTimer) {
+                    window.clearTimeout(autoTimer);
+                    autoTimer = 0;
+                }
+                if (autoTimer) return;
+                const tick = () => {
+                    autoTimer = 0;
+                    if (!document.hidden) moveBy(1);
+                    else armAutoplay();
+                };
+                autoTimer = window.setTimeout(tick, autoDelay);
+            }
+            function select(index) {
+                hasInteracted = true;
+                const desired = wrap(index);
+                let delta = desired - wrap(Math.round(motion.target));
+                delta -= total * Math.round(delta / total);
+                active = desired;
+                motion.target += delta;
+                updateDetails();
+                kick();
+                armAutoplay(true);
+            }
+            function moveBy(delta) {
+                hasInteracted = true;
+                active = wrap(active + delta);
+                motion.target += delta;
+                updateDetails();
+                kick();
+                armAutoplay(true);
+            }
+
+            track.addEventListener('click', (event) => {
+                if (motion.clickBlock) return;
+                const disc = event.target.closest('.disc-cascade-disc');
+                if (disc) select(Number(disc.dataset.index));
+            });
+            const step = (delta, event) => { event?.preventDefault(); event?.stopPropagation(); moveBy(delta); };
+            document.getElementById('discCascadePrev')?.addEventListener('click', (event) => step(-1, event));
+            document.getElementById('discCascadeNext')?.addEventListener('click', (event) => step(1, event));
+            document.getElementById('discCascadeRules')?.addEventListener('click', (event) => {
+                event.preventDefault();
+                const button = event.currentTarget;
+                openRulesModal(button.dataset.eventName || 'This event', button.dataset.rules || '');
+            });
+            document.getElementById('discCascadeCall')?.addEventListener('click', (event) => {
+                const button = event.currentTarget;
+                openContactModal(
+                    button.dataset.contactEvent || 'This event',
+                    button.dataset.facultyName || '',
+                    button.dataset.facultyPhone || '',
+                    button.dataset.studentName || '',
+                    button.dataset.studentPhone || ''
+                );
+            });
+            document.getElementById('discCascadeIndexButton')?.addEventListener('click', () => {
+                const index = document.getElementById('discCascadeIndex');
+                const button = document.getElementById('discCascadeIndexButton');
+                const open = index.classList.toggle('open');
+                button.setAttribute('aria-expanded', String(open));
+            });
+            document.querySelectorAll('#discCascadeIndexMenu [data-index]').forEach((item) => item.addEventListener('click', () => {
+                select(Number(item.dataset.index));
+                document.getElementById('discCascadeIndex')?.classList.remove('open');
+                document.getElementById('discCascadeIndexButton')?.setAttribute('aria-expanded', 'false');
+            }));
+            stage.addEventListener('keydown', (event) => {
+                if (event.key === 'ArrowRight' || event.key === 'ArrowDown') { event.preventDefault(); moveBy(1); }
+                if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); moveBy(-1); }
+                if (event.key === 'Home') { event.preventDefault(); select(0); }
+                if (event.key === 'End') { event.preventDefault(); select(total - 1); }
+            });
+            stage.addEventListener('pointerdown', (event) => {
+                if (event.button !== 0 || event.target.closest('.disc-cascade-controls, .disc-cascade-actions, .disc-cascade-index')) return;
+                motion.drag = { id: event.pointerId, x0: event.clientX, pos0: motion.a, moved: false, samples: [{ t: event.timeStamp, x: event.clientX }] };
+            });
+            stage.addEventListener('pointermove', (event) => {
+                const drag = motion.drag;
+                if (!drag || drag.id !== event.pointerId) return;
+                const dx = event.clientX - drag.x0;
+                if (!drag.moved) {
+                    if (Math.abs(dx) < 6) return;
+                    drag.moved = true;
+                    drag.x0 = event.clientX;
+                    drag.pos0 = motion.a;
+                    motion.va = 0;
+                    stage.setPointerCapture?.(event.pointerId);
+                }
+                const spacing = stage.clientWidth < 720 ? .82 : config.spacing;
+                const raw = drag.pos0 - (event.clientX - drag.x0) / (motion.size * spacing);
+                motion.a = raw;
+                const nearest = wrap(Math.round(raw));
+                if (nearest !== active) { hasInteracted = true; active = nearest; updateDetails(); }
+                drag.samples.push({ t: event.timeStamp, x: event.clientX });
+                if (drag.samples.length > 6) drag.samples.shift();
+                kick();
+            });
+            const finishDrag = (event) => {
+                const drag = motion.drag;
+                if (!drag || drag.id !== event.pointerId) return;
+                motion.drag = null;
+                if (!drag.moved) return;
+                motion.clickBlock = true;
+                window.setTimeout(() => { motion.clickBlock = false; }, 0);
+                const first = drag.samples[0];
+                const last = drag.samples[drag.samples.length - 1];
+                const ms = Math.max(last.t - first.t, 1);
+                const velocity = event.type === 'pointercancel' ? 0 : (-(last.x - first.x) / ms / (motion.size * config.spacing)) * 1000;
+                const target = Math.round(motion.a + velocity * .2);
+                select(target);
+            };
+            stage.addEventListener('pointerup', finishDrag);
+            stage.addEventListener('pointercancel', finishDrag);
+            stage.addEventListener('pointermove', (event) => {
+                const bounds = stage.getBoundingClientRect();
+                const px = Math.max(-1, Math.min(1, (event.clientX - (bounds.left + bounds.width / 2)) / bounds.width));
+                const py = Math.max(-1, Math.min(1, (event.clientY - (bounds.top + bounds.height / 2)) / bounds.height));
+                stage.style.setProperty('--dcc-px', px.toFixed(3));
+                stage.style.setProperty('--dcc-py', py.toFixed(3));
+                paint();
+            }, { passive: true });
+            stage.addEventListener('pointerleave', () => {
+                stage.style.setProperty('--dcc-px', '0');
+                stage.style.setProperty('--dcc-py', '0');
+                paint();
+            }, { passive: true });
+            window.addEventListener('resize', paint, { passive: true });
+            updateDetails();
+            paint();
+            armAutoplay();
+        })();
     });
 </script>
 {% endblock %}

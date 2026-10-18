@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}EventMate – College Event Management System{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
@@ -11,10 +11,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head_extra %}{% endblock %}
     <style>
         /* Official Header */
         .landing-header {
@@ -44,12 +45,11 @@
             height: 35px;
         }
         .landing-logo h1 {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             color: #0f172a;
             margin: 0;
             font-size: 1.1rem;
             letter-spacing: 0.5px;
-            text-transform: uppercase;
         }
         
         .header-nav-center {
@@ -68,7 +68,6 @@
             font-size: 0.84rem;
             transition: color 0.3s ease;
             padding: 8px 0;
-            text-transform: uppercase;
             letter-spacing: 1px;
         }
         .header-nav-link:hover {
@@ -112,13 +111,114 @@
         .header-btn:hover {
             background: rgba(37, 99, 235, 0.14);
             border-color: #2563eb;
-            box-shadow: 0 0 10px rgba(37, 99, 235, 0.2);
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.12);
             color: #ffffff;
         }
         .header-btn.active {
             background: rgba(37, 99, 235, 0.18);
             color: #ffffff;
             border-color: #2563eb;
+        }
+        .landing-logo:focus-visible,
+        .image-like-nav .nav-link:focus-visible,
+        .header-btn:focus-visible,
+        .mobile-toggle:focus-visible {
+            outline: 3px solid rgba(37, 99, 235, .28);
+            outline-offset: 3px;
+        }
+
+        /* Authenticated workspace header */
+        .workspace-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #ffffff;
+            border-bottom: 1px solid #e5eaf2;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+        }
+        .workspace-header-inner {
+            width: min(100% - 32px, 1480px);
+            min-height: 72px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 24px;
+        }
+        .workspace-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            min-width: max-content;
+            color: #172033;
+            text-decoration: none;
+        }
+        .workspace-brand-mark {
+            display: inline-grid;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            background: #172554;
+            color: #ffffff;
+            font-size: .78rem;
+            font-weight: 850;
+            letter-spacing: .08em;
+            box-shadow: 0 5px 12px rgba(15, 23, 42, .16);
+        }
+        .workspace-brand-copy,
+        .workspace-user-copy { display: flex; flex-direction: column; min-width: 0; }
+        .workspace-brand-copy strong { font-size: .98rem; letter-spacing: -.02em; }
+        .workspace-brand-copy small,
+        .workspace-user-copy small { margin-top: 2px; color: #596579; font-size: .68rem; font-weight: 700; letter-spacing: .04em; }
+        .workspace-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            min-width: 0;
+        }
+        .workspace-nav a {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            min-height: 40px;
+            padding: 0 11px;
+            border-radius: 8px;
+            color: #536176;
+            font-size: .79rem;
+            font-weight: 750;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: color .18s ease, background .18s ease, transform .18s ease;
+        }
+        .workspace-nav a:hover { color: #1d4ed8; background: #f3f6ff; transform: translateY(-1px); }
+        .workspace-nav a.active { color: #1d4ed8; background: #edf3ff; }
+        .workspace-nav a.active::after { content: ''; position: absolute; left: 11px; right: 11px; bottom: 5px; height: 2px; border-radius: 999px; background: #2563eb; }
+        .workspace-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; min-width: max-content; }
+        .workspace-user { display: inline-flex; align-items: center; gap: 9px; max-width: 200px; }
+        .workspace-avatar { display: inline-grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; border-radius: 50%; background: #e9efff; color: #1d4ed8; font-size: .78rem; font-weight: 850; }
+        .workspace-user-copy strong { overflow: hidden; color: #26344d; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+        .workspace-logout { display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border: 1px solid #f0c5c1; border-radius: 8px; background: #fffafa; color: #b42318; font-size: .76rem; font-weight: 800; text-decoration: none; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+        .workspace-logout:hover { border-color: #e59b94; background: #fff2f1; transform: translateY(-1px); }
+        .workspace-menu-toggle { display: none; align-items: center; gap: 7px; min-height: 38px; padding: 0 10px; border: 1px solid #dbe3ef; border-radius: 8px; background: #ffffff; color: #334155; font: inherit; font-size: .76rem; font-weight: 800; cursor: pointer; }
+        .workspace-menu-icon { display: grid; gap: 3px; }
+        .workspace-menu-icon i { display: block; width: 15px; height: 2px; border-radius: 2px; background: currentColor; }
+
+        @media (max-width: 1050px) {
+            .workspace-header-inner { grid-template-columns: auto auto; justify-content: space-between; gap: 12px; }
+            .workspace-menu-toggle { display: inline-flex; justify-self: end; }
+            .workspace-nav { position: absolute; top: calc(100% + 8px); right: 16px; left: 16px; display: none; align-items: stretch; flex-direction: column; gap: 2px; padding: 8px; border: 1px solid #e0e7f0; border-radius: 12px; background: #ffffff; box-shadow: 0 10px 16px rgba(15, 23, 42, .12); }
+            .workspace-nav.open { display: flex; }
+            .workspace-nav a { min-height: 44px; padding: 0 12px; }
+            .workspace-nav a.active::after { left: 12px; right: auto; bottom: 10px; width: 3px; height: 22px; }
+            .workspace-actions { grid-column: 1 / -1; justify-content: space-between; padding: 10px 0 12px; border-top: 1px solid #eef1f6; }
+        }
+        @media (max-width: 520px) {
+            .workspace-header-inner { width: min(100% - 24px, 1480px); min-height: 64px; }
+            .workspace-brand-copy small, .workspace-user-copy small { display: none; }
+            .workspace-user { max-width: 130px; }
+            .workspace-logout { min-height: 34px; padding: 0 10px; }
         }
 
         /* Mobile Menu */
@@ -173,26 +273,60 @@
             margin-top: auto;
         }
     </style>
-    {% block extra_css %}{% endblock %}
 </head>
 
 <body class="light-theme">
 
-    <!-- Official Header -->
+    {% if session.get('user_id') %}
+    <!-- Authenticated workspace header: compact, role-aware, and independent from the public event header. -->
+    <header class="workspace-header">
+        <div class="workspace-header-inner">
+            <a class="workspace-brand" href="{{ url_for('admin_dashboard' if session.get('role') == 'admin' else 'member_dashboard') }}" aria-label="EventMate workspace home">
+                <span class="workspace-brand-mark" aria-hidden="true">EM</span>
+                <span class="workspace-brand-copy"><strong>EventMate</strong><small>{{ session.get('role', 'member')|capitalize }} workspace</small></span>
+            </a>
+            <button class="workspace-menu-toggle" type="button" aria-expanded="false" aria-controls="workspace-navigation">
+                <span class="workspace-menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span>Menu</span>
+            </button>
+            <nav id="workspace-navigation" class="workspace-nav" aria-label="Workspace navigation">
+                <a href="{{ url_for('events_list') }}">Public events</a>
+                {% if session.get('role') == 'admin' %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="{% if request.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a>
+                    <a href="{{ url_for('attendance_manager') }}" class="{% if request.path == '/admin/attendance' %}active{% endif %}">Attendance</a>
+                    <a href="{{ url_for('certificates_manager') }}" class="{% if request.path == '/admin/certificates' %}active{% endif %}">Certificates</a>
+                    <a href="{{ url_for('members_list') }}" class="{% if request.path == '/members' %}active{% endif %}">Members</a>
+                {% else %}
+                    <a href="{{ url_for('member_dashboard') }}" class="{% if request.path == '/member/dashboard' %}active{% endif %}">Dashboard</a>
+                    <a href="{{ url_for('members_list') }}" class="{% if request.path == '/members' %}active{% endif %}">Team directory</a>
+                {% endif %}
+            </nav>
+            <div class="workspace-actions">
+                <div class="workspace-user">
+                    <span class="workspace-avatar" aria-hidden="true">{{ (session.get('full_name', session.get('username', 'U')) or 'U')[0]|upper }}</span>
+                    <span class="workspace-user-copy"><strong>{{ session.get('full_name', session.get('username')) }}</strong><small>{{ session.get('role', 'member')|capitalize }}</small></span>
+                </div>
+                <a class="workspace-logout" href="{{ url_for('logout') }}">Log out</a>
+            </div>
+        </div>
+    </header>
+    {% else %}
+    <!-- Public event header -->
     <header class="landing-header" style="box-sizing: border-box;">
         <a href="https://shreedakshaacademyedu.in/" target="_blank" class="landing-logo">
             <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Logo">
             <h1>Shree Daksha Academy</h1>
         </a>
 
-        <button class="mobile-toggle" onclick="document.querySelector('.header-nav-center').classList.toggle('open')">&#9776;</button>
+        <button class="mobile-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" onclick="const nav = document.getElementById('public-navigation'); const isOpen = nav.classList.toggle('open'); this.setAttribute('aria-expanded', String(isOpen));">&#9776;<span class="sr-only">Toggle navigation</span></button>
         
-        <nav class="header-nav-center">
-            <ul class="image-like-nav">
+        <nav id="public-navigation" class="header-nav-center" aria-label="Public navigation">
+            <div class="image-like-nav">
                 <div class="nav-pill-indicator"></div>
                 <a href="{{ url_for('events_list') }}" class="nav-link">Home</a>
                 <a href="{{ url_for('events_list') }}#events" class="nav-link">Event</a>
                 <a href="{{ url_for('events_list') }}#location" class="nav-link">Location</a>
+                <a href="{{ url_for('events_list') }}#contact" class="nav-link">Contact</a>
                 
                 {% if session.get('user_id') %}
                     {% if session.get('role') == 'admin' %}
@@ -205,7 +339,7 @@
                         <a href="{{ url_for('members_list') }}" class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a>
                     {% endif %}
                 {% endif %}
-            </ul>
+            </div>
 
             <div class="header-actions mobile-visible">
                 {% if session.get('user_id') %}
@@ -218,21 +352,21 @@
         </nav>
 
         <div class="header-actions">
+            <a href="{{ url_for('events_list') }}#events" class="header-register-link">Register for Event</a>
             {% if session.get('user_id') %}
                 <div class="header-user-name" style="display:flex; align-items:center; gap:8px; color:#0f172a; font-weight:600; padding:0 15px; border-left:1px solid #e2e8f0; margin-left:10px;">
                     <span>{{ session.get('full_name', session.get('username')) }}</span>
                 </div>
                 <a href="{{ url_for('logout') }}" class="header-btn" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); min-width: max-content;">Logout</a>
-            {% else %}
-                <div style="width: 1px;"></div>
             {% endif %}
         </div>
     </header>
+    {% endif %}
 
     <!-- Main Content Area -->
     <main class="main-wrapper">
         <!-- Universal Quick Navigation -->
-        {% if request.path != '/' and request.path != '/events' %}
+        {% if request.path != '/' and request.path != '/events' and request.endpoint != 'login' %}
         <div class="nav-breadcrumbs"
             style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
             <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -251,11 +385,11 @@
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        <div class="alert-container" style="position: fixed; top: 80px; right: 20px; z-index: 10000; width: 300px;">
+        <div class="alert-container">
             {% for category, message in messages %}
-            <div class="alert alert-{{ category }}" style="margin-bottom: 10px; padding: 15px; border-radius: 8px; background: #ffffff; backdrop-filter: blur(10px); color: #0f172a; border-left: 4px solid #dc2626; box-shadow: 0 10px 25px rgba(15,23,42,0.12);">
+            <div class="alert alert-{{ category }}">
                 <span>{{ message }}</span>
-                <button class="alert-close" onclick="this.parentElement.remove()" style="float:right; background:none; border:none; color:#64748b; cursor:pointer;">&times;</button>
+                <button class="alert-close" type="button" onclick="this.parentElement.remove()" aria-label="Dismiss notification">&times;</button>
             </div>
             {% endfor %}
         </div>
@@ -269,11 +403,11 @@
     <div id="certPreviewModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalCertTitle" style="font-size: 1.15rem;">Certificate Preview</h3>
+                <h2 id="modalCertTitle" style="font-size: 1.15rem;">Certificate Preview</h2>
                 <button class="alert-close" onclick="closeCertModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <img id="modalCertImage" src="" alt="Certificate Preview">
+                <img id="modalCertImage" src="{{ url_for('static', filename='favicon.svg') }}" alt="Certificate Preview">
                 <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; justify-content: center;">
                     <a id="modalDownloadBtn" href="" download class="btn btn-primary">Download High-Res PNG</a>
                     <button type="button" class="btn btn-secondary" onclick="closeCertModal()">Close</button>
@@ -301,6 +435,21 @@
     <!-- Pill Navigation Animation Script -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const workspaceToggle = document.querySelector('.workspace-menu-toggle');
+            const workspaceNav = document.querySelector('.workspace-nav');
+            if (workspaceToggle && workspaceNav) {
+                workspaceToggle.addEventListener('click', () => {
+                    const isOpen = workspaceNav.classList.toggle('open');
+                    workspaceToggle.setAttribute('aria-expanded', String(isOpen));
+                });
+                workspaceNav.addEventListener('click', (event) => {
+                    if (event.target.closest('a')) {
+                        workspaceNav.classList.remove('open');
+                        workspaceToggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+
             const nav = document.querySelector('.image-like-nav');
             if (!nav) return;
             const indicator = nav.querySelector('.nav-pill-indicator');

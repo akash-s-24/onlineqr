@@ -1,5 +1,6 @@
 # Environment variables
 .env
+backups/
 
 # Python cache and bytecode
 __pycache__/
@@ -34,3 +35,10 @@ kannada_test_bold.png
 *.sublime-workspace
 .DS_Store
 Thumbs.db
+
+# Frontend build & dependencies
+node_modules/
+dist/
+.agents/
+skills-lock.json
+

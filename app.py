@@ -314,10 +314,33 @@ def admin_dashboard():
         'total_pending': total_pending
     }
 
+    # Analytics: Online vs Offline Payments
+    online_res = query_db("SELECT COUNT(*) as count FROM registrations WHERE payment_method = 'Online'", one=True)
+    online_count = online_res['count'] if online_res else 0
+
+    offline_res = query_db("SELECT COUNT(*) as count FROM registrations WHERE payment_status = 'pay_on_site' OR payment_method = 'Cash'", one=True)
+    offline_count = offline_res['count'] if offline_res else 0
+
+    analytics = {
+        'online_count': online_count,
+        'offline_count': offline_count
+    }
+
+    # Analytics: Event Stats for Bar Chart & Top Event
+    event_stats = query_db("""
+        SELECT e.event_name, COUNT(r.id) as reg_count 
+        FROM events e 
+        LEFT JOIN registrations r ON e.id = r.event_id 
+        GROUP BY e.id 
+        ORDER BY reg_count DESC
+    """)
+    top_event = event_stats[0] if event_stats else {'event_name': 'None', 'reg_count': 0}
+
     # Pending Registrations
     pending_registrations = query_db("""
         SELECT r.id as registration_id, r.registration_uid, r.is_group, r.team_name, r.team_size, r.team_members, r.payment_status, r.amount_paid, r.payment_method, r.utr_number,
-               p.full_name, p.email, p.college_name, p.department, 
+               r.payment_verified_at, r.payment_verified_by, r.receipt_sent_at, r.receipt_delivery_status,
+               p.full_name, p.email, p.phone, p.college_name, p.department, 
                e.event_name, u.username as registered_by_name
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
@@ -330,7 +353,8 @@ def admin_dashboard():
     # Approved Recent Registrations
     recent_registrations = query_db("""
         SELECT r.id as registration_id, r.registration_uid, r.is_group, r.team_name, r.team_size, r.team_members, r.payment_status, r.amount_paid, r.payment_method, r.utr_number,
-               p.full_name, p.email, p.college_name, p.department, 
+               r.payment_verified_at, r.payment_verified_by, r.receipt_sent_at, r.receipt_delivery_status,
+               p.full_name, p.email, p.phone, p.college_name, p.department, 
                e.event_name, a.status as att_status, u.username as registered_by_name
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
@@ -357,6 +381,10 @@ def admin_dashboard():
     """)
 
     events = query_db("SELECT * FROM events ORDER BY id ASC")
+    showcase_section = query_db(
+        "SELECT * FROM event_showcase_sections WHERE section_key = %s",
+        ('main-events',), one=True
+    )
     
     return render_template('admin_dashboard.html', 
                            stats=stats, 
@@ -365,7 +393,12 @@ def admin_dashboard():
                            online_approved=online_approved,
                            cash_approved=cash_approved,
                            team_performance=team_performance,
-                           events=events)
+                           events=events,
+                           analytics=analytics,
+                           event_stats=event_stats,
+                           top_event=top_event,
+                           showcase_section=showcase_section,
+                           smtp_info=get_smtp_info())
 
 @app.route('/admin/approve/<int:reg_id>', methods=['POST'])
 @admin_required
@@ -374,6 +407,25 @@ def approve_registration(reg_id):
     execute_db("UPDATE registrations SET status = 'approved' WHERE id = %s", (reg_id,))
     flash("Registration has been approved and moved to the completed list.", "success")
     return redirect(request.referrer or url_for('admin_dashboard'))
+
+@app.route('/payment-status/<registration_uid>')
+def payment_status(registration_uid):
+    """Show a limited, shareable payment-status record."""
+    registration = query_db(
+        """
+        SELECT r.registration_uid, r.payment_status, r.amount_paid, r.payment_method,
+               r.utr_number, r.payment_verified_at, r.receipt_delivery_status,
+               p.full_name, e.event_name, e.event_fee
+        FROM registrations r
+        JOIN participants p ON p.id = r.participant_id
+        JOIN events e ON e.id = r.event_id
+        WHERE r.registration_uid = %s
+        """,
+        (registration_uid,), one=True
+    )
+    if not registration:
+        abort(404)
+    return render_template('payment_status.html', registration=registration)
 
 @app.route('/admin/export/csv')
 @admin_required
@@ -452,6 +504,7 @@ def member_dashboard():
     user_id = session.get('user_id')
     registrations = query_db("""
         SELECT r.id as registration_id, r.registration_uid, r.payment_status, r.amount_paid, r.payment_method, r.team_name, r.status as approval_status, r.utr_number,
+               r.payment_verified_at, r.receipt_sent_at, r.receipt_delivery_status,
                p.full_name, p.email, p.phone, p.college_name, p.department, e.event_name
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
@@ -464,13 +517,15 @@ def member_dashboard():
 @app.route('/member/payment/<int:reg_id>', methods=['POST'])
 @admin_required
 def toggle_payment(reg_id):
-    """Allow an administrator to verify or correct a payment status."""
+    """Verify a payment once against the college bank record and issue receipt."""
     reg = query_db(
         """
         SELECT r.registered_by, r.payment_status, r.status,
-               r.payment_method, r.utr_number, e.event_fee
+               r.payment_method, r.utr_number, r.payment_verified_at,
+               r.receipt_delivery_status, p.full_name, p.email, e.event_name, e.event_fee
         FROM registrations r
         JOIN events e ON e.id = r.event_id
+        JOIN participants p ON p.id = r.participant_id
         WHERE r.id = %s
         """,
         (reg_id,), one=True
@@ -483,22 +538,54 @@ def toggle_payment(reg_id):
         flash("Approve the registration before verifying its payment.", "warning")
         return redirect(request.referrer or url_for('member_dashboard'))
 
-    new_status = 'paid' if reg['payment_status'] != 'paid' else 'unpaid'
+    if reg['payment_status'] == 'paid':
+        flash("This payment is already verified. Use receipt resend if delivery failed.", "info")
+        return redirect(request.referrer or url_for('admin_dashboard'))
 
-    if new_status == 'paid' and safe_int(reg.get('event_fee'), 0) > 0:
+    if safe_int(reg.get('event_fee'), 0) > 0:
         if reg.get('payment_method') == 'Online' and not reg.get('utr_number'):
             flash("Cannot verify an online payment without a UTR / transaction reference.", "warning")
             return redirect(request.referrer or url_for('admin_dashboard'))
-    
-    # If marking as paid, get the event fee to update amount_paid
-    if new_status == 'paid':
-        event_info = query_db("SELECT e.event_fee FROM events e JOIN registrations r ON e.id = r.event_id WHERE r.id = %s", (reg_id,), one=True)
-        fee = event_info['event_fee'] if event_info else 0
-        execute_db("UPDATE registrations SET payment_status = %s, amount_paid = %s WHERE id = %s", (new_status, fee, reg_id))
+
+    fee = max(0, safe_int(reg.get('event_fee'), 0))
+    updated = execute_db(
+        """
+        UPDATE registrations
+        SET payment_status = 'paid', amount_paid = %s,
+            payment_verified_at = CURRENT_TIMESTAMP,
+            payment_verified_by = %s,
+            receipt_delivery_status = 'pending'
+        WHERE id = %s AND COALESCE(payment_status, 'unpaid') <> 'paid'
+        """,
+        (fee, session.get('user_id'), reg_id)
+    )
+
+    if updated != 1:
+        # The conditional UPDATE is the concurrency boundary. If another admin
+        # won the race, do not send a second receipt or overwrite its audit data.
+        flash("This payment was already verified by another administrator.", "info")
+        return redirect(request.referrer or url_for('admin_dashboard'))
+
+    receipt_ok, receipt_msg = send_receipt_email(
+        recipient_email=reg['email'],
+        participant_name=reg['full_name'],
+        event_name=reg['event_name'],
+        payment_method=reg['payment_method'],
+        amount_paid=fee,
+        utr_number=reg['utr_number']
+    )
+    if receipt_ok:
+        execute_db(
+            "UPDATE registrations SET receipt_sent_at = CURRENT_TIMESTAMP, receipt_delivery_status = 'sent' WHERE id = %s",
+            (reg_id,)
+        )
+        flash(f"Payment verified and receipt sent to {reg['email']}.", "success")
     else:
-        execute_db("UPDATE registrations SET payment_status = %s, amount_paid = 0 WHERE id = %s", (new_status, reg_id))
-        
-    flash(f"Payment status updated to {new_status.upper()}.", "success")
+        execute_db(
+            "UPDATE registrations SET receipt_delivery_status = 'failed' WHERE id = %s",
+            (reg_id,)
+        )
+        flash(f"Payment verified, but receipt delivery failed: {receipt_msg}", "warning")
     return redirect(request.referrer or url_for('member_dashboard'))
 
 # ---------------------------------------------------------
@@ -507,7 +594,60 @@ def toggle_payment(reg_id):
 @app.route('/events')
 def events_list():
     events = query_db("SELECT * FROM events ORDER BY id ASC")
-    return render_template('events.html', events=events)
+    showcase_section = query_db(
+        "SELECT * FROM event_showcase_sections WHERE section_key = %s",
+        ('main-events',), one=True
+    )
+    return render_template('events.html', events=events, showcase_section=showcase_section)
+
+
+@app.route('/admin/event-showcase', methods=['POST'])
+@admin_required
+def update_event_showcase():
+    """Update the editable public disc-cascade section settings."""
+    eyebrow = request.form.get('eyebrow', '').strip() or 'THE LINEUP'
+    title = request.form.get('title', '').strip() or 'Pick your frequency.'
+    description = request.form.get('description', '').strip()
+    background_color = request.form.get('background_color', '').strip() or '#11131b'
+    if not re.fullmatch(r'#[0-9a-fA-F]{6}', background_color):
+        flash('Background color must be a six-digit hex color.', 'danger')
+        return redirect(url_for('admin_dashboard'))
+
+    try:
+        banner_filename = save_image_upload(
+            request.files.get('showcase_banner'), app.config['UPLOAD_FOLDER_BANNERS']
+        )
+    except ValueError as error:
+        flash(str(error), 'danger')
+        return redirect(url_for('admin_dashboard'))
+
+    current = query_db(
+        "SELECT banner_image FROM event_showcase_sections WHERE section_key = %s",
+        ('main-events',), one=True
+    )
+    saved_banner = banner_filename or (current.get('banner_image') if current else None)
+    if request.form.get('clear_showcase_banner') == 'on':
+        saved_banner = None
+
+    execute_db(
+        """
+        UPDATE event_showcase_sections
+        SET eyebrow = %s, title = %s, description = %s, background_color = %s,
+            banner_image = %s, is_enabled = %s, updated_at = CURRENT_TIMESTAMP
+        WHERE section_key = %s
+        """,
+        (
+            eyebrow,
+            title,
+            description,
+            background_color,
+            saved_banner,
+            1 if request.form.get('is_enabled') == 'on' else 0,
+            'main-events',
+        )
+    )
+    flash('Disc-cascade event section updated successfully.', 'success')
+    return redirect(url_for('admin_dashboard'))
 
 
 @app.route('/events/<int:event_id>/upi-qr')
@@ -751,6 +891,7 @@ def register_participant():
             payment_status = 'pending'
         elif payment_method == 'Cash':
             utr_number = None
+            payment_status = 'pay_on_site'
         else:
             flash('Select Online (UPI) or Cash before submitting a paid registration.', 'danger')
             return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
@@ -837,8 +978,7 @@ def register_participant():
         confirmation = 'Registration received and awaiting admin verification.' if payment_status == 'pending' else 'Registration successful.'
         flash(f'{confirmation} Reference: {registration["registration_uid"]}{team_info_msg}', 'success')
         
-        # Always redirect to the events list on success so users can keep browsing events
-        return redirect(url_for('events_list'))
+        return redirect(url_for('payment_status', registration_uid=registration['registration_uid']))
 
     return render_template('register.html', events=events, selected_event_id=selected_event_id, user_info=user_info)
 
@@ -1329,8 +1469,16 @@ def send_receipt_email_route(reg_id):
     )
     
     if success:
+        execute_db(
+            "UPDATE registrations SET receipt_sent_at = CURRENT_TIMESTAMP, receipt_delivery_status = 'sent' WHERE id = %s",
+            (reg_id,)
+        )
         flash(msg, 'success')
     else:
+        execute_db(
+            "UPDATE registrations SET receipt_delivery_status = 'failed' WHERE id = %s",
+            (reg_id,)
+        )
         flash(f"Email dispatch error: {msg}", 'danger')
         
     return redirect(request.referrer or url_for('admin_dashboard'))
@@ -1384,13 +1532,17 @@ def send_bulk_certificate_emails():
             sent_count += 1
 
     smtp_info = get_smtp_info()
-    mode_text = "Safe Demo Mode" if smtp_info['is_demo'] else "Live SMTP"
+    mode_text = "Safe Demo Mode" if smtp_info['is_demo'] else f"Live {smtp_info['mode'].upper()}"
     flash(f"Successfully emailed {sent_count} certificate(s) via {mode_text}!", 'success')
     return redirect(url_for('certificates_manager'))
 
 @app.route('/admin/certificates/toggle-mode', methods=['POST'])
 @admin_required
 def toggle_smtp_mode():
+    if Config.APP_ENV == 'production':
+        flash('Email mode is controlled by deployment secrets in production.', 'warning')
+        return redirect(url_for('certificates_manager'))
+
     new_mode = request.form.get('mode', 'demo').strip().lower()
     if new_mode not in ('demo', 'live'):
         new_mode = 'demo'
@@ -1514,9 +1666,132 @@ def clear_all_registrations():
     flash("All registrations, attendance, and certificates have been permanently cleared.", "success")
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/api/chat', methods=['POST'])
+def api_chat():
+    data = request.get_json() or {}
+    message = data.get('message', '').strip().lower()
+    
+    if not message:
+        return jsonify({'status': 'error', 'message': 'Empty message'})
+        
+    # Basic Rule-Based Fallback for AI Assistant
+    # In production, integrate `google.generativeai` here.
+    reply = "I'm still learning! But I can tell you that you can register for events using the Registration page. If you choose 'Pay On-Site', you can pay cash at the venue."
+    
+    if 'when' in message or 'time' in message or 'schedule' in message:
+        reply = "Events are scheduled throughout the day. Please check the specific event cards on the homepage for exact timings."
+    elif 'where' in message or 'venue' in message or 'location' in message:
+        reply = "All events are held at the Shree Daksha Academy main campus. Refer to your event ticket for the exact room number."
+    elif 'fee' in message or 'pay' in message or 'cost' in message:
+        reply = "You can pay online via UPI or choose the 'Pay On-Site' option to pay in cash when you arrive. Registration fees vary per event."
+    elif 'qr' in message or 'ticket' in message:
+        reply = "Once registered, you will receive a QR Code. Keep it safe! Our volunteers will scan it when you arrive to mark your attendance."
+        
+    # Add a slight delay to simulate "thinking"
+    time.sleep(1.2)
+    return jsonify({'status': 'success', 'reply': reply})
+
+@app.route('/admin/qr_scanner')
+@admin_required
+def qr_scanner():
+    return render_template('qr_scanner.html')
+
+@app.route('/api/scan_qr')
+@admin_required
+def api_scan_qr():
+    uid = request.args.get('uid', '').strip()
+    if not uid:
+        return jsonify({'status': 'error', 'message': 'No UID provided'})
+        
+    res = query_db("""
+        SELECT r.id as registration_id, r.registration_uid, r.is_group, r.team_name, r.team_size, r.payment_status, r.payment_method,
+               p.full_name, p.college_name, p.department, e.event_name,
+               (SELECT status FROM attendance a WHERE a.registration_id = r.id) as attendance_status
+        FROM registrations r
+        JOIN participants p ON r.participant_id = p.id
+        JOIN events e ON r.event_id = e.id
+        WHERE r.registration_uid = %s
+    """, (uid,), one=True)
+    
+    if res:
+        return jsonify({'status': 'success', 'data': dict(res)})
+    return jsonify({'status': 'error', 'message': 'Invalid QR Code'})
+
+@app.route('/api/mark_attended', methods=['POST'])
+@admin_required
+def api_mark_attended():
+    data = request.get_json() or {}
+    reg_id = data.get('registration_id')
+    
+    if not reg_id:
+        return jsonify({'status': 'error', 'message': 'Invalid data'})
+        
+    # Verify cash payment and record the same audit trail as online payment.
+    reg = query_db(
+        """
+        SELECT r.payment_status, r.payment_method, r.utr_number,
+               p.full_name, p.email, e.event_name, e.event_fee
+        FROM registrations r
+        JOIN participants p ON p.id = r.participant_id
+        JOIN events e ON e.id = r.event_id
+        WHERE r.id = %s
+        """,
+        (reg_id,), one=True
+    )
+    if not reg:
+        return jsonify({'status': 'error', 'message': 'Registration not found'}), 404
+
+    receipt_warning = None
+    if reg['payment_status'] == 'pay_on_site':
+        fee = max(0, safe_int(reg.get('event_fee'), 0))
+        claimed = execute_db(
+            """
+            UPDATE registrations
+            SET payment_status = 'paid', amount_paid = %s,
+                payment_verified_at = CURRENT_TIMESTAMP,
+                payment_verified_by = %s,
+                receipt_delivery_status = 'pending'
+            WHERE id = %s AND payment_status = 'pay_on_site'
+            """,
+            (fee, session.get('user_id'), reg_id)
+        )
+        if claimed == 1:
+            receipt_ok, receipt_msg = send_receipt_email(
+                recipient_email=reg['email'],
+                participant_name=reg['full_name'],
+                event_name=reg['event_name'],
+                payment_method=reg['payment_method'],
+                amount_paid=fee,
+                utr_number=reg['utr_number']
+            )
+            if receipt_ok:
+                execute_db(
+                    "UPDATE registrations SET receipt_sent_at = CURRENT_TIMESTAMP, receipt_delivery_status = 'sent' WHERE id = %s",
+                    (reg_id,)
+                )
+            else:
+                execute_db(
+                    "UPDATE registrations SET receipt_delivery_status = 'failed' WHERE id = %s",
+                    (reg_id,)
+                )
+                receipt_warning = f'Payment recorded, but receipt delivery failed: {receipt_msg}'
+        
+    # Check attendance
+    att = query_db("SELECT id FROM attendance WHERE registration_id = %s", (reg_id,), one=True)
+    if not att:
+        execute_db("INSERT INTO attendance (registration_id, status) VALUES (%s, 'present')", (reg_id,))
+    else:
+        execute_db("UPDATE attendance SET status = 'present' WHERE registration_id = %s", (reg_id,))
+        
+    message = 'Marked Paid and Attended'
+    if receipt_warning:
+        message += f'. {receipt_warning} An administrator can resend the receipt.'
+    return jsonify({'status': 'success', 'message': message})
+
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5001))
     print("=" * 60)
     print("  EventMate – College Event Management System")
-    print("  Server running on http://127.0.0.1:5001")
+    print(f"  Server running on http://0.0.0.0:{port} (Accessible on local network)")
     print("=" * 60)
-    app.run(debug=True, host='127.0.0.1', port=5001)
+    app.run(debug=Config.APP_ENV != 'production', host='0.0.0.0', port=port)

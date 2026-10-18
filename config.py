@@ -41,7 +41,7 @@ class Config:
     SIGNATORY_TITLE = os.environ.get('SIGNATORY_TITLE', 'Head of Department (HOD)')
 
     # Base URL for Verification Links
-    BASE_URL = os.environ.get('BASE_URL', 'http://127.0.0.1:5000')
+    BASE_URL = os.environ.get('BASE_URL') or os.environ.get('RENDER_EXTERNAL_URL', 'http://127.0.0.1:5000')
 
     # Certificate Storage Path
     CERTIFICATE_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'certificates')
@@ -55,3 +55,25 @@ class Config:
     SMTP_SENDER_EMAIL = os.environ.get('SMTP_SENDER_EMAIL', os.environ.get('SMTP_USERNAME', 'eventmate.college@gmail.com'))
     SMTP_USE_TLS = os.environ.get('SMTP_USE_TLS', 'True').lower() in ('true', '1', 't')
     SMTP_USE_SSL = os.environ.get('SMTP_USE_SSL', 'False').lower() in ('true', '1', 't')
+    RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '').strip()
+    RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', '').strip()
+
+
+if Config.APP_ENV == 'production':
+    production_errors = []
+    if not Config._configured_secret or len(Config._configured_secret) < 32 or Config._configured_secret.lower().startswith(('change-me', 'eventmate-')):
+        production_errors.append('SECRET_KEY must be a stable random value of at least 32 characters')
+    if not Config.DATABASE_URL:
+        production_errors.append('DATABASE_URL must be configured')
+    if not Config.BASE_URL.startswith('https://'):
+        production_errors.append('BASE_URL must use HTTPS')
+    if not Config.SESSION_COOKIE_SECURE:
+        production_errors.append('SESSION_COOKIE_SECURE must be enabled')
+    smtp_ready = Config.SMTP_MODE == 'live' and Config.SMTP_USERNAME and Config.SMTP_PASSWORD
+    resend_ready = bool(Config.RESEND_API_KEY and Config.RESEND_FROM_EMAIL)
+    if not smtp_ready and not resend_ready:
+        production_errors.append('live SMTP or Resend email credentials must be configured')
+    if len(Config.ADMIN_PASSWORD) < 12:
+        production_errors.append('ADMIN_PASSWORD must be at least 12 characters')
+    if production_errors:
+        raise RuntimeError('Production configuration is incomplete: ' + '; '.join(production_errors))

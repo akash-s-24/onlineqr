@@ -1,6 +1,11 @@
 import os
 import datetime
 import smtplib
+import base64
+import json
+import urllib.error
+import urllib.request
+from html import escape
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
@@ -30,6 +35,11 @@ def is_demo_mode():
     smtp_mode = os.environ.get('SMTP_MODE', getattr(Config, 'SMTP_MODE', 'demo')).strip().lower()
     smtp_username = os.environ.get('SMTP_USERNAME', getattr(Config, 'SMTP_USERNAME', '')).strip()
     smtp_password = os.environ.get('SMTP_PASSWORD', getattr(Config, 'SMTP_PASSWORD', '')).strip()
+    resend_key = os.environ.get('RESEND_API_KEY', getattr(Config, 'RESEND_API_KEY', '')).strip()
+    resend_sender = os.environ.get('RESEND_FROM_EMAIL', getattr(Config, 'RESEND_FROM_EMAIL', '')).strip()
+
+    if resend_key and resend_sender:
+        return False, 'Resend HTTPS email credentials detected'
 
     if smtp_mode == 'demo':
         return True, "Safe Demo Mode is active in .env (SMTP_MODE=demo)"
@@ -52,17 +62,55 @@ def get_smtp_info():
     is_demo, reason = is_demo_mode()
     smtp_username = os.environ.get('SMTP_USERNAME', getattr(Config, 'SMTP_USERNAME', '')).strip()
     smtp_sender = os.environ.get('SMTP_SENDER_EMAIL', getattr(Config, 'SMTP_SENDER_EMAIL', smtp_username or 'eventmate.college@gmail.com')).strip()
+    resend_sender = os.environ.get('RESEND_FROM_EMAIL', getattr(Config, 'RESEND_FROM_EMAIL', '')).strip()
+    resend_configured = bool(os.environ.get('RESEND_API_KEY', getattr(Config, 'RESEND_API_KEY', '')).strip() and resend_sender)
 
     return {
-        'mode': 'demo' if is_demo else 'live',
-        'is_demo': is_demo,
+        'mode': 'resend' if resend_configured else ('demo' if is_demo else 'smtp'),
+        'is_demo': is_demo and not resend_configured,
         'reason': reason,
         'server': os.environ.get('SMTP_SERVER', Config.SMTP_SERVER),
         'port': int(os.environ.get('SMTP_PORT', Config.SMTP_PORT)),
         'username': smtp_username,
-        'sender': smtp_sender,
-        'has_password': not is_demo
+        'sender': resend_sender or smtp_sender,
+        'has_password': bool(resend_configured or not is_demo)
     }
+
+
+def _send_via_resend(recipient_email, subject, html_content, attachments=None):
+    """Send transactional mail through Resend's HTTPS API without SMTP ports."""
+    api_key = os.environ.get('RESEND_API_KEY', getattr(Config, 'RESEND_API_KEY', '')).strip()
+    sender = os.environ.get('RESEND_FROM_EMAIL', getattr(Config, 'RESEND_FROM_EMAIL', '')).strip()
+    if not api_key or not sender:
+        return None
+
+    payload = {
+        'from': sender,
+        'to': [recipient_email],
+        'subject': subject,
+        'html': html_content,
+    }
+    if attachments:
+        payload['attachments'] = attachments
+
+    request = urllib.request.Request(
+        'https://api.resend.com/emails',
+        data=json.dumps(payload).encode('utf-8'),
+        headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
+        method='POST',
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            if 200 <= response.status < 300:
+                return True, 'Email delivered through Resend.'
+            return False, f'Resend returned HTTP {response.status}.'
+    except urllib.error.HTTPError as error:
+        detail = error.read().decode('utf-8', errors='replace')[:240]
+        print(f'[Resend HTTP Error] {error.code}: {detail}')
+        return False, 'Resend rejected the email request.'
+    except (urllib.error.URLError, TimeoutError, OSError) as error:
+        print(f'[Resend Connection Error] {error}')
+        return False, 'Resend could not be reached; retry delivery later.'
 
 def send_certificate_email(recipient_email, participant_name, event_name, certificate_path, certificate_code, attachment_bytes=None, attachment_filename=None):
     """
@@ -167,6 +215,28 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
             )
             msg.attach(part)
 
+        resend_attachments = []
+        if attachment_bytes and attachment_filename:
+            resend_attachments.append({
+                'filename': attachment_filename,
+                'content': base64.b64encode(attachment_bytes).decode('ascii'),
+            })
+        elif certificate_path and os.path.exists(certificate_path):
+            with open(certificate_path, 'rb') as attachment:
+                resend_attachments.append({
+                    'filename': os.path.basename(certificate_path),
+                    'content': base64.b64encode(attachment.read()).decode('ascii'),
+                })
+
+        resend_result = _send_via_resend(
+            recipient_email,
+            f"Congratulations! Your Certificate of Participation for {event_name} - EventMate",
+            html_content,
+            resend_attachments,
+        )
+        if resend_result is not None:
+            return resend_result
+
         # Dispatch via SMTP
         # Robust SSL/TLS handling based on port and user preference
         if smtp_port == 465 or (use_ssl and smtp_port != 587):
@@ -186,13 +256,12 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
         return True, f"Certificate successfully emailed to {recipient_email} via Gmail SMTP!"
 
     except smtplib.SMTPAuthenticationError as auth_err:
-        print(f"[SMTP Auth Error] {auth_err}. Falling back smoothly to Safe Demo Mode.")
-        # Fallback to Safe Demo Mode so the user's workflow / viva demo is not broken!
-        return True, f"Certificate dispatched in Safe Demo Mode to {recipient_email}! (Note: Live Gmail login failed — check your 16-character App Password in .env)"
+        print(f"[SMTP Auth Error] {auth_err}")
+        return False, 'SMTP authentication failed; configure the provider credentials.'
 
     except Exception as e:
-        print(f"[SMTP Connection Error] {e}. Falling back to Safe Demo Mode.")
-        return True, f"Certificate dispatched in Safe Demo Mode to {recipient_email}! (Note: SMTP connection issue: {str(e)})"
+        print(f"[SMTP Connection Error] {e}")
+        return False, 'SMTP delivery failed; the certificate remains queued for retry.'
 
 def send_receipt_email(recipient_email, participant_name, event_name, payment_method, amount_paid, utr_number=None):
     """
@@ -226,11 +295,17 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
         msg = MIMEMultipart('alternative')
         msg['From'] = f"{Config.COLLEGE_NAME} <{smtp_sender}>"
         msg['To'] = recipient_email
-        msg['Subject'] = f"Payment Receipt: Registration Confirmed for {event_name}"
+        safe_event_name = escape(str(event_name))
+        safe_participant_name = escape(str(participant_name))
+        safe_payment_method = escape(str(payment_method))
+        safe_utr_number = escape(str(utr_number)) if utr_number else ''
+        safe_college_name = escape(str(Config.COLLEGE_NAME))
+        subject_event_name = str(event_name).replace('\n', ' ').replace('\r', ' ')
+        msg['Subject'] = f"Payment Receipt: Registration Confirmed for {subject_event_name}"
 
-        payment_details = f"<strong>Payment Mode:</strong> {payment_method}"
+        payment_details = f"<strong>Payment Mode:</strong> {safe_payment_method}"
         if utr_number:
-            payment_details += f"<br><strong>Transaction / UTR:</strong> <code>{utr_number}</code>"
+            payment_details += f"<br><strong>Transaction / UTR:</strong> <code>{safe_utr_number}</code>"
         
         html_content = f"""
         <!DOCTYPE html>
@@ -251,12 +326,12 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
         <body>
             <div class="email-container">
                 <div class="header">
-                    <h1>{Config.COLLEGE_NAME}</h1>
+                    <h1>{safe_college_name}</h1>
                     <p>Payment Receipt</p>
                 </div>
                 <div class="content">
-                    <h2>Hello {participant_name},</h2>
-                    <p>Your payment for <strong>{event_name}</strong> has been successfully received and confirmed!</p>
+                    <h2>Hello {safe_participant_name},</h2>
+                    <p>Your payment for <strong>{safe_event_name}</strong> has been successfully received and confirmed!</p>
                     
                     <div class="highlight-box">
                         <p style="margin: 0 0 8px 0; font-size: 1.1em;"><strong>Amount Paid:</strong> ₹{amount_paid}</p>
@@ -268,13 +343,21 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
                 </div>
                 <div class="footer">
                     <p>This is an automated receipt from EventMate College Event Management System.</p>
-                    <p>&copy; 2026 {Config.COLLEGE_NAME}. All rights reserved.</p>
+                    <p>&copy; 2026 {safe_college_name}. All rights reserved.</p>
                 </div>
             </div>
         </body>
         </html>
         """
         msg.attach(MIMEText(html_content, 'html'))
+
+        resend_result = _send_via_resend(
+            recipient_email,
+            f"Payment Receipt: Registration Confirmed for {subject_event_name}",
+            html_content,
+        )
+        if resend_result is not None:
+            return resend_result
 
         if smtp_port == 465 or (use_ssl and smtp_port != 587):
             server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=20)
@@ -294,9 +377,8 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
 
     except smtplib.SMTPAuthenticationError as auth_err:
         print(f"[SMTP Auth Error] {auth_err}. Falling back smoothly to Safe Demo Mode.")
-        return True, f"Receipt dispatched in Safe Demo Mode to {recipient_email}!"
+        return False, f"SMTP authentication failed for {recipient_email}."
 
     except Exception as e:
-        print(f"[SMTP Connection Error] {e}. Falling back to Safe Demo Mode.")
-        return True, f"Receipt dispatched in Safe Demo Mode to {recipient_email}!"
-
+        print(f"[SMTP Connection Error] {e}.")
+        return False, f"SMTP delivery failed: {e}"

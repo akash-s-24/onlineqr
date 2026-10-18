@@ -1,167 +1,224 @@
 {% extends 'landing_base.html' %}
 
-{% block title %}Event Registration – EventMate{% endblock %}
+{% block title %}Event Registration – Shree Daksha Academy{% endblock %}
+
+{% block body_class %}registration-page{% endblock %}
 
 {% block extra_css %}
-.registration-section {
-    padding: 120px 5% 80px;
-    min-height: 100vh;
+/* ═══════════════════════════════════════════════════════════════
+   CLEAN BLACK & WHITE PROFESSIONAL REGISTRATION THEME
+   ═══════════════════════════════════════════════════════════════ */
+
+/* 1. Complete White Page Canvas */
+html:has(body.registration-page),
+body.registration-page {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #09090b !important;
+}
+
+body.registration-page canvas {
+    display: none !important;
+}
+
+/* The registration flow is intentionally distraction-free: the form owns the page. */
+body.registration-page .landing-header,
+body.registration-page .l-footer,
+body.registration-page #loader,
+body.registration-page #navScrim {
+    display: none !important;
+}
+body.registration-page .scroll-content {
+    min-height: 100svh;
+}
+
+body.registration-page .registration-section {
+    background: #ffffff !important;
+    padding: 32px 20px 56px;
+    min-height: 100svh;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
 }
-.glass-form-card {
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(45, 212, 191, 0.3);
-    border-radius: 20px;
-    padding: 40px;
+
+/* 2. Professional Polished Form Card */
+.glass-form-card,
+.clean-form-card {
+    background: #ffffff !important;
+    border: 1px solid #e4e4e7 !important;
+    border-radius: 20px !important;
+    padding: 44px 40px !important;
     width: 100%;
-    max-width: 800px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-}
-
-.form-title {
-    font-family: 'Space Grotesk', sans-serif;
-    color: #dc2626;
-    font-size: 2rem;
-    margin-bottom: 5px;
-    text-align: center;
-}
-.form-subtitle {
-    color: #94a3b8;
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 0.95rem;
-}
-
-.f-form-group {
-    margin-bottom: 20px;
-}
-.f-form-row {
-    display: flex;
-    gap: 20px;
-}
-.f-form-row .f-form-group {
-    flex: 1;
-}
-
-.f-label {
-    display: block;
-    color: #cbd5e1;
-    font-weight: 600;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
-}
-.f-control {
-    width: 100%;
-    padding: 12px 15px;
-    background: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    color: #fff;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
+    max-width: 820px;
+    box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
     box-sizing: border-box;
 }
-.f-control:focus {
-    outline: none;
-    border-color: #dc2626;
-    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
-    background: #ffffff;
-}
-.f-control::placeholder {
-    color: #64748b;
+
+@media (max-width: 768px) {
+    .glass-form-card,
+    .clean-form-card {
+        padding: 26px 20px !important;
+        border-radius: 16px !important;
+    }
+    body.registration-page .registration-section {
+        padding: 22px 14px 38px !important;
+    }
 }
 
-.f-hint {
-    display: block;
-    color: #64748b;
-    font-size: 0.75rem;
-    margin-top: 5px;
-}
-
-/* Dynamic Cards (Group & UPI) */
-.f-dynamic-card {
-    background: rgba(6, 182, 212, 0.05);
-    border: 1px solid rgba(6, 182, 212, 0.2);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 25px;
-    transition: all 0.3s ease;
-}
-.f-dynamic-card-warning {
-    background: rgba(245, 158, 11, 0.05);
-    border-color: rgba(245, 158, 11, 0.3);
-}
-
-.f-badge {
-    padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-    background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;
-}
-
-.f-submit-btn {
-    display: block;
-    width: 100%;
-    padding: 15px;
-    text-align: center;
-    background: linear-gradient(135deg, #1d4ed8, #2563eb);
-    color: #fff;
-    font-family: 'Space Grotesk', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-radius: 10px;
-    font-weight: 700;
-    transition: 0.3s;
-    border: none;
-    cursor: pointer;
-    font-size: 1.1rem;
-    margin-top: 20px;
-}
-.f-submit-btn:hover {
-    box-shadow: 0 0 20px rgba(37, 99, 235, 0.5);
-    transform: scale(1.02);
-}
-
-/* ── Ghost Back Button (Button19 style) ── */
+/* 3. Ghost Back Button */
 .back-btn-ghost {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    background: transparent;
-    border: none;
-    color: #94a3b8;
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    color: #09090b;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 0.95rem;
+    font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
     border-radius: 8px;
-    transition: all 0.2s ease;
-    position: relative;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .back-btn-ghost:hover {
-    color: #f8fafc;
-    background: rgba(255, 255, 255, 0.06);
+    background: #0b1220;
+    color: #ffffff;
+    border-color: #0b1220;
 }
 .back-btn-ghost .arrow-icon {
     display: inline-flex;
-    transition: transform 0.18s ease-in-out;
+    transition: transform 0.2s ease;
 }
 .back-btn-ghost:hover .arrow-icon {
     transform: translateX(-4px);
 }
 .back-btn-ghost .arrow-icon svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     stroke: currentColor;
-    stroke-width: 2;
+    stroke-width: 2.2;
     fill: none;
 }
 
-/* ── Custom Combobox ── */
+/* 4. Typography */
+.form-title {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    color: #0b1220 !important;
+    font-size: 2.25rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.025em !important;
+    text-align: center;
+    margin: 8px 0 6px !important;
+}
+.form-subtitle {
+    color: #71717a !important;
+    text-align: center;
+    margin-bottom: 28px !important;
+    font-size: 0.95rem;
+    font-weight: 400;
+}
+
+/* 5. Quick Demo Help Card */
+.help-guide-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+.help-guide-card h4 {
+    color: #09090b;
+    margin: 0 0 4px;
+    font-size: 1rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+}
+.help-guide-card p {
+    color: #64748b;
+    font-size: 0.88rem;
+    margin: 0;
+}
+.help-guide-btn {
+    background: #ffffff;
+    border: 1px solid #2563eb;
+    color: #1d4ed8;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.84rem;
+    padding: 7px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+.help-guide-btn:hover {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+/* 6. Form Groups & Inputs */
+.f-form-group {
+    margin-bottom: 20px;
+}
+.f-form-row {
+    display: flex;
+    gap: 18px;
+}
+.f-form-row .f-form-group {
+    flex: 1;
+}
+@media (max-width: 768px) {
+    .f-form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+.f-label {
+    display: block;
+    color: #09090b !important;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.88rem;
+    letter-spacing: -0.01em;
+}
+
+.f-control {
+    width: 100%;
+    padding: 12px 14px;
+    background: #ffffff !important;
+    border: 1px solid #d4d4d8 !important;
+    border-radius: 10px;
+    color: #09090b !important;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+.f-control:focus {
+    outline: none !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .14) !important;
+    background: #ffffff !important;
+}
+.f-control::placeholder {
+    color: #a1a1aa !important;
+}
+.f-hint {
+    display: block;
+    color: #71717a !important;
+    font-size: 0.78rem;
+    margin-top: 5px;
+}
+
+/* 7. Custom Searchable Combobox */
 .cb-wrapper {
     position: relative;
     width: 100%;
@@ -171,27 +228,25 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 12px 15px;
-    background: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 14px;
+    background: #ffffff !important;
+    border: 1px solid #d4d4d8 !important;
     border-radius: 10px;
-    color: #fff;
+    color: #09090b !important;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     box-sizing: border-box;
     text-align: left;
     user-select: none;
 }
 .cb-trigger:hover {
-    border-color: rgba(6, 182, 212, 0.4);
-    background: #ffffff;
+    border-color: #71717a !important;
 }
 .cb-trigger.open {
-    border-color: #dc2626;
-    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
-    background: #ffffff;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .14) !important;
     border-radius: 10px 10px 0 0;
 }
 .cb-trigger-text {
@@ -201,13 +256,13 @@
     white-space: nowrap;
 }
 .cb-trigger-text.placeholder {
-    color: #64748b;
+    color: #a1a1aa !important;
 }
 .cb-chevron {
     display: flex;
     align-items: center;
-    opacity: 0.5;
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.6;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     flex-shrink: 0;
     margin-left: 8px;
 }
@@ -220,29 +275,27 @@
 }
 .cb-trigger.open .cb-chevron {
     transform: rotate(180deg);
-    opacity: 0.8;
+    opacity: 1;
 }
 
-/* Dropdown panel */
 .cb-dropdown {
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
     z-index: 100;
-    background: rgba(15, 23, 42, 0.98);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(6, 182, 212, 0.3);
-    border-top: none;
+    background: #ffffff !important;
+    border: 1px solid #e4e4e7 !important;
+    border-top: none !important;
     border-radius: 0 0 10px 10px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12) !important;
     max-height: 0;
     overflow: hidden;
     opacity: 0;
     transform: translateY(-4px);
-    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transition: max-height 0.28s cubic-bezier(0.16, 1, 0.3, 1),
                 opacity 0.2s ease,
-                transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     pointer-events: none;
 }
 .cb-dropdown.open {
@@ -251,33 +304,26 @@
     transform: translateY(0);
     pointer-events: auto;
 }
-
-/* Search input inside dropdown */
 .cb-search-wrap {
     padding: 8px 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid #f4f4f5;
+    background: #fafafa;
 }
 .cb-search {
     width: 100%;
     padding: 8px 12px;
-    background: #f8fafc;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    color: #fff;
+    background: #ffffff !important;
+    border: 1px solid #d4d4d8 !important;
+    border-radius: 6px;
+    color: #09090b !important;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.88rem;
     outline: none;
     box-sizing: border-box;
-    transition: border-color 0.2s;
 }
 .cb-search:focus {
-    border-color: rgba(6, 182, 212, 0.4);
+    border-color: #2563eb !important;
 }
-.cb-search::placeholder {
-    color: #475569;
-}
-
-/* Option items */
 .cb-options {
     overflow-y: auto;
     max-height: 240px;
@@ -287,33 +333,32 @@
     width: 4px;
 }
 .cb-options::-webkit-scrollbar-thumb {
-    background: rgba(6, 182, 212, 0.3);
+    background: #d4d4d8;
     border-radius: 4px;
 }
-
 .cb-option {
     display: flex;
     align-items: center;
     padding: 10px 14px;
-    color: #e2e8f0;
+    color: #09090b !important;
     font-size: 0.92rem;
     cursor: pointer;
     transition: all 0.15s ease;
-    gap: 10px;
+    gap: 8px;
 }
 .cb-option:hover {
-    background: rgba(6, 182, 212, 0.12);
-    color: #fff;
+    background: #f4f4f5 !important;
+    color: #1d4ed8 !important;
 }
 .cb-option.selected {
-    background: rgba(6, 182, 212, 0.18);
-    color: #b91c1c;
+    background: #2563eb !important;
+    color: #ffffff !important;
     font-weight: 600;
 }
 .cb-option.selected::before {
     content: '✓';
-    font-size: 0.8rem;
-    color: #dc2626;
+    font-size: 0.85rem;
+    color: #ffffff;
     font-weight: 800;
 }
 .cb-option.hidden {
@@ -321,80 +366,253 @@
 }
 .cb-option-group-label {
     padding: 8px 14px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 800;
-    color: #2563eb;
-    background-color: #eff6ff;
-    border-radius: 6px;
-    margin: 4px 8px;
+    color: #71717a !important;
+    background-color: #fafafa !important;
+    margin: 4px 0;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     pointer-events: none;
 }
 .cb-empty {
     padding: 16px 14px;
     text-align: center;
-    color: #64748b;
+    color: #71717a;
     font-size: 0.88rem;
     display: none;
 }
 
-@media (max-width: 768px) {
-    .f-form-row { flex-direction: column; gap: 0; }
+/* 8. Selected Event Presentation Card */
+.selected-event-card {
+    background: #fafafa;
+    border: 1px solid #e4e4e7;
+    border-color: #bfdbfe;
+    border-top: 3px solid #2563eb;
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-bottom: 24px;
+    transition: all 0.2s ease;
+}
+.event-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.event-badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.event-pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 9999px;
+}
+.event-pill-type {
+    background: #2563eb;
+    color: #ffffff;
+}
+.event-pill-group,
+.event-pill-solo {
+    background: #f4f4f5;
+    color: #18181b;
+    border: 1px solid #e4e4e7;
+}
+.event-pill-fee {
+    background: #f4f4f5;
+    color: #09090b;
+    font-weight: 800;
+    border: 1px solid #e4e4e7;
+}
+.selected-event-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0b1220;
+    margin: 0;
+}
+.change-event-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #09090b;
+    background: #ffffff;
+    border: 1px solid #d4d4d8;
+    padding: 6px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+.change-event-btn:hover {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+.event-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    padding: 14px 16px;
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+}
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.meta-icon {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+.meta-label {
+    display: block;
+    font-size: 0.72rem;
+    color: #71717a;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.meta-val {
+    display: block;
+    font-size: 0.88rem;
+    color: #09090b;
+    font-weight: 600;
+}
+.event-desc-preview {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #e4e4e7;
+    font-size: 0.86rem;
+    color: #52525b;
+    line-height: 1.5;
 }
 
-/* Registration page follows the shared white/red/black visual system. */
-.registration-section { background: #ffffff; }
-.glass-form-card {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.1) !important;
-}
-.form-title { color: #dc2626 !important; }
-.form-subtitle, .f-hint { color: #64748b !important; }
-.f-label { color: #334155 !important; }
-.f-control, .cb-trigger, .cb-search {
-    background: #ffffff !important;
-    border-color: #cbd5e1 !important;
-    color: #0f172a !important;
-    box-shadow: none !important;
-}
-.f-control:focus, .cb-trigger.open, .cb-search:focus {
-    border-color: #dc2626 !important;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
-}
-.cb-dropdown {
-    background: #ffffff !important;
-    border-color: #fecaca !important;
-    box-shadow: 0 15px 40px rgba(15, 23, 42, 0.14) !important;
-}
-.cb-option { color: #334155 !important; }
-.cb-option:hover, .cb-option.selected { background: #fef2f2 !important; color: #b91c1c !important; }
-.cb-option.selected::before { color: #dc2626 !important; }
-.f-dynamic-card { background: #fef2f2 !important; border-color: #fecaca !important; }
-.f-dynamic-card-warning { background: #fffbeb !important; border-color: #fde68a !important; }
-.f-badge { background: #fef2f2 !important; color: #b91c1c !important; border-color: #fecaca !important; }
-.f-submit-btn { background: linear-gradient(135deg, #1d4ed8, #2563eb) !important; }
-.f-submit-btn:hover { box-shadow: 0 0 20px rgba(37, 99, 235, 0.3) !important; }
-.back-btn-ghost { color: #64748b !important; }
-.back-btn-ghost:hover { color: #2563eb !important; background: #eff6ff !important; }
-.registration-section [style*="06b6d4"],
-.registration-section [style*="22d3ee"],
-.registration-section [style*="0891b2"] { color: #2563eb !important; border-color: #bfdbfe !important; }
-.registration-section [style*="30, 41, 59"],
-.registration-section [style*="255,255,255,0.05"],
-.registration-section [style*="255,255,255,0.02"] {
+/* 9. Dynamic Cards (Group & Payment) */
+.f-dynamic-card {
     background: #f8fafc !important;
-    color: #475569 !important;
-    border-color: #e2e8f0 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    padding: 24px !important;
+    margin-bottom: 24px !important;
+    transition: all 0.3s ease;
 }
-.registration-section [style*="255,255,255,0.1"] { border-color: #e2e8f0 !important; }
-.registration-section [style*="cbd5e1"] { color: #475569 !important; }
-.registration-section [style*="94a3b8"] { color: #64748b !important; }
-.registration-section [style*="color: #fbbf24"] { color: #b45309 !important; }
-.registration-section [style*="rgba(6, 182, 212"] { background: #fef2f2 !important; border-color: #fecaca !important; }
-.registration-section [style*="rgba(45, 212, 191"] { border-color: #fecaca !important; }
-.registration-section [style*="rgba(15, 23, 42"] { background: #ffffff !important; }
+.f-badge {
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border: 1px solid #2563eb !important;
+}
+
+/* Payment Method Selection Cards */
+.payment-method-card {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid #e2e8f0;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    color: #09090b;
+    font-weight: 600;
+    box-sizing: border-box;
+}
+.payment-method-card:hover {
+    border-color: #2563eb;
+}
+.payment-method-card.active {
+    border-color: #2563eb !important;
+    background: #f5f8ff !important;
+    color: #1d4ed8 !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, .12);
+}
+
+/* Primary registration action */
+.clean-black-submit-btn {
+    display: block;
+    width: 100%;
+    padding: 16px 24px;
+    text-align: center;
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border: 1px solid #2563eb !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    border-radius: 12px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    margin-top: 24px;
+    min-height: 52px;
+}
+.clean-black-submit-btn:hover {
+    background: #1d4ed8 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, .2) !important;
+}
+.clean-black-submit-btn:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Certificate Assurance Note */
+.cert-assurance-note {
+    margin: 20px 0;
+    padding: 14px 18px;
+    background: #fafafa;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: #52525b;
+    text-align: center;
+    line-height: 1.5;
+}
+.cert-assurance-note strong {
+    color: #09090b;
+}
+
+/* Phone-first refinements */
+@media (max-width: 480px) {
+    body.registration-page { overflow-x: hidden; }
+    .glass-form-card { padding: 22px 16px !important; border-radius: 14px !important; }
+    .form-title { font-size: 1.72rem !important; line-height: 1.12; }
+    .form-subtitle { margin-bottom: 20px !important; font-size: .86rem; line-height: 1.55; }
+    .help-guide-card { align-items: flex-start; padding: 14px; margin-bottom: 20px; }
+    .help-guide-btn { width: 100%; min-height: 42px; }
+    .event-card-top { flex-direction: column; gap: 12px; }
+    .change-event-btn { width: 100%; justify-content: center; min-height: 40px; }
+    .event-meta-grid { grid-template-columns: 1fr; gap: 10px; padding: 12px; }
+    .f-dynamic-card { padding: 18px !important; }
+    .payment-method-card { width: 100%; min-height: 52px; padding: 12px 14px; }
+    #upiPaymentDetails, #offlinePaymentDetails { padding: 16px !important; }
+    #upiQrCode { width: 168px !important; height: 168px !important; }
+    .clean-black-submit-btn { min-height: 50px; padding: 14px 16px; font-size: .92rem !important; }
+    .cert-assurance-note { padding: 12px 14px; font-size: .78rem; }
+}
 {% endblock %}
 
 {% block content %}
@@ -402,73 +620,136 @@
     <div class="glass-form-card">
         <!-- Ghost Back Button -->
         <div style="margin-bottom: 20px;">
-            <a href="{{ url_for('events_list') }}" class="back-btn-ghost">
+            <a href="{{ url_for('events_list') }}#events" class="back-btn-ghost">
                 <span class="arrow-icon">
                     <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
                 </span>
-                Back
+                Back to Events
             </a>
         </div>
+
         <h1 class="form-title">Event Registration</h1>
-        <p class="form-subtitle">Secure your spot in the symposium challenges.</p>
+        <p class="form-subtitle">Secure your official symposium challenge pass and entry credentials.</p>
+
+        <!-- Quick Demo Guide Card -->
+        <div class="help-guide-card">
+            <div>
+                <h4>Need assistance registering?</h4>
+                <p>Watch our step-by-step guidance walkthrough.</p>
+            </div>
+            <button type="button" onclick="document.getElementById('demo-video-container').style.display='block'; this.style.display='none';" class="help-guide-btn">
+                ▶ Watch Video Guide
+            </button>
+        </div>
+
+        <div id="demo-video-container" style="display: none; margin-bottom: 28px; border-radius: 12px; overflow: hidden; border: 1px solid #e4e4e7; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #000;">
+            <video width="100%" controls preload="metadata" style="display: block;">
+                <source src="{{ url_for('static', filename='videos/demovideo.mp4') }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
 
         <form method="POST" action="{{ url_for('register_participant') }}" id="eventRegistrationForm">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <!-- Event Selection -->
+
+            <!-- ── EVENT SELECTION SECTION ── -->
             <div class="f-form-group">
                 <label class="f-label">Selected Event *</label>
-                
+
+                {# Determine if a valid pre-selected event was passed #}
+                {% set ns = namespace(selected_event=None) %}
                 {% if selected_event_id %}
-                    <!-- Fixed Event View -->
-                    {% set ns = namespace(found=false, ev_name='', is_group=false, min_t=0, max_t=0, fee=0) %}
                     {% for ev in events %}
                         {% if ev.id|string == selected_event_id|string %}
-                            {% set ns.found = true %}
-                            {% set ns.ev_name = ev.event_name %}
-                            {% set ns.is_group = ev.is_group %}
-                            {% set ns.min_t = ev.min_team_size %}
-                            {% set ns.max_t = ev.max_team_size %}
-                            {% set ns.fee = ev.event_fee %}
-                            
-                            <!-- Hidden Select required for JS logic (handleEventSelectionChange) -->
-                            <select id="event_id" name="event_id" style="display:none;" onchange="handleEventSelectionChange(this)">
-                                <option value="{{ ev.id }}" 
-                                        data-is-group="{{ ev.is_group }}" 
-                                        data-min-team="{{ ev.min_team_size }}" 
-                                        data-max-team="{{ ev.max_team_size }}"
-                                        data-event-name="{{ ev.event_name }}"
-                                        data-event-fee="{{ ev.event_fee }}"
-                                        data-upi-id="{{ ev.upi_id }}"
-                                        data-qr-code="{{ ev.qr_code_image or '' }}" selected>
-                                    {{ ev.event_name }}
-                                </option>
-                            </select>
+                            {% set ns.selected_event = ev %}
                         {% endif %}
                     {% endfor %}
-                    
-                    {% if ns.found %}
-                        <div style="padding: 14px 18px; background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; color: #0f172a; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
-                            <span>
-                                {{ ns.ev_name }} 
-                                <span style="color: #64748b; font-weight: 500; font-size: 0.9em;">
-                                    {% if ns.is_group %}[👥 Group ({{ ns.min_t }}-{{ ns.max_t }})]{% else %}[👤 Individual]{% endif %}
-                                </span>
-                            </span>
-                            <a href="{{ url_for('events_list') }}" style="font-size: 0.85rem; color: #2563eb; text-decoration: none; font-weight: 500; background: #dbeafe; padding: 4px 10px; border-radius: 6px;">Change</a>
+                {% endif %}
+                {% set selected_event = ns.selected_event %}
+
+                {% if selected_event %}
+                    <!-- Full Preselected Event Presentation Card with All Elements -->
+                    <div class="selected-event-card">
+                        <div class="event-card-top">
+                            <div>
+                                <div class="event-badges-row">
+                                    <span class="event-pill-badge event-pill-type">{{ selected_event.event_type }}</span>
+                                    {% if selected_event.is_group %}
+                                        <span class="event-pill-badge event-pill-group">👥 Group Event ({{ selected_event.min_team_size }}–{{ selected_event.max_team_size }} Members)</span>
+                                    {% else %}
+                                        <span class="event-pill-badge event-pill-solo">👤 Individual / Solo</span>
+                                    {% endif %}
+                                    <span class="event-pill-badge event-pill-fee">
+                                        {% if selected_event.event_fee and selected_event.event_fee > 0 %}₹ {{ selected_event.event_fee }} Fee{% else %}Free Entry{% endif %}
+                                    </span>
+                                </div>
+                                <h3 class="selected-event-title">{{ selected_event.event_name }}</h3>
+                            </div>
+                            <a href="{{ url_for('events_list') }}#events" class="change-event-btn" title="Choose another event">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m16 3 5 5-5 5"/><path d="M4 20h7a4 4 0 0 0 4-4V8"/><path d="M21 8h-7"/></svg>
+                                Change Event
+                            </a>
                         </div>
-                        
-                        <!-- Trigger the change event on load so the form updates dynamically for the fixed event -->
-                        <script>
-                            document.addEventListener("DOMContentLoaded", function() {
-                                const eventSelect = document.getElementById('event_id');
-                                if(eventSelect && window.handleEventSelectionChange) {
-                                    handleEventSelectionChange(eventSelect);
-                                }
-                            });
-                        </script>
-                    {% endif %}
+
+                        <div class="event-meta-grid">
+                            <div class="meta-item">
+                                <span class="meta-icon">📅</span>
+                                <div>
+                                    <span class="meta-label">Date & Time</span>
+                                    <span class="meta-val">{{ selected_event.event_date }}{% if selected_event.event_time %} @ {{ selected_event.event_time }}{% endif %}</span>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">📍</span>
+                                <div>
+                                    <span class="meta-label">Campus Venue</span>
+                                    <span class="meta-val">{{ selected_event.venue }}</span>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">👥</span>
+                                <div>
+                                    <span class="meta-label">Participation Format</span>
+                                    <span class="meta-val">{% if selected_event.is_group %}Team Squad ({{ selected_event.min_team_size }}–{{ selected_event.max_team_size }} Members){% else %}Solo Participant{% endif %}</span>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">💳</span>
+                                <div>
+                                    <span class="meta-label">Entry Fee</span>
+                                    <span class="meta-val">{% if selected_event.event_fee and selected_event.event_fee > 0 %}₹ {{ selected_event.event_fee }} per {% if selected_event.is_group %}Team{% else %}Head{% endif %}{% else %}Free Entry{% endif %}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if selected_event.description %}
+                        <div class="event-desc-preview">
+                            <p style="margin: 0;">{{ selected_event.description }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Hidden Select required for JS and form submission -->
+                    <select id="event_id" name="event_id" style="display:none;" onchange="handleEventSelectionChange(this)">
+                        <option value="{{ selected_event.id }}"
+                                data-is-group="{{ selected_event.is_group }}"
+                                data-min-team="{{ selected_event.min_team_size }}"
+                                data-max-team="{{ selected_event.max_team_size }}"
+                                data-event-name="{{ selected_event.event_name }}"
+                                data-event-type="{{ selected_event.event_type }}"
+                                data-event-fee="{{ selected_event.event_fee }}"
+                                data-date="{{ selected_event.event_date }}"
+                                data-time="{{ selected_event.event_time }}"
+                                data-venue="{{ selected_event.venue }}"
+                                data-desc="{{ selected_event.description or '' }}"
+                                data-upi-id="{{ selected_event.upi_id or 'admin@upi' }}"
+                                data-qr-code="{{ selected_event.qr_code_image or '' }}" selected>
+                            {{ selected_event.event_name }}
+                        </option>
+                    </select>
+
                 {% else %}
-                    <!-- Fallback Dropdown if accessed directly without event_id -->
+                    <!-- Searchable Dropdown for Direct Registration -->
                     <select id="event_id" name="event_id" required style="display:none;" onchange="handleEventSelectionChange(this)">
                         <option value="">-- Choose an Event --</option>
                         {% for ev in events %}
@@ -477,13 +758,19 @@
                                     data-min-team="{{ ev.min_team_size }}" 
                                     data-max-team="{{ ev.max_team_size }}"
                                     data-event-name="{{ ev.event_name }}"
+                                    data-event-type="{{ ev.event_type }}"
                                     data-event-fee="{{ ev.event_fee }}"
-                                    data-upi-id="{{ ev.upi_id }}"
+                                    data-date="{{ ev.event_date }}"
+                                    data-time="{{ ev.event_time }}"
+                                    data-venue="{{ ev.venue }}"
+                                    data-desc="{{ ev.description or '' }}"
+                                    data-upi-id="{{ ev.upi_id or 'admin@upi' }}"
                                     data-qr-code="{{ ev.qr_code_image or '' }}">
-                                {{ ev.event_name }} {% if ev.is_group %}[👥 Group ({{ ev.min_team_size }}-{{ ev.max_team_size }})]{% else %}[👤 Individual]{% endif %} – {{ ev.event_date }} @ {{ ev.event_time }} – Fee: {% if ev.event_fee and ev.event_fee > 0 %}₹ {{ ev.event_fee }}{% else %}Free{% endif %}
+                                {{ ev.event_name }} • [{{ ev.event_type }}] • {% if ev.is_group %}Group ({{ ev.min_team_size }}-{{ ev.max_team_size }}){% else %}Solo{% endif %} • {{ ev.event_date }} • Fee: {% if ev.event_fee and ev.event_fee > 0 %}₹{{ ev.event_fee }}{% else %}Free{% endif %}
                             </option>
                         {% endfor %}
                     </select>
+
                     <div class="cb-wrapper" data-cb-for="event_id">
                         <div class="cb-trigger" tabindex="0">
                             <span class="cb-trigger-text placeholder">-- Choose an Event --</span>
@@ -491,23 +778,72 @@
                         </div>
                         <div class="cb-dropdown">
                             <div class="cb-search-wrap">
-                                <input type="text" class="cb-search" placeholder="Search events…">
+                                <input type="text" class="cb-search" placeholder="Search events by name or category…">
                             </div>
                             <div class="cb-options"></div>
                             <div class="cb-empty">No events found.</div>
                         </div>
                     </div>
+
+                    <!-- Dynamic Event Summary Presentation Card (Appears immediately when user picks an event from dropdown) -->
+                    <div id="dynamicEventSummaryCard" class="selected-event-card" style="display: none; margin-top: 14px;">
+                        <div class="event-card-top">
+                            <div>
+                                <div class="event-badges-row">
+                                    <span id="dynEvType" class="event-pill-badge event-pill-type">Category</span>
+                                    <span id="dynEvFormat" class="event-pill-badge event-pill-group">Format</span>
+                                    <span id="dynEvFee" class="event-pill-badge event-pill-fee">Fee</span>
+                                </div>
+                                <h3 id="dynEvName" class="selected-event-title">Event Title</h3>
+                            </div>
+                        </div>
+
+                        <div class="event-meta-grid">
+                            <div class="meta-item">
+                                <span class="meta-icon">📅</span>
+                                <div>
+                                    <span class="meta-label">Date & Time</span>
+                                    <span id="dynEvDateTime" class="meta-val">--</span>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">📍</span>
+                                <div>
+                                    <span class="meta-label">Campus Venue</span>
+                                    <span id="dynEvVenue" class="meta-val">--</span>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">👥</span>
+                                <div>
+                                    <span class="meta-label">Participation Format</span>
+                                    <span id="dynEvCapacity" class="meta-val">--</span>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">💳</span>
+                                <div>
+                                    <span class="meta-label">Registration Fee</span>
+                                    <span id="dynEvFeeDetail" class="meta-val">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="dynEvDescContainer" class="event-desc-preview" style="display: none;">
+                            <p id="dynEvDesc" style="margin: 0;"></p>
+                        </div>
+                    </div>
                 {% endif %}
             </div>
 
-            <!-- Dynamic Group / Team Event Configuration Card -->
+            <!-- ── DYNAMIC GROUP / TEAM SQUAD CONFIGURATION CARD ── -->
             <div id="groupEventCard" class="f-dynamic-card" style="display: none;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                    <strong style="color: #dc2626; font-size: 1.1rem;" id="groupEventHeading">👥 Group Event Registration</strong>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <strong style="color: #000000; font-size: 1.1rem; font-family: 'Space Grotesk', sans-serif;" id="groupEventHeading">👥 Group Event Squad Details</strong>
                     <span class="f-badge" id="groupSizeBadge">Team Size: 2 - 4</span>
                 </div>
-                <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px;">
-                    This competition is a team-based event. Please select the number of participants in your squad and enter your team details.
+                <p style="font-size: 0.88rem; color: #71717a; margin-bottom: 20px;">
+                    This competition is a team-based event. Please configure your squad roster below.
                 </p>
 
                 <div class="f-form-row">
@@ -524,9 +860,7 @@
                                 <span class="cb-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
                             </div>
                             <div class="cb-dropdown">
-                                <div class="cb-options">
-                                    <!-- Populated by JS -->
-                                </div>
+                                <div class="cb-options"></div>
                             </div>
                         </div>
                     </div>
@@ -536,18 +870,19 @@
                     </div>
                 </div>
 
-                <!-- Dynamic Additional Team Members Fields -->
+                <!-- Squad Members List -->
                 <div id="teamMembersList" style="margin-top: 10px;">
-                    <label class="f-label" style="color: #dc2626;">Squad Members List</label>
-                    <div style="background: rgba(255,255,255,0.05); border: 1px dashed rgba(45, 212, 191, 0.3); border-radius: 8px; padding: 10px; margin-bottom: 15px; font-size: 0.85rem; color: #94a3b8;">
-                        <strong>Lead Participant (Member 1):</strong> Will be taken from the Full Name field below.
+                    <label class="f-label" style="color: #000000;">Squad Members Roster</label>
+                    <div style="background: #ffffff; border: 1px dashed #d4d4d8; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #52525b;">
+                        <strong>Lead Participant (Member 1):</strong> Captured automatically from the Registrant Details below.
                     </div>
-                    <div id="additionalMembersContainer" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div id="additionalMembersContainer" style="display: flex; flex-direction: column; gap: 14px;">
                         <!-- Injected dynamically by JavaScript -->
                     </div>
                 </div>
             </div>
 
+            <!-- ── PARTICIPANT DETAILS ── -->
             <div class="f-form-row">
                 <div class="f-form-group">
                     <label class="f-label" for="full_name">Lead Registrant Full Name *</label>
@@ -562,13 +897,14 @@
             <div class="f-form-row">
                 <div class="f-form-group">
                     <label class="f-label" for="phone">Phone / Mobile Number *</label>
-                    <input type="tel" id="phone" name="phone" class="f-control" placeholder="e.g. Your Mobile Number" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" required>
+                    <input type="tel" id="phone" name="phone" class="f-control" placeholder="e.g. 9876543210" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" required>
                 </div>
                 <div class="f-form-group">
-                    <label class="f-label">Year</label>
+                    <label class="f-label">Academic Year / Class</label>
                     <select id="semester" name="semester" style="display:none;">
                         <option value="I PUC">I PUC</option>
                         <option value="II PUC" selected>II PUC</option>
+                        <option value="UG / Degree">UG / Degree</option>
                     </select>
                     <div class="cb-wrapper" data-cb-for="semester">
                         <div class="cb-trigger" tabindex="0">
@@ -584,109 +920,114 @@
 
             <div class="f-form-group">
                 <label class="f-label" for="college_name">Institution / Academy / College Name *</label>
-                <input type="text" id="college_name" name="college_name" class="f-control" placeholder="e.g. Your College Name" required>
+                <input type="text" id="college_name" name="college_name" class="f-control" placeholder="e.g. Your College / Institution Name" required>
             </div>
 
             <div class="f-form-group">
-                <label class="f-label">Category / Combination *</label>
+                <label class="f-label">Stream / Department Category *</label>
                 <select id="department" name="department" required style="display:none;" onchange="handleDepartmentChange(this)">
-                    <option value="">-- Select Category --</option>
-                    <optgroup label="Commerce">
-                        <option value="CEBA">CEBA</option>
-                        <option value="SEBA">SEBA</option>
-                        <option value="HEBA">HEBA</option>
+                    <option value="">-- Select Stream / Category --</option>
+                    <optgroup label="Commerce Streams">
+                        <option value="CEBA">CEBA (Computer, Eco, Business, Accounts)</option>
+                        <option value="SEBA">SEBA (Stats, Eco, Business, Accounts)</option>
+                        <option value="HEBA">HEBA (History, Eco, Business, Accounts)</option>
                     </optgroup>
-                    <optgroup label="Science">
-                        <option value="PCMB">PCMB</option>
-                        <option value="PCMC">PCMC</option>
+                    <optgroup label="Science Streams">
+                        <option value="PCMB">PCMB (Physics, Chem, Math, Bio)</option>
+                        <option value="PCMC">PCMC (Physics, Chem, Math, Comp)</option>
                     </optgroup>
                     <option value="Other">Other (Specify below)</option>
                 </select>
                 <div class="cb-wrapper" data-cb-for="department">
                     <div class="cb-trigger" tabindex="0">
-                        <span class="cb-trigger-text placeholder">-- Select Category --</span>
+                        <span class="cb-trigger-text placeholder">-- Select Stream / Category --</span>
                         <span class="cb-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
                     </div>
                     <div class="cb-dropdown">
                         <div class="cb-search-wrap">
-                            <input type="text" class="cb-search" placeholder="Search category…">
+                            <input type="text" class="cb-search" placeholder="Search streams or courses…">
                         </div>
                         <div class="cb-options"></div>
-                        <div class="cb-empty">No categories found.</div>
+                        <div class="cb-empty">No streams found.</div>
                     </div>
                 </div>
             </div>
 
             <div id="otherDepartmentGroup" class="f-form-group" style="display: none;">
                 <label class="f-label" for="other_department">Specify Your Course / Branch *</label>
-                <input type="text" id="other_department" class="f-control" placeholder="e.g. Your Course Name">
+                <input type="text" id="other_department" class="f-control" placeholder="e.g. BCA, BBA, B.Com, B.Sc, Diploma">
             </div>
 
-            <!-- Payment Section -->
-            <div id="paymentSection" class="f-dynamic-card f-dynamic-card-warning" style="display: none;">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px;">
-                    <strong style="color: #dc2626; font-size: 1.1rem;">🏦 Payment Details</strong>
+            <!-- ── PAYMENT SECTION ── -->
+            <div id="paymentSection" class="f-dynamic-card" style="display: none;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                    <strong style="color: #0b1220; font-size: 1.15rem; font-family: 'Plus Jakarta Sans', sans-serif;">🏦 Registration Fee & Settlement</strong>
+                    <span id="displayEventFee" style="font-size: 1.4rem; font-weight: 800; color: #1d4ed8; font-family: 'Plus Jakarta Sans', sans-serif;">₹ 0</span>
                 </div>
                 
-                <p style="font-size: 0.95rem; color: #cbd5e1; margin-bottom: 20px; text-align: center;">
-                    This event has a registration fee of <strong id="displayEventFee" style="color:#dc2626;">₹ 0</strong>.
+                <p style="font-size: 0.9rem; color: #52525b; margin-bottom: 20px;">
+                    Please select your preferred payment settlement mode for this event entry:
                 </p>
 
                 <div class="f-form-group" style="text-align: left;">
-                    <label class="f-label" style="color: #fbbf24;">Select Payment Method *</label>
-                    <div style="display: flex; gap: 15px; margin-top: 10px;">
-                        <label style="flex: 1; display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-radius: 10px; cursor: pointer; border: 2px solid #e2e8f0; background: #ffffff; transition: all 0.3s; color: #334155; font-weight: 600;">
-                            <input type="radio" name="payment_method" value="Online" id="payOnlineRadio" onchange="togglePaymentMethod()" style="accent-color: #dc2626; width: 18px; height: 18px;">
-                            <span>💳 Pay Online (UPI)</span>
+                    <label class="f-label">Payment Method *</label>
+                    <div style="display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap;">
+                        <label class="payment-method-card" id="payOnlineCard">
+                            <input type="radio" name="payment_method" value="Online" id="payOnlineRadio" onchange="togglePaymentMethod()" style="accent-color: #2563eb; width: 18px; height: 18px;">
+                            <span>💳 Pay Online (UPI / QR)</span>
                         </label>
-                        <label style="flex: 1; display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-radius: 10px; cursor: pointer; border: 2px solid #e2e8f0; background: #ffffff; transition: all 0.3s; color: #334155; font-weight: 600;">
-                            <input type="radio" name="payment_method" value="Cash" id="payOfflineRadio" onchange="togglePaymentMethod()" style="accent-color: #f59e0b; width: 18px; height: 18px;">
-                            <span>💵 Pay on Spot (Cash)</span>
+                        <label class="payment-method-card" id="payOfflineCard">
+                            <input type="radio" name="payment_method" value="Cash" id="payOfflineRadio" onchange="togglePaymentMethod()" style="accent-color: #2563eb; width: 18px; height: 18px;">
+                            <span>💵 Pay on Spot (Cash Desk)</span>
                         </label>
                     </div>
                 </div>
 
-                <!-- Online Payment Details (QR + UTR) -->
-                <div id="upiPaymentDetails" style="display: none; text-align: center; margin-top: 20px; padding: 20px; background: rgba(6, 182, 212, 0.05); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 12px;">
-                    <p style="color: #b91c1c; font-weight: 700; font-size: 1rem; margin-bottom: 15px;">Step 1: Scan QR Code or Pay via UPI ID</p>
-                    <img id="upiQrCode" src="" alt="UPI QR Code" style="width: 200px; height: 200px; margin: 0 auto 15px; display: block; border: 4px solid #fff; border-radius: 10px; box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);">
-                    
-                    <p style="font-size: 0.95rem; color: #fbbf24; margin-bottom: 10px;">
-                        <strong>UPI ID:</strong> <span id="displayUpiId">demopay@ybl</span>
+                <!-- Online UPI Payment Details -->
+                <div id="upiPaymentDetails" style="display: none; text-align: center; margin-top: 20px; padding: 24px; background: #ffffff; border: 1px solid #e4e4e7; border-radius: 12px;">
+                    <p style="color: #000000; font-weight: 700; font-size: 1rem; margin-bottom: 14px;">Step 1: Scan UPI QR Code to Settle Entry Fee</p>
+                    <img id="upiQrCode" src="{{ url_for('static', filename='favicon.svg') }}" alt="UPI QR Code" style="width: 190px; height: 190px; margin: 0 auto 14px; display: block; border: 2px solid #2563eb; border-radius: 12px; padding: 6px; background: #ffffff;">
+                    <a id="upiPayButton" href="#" class="clean-black-submit-btn" style="display: inline-flex; width: auto; margin: 0 auto 14px; text-decoration: none;">Open UPI App to Pay</a>
+
+                    <p style="font-size: 0.92rem; color: #09090b; margin-bottom: 12px;">
+                        <strong>UPI ID:</strong> <span id="displayUpiId" style="font-family: monospace; font-weight: 700; background: #f4f4f5; padding: 4px 10px; border-radius: 6px; border: 1px solid #e4e4e7;">demopay@ybl</span>
                     </p>
-                    <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 8px; padding: 10px; margin-bottom: 20px; display: inline-block;">
-                        <strong style="color: #fbbf24; font-size: 0.85rem; text-transform: uppercase;">Bank Transfer Details</strong><br>
-                        <span style="color: #cbd5e1; font-size: 0.9rem;"><strong>A/C No:</strong> 9999999999</span><br>
-                        <span style="color: #cbd5e1; font-size: 0.85rem;">Shree Daksha Academy</span>
+
+                    <div style="background: #fafafa; border: 1px solid #e4e4e7; border-radius: 8px; padding: 12px 16px; margin-bottom: 22px; display: inline-block; text-align: left;">
+                        <strong style="color: #09090b; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Beneficiary Details</strong><br>
+                        <span style="color: #52525b; font-size: 0.88rem;"><strong>Account:</strong> Shree Daksha Academy</span><br>
+                        <span style="color: #52525b; font-size: 0.85rem;">Official Symposium Event Desk</span>
                     </div>
 
-                    <p style="color: #b91c1c; font-weight: 700; font-size: 1rem; margin-bottom: 10px; margin-top: 15px;">Step 2: Enter Your Transaction ID</p>
-                    <div class="f-form-group" style="text-align: left;">
-                        <label class="f-label" for="utr_number" style="color: #fbbf24;">UPI Transaction Reference / UTR *</label>
-                        <input type="text" id="utr_number" name="utr_number" class="f-control" style="border-color: rgba(251, 191, 36, 0.5);" placeholder="e.g. 123456789012" pattern="[A-Za-z0-9][A-Za-z0-9._/-]{5,63}" maxlength="64" autocapitalize="characters" title="Please enter a valid UPI transaction reference (6-64 characters)">
-                        <span class="f-hint" style="color: #94a3b8;">After paying, enter your UTR number and then submit registration below.</span>
+                    <p style="color: #000000; font-weight: 700; font-size: 0.98rem; margin-bottom: 8px;">Step 2: Enter Transaction Reference / UTR Number</p>
+                    <div class="f-form-group" style="text-align: left; max-width: 440px; margin: 0 auto;">
+                        <label class="f-label" for="utr_number">UPI UTR / Reference ID *</label>
+                        <input type="text" id="utr_number" name="utr_number" class="f-control" placeholder="e.g. 12-digit UPI UTR" pattern="[A-Za-z0-9][A-Za-z0-9._/-]{5,63}" maxlength="64" autocapitalize="characters" title="Please enter a valid UPI transaction reference (6-64 characters)">
+                        <span class="f-hint">After completing payment via your UPI app, paste the transaction reference ID above.</span>
                     </div>
                 </div>
 
-                <!-- Cash / Offline Payment Details -->
-                <div id="offlinePaymentDetails" style="display: none; margin-top: 20px; padding: 20px; background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px;">
-                    <div style="display: flex; align-items: flex-start; gap: 12px;">
-                        <span style="font-size: 1.5rem;">🏫</span>
+                <!-- Cash / Spot Payment Details -->
+                <div id="offlinePaymentDetails" style="display: none; margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #e4e4e7; border-radius: 12px;">
+                    <div style="display: flex; align-items: flex-start; gap: 14px;">
+                        <span style="font-size: 1.8rem; line-height: 1;">🏛️</span>
                         <div>
-                            <p style="font-size: 0.95rem; color: #fbbf24; font-weight: 700; margin-bottom: 5px;">Pay at the College on Event Day</p>
-                            <p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.5;">
-                                You have selected <strong>Pay on Spot (Cash)</strong>. No payment is needed now. Simply carry the fee in cash and pay at the registration desk when you arrive at Shree Daksha Academy. Your registration will be marked as confirmed once payment is collected.
+                            <p style="font-size: 0.95rem; color: #000000; font-weight: 700; margin: 0 0 6px;">Pay at College Registration Desk</p>
+                            <p style="font-size: 0.88rem; color: #52525b; line-height: 1.5; margin: 0;">
+                                You have selected <strong>Pay on Spot (Cash Desk)</strong>. No payment is required online now. Simply arrive at Shree Daksha Academy with the registration fee in cash and settle it at the entry desk on symposium day.
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div style="margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.85rem; color: #94a3b8; text-align: center;">
-                <strong>📜 Certificate Assurance:</strong> Verified Certificate of Achievement with Shree Daksha Academy branding will be generated upon confirmed attendance.
+            <!-- Certificate Assurance Note -->
+            <div class="cert-assurance-note">
+                <strong>📜 Official Certification Guarantee:</strong> Every registered attendee and team participant will receive an official, verified Shree Daksha Academy Certificate of Participation & Achievement upon check-in.
             </div>
 
-            <button type="submit" id="submitBtn" class="pop-btn">Submit Registration →</button>
+<!-- Submit Button -->
+            <button type="submit" id="submitBtn" class="clean-black-submit-btn">Submit Registration →</button>
         </form>
     </div>
 </section>
@@ -723,13 +1064,11 @@ class Combobox {
         
         options.forEach(node => {
             if (node.tagName === 'OPTGROUP') {
-                // Group label
                 const groupLabel = document.createElement('div');
                 groupLabel.className = 'cb-option-group-label';
                 groupLabel.textContent = node.label;
                 this.optionsList.appendChild(groupLabel);
                 
-                // Group options
                 node.querySelectorAll('option').forEach(opt => {
                     this.createOption(opt);
                 });
@@ -747,7 +1086,7 @@ class Combobox {
         div.textContent = opt.textContent.trim();
         if (opt.selected && opt.value !== '') div.classList.add('selected');
         
-        // Copy data attributes
+        // Copy all data attributes
         Array.from(opt.attributes).forEach(attr => {
             if (attr.name.startsWith('data-')) {
                 div.setAttribute(attr.name, attr.value);
@@ -767,21 +1106,16 @@ class Combobox {
     }
 
     selectOption(optionDiv) {
-        // Deselect all
         this.optionsList.querySelectorAll('.cb-option').forEach(o => o.classList.remove('selected'));
         optionDiv.classList.add('selected');
 
         const value = optionDiv.getAttribute('data-value');
         const text = optionDiv.textContent.trim();
         
-        // Update trigger
         this.triggerText.textContent = text;
         this.triggerText.classList.remove('placeholder');
 
-        // Update hidden select
         this.hiddenSelect.value = value;
-        
-        // Fire change event
         this.hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
 
         this.close();
@@ -819,7 +1153,6 @@ class Combobox {
             opt.classList.toggle('hidden', !match);
             if (match) visibleCount++;
         });
-        // Show/hide group labels based on whether they have visible children
         this.optionsList.querySelectorAll('.cb-option-group-label').forEach(gl => {
             let next = gl.nextElementSibling;
             let hasVisible = false;
@@ -839,7 +1172,6 @@ class Combobox {
     bindEvents() {
         this.trigger.addEventListener('click', (e) => {
             e.stopPropagation();
-            // Close all other comboboxes first
             document.querySelectorAll('.cb-wrapper').forEach(w => {
                 if (w !== this.wrapper) {
                     const inst = w._cbInstance;
@@ -867,7 +1199,6 @@ class Combobox {
             });
         }
 
-        // Close on outside click
         document.addEventListener('click', (e) => {
             if (!this.wrapper.contains(e.target)) {
                 this.close();
@@ -875,7 +1206,6 @@ class Combobox {
         });
     }
 
-    // Rebuild options (used when select options change dynamically)
     refresh() {
         this.buildOptions();
         this.syncFromSelect();
@@ -890,99 +1220,167 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Helper to get combobox instance by select ID
 function getCbInstance(selectId) {
     const wrapper = document.querySelector(`.cb-wrapper[data-cb-for="${selectId}"]`);
     return wrapper ? wrapper._cbInstance : null;
 }
 
 // ============================================================
-// Event Selection Handler
+// Event Selection Handler — updates all elements in Event section
 // ============================================================
 function handleEventSelectionChange(selectElement) {
+    if (!selectElement || selectElement.selectedIndex < 0) return;
     const selectedOption = selectElement.options[selectElement.selectedIndex];
+    if (!selectedOption) return;
+
+    const eventId = selectElement.value;
     const isGroup = (selectedOption.getAttribute('data-is-group') === '1');
     const minTeam = parseInt(selectedOption.getAttribute('data-min-team') || '1', 10);
     const maxTeam = parseInt(selectedOption.getAttribute('data-max-team') || '1', 10);
-    const eventName = selectedOption.getAttribute('data-event-name') || 'Event';
+    const eventName = selectedOption.getAttribute('data-event-name') || selectedOption.textContent.trim();
+    const eventType = selectedOption.getAttribute('data-event-type') || 'Event';
     const eventFee = parseInt(selectedOption.getAttribute('data-event-fee') || '0', 10);
-    const upiId = selectedOption.getAttribute('data-upi-id') || 'admin@upi';
+    const upiId = selectedOption.getAttribute('data-upi-id') || 'demopay@ybl';
     const qrCodeImage = selectedOption.getAttribute('data-qr-code') || '';
-    const eventId = selectElement.value;
+    const eventDate = selectedOption.getAttribute('data-date') || '';
+    const eventTime = selectedOption.getAttribute('data-time') || '';
+    const venue = selectedOption.getAttribute('data-venue') || 'Campus Venue';
+    const desc = selectedOption.getAttribute('data-desc') || '';
 
+    // Update dynamic summary card (if in dropdown mode)
+    const summaryCard = document.getElementById('dynamicEventSummaryCard');
+    if (summaryCard) {
+        if (eventId) {
+            summaryCard.style.display = 'block';
+            const dynName = document.getElementById('dynEvName');
+            const dynType = document.getElementById('dynEvType');
+            const dynFormat = document.getElementById('dynEvFormat');
+            const dynFee = document.getElementById('dynEvFee');
+            const dynDateTime = document.getElementById('dynEvDateTime');
+            const dynVenue = document.getElementById('dynEvVenue');
+            const dynCapacity = document.getElementById('dynEvCapacity');
+            const dynFeeDetail = document.getElementById('dynEvFeeDetail');
+            const dynDescContainer = document.getElementById('dynEvDescContainer');
+            const dynDesc = document.getElementById('dynEvDesc');
+
+            if (dynName) dynName.textContent = eventName;
+            if (dynType) dynType.textContent = eventType;
+            if (dynFormat) dynFormat.textContent = isGroup ? `👥 Group Event (${minTeam}–${maxTeam} Members)` : '👤 Individual / Solo';
+            if (dynFee) dynFee.textContent = eventFee > 0 ? `₹ ${eventFee} Fee` : 'Free Entry';
+            if (dynDateTime) dynDateTime.textContent = `${eventDate} ${eventTime ? '@ ' + eventTime : ''}`.trim() || 'Scheduled Date';
+            if (dynVenue) dynVenue.textContent = venue;
+            if (dynCapacity) dynCapacity.textContent = isGroup ? `Team Squad (${minTeam}–${maxTeam} Members)` : 'Solo Participant';
+            if (dynFeeDetail) dynFeeDetail.textContent = eventFee > 0 ? `₹ ${eventFee} per ${isGroup ? 'Team' : 'Head'}` : 'Free Entry';
+            if (dynDescContainer && dynDesc) {
+                if (desc) {
+                    dynDesc.textContent = desc;
+                    dynDescContainer.style.display = 'block';
+                } else {
+                    dynDescContainer.style.display = 'none';
+                }
+            }
+        } else {
+            summaryCard.style.display = 'none';
+        }
+    }
+
+    // Payment Section handling
+    const paymentSection = document.getElementById('paymentSection');
+    const displayFee = document.getElementById('displayEventFee');
+    const upiQrCode = document.getElementById('upiQrCode');
+    const upiPayButton = document.getElementById('upiPayButton');
+    const displayUpiId = document.getElementById('displayUpiId');
+    const utrInput = document.getElementById('utr_number');
+    const payOnlineRadio = document.getElementById('payOnlineRadio');
+    const payOfflineRadio = document.getElementById('payOfflineRadio');
+
+    if (payOnlineRadio && payOfflineRadio) {
+        payOnlineRadio.checked = false;
+        payOfflineRadio.checked = false;
+        const onlineCard = document.getElementById('payOnlineCard');
+        const offlineCard = document.getElementById('payOfflineCard');
+        if (onlineCard) onlineCard.classList.remove('active');
+        if (offlineCard) offlineCard.classList.remove('active');
+    }
+    const upiDetails = document.getElementById('upiPaymentDetails');
+    const offlineDetails = document.getElementById('offlinePaymentDetails');
+    if (upiDetails) upiDetails.style.display = 'none';
+    if (offlineDetails) offlineDetails.style.display = 'none';
+    if (utrInput) {
+        utrInput.value = '';
+        utrInput.required = false;
+    }
+
+    if (eventFee > 0 && eventId) {
+        if (paymentSection) paymentSection.style.display = 'block';
+        if (displayFee) displayFee.innerText = `₹ ${eventFee}`;
+        if (displayUpiId) displayUpiId.innerText = upiId;
+        
+        if (upiQrCode) {
+            if (qrCodeImage) {
+                upiQrCode.src = `/static/${qrCodeImage}`;
+            } else {
+                upiQrCode.src = `/events/${encodeURIComponent(eventId)}/upi-qr`;
+            }
+        }
+        if (upiPayButton) {
+            const upiPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(eventName)}&am=${encodeURIComponent(eventFee.toFixed(2))}&cu=INR&tn=${encodeURIComponent(`Event registration ${eventId}`)}`;
+            upiPayButton.href = upiPayload;
+            upiPayButton.style.display = 'inline-flex';
+        }
+        
+        if (payOnlineRadio) payOnlineRadio.required = true;
+        if (payOfflineRadio) payOfflineRadio.required = true;
+    } else {
+        if (paymentSection) paymentSection.style.display = 'none';
+        if (upiPayButton) {
+            upiPayButton.href = '#';
+            upiPayButton.style.display = 'none';
+        }
+        if (payOnlineRadio) payOnlineRadio.required = false;
+        if (payOfflineRadio) payOfflineRadio.required = false;
+    }
+
+    // Group Event Card handling
     const groupCard = document.getElementById('groupEventCard');
     const teamNameInput = document.getElementById('team_name');
     const teamSizeSelect = document.getElementById('team_size');
     const groupHeading = document.getElementById('groupEventHeading');
     const groupSizeBadge = document.getElementById('groupSizeBadge');
 
-    const paymentSection = document.getElementById('paymentSection');
-    const displayFee = document.getElementById('displayEventFee');
-    const upiQrCode = document.getElementById('upiQrCode');
-    const displayUpiId = document.getElementById('displayUpiId');
-    const utrInput = document.getElementById('utr_number');
-    const payOnlineRadio = document.getElementById('payOnlineRadio');
-    const payOfflineRadio = document.getElementById('payOfflineRadio');
+    if (isGroup && eventId) {
+        if (groupCard) groupCard.style.display = 'block';
+        if (teamNameInput) teamNameInput.required = true;
+        if (groupHeading) groupHeading.innerText = `👥 ${eventName} – Group Event Squad`;
+        if (groupSizeBadge) groupSizeBadge.innerText = `Capacity: ${minTeam} - ${maxTeam} Members`;
 
-    // Reset payment selections
-    payOnlineRadio.checked = false;
-    payOfflineRadio.checked = false;
-    document.getElementById('upiPaymentDetails').style.display = 'none';
-    document.getElementById('offlinePaymentDetails').style.display = 'none';
-    if (utrInput) {
-        utrInput.value = '';
-        utrInput.required = false;
-    }
-
-    if (eventFee > 0) {
-        paymentSection.style.display = 'block';
-        displayFee.innerText = `₹ ${eventFee}`;
-        displayUpiId.innerText = upiId;
-        
-        if (qrCodeImage) {
-            upiQrCode.src = `/static/${qrCodeImage}`;
-        } else {
-            upiQrCode.src = `/events/${encodeURIComponent(eventId)}/upi-qr`;
+        if (teamSizeSelect) {
+            teamSizeSelect.innerHTML = '';
+            for (let i = minTeam; i <= maxTeam; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.innerText = `${i} Participants (${i === 2 ? 'Duo' : (i === 3 ? 'Trio' : 'Squad')} Team)`;
+                if (i === Math.min(3, maxTeam)) opt.selected = true;
+                teamSizeSelect.appendChild(opt);
+            }
+            const teamCb = getCbInstance('team_size');
+            if (teamCb) teamCb.refresh();
         }
-        
-        payOnlineRadio.required = true;
-        payOfflineRadio.required = true;
-    } else {
-        paymentSection.style.display = 'none';
-        payOnlineRadio.required = false;
-        payOfflineRadio.required = false;
-    }
-
-    if (isGroup) {
-        groupCard.style.display = 'block';
-        teamNameInput.required = true;
-        groupHeading.innerText = `👥 ${eventName} – Group Event Details`;
-        groupSizeBadge.innerText = `Capacity: ${minTeam} - ${maxTeam} Members`;
-
-        teamSizeSelect.innerHTML = '';
-        for (let i = minTeam; i <= maxTeam; i++) {
-            const opt = document.createElement('option');
-            opt.value = i;
-            opt.innerText = `${i} Participants (${i === 2 ? 'Duo' : (i === 3 ? 'Trio' : 'Squad')} Team)`;
-            if (i === Math.min(3, maxTeam)) opt.selected = true;
-            teamSizeSelect.appendChild(opt);
-        }
-
-        // Refresh the team_size combobox
-        const teamCb = getCbInstance('team_size');
-        if (teamCb) teamCb.refresh();
 
         renderTeamMemberInputs();
     } else {
-        groupCard.style.display = 'none';
-        teamNameInput.required = false;
-        document.getElementById('additionalMembersContainer').innerHTML = '';
+        if (groupCard) groupCard.style.display = 'none';
+        if (teamNameInput) teamNameInput.required = false;
+        const addContainer = document.getElementById('additionalMembersContainer');
+        if (addContainer) addContainer.innerHTML = '';
     }
 }
 
 function renderTeamMemberInputs() {
-    const teamSize = parseInt(document.getElementById('team_size').value || '2', 10);
+    const teamSizeEl = document.getElementById('team_size');
+    const teamSize = parseInt(teamSizeEl ? teamSizeEl.value : '2', 10);
     const container = document.getElementById('additionalMembersContainer');
+    if (!container) return;
     container.innerHTML = '';
 
     for (let i = 2; i <= teamSize; i++) {
@@ -1008,34 +1406,32 @@ function togglePaymentMethod() {
     const utrInput = document.getElementById('utr_number');
     const submitBtn = document.getElementById('submitBtn');
 
-    const onlineLabel = payOnline.closest('label');
-    const offlineLabel = payOffline.closest('label');
+    const onlineCard = document.getElementById('payOnlineCard');
+    const offlineCard = document.getElementById('payOfflineCard');
 
-    onlineLabel.style.borderColor = 'rgba(255,255,255,0.1)';
-    onlineLabel.style.background = '#ffffff';
-    offlineLabel.style.borderColor = 'rgba(255,255,255,0.1)';
-    offlineLabel.style.background = '#ffffff';
+    if (onlineCard) onlineCard.classList.remove('active');
+    if (offlineCard) offlineCard.classList.remove('active');
 
-    if (payOnline.checked) {
-        upiSection.style.display = 'block';
-        offlineSection.style.display = 'none';
-        utrInput.required = true;
-        submitBtn.textContent = 'Submit Registration with Payment →';
-        onlineLabel.style.borderColor = '#dc2626';
-        onlineLabel.style.background = '#fef2f2';
-    } else if (payOffline.checked) {
-        upiSection.style.display = 'none';
-        offlineSection.style.display = 'block';
-        utrInput.required = false;
-        utrInput.value = '';
-        submitBtn.textContent = 'Submit Registration (Pay Later at College) →';
-        offlineLabel.style.borderColor = '#f59e0b';
-        offlineLabel.style.background = 'rgba(245, 158, 11, 0.1)';
+    if (payOnline && payOnline.checked) {
+        if (onlineCard) onlineCard.classList.add('active');
+        if (upiSection) upiSection.style.display = 'block';
+        if (offlineSection) offlineSection.style.display = 'none';
+        if (utrInput) utrInput.required = true;
+        if (submitBtn) submitBtn.textContent = 'Submit Registration with Payment →';
+    } else if (payOffline && payOffline.checked) {
+        if (offlineCard) offlineCard.classList.add('active');
+        if (upiSection) upiSection.style.display = 'none';
+        if (offlineSection) offlineSection.style.display = 'block';
+        if (utrInput) {
+            utrInput.required = false;
+            utrInput.value = '';
+        }
+        if (submitBtn) submitBtn.textContent = 'Submit Registration (Pay Later at College) →';
     } else {
-        upiSection.style.display = 'none';
-        offlineSection.style.display = 'none';
-        utrInput.required = false;
-        submitBtn.textContent = 'Submit Registration →';
+        if (upiSection) upiSection.style.display = 'none';
+        if (offlineSection) offlineSection.style.display = 'none';
+        if (utrInput) utrInput.required = false;
+        if (submitBtn) submitBtn.textContent = 'Submit Registration →';
     }
 }
 
@@ -1045,6 +1441,7 @@ function togglePaymentMethod() {
 function handleDepartmentChange(selectElement) {
     const otherGroup = document.getElementById('otherDepartmentGroup');
     const otherInput = document.getElementById('other_department');
+    if (!otherGroup || !otherInput) return;
     if (selectElement.value === 'Other') {
         otherGroup.style.display = 'block';
         otherInput.required = true;
@@ -1070,21 +1467,20 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('eventRegistrationForm').addEventListener('submit', function(e) {
     const deptSelect = document.getElementById('department');
     const otherInput = document.getElementById('other_department');
-    if (deptSelect.value === 'Other' && otherInput.value.trim()) {
+    if (deptSelect && deptSelect.value === 'Other' && otherInput && otherInput.value.trim()) {
         const tempOption = document.createElement('option');
         tempOption.value = otherInput.value.trim();
         tempOption.selected = true;
         deptSelect.appendChild(tempOption);
     }
 
-    // Validate UTR if online payment is selected
     const payOnline = document.getElementById('payOnlineRadio');
     const utrInput = document.getElementById('utr_number');
     if (payOnline && payOnline.checked && utrInput) {
         const utrVal = utrInput.value.trim();
         if (!utrVal || utrVal.length < 6) {
             e.preventDefault();
-            alert('Please enter a valid UTR / Transaction ID before submitting. You must pay first, then enter the transaction reference number.');
+            alert('Please enter a valid UPI UTR / Transaction Reference ID before submitting. You must transfer the fee first and provide the transaction reference.');
             utrInput.focus();
             return false;
         }

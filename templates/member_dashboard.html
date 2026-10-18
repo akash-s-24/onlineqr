@@ -1,127 +1,16 @@
 {% extends 'base.html' %}
-
-{% block title %}Member Dashboard - EventMate{% endblock %}
-
+{% block title %}Member workspace – EventMate{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">{% endblock %}
 {% block content %}
-<div class="page-header">
-    <div class="page-title">
-        <h1>Welcome, {{ session.full_name }}!</h1>
-        <p>Manage your participant registrations and collections</p>
-    </div>
-    <div class="page-actions">
-        <a href="{{ url_for('events_list') }}" class="btn btn-primary">+ Register New Participant</a>
-    </div>
-</div>
-
-<!-- Dashboard Key Metric Cards (Member Specific) -->
 {% set total_regs = registrations|length %}
-{% set paid_regs = registrations|selectattr("payment_status", "equalto", "paid")|list|length %}
-{% set pending_approvals = registrations|selectattr("approval_status", "equalto", "pending")|list|length %}
+{% set paid_regs = registrations|selectattr('payment_status', 'equalto', 'paid')|list|length %}
+{% set pending_approvals = registrations|selectattr('approval_status', 'equalto', 'pending')|list|length %}
+<div class="dashboard-shell">
+    <header class="dashboard-topbar"><div><p class="dashboard-kicker">Team workspace</p><h1 class="dashboard-title">Your registrations</h1><p class="dashboard-subtitle">Track participants you registered, payment verification, and receipt delivery from one compact workspace.</p></div><div class="dashboard-actions"><a class="dashboard-btn" href="{{ url_for('events_list') }}">Browse events</a><a class="dashboard-btn primary" href="{{ url_for('register_participant') }}">Register participant</a></div></header>
+    <nav class="dashboard-nav" aria-label="Member sections"><a class="active" href="#summary">Summary</a><a href="#records">Registration records</a><a href="{{ url_for('members_list') }}">Team directory</a></nav>
+    <section id="summary" aria-labelledby="summary-title"><h2 id="summary-title" class="sr-only">Summary</h2><div class="dash-grid metrics"><div class="metric info"><span class="metric-label">Registrations</span><span class="metric-value">{{ total_regs }}</span><span class="metric-meta">Participants you added</span></div><div class="metric good"><span class="metric-label">Paid</span><span class="metric-value">{{ paid_regs }}</span><span class="metric-meta">Verified by administrator</span></div><div class="metric warn"><span class="metric-label">Approval pending</span><span class="metric-value">{{ pending_approvals }}</span><span class="metric-meta">Awaiting admin review</span></div><div class="metric"><span class="metric-label">Receipts</span><span class="metric-value">{{ registrations|selectattr('receipt_delivery_status', 'equalto', 'sent')|list|length }}</span><span class="metric-meta">Email receipts sent</span></div><div class="metric"><span class="metric-label">Next step</span><span class="metric-value" style="font-size:1.15rem; letter-spacing:-.02em;">{% if pending_approvals %}Review{% elif paid_regs < total_regs %}Collect{% else %}Ready{% endif %}</span><span class="metric-meta">Based on your records</span></div></div></section>
 
-<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-    <!-- Total Registered -->
-    <div class="stat-card">
-        <div class="stat-info">
-            <span class="stat-label">Total Registered</span>
-            <span class="stat-value">{{ total_regs }}</span>
-            <span class="stat-subtext">Participants you added</span>
-        </div>
-        <div class="stat-icon-wrapper">
-            <span>👥</span>
-        </div>
-    </div>
-
-    <!-- Payments Collected -->
-    <div class="stat-card stat-success">
-        <div class="stat-info">
-            <span class="stat-label">Payments Collected</span>
-            <span class="stat-value">{{ paid_regs }}</span>
-            <span class="stat-subtext">Marked as Paid</span>
-        </div>
-        <div class="stat-icon-wrapper success">
-            <span>✅</span>
-        </div>
-    </div>
-
-    <!-- Pending Admin Approval -->
-    <div class="stat-card stat-warning">
-        <div class="stat-info">
-            <span class="stat-label">Pending Approval</span>
-            <span class="stat-value">{{ pending_approvals }}</span>
-            <span class="stat-subtext">Waiting for Admin OK</span>
-        </div>
-        <div class="stat-icon-wrapper warning">
-            <span>⏳</span>
-        </div>
-    </div>
+    <section id="records" class="dash-panel" style="margin-top:18px;" aria-labelledby="records-title"><div class="dash-panel-head"><div><h2 id="records-title" class="dash-panel-title">Registration records</h2><p class="dash-panel-note">Payment is not considered complete until an administrator verifies the submitted evidence.</p></div><a class="dashboard-btn small" href="{{ url_for('events_list') }}">View public events</a></div>{% if registrations %}<div class="dash-table-wrap"><table class="dash-table"><thead><tr><th>Reference</th><th>Participant</th><th>Event</th><th>Approval</th><th>Payment</th><th>Receipt</th></tr></thead><tbody>{% for reg in registrations %}<tr><td><a class="dash-id" href="{{ url_for('payment_status', registration_uid=reg.registration_uid) }}">{{ reg.registration_uid }}</a><br><span class="dash-muted">Open status</span></td><td><strong>{{ reg.full_name }}</strong><br><span class="dash-muted">{{ reg.email }}<br>{{ reg.college_name }}{% if reg.department %} · {{ reg.department }}{% endif %}</span></td><td>{{ reg.event_name }}{% if reg.team_name %}<br><span class="dash-muted">{{ reg.team_name }}</span>{% endif %}</td><td>{% if reg.approval_status == 'approved' %}<span class="dash-badge good">Approved</span>{% else %}<span class="dash-badge warn">Pending review</span>{% endif %}</td><td>{% if reg.payment_status == 'paid' %}<span class="dash-badge good">Paid · ₹{{ reg.amount_paid }}</span>{% elif reg.payment_status == 'pending' %}<span class="dash-badge info">UTR submitted</span>{% elif reg.payment_status == 'pay_on_site' %}<span class="dash-badge warn">Pay on site</span>{% else %}<span class="dash-badge warn">Unpaid</span>{% endif %}{% if reg.utr_number %}<br><span class="dash-id">{{ reg.utr_number }}</span>{% endif %}{% if reg.payment_verified_at %}<br><span class="dash-muted">Verified {{ reg.payment_verified_at }}</span>{% endif %}</td><td>{% if reg.receipt_delivery_status == 'sent' %}<span class="dash-badge good">Sent</span>{% elif reg.receipt_delivery_status == 'failed' %}<span class="dash-badge bad">Delivery failed</span>{% elif reg.payment_status == 'paid' %}<span class="dash-badge warn">Pending send</span>{% else %}<span class="dash-muted">After verification</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="dash-empty">No registrations yet. Start by choosing an event.</div>{% endif %}</section>
+    <section class="dash-panel" style="margin-top:18px;"><div class="dash-panel-head"><div><h2 class="dash-panel-title">What happens next</h2><p class="dash-panel-note">A simple, reliable handoff for every registration.</p></div></div><div class="dash-grid two" style="padding:16px 18px;"><div class="dash-callout" style="margin:0;"><strong>1. Record</strong><br>Keep the registration reference and UTR safe.</div><div class="dash-callout" style="margin:0;"><strong>2. Verify</strong><br>The administrator checks the bank record.</div><div class="dash-callout" style="margin:0;"><strong>3. Receive</strong><br>The receipt status updates after delivery.</div><div class="dash-callout" style="margin:0;"><strong>4. Attend</strong><br>Use the approved record at the event.</div></div></section>
 </div>
-
-<div class="table-card">
-    <div class="table-header">
-        <h3 class="table-title">Your Registrations</h3>
-    </div>
-    <div class="table-responsive">
-        <table class="custom-table" style="width: 100%;">
-            <thead>
-                <tr>
-                    <th>Reg ID</th>
-                    <th>Participant</th>
-                    <th>College / Dept</th>
-                    <th>Registered Event</th>
-                    <th>Approval Status</th>
-                    <th>Payment</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for reg in registrations %}
-                <tr>
-                    <td><span style="font-family: monospace; font-weight: bold; color: #a855f7;">{{ reg.registration_uid }}</span></td>
-                    <td>
-                        <strong>{{ reg.full_name }}</strong><br>
-                        <span style="font-size: 0.78rem; color: var(--text-muted);">{{ reg.email }}</span>
-                    </td>
-                    <td>
-                        <span>{{ reg.college_name }}</span><br>
-                        <span style="font-size: 0.78rem; color: var(--text-muted);">{{ reg.department }}</span>
-                    </td>
-                    <td>
-                        <span class="badge badge-primary">{{ reg.event_name }}</span><br>
-                        {% if reg.team_name %}
-                        <span style="font-size: 0.78rem; color: var(--text-muted);">Team: {{ reg.team_name }}</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if reg.approval_status == 'approved' %}
-                            <span class="badge badge-success" style="background-color: #d1fae5; color: #065f46;">Approved</span>
-                        {% else %}
-                            <span class="badge badge-warning" style="background-color: #fef3c7; color: #92400e;">Pending Admin</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                                                                                {% if reg.payment_status == 'paid' %}
-                                <span class="badge badge-success" style="background-color: #d1fae5; color: #065f46; margin-bottom: 5px; display: inline-block;">Paid (₹{{ reg.amount_paid }})</span><br>
-                                <a href="https://wa.me/91{{ reg.phone|replace(' ', '')|replace('+91', '') }}?text=Hello {{ reg.full_name|urlencode }}, your cash payment for {{ reg.event_name|urlencode }} is confirmed! See you at Shree Daksha Academy!" target="_blank" class="btn btn-sm" style="background: #25D366; color: white; padding: 4px 8px; font-size: 0.75rem; text-decoration: none; border-radius: 4px;">📱 WA</a>
-                            {% else %}
-                                <span class="badge badge-warning" style="background-color: #fef3c7; color: #92400e; margin-bottom: 5px; display: inline-block;">Unpaid</span><br>
-                                <a href="https://wa.me/91{{ reg.phone|replace(' ', '')|replace('+91', '') }}?text=Hello {{ reg.full_name|urlencode }}, you are registered for {{ reg.event_name|urlencode }}. Please complete your cash payment at the venue desk to receive your certificate." target="_blank" class="btn btn-sm" style="background: #25D366; color: white; padding: 4px 8px; font-size: 0.75rem; text-decoration: none; border-radius: 4px;">📱 WA Reminder</a>
-                            {% endif %}
-                        {% if reg.utr_number %}
-                            <div style="margin-top: 0.25rem; font-size: 0.75rem; color: #b45309; font-weight: 700;">
-                                UTR: {{ reg.utr_number }}
-                            </div>
-                        {% endif %}
-                        
-                        <span style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-top: 4px;">Payment status is verified by an administrator.</span>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">You haven't registered any participants yet.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
 {% endblock %}

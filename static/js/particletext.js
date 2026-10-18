@@ -70,7 +70,7 @@ window.initParticleText = function(container, options = {}) {
   
   container.style.position = 'relative';
   container.style.overflow = 'hidden';
-  container.style.touchAction = 'none';
+  container.style.touchAction = 'pan-y';
   
   const canvas = document.createElement('canvas');
   canvas.style.position = 'absolute';
@@ -202,7 +202,7 @@ window.initParticleText = function(container, options = {}) {
       particle.x += (baseX - particle.x) * follow;
       particle.y += (baseY - particle.y) * follow;
 
-      ctx.globalAlpha = clamp(0.35 + progress * 0.65, 0, 1);
+      ctx.globalAlpha = clamp(0.85 + progress * 0.15, 0, 1);
       drawParticle(particle);
     });
 

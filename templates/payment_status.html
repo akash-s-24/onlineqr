@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Status - EventMate{% endblock %}
+
+{% block content %}
+<section class="page-section" style="max-width: 760px; margin: 0 auto;">
+    <div class="table-card" style="padding: 2rem;">
+        <div class="page-header" style="margin-bottom: 1.5rem;">
+            <div class="page-title">
+                <h1>Payment Status</h1>
+                <p>Keep this reference to check your registration payment later.</p>
+            </div>
+        </div>
+        <div style="display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
+            <div><small>Participant</small><br><strong>{{ registration.full_name }}</strong></div>
+            <div><small>Event</small><br><strong>{{ registration.event_name }}</strong></div>
+            <div><small>Registration ID</small><br><strong style="font-family:monospace;">{{ registration.registration_uid }}</strong></div>
+            <div><small>Event fee</small><br><strong>₹{{ registration.event_fee }}</strong></div>
+        </div>
+        <hr style="margin:1.5rem 0; border:0; border-top:1px solid #e5e7eb;">
+        {% if registration.payment_status == 'paid' %}
+            <div class="alert alert-success" style="padding:1rem; border-radius:8px;">
+                <strong>Payment verified</strong><br>
+                ₹{{ registration.amount_paid }} received by the college.
+            </div>
+            <p><strong>Payment ID / UTR:</strong> <code>{{ registration.utr_number or 'Recorded by admin' }}</code></p>
+            <p><strong>Receipt:</strong> {{ 'Sent to the registered email address.' if registration.receipt_delivery_status == 'sent' else 'Being prepared or available from the registration desk.' }}</p>
+        {% elif registration.payment_status == 'pending' %}
+            <div class="alert alert-warning" style="padding:1rem; border-radius:8px;">
+                <strong>Payment submitted for verification</strong><br>
+                The college will verify the UTR against its bank records before confirming payment.
+            </div>
+            <p><strong>Submitted payment ID / UTR:</strong> <code>{{ registration.utr_number }}</code></p>
+        {% elif registration.payment_status == 'pay_on_site' %}
+            <div class="alert alert-warning" style="padding:1rem; border-radius:8px;">
+                <strong>Pay on spot selected</strong><br>
+                Please pay the registration fee at the college desk.
+            </div>
+        {% else %}
+            <div class="alert alert-warning" style="padding:1rem; border-radius:8px;">
+                <strong>Payment not completed</strong><br>
+                No verified payment has been recorded for this registration.
+            </div>
+        {% endif %}
+        <a href="{{ url_for('events_list') }}" class="btn btn-primary" style="margin-top:1rem;">Back to Events</a>
+    </div>
+</section>
+{% endblock %}

@@ -81,7 +81,10 @@ def query_db(query, args=(), one=False, commit=False):
             cursor.execute(sqlite_query, args)
             if commit:
                 conn.commit()
-                last_id = cursor.lastrowid
+                if sqlite_query.lstrip().upper().startswith('INSERT'):
+                    last_id = cursor.lastrowid
+                else:
+                    last_id = cursor.rowcount
                 cursor.close()
                 conn.close()
                 return last_id
@@ -111,9 +114,10 @@ def query_db(query, args=(), one=False, commit=False):
                 # Actually, if the query is an INSERT and has no RETURNING, last_id is tricky in psycopg2 without it.
                 # We'll just return 1 as a stub if not fetched, but wait! The app relies on `execute_db` returning the ID!
                 # I will modify the query dynamically if it's an INSERT to append RETURNING id
-                last_id = 1
+                last_id = cursor.rowcount
                 try:
                     if query.strip().upper().startswith('INSERT'):
+                        last_id = 1
                         cursor.execute("SELECT LASTVAL()")
                         res = cursor.fetchone()
                         if res:
@@ -136,7 +140,7 @@ def query_db(query, args=(), one=False, commit=False):
             raise e
 
 def execute_db(query, args=()):
-    """Helper to execute write query and commit."""
+    """Helper to execute a write query and return its affected-row count or ID."""
     return query_db(query, args, commit=True)
 
 
@@ -373,6 +377,19 @@ def create_tables_and_seed():
         );
         """,
         """
+        CREATE TABLE IF NOT EXISTS event_showcase_sections (
+            id SERIAL PRIMARY KEY,
+            section_key VARCHAR(80) NOT NULL UNIQUE,
+            eyebrow VARCHAR(120) NOT NULL DEFAULT 'THE LINEUP',
+            title VARCHAR(180) NOT NULL DEFAULT 'Pick your frequency.',
+            description TEXT NULL,
+            background_color VARCHAR(30) NOT NULL DEFAULT '#11131b',
+            banner_image VARCHAR(255) NULL,
+            is_enabled INTEGER NOT NULL DEFAULT 1,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """,
+        """
         CREATE TABLE IF NOT EXISTS participants (
             id SERIAL PRIMARY KEY,
             user_id INTEGER NULL,
@@ -401,7 +418,11 @@ def create_tables_and_seed():
             payment_status VARCHAR(20) DEFAULT 'unpaid',
             amount_paid INTEGER DEFAULT 0,
             payment_method VARCHAR(50) DEFAULT 'None',
-            utr_number VARCHAR(100) NULL
+            utr_number VARCHAR(100) NULL,
+            payment_verified_at TIMESTAMP NULL,
+            payment_verified_by INTEGER NULL,
+            receipt_sent_at TIMESTAMP NULL,
+            receipt_delivery_status VARCHAR(20) DEFAULT 'not_sent'
         );
         """,
         """
@@ -442,6 +463,30 @@ def create_tables_and_seed():
             else:
                 print(f"[Table Init Error] {e}")
 
+    # The public disc-cascade section is a singleton-style editable content
+    # block. Keeping it in the database lets administrators change copy and
+    # artwork without touching the event records themselves.
+    showcase = query_db(
+        "SELECT id FROM event_showcase_sections WHERE section_key = %s",
+        ('main-events',), one=True
+    )
+    if not showcase:
+        execute_db(
+            """
+            INSERT INTO event_showcase_sections
+                (section_key, eyebrow, title, description, background_color, is_enabled)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """,
+            (
+                'main-events',
+                'THE LINEUP',
+                'Pick your frequency.',
+                'A living catalogue of every stage, skill, and squad at Shreedaksha Academy.',
+                '#11131b',
+                1,
+            )
+        )
+
     # Run auto-migrations for existing tables
     migration_columns = [
         ("events", "is_group", "INTEGER DEFAULT 0"),
@@ -462,6 +507,10 @@ def create_tables_and_seed():
         ("registrations", "amount_paid", "INTEGER DEFAULT 0"),
         ("registrations", "payment_method", "VARCHAR(50) DEFAULT 'None'"),
         ("registrations", "utr_number", "VARCHAR(100) NULL"),
+        ("registrations", "payment_verified_at", "TIMESTAMP NULL"),
+        ("registrations", "payment_verified_by", "INTEGER NULL"),
+        ("registrations", "receipt_sent_at", "TIMESTAMP NULL"),
+        ("registrations", "receipt_delivery_status", "VARCHAR(20) DEFAULT 'not_sent'"),
         ("registrations", "registration_uid", "VARCHAR(20) NULL"),
         # Event contact & rules fields
         ("events", "rules_text", "TEXT NULL"),

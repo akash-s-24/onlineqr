@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Scanner – EventMate{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h1>On-Site QR Scanner</h1>
+        <p>Scan participant QR codes to verify payment and mark attendance</p>
+    </div>
+</div>
+
+<div style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start;">
+    
+    <!-- Camera Section -->
+    <div class="table-card" style="flex: 1; min-width: 320px; padding: 2rem; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-top: 4px solid #06b6d4; display: flex; flex-direction: column; align-items: center;">
+        <h3 style="color: #fff; margin-bottom: 1rem;">Camera Feed</h3>
+        <div id="reader" style="width: 100%; max-width: 400px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"></div>
+        <button id="startScanBtn" class="candy-btn" style="margin-top: 1.5rem; width: 100%; max-width: 400px;">Start Scanner</button>
+    </div>
+
+    <!-- Results Section -->
+    <div class="table-card" style="flex: 1; min-width: 320px; padding: 2rem; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-top: 4px solid #fbbf24;">
+        <h3 style="color: #fbbf24; margin-bottom: 1.5rem;">Scan Result</h3>
+        
+        <div id="loadingIndicator" style="display: none; color: #94a3b8; text-align: center; padding: 2rem;">
+            Loading participant details...
+        </div>
+
+        <div id="scanResult" style="display: none;">
+            <div style="margin-bottom: 1rem;">
+                <span style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase;">Participant</span>
+                <div id="resName" style="font-size: 1.5rem; color: #fff; font-weight: bold;"></div>
+                <div id="resCollege" style="color: #cbd5e1; font-size: 0.95rem;"></div>
+            </div>
+            
+            <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                <span style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase;">Event</span>
+                <div id="resEvent" style="font-size: 1.1rem; color: #fff;"></div>
+                <div id="resTeam" style="color: #cbd5e1; font-size: 0.9rem; margin-top: 0.5rem;"></div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+                <div style="flex: 1; padding: 1rem; border-radius: 8px; background: rgba(255,255,255,0.05); text-align: center;">
+                    <span style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase;">Payment</span>
+                    <div id="resPayment" style="font-size: 1.1rem; font-weight: bold; margin-top: 0.25rem;"></div>
+                </div>
+                <div style="flex: 1; padding: 1rem; border-radius: 8px; background: rgba(255,255,255,0.05); text-align: center;">
+                    <span style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase;">Attendance</span>
+                    <div id="resAttendance" style="font-size: 1.1rem; font-weight: bold; margin-top: 0.25rem;"></div>
+                </div>
+            </div>
+
+            <form id="verifyForm">
+                <input type="hidden" id="verifyRegId" name="registration_id">
+                <button type="button" id="markPaidAttendedBtn" class="candy-btn" style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border:none;">Mark Paid & Attended</button>
+            </form>
+        </div>
+        
+        <div id="scanIdle" style="color: #94a3b8; text-align: center; padding: 3rem 1rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📷</div>
+            Waiting for QR scan...
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+    let html5QrcodeScanner;
+    
+    document.getElementById('startScanBtn').addEventListener('click', function() {
+        if (!html5QrcodeScanner) {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader", { fps: 10, qrbox: 250 }, false);
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            this.style.display = 'none';
+        }
+    });
+
+    let isScanning = false;
+    function onScanSuccess(decodedText, decodedResult) {
+        if (isScanning) return; // Prevent double firing
+        
+        // Assume decodedText is the registration_uid
+        const uid = decodedText.trim();
+        if (!uid) return;
+        
+        isScanning = true;
+        
+        // UI Updates
+        document.getElementById('scanIdle').style.display = 'none';
+        document.getElementById('scanResult').style.display = 'none';
+        document.getElementById('loadingIndicator').style.display = 'block';
+        
+        fetch(`/api/scan_qr?uid=${encodeURIComponent(uid)}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                
+                if (data.status === 'success') {
+                    const r = data.data;
+                    document.getElementById('scanResult').style.display = 'block';
+                    
+                    document.getElementById('resName').innerText = r.full_name;
+                    document.getElementById('resCollege').innerText = `${r.college_name} - ${r.department}`;
+                    document.getElementById('resEvent').innerText = r.event_name;
+                    
+                    if (r.is_group) {
+                        document.getElementById('resTeam').innerText = `Team: ${r.team_name} (${r.team_size} members)`;
+                    } else {
+                        document.getElementById('resTeam').innerText = '';
+                    }
+
+                    // Payment logic
+                    const pEl = document.getElementById('resPayment');
+                    if (r.payment_status === 'pay_on_site' || r.payment_method === 'Cash') {
+                        pEl.innerText = 'Pay On-Site (Cash)';
+                        pEl.style.color = '#fbbf24';
+                    } else if (r.payment_status === 'paid') {
+                        pEl.innerText = 'Paid Online';
+                        pEl.style.color = '#10b981';
+                    } else {
+                        pEl.innerText = r.payment_status;
+                        pEl.style.color = '#ef4444';
+                    }
+
+                    // Attendance logic
+                    const aEl = document.getElementById('resAttendance');
+                    if (r.attendance_status === 'present') {
+                        aEl.innerText = 'Present';
+                        aEl.style.color = '#10b981';
+                        document.getElementById('markPaidAttendedBtn').innerText = 'Already Marked Attended';
+                        document.getElementById('markPaidAttendedBtn').disabled = true;
+                        document.getElementById('markPaidAttendedBtn').style.opacity = '0.5';
+                    } else {
+                        aEl.innerText = 'Absent';
+                        aEl.style.color = '#ef4444';
+                        document.getElementById('markPaidAttendedBtn').innerText = 'Mark Paid & Attended';
+                        document.getElementById('markPaidAttendedBtn').disabled = false;
+                        document.getElementById('markPaidAttendedBtn').style.opacity = '1';
+                    }
+
+                    document.getElementById('verifyRegId').value = r.registration_id;
+                    
+                    // Automatically pause scanning while reviewing
+                    html5QrcodeScanner.pause();
+                } else {
+                    alert('QR Code Invalid: ' + data.message);
+                    document.getElementById('scanIdle').style.display = 'block';
+                }
+                
+                setTimeout(() => { isScanning = false; }, 2000);
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error fetching details.');
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('scanIdle').style.display = 'block';
+                setTimeout(() => { isScanning = false; }, 2000);
+            });
+    }
+
+    function onScanFailure(error) {
+        // handle scan failure, usually better to ignore and keep scanning
+    }
+
+    // Handle "Mark Paid & Attended" button click
+    document.getElementById('markPaidAttendedBtn').addEventListener('click', function() {
+        const regId = document.getElementById('verifyRegId').value;
+        if (!regId) return;
+        
+        this.innerText = 'Processing...';
+        this.disabled = true;
+
+        fetch('/api/mark_attended', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ registration_id: regId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Update UI immediately to show success
+                document.getElementById('resAttendance').innerText = 'Present';
+                document.getElementById('resAttendance').style.color = '#10b981';
+                
+                // If it was pay_on_site, assume they paid
+                if (document.getElementById('resPayment').innerText.includes('Cash')) {
+                     document.getElementById('resPayment').innerText = 'Paid (Cash)';
+                     document.getElementById('resPayment').style.color = '#10b981';
+                }
+
+                alert('Success: Participant marked as Paid & Attended!');
+                
+                // Reset UI for next scan
+                document.getElementById('scanResult').style.display = 'none';
+                document.getElementById('scanIdle').style.display = 'block';
+                html5QrcodeScanner.resume(); // Resume scanning next person
+            } else {
+                alert('Error: ' + data.message);
+                this.innerText = 'Mark Paid & Attended';
+                this.disabled = false;
+            }
+        })
+        .catch(err => {
+            alert('Request Failed');
+            this.innerText = 'Mark Paid & Attended';
+            this.disabled = false;
+        });
+    });
+</script>
+{% endblock %}

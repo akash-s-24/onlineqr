@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}EventMate – Shree Daksha Academy{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
@@ -16,40 +16,38 @@
 
     
     <style>
-        /* CSS Reset for Landing */
+        /* ═══════════════════════════════════════════
+           MOBILE-FIRST CSS — Base = phone, scale up
+           ═══════════════════════════════════════════ */
+        *, *::before, *::after { box-sizing: border-box; }
+
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             overflow-x: hidden;
-            background-color: #ffffff;
-            color: #0f172a;
+            background-color: #0b1220 !important;
+            color: #f8fafc;
             font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-
-
-        /* First-Time Loading Screen */
+        /* ── Loading Screen ── */
         #loader {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #ffffff;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: #0b1220 !important;
             z-index: 9999;
             display: flex;
             justify-content: center;
             align-items: center;
             transition: opacity 0.5s ease;
         }
-        .unique-loader {
-            display: flex;
-            gap: 15px;
-        }
+        .unique-loader { display: flex; gap: 12px; }
         .unique-loader div {
-            width: 20px;
-            height: 20px;
+            width: 16px; height: 16px;
             background-color: #dc2626;
             border-radius: 4px;
             animation: pulse-diamond 1.2s infinite ease-in-out;
@@ -60,64 +58,188 @@
         .unique-loader div:nth-child(3) { animation-delay: 0s; }
         @keyframes pulse-diamond {
             0%, 100% { transform: rotate(45deg) scale(0.5); opacity: 0.3; }
-            50% { transform: rotate(45deg) scale(1.2); opacity: 1; box-shadow: 0 0 20px rgba(220, 38, 38, 0.4); }
+            50% { transform: rotate(45deg) scale(1.2); opacity: 1; box-shadow: 0 3px 12px rgba(255, 255, 255, 0.18); }
         }
 
-        /* Official Header */
+        /* ═══════════════════════════════════════════
+           REDESIGNED HEADER — Flush, Luxury Dark Glassmorphic Bar
+           ═══════════════════════════════════════════ */
         .landing-header {
             position: fixed;
             top: 0;
             left: 0;
+            right: 0;
             width: 100%;
-            padding: 8px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            height: 64px;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(15, 23, 42, 0.1);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .landing-logo {
+            background: #0b1220 !important;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+            margin: 0 !important;
+            padding: 0 !important;
             display: flex;
-            align-items: center;
-            text-decoration: none;
-            gap: 12px;
-            flex: 1;
-            min-width: 220px;
-        }
-        .landing-logo img {
-            height: 35px;
-        }
-        .landing-logo h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            color: #0f172a;
-            margin: 0;
-            font-size: 1.1rem;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        
-        .header-nav-center {
-            display: flex;
-            gap: 0;
-            flex: 1 1 auto;
-            min-width: 0;
-            justify-content: center;
             align-items: center;
         }
 
-        /* ── Animated Breadcrumb Nav ── */
-        .breadcrumb-nav {
+        .header-inner {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
             display: flex;
             align-items: center;
-            gap: 4px;
+            height: 100%;
+            position: relative;
+        }
+
+        /* ── College Logo & Name (Left) ── */
+        .landing-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none !important;
+            min-width: 0;
+            flex-shrink: 0;
+            cursor: pointer;
+            z-index: 1002;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+        }
+        .landing-logo:hover {
+            transform: translateY(-1px);
+            opacity: 0.95;
+        }
+        .landing-logo img, .landing-logo-img {
+            height: 38px;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+        }
+        .landing-logo h1, .landing-logo-title {
+            font-family: 'Space Grotesk', sans-serif;
+            color: #ffffff !important;
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+        }
+
+        /* ── Mobile Nav Toggle ── */
+        .mobile-toggle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1005;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            transition: background 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mobile-toggle:hover { background: rgba(255, 255, 255, 0.12); }
+        .mobile-toggle:active { background: rgba(255, 255, 255, 0.18); }
+
+        .header-nav-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            flex: 1 1 auto;
+        }
+
+        .image-like-nav {
+            position: relative;
             list-style: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin: 0;
+            padding: 4px 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Sliding pill indicator — absolute positioning prevents flex item displacement */
+        .nav-pill-indicator {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            left: 0;
+            border-radius: 9999px;
+            background: rgba(37, 99, 235, 0.28);
+            border: 1px solid rgba(96, 165, 250, 0.35);
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.24);
+            pointer-events: none;
+            z-index: 0;
+            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), width 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+            opacity: 0;
+            display: block;
+        }
+        .nav-pill-indicator.visible {
+            opacity: 1;
+        }
+
+        .image-like-nav li {
+            position: relative;
+            z-index: 1;
             margin: 0;
             padding: 0;
         }
+        .image-like-nav .nav-link {
+            position: relative;
+            z-index: 1;
+            color: #cbd5e1;
+            text-decoration: none !important;
+            font-size: 0.88rem;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            padding: 7px 18px;
+            border-radius: 9999px;
+            transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            background: transparent;
+        }
+        .image-like-nav .nav-link:hover {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .image-like-nav .nav-link.active {
+            color: #60a5fa !important;
+            font-weight: 700;
+        }
 
+        /* Scrim behind mobile overlay */
+        .nav-scrim {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .nav-scrim.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ── Breadcrumb animation ── */
         .breadcrumb-item {
             display: flex;
             align-items: center;
@@ -126,86 +248,131 @@
             transform: translateY(-8px);
             animation: bc-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .breadcrumb-item:nth-child(1) { animation-delay: 0.1s; }
-        .breadcrumb-item:nth-child(2) { animation-delay: 0.2s; }
-        .breadcrumb-item:nth-child(3) { animation-delay: 0.3s; }
-        .breadcrumb-item:nth-child(4) { animation-delay: 0.4s; }
-        .breadcrumb-item:nth-child(5) { animation-delay: 0.5s; }
-        .breadcrumb-item:nth-child(6) { animation-delay: 0.6s; }
-        .breadcrumb-item:nth-child(7) { animation-delay: 0.7s; }
+        .breadcrumb-item:nth-child(1) { animation-delay: 0.05s; }
+        .breadcrumb-item:nth-child(2) { animation-delay: 0.1s; }
+        .breadcrumb-item:nth-child(3) { animation-delay: 0.15s; }
+        .breadcrumb-item:nth-child(4) { animation-delay: 0.2s; }
+        .breadcrumb-item:nth-child(5) { animation-delay: 0.25s; }
+        .breadcrumb-item:nth-child(6) { animation-delay: 0.3s; }
+        .breadcrumb-item:nth-child(7) { animation-delay: 0.35s; }
+        @keyframes bc-fade-in { to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes bc-fade-in {
-            to { opacity: 1; transform: translateY(0); }
+        /* ── Header Actions (mobile: inside overlay) ── */
+        .header-actions {
+            display: none; /* hidden on mobile (only desktop row) */
         }
+        .header-actions.mobile-visible {
+            display: none; /* hidden until overlay opens */
+        }
+        .header-nav-center.open ~ .header-actions.mobile-visible,
+        .header-nav-center .header-actions.mobile-visible {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px 0 0;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            margin-top: auto;
+        }
+        .header-btn {
+            background: #2563eb;
+            color: #ffffff;
+            border: 1px solid #2563eb;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header-btn:hover { background: #1d4ed8; border-color: #1d4ed8; transform: translateY(-1px); box-shadow: 0 5px 12px rgba(37, 99, 235, .24); }
+        .header-btn:focus-visible, .header-cta-pill:focus-visible, .header-cta-classic:focus-visible { outline: 3px solid rgba(147, 197, 253, .7); outline-offset: 3px; }
 
-
-        .pop-btn {
-            position: relative;
+        .header-cta-pill, .header-cta-classic {
+            background: #1e40af;
+            color: #ffffff !important;
+            padding: 8px 18px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-decoration: none !important;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.22);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.95rem !important;
-            color: #ffffff !important;
-            padding: 0.9rem 1.5rem !important;
-            border-radius: 0.6rem !important;
-            background-color: #3b82f6 !important;
-            border: 2px solid #1e3a8a !important;
-            transition: all 150ms cubic-bezier(0,0,0.58,1) !important;
-            box-shadow: 0 6px 0 -1px #60a5fa, 0 6px 0 0 #1e3a8a, 0 12px 0 0 #dbeafe !important;
-            text-decoration: none !important;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
             cursor: pointer;
-            width: 100%;
-            margin-bottom: 12px; /* compensate for the smaller shadow */
+            -webkit-tap-highlight-color: transparent;
         }
-        .pop-btn:hover {
-            background-color: #2563eb !important;
-            transform: translateY(2px) !important;
-            box-shadow: 0 4px 0 -1px #60a5fa, 0 4px 0 0 #1e3a8a, 0 8px 0 0 #dbeafe !important;
+        .header-cta-pill:hover, .header-cta-classic:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.28);
+            color: #ffffff !important;
         }
-        .pop-btn:active {
-            background-color: #1d4ed8 !important;
-            transform: translateY(6px) !important;
-            box-shadow: 0 0px 0 -1px #60a5fa, 0 0px 0 0 #1e3a8a, 0 0px 0 0 #dbeafe !important;
+        .header-cta-pill:active, .header-cta-classic:active {
+            transform: scale(0.97);
         }
 
-        /* Candy Button — glowing radial-gradient press animation */
-        .candy-btn {
-            position: relative;
-            display: inline-block;
-            color: #fff;
-            font-weight: 600;
-            font-size: 1rem;
-            line-height: 1.4;
-            letter-spacing: 0.02em;
-            padding: 0.75rem 2.25rem;
-            border-radius: 0.75rem;
-            cursor: pointer;
-            transition: all 200ms ease-out;
-            border: 1px solid #3b82f6;
-            background: radial-gradient(95% 60% at 50% 75%, #1e40af 0%, #1e3a8a 100%);
-            box-shadow: 0px 4px 48px -12px rgba(30, 58, 138, 0.8), inset 0px 1px 8px -4px rgba(255,255,255,0.4);
+        .header-user-name {
+            overflow-wrap: anywhere;
+            white-space: normal;
+        }
+
+        .alert-container {
+            position: fixed;
+            top: 78px;
+            right: 20px;
+            z-index: 10000;
+            width: min(360px, calc(100vw - 32px));
+        }
+        .alert {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+            padding: 13px 15px;
+            border: 1px solid rgba(255, 255, 255, .16);
+            border-radius: 10px;
+            background: rgba(15, 23, 42, .94);
+            color: #f8fafc;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .22);
+            font-size: .82rem;
+        }
+        .alert-success { border-color: rgba(52, 211, 153, .5); }
+        .alert-danger { border-color: rgba(248, 113, 113, .55); }
+        .alert-warning { border-color: rgba(251, 191, 36, .55); }
+        .alert-info { border-color: rgba(96, 165, 250, .55); }
+        .alert-close { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 1.2rem; line-height: 1; opacity: .72; }
+        .alert-close:hover, .alert-close:focus-visible { opacity: 1; }
+        .alert-close:focus-visible { outline: 2px solid #93c5fd; outline-offset: 2px; }
+        @media (max-width: 640px) {
+            .alert-container { top: 70px; right: 16px; width: min(360px, calc(100vw - 32px)); }
+        }
+
+        /* Authenticated navigation */
+        body.authenticated-view .image-like-nav .nav-link:hover,
+        body.authenticated-view .image-like-nav .nav-link.active { color: #2563eb; }
+
+        /* Legacy header-nav-link */
+        .header-nav-link {
+            color: #334155;
             text-decoration: none;
-            text-align: center;
-            overflow: hidden;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .candy-btn::after {
-            content: '';
-            position: absolute;
-            top: 1px;
-            right: 10%;
-            width: 60%;
-            height: 1px;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
-            pointer-events: none;
-        }
-        .candy-btn:hover {
-            filter: brightness(1.1);
-        }
-        .candy-btn:active {
-            transform: scale(0.95) rotate(1deg);
-        }
+        .header-nav-link:hover { color: #dc2626; }
 
         .breadcrumb-link {
             color: #475569;
@@ -219,437 +386,709 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
+        .breadcrumb-link:hover { color: #dc2626; background: rgba(220, 38, 38, 0.1); }
 
-        .breadcrumb-link:hover {
-            color: #dc2626;
-            background: rgba(220, 38, 38, 0.1);
-            box-shadow: none;
-        }
-
-        .image-like-nav {
-            position: relative;
-            list-style: none;
-            display: flex;
-            align-items: center;
-            gap: clamp(4px, 1vw, 8px);
-            margin: 0;
-            padding: 4px;
-            flex-wrap: nowrap;
-            white-space: nowrap;
-            background: rgba(241, 245, 249, 0.8);
-            border-radius: 10px;
-            border: 1px solid rgba(226, 232, 240, 0.6);
-        }
-
-        /* Sliding pill indicator */
-        .nav-pill-indicator {
-            position: absolute;
-            top: 4px;
-            left: 0;
-            height: calc(100% - 8px);
-            border-radius: 8px;
-            background: #ffffff;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
-            transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease;
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0;
-        }
-        .nav-pill-indicator.visible {
-            opacity: 1;
-        }
-
-        .image-like-nav .nav-link {
-            position: relative;
-            z-index: 1;
-            color: #475569;
-            text-decoration: none;
-            font-size: 0.88rem;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            padding: 7px 14px;
-            border-radius: 7px;
-            transition: color 0.25s ease;
-            cursor: pointer;
-        }
-
-        .image-like-nav .nav-link:hover {
-            color: #2563eb;
-        }
-        .image-like-nav .nav-link.active {
-            color: #2563eb;
-            font-weight: 600;
-        }
-
-        /* Authenticated navigation */
-        body.authenticated-view .image-like-nav .nav-link:hover,
-        body.authenticated-view .image-like-nav .nav-link.active {
-            color: #2563eb;
-        }
-
-        /* Legacy header-nav-link kept for admin/member links below breadcrumbs */
-        .header-nav-link {
-            color: #334155;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .header-nav-link:hover {
-            color: #dc2626;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
-            justify-content: flex-end;
-            min-width: max-content;
-            white-space: nowrap;
-        }
-        .header-btn {
-            background: #dc2626;
-            color: #ffffff;
-            border: 1px solid #dc2626;
-            padding: 8px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
-        .header-btn:hover {
-            background: #b91c1c;
-            border-color: #b91c1c;
-            box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
-        }
-
-        /* Flash Messages */
+        /* ── Flash Messages ── */
         .landing-flash {
             position: fixed;
-            top: 80px;
-            right: 20px;
+            top: 62px;
+            left: 12px; right: 12px;
             z-index: 10000;
-            width: 300px;
+            width: auto;
         }
 
-        /* Mobile Menu */
-        .mobile-toggle {
-            display: none;
-            background: transparent;
-            border: none;
-            color: #0f172a;
-            font-size: 2rem;
+        /* ═══ POP BUTTON ═══ */
+        .pop-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.88rem !important;
+            color: #ffffff !important;
+            padding: 0.8rem 1.25rem !important;
+            border-radius: 0.6rem !important;
+            background-color: #3b82f6 !important;
+            border: 2px solid #1e3a8a !important;
+            transition: all 150ms cubic-bezier(0,0,0.58,1) !important;
+            box-shadow: 0 6px 0 -1px #60a5fa, 0 6px 0 0 #1e3a8a, 0 12px 0 0 #dbeafe !important;
+            text-decoration: none !important;
             cursor: pointer;
-            z-index: 1002;
+            width: 100%;
+            margin-bottom: 12px;
+            min-height: 48px;
         }
-        .mobile-visible {
-            display: none;
+        .pop-btn:hover {
+            background-color: #2563eb !important;
+            transform: translateY(2px) !important;
+            box-shadow: 0 4px 0 -1px #60a5fa, 0 4px 0 0 #1e3a8a, 0 8px 0 0 #dbeafe !important;
         }
-        @media (max-width: 1150px) {
-            .mobile-toggle { display: block; }
-            .header-nav-center {
-                position: fixed;
-                top: 0; right: -100%;
-                width: 250px; height: 100vh;
-                background: rgba(255, 255, 255, 0.98);
-                backdrop-filter: blur(10px);
-                flex-direction: column;
-                justify-content: flex-start;
-                padding-top: 80px;
-                transition: 0.3s ease;
-                z-index: 1000;
-                border-left: 1px solid rgba(15, 23, 42, 0.1);
-            }
-            .header-nav-center.open { right: 0; }
-            .header-actions { display: none; }
-            .header-actions.mobile-visible {
-                display: flex;
-                flex-direction: column;
-                padding: 20px;
-                border-top: 1px solid rgba(15, 23, 42, 0.1);
-                margin-top: auto;
-            }
+        .pop-btn:active {
+            background-color: #1d4ed8 !important;
+            transform: translateY(6px) !important;
+            box-shadow: 0 0 0 -1px #60a5fa, 0 0 0 0 #1e3a8a, 0 0 0 0 #dbeafe !important;
         }
 
-        @media (max-width: 600px) {
-            .landing-header {
-                padding: 8px 14px;
-                min-height: 58px;
-            }
-            .landing-logo {
-                min-width: 0;
-                max-width: calc(100% - 54px);
-                gap: 8px;
-            }
-            .landing-logo img { height: 30px; width: auto; }
-            .landing-logo h1 {
-                min-width: 0;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                font-size: .82rem;
-                letter-spacing: .25px;
-            }
-            .mobile-toggle {
-                flex: 0 0 auto;
-                padding: 4px 6px;
-                font-size: 1.8rem;
-                line-height: 1;
-            }
-            .header-nav-center {
-                width: min(86vw, 320px);
-                padding: 74px 20px 20px;
-                align-items: stretch;
-            }
-            .image-like-nav {
-                width: 100%;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 14px;
-            }
-            .image-like-nav .nav-link { font-size: .92rem; }
-            .header-actions.mobile-visible {
-                width: 100%;
-                align-items: stretch;
-                padding: 16px 0 0;
-            }
-            .header-user-name { overflow-wrap: anywhere; white-space: normal; }
-            .landing-flash { left: 14px; right: 14px; width: auto; }
+        /* ═══ CANDY BUTTON ═══ */
+        .candy-btn {
+            position: relative;
+            display: inline-block;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            letter-spacing: 0.02em;
+            padding: 0.7rem 1.75rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 200ms ease-out;
+            border: 1px solid #3b82f6;
+            background: radial-gradient(95% 60% at 50% 75%, #1e40af 0%, #1e3a8a 100%);
+            box-shadow: 0px 4px 48px -12px rgba(30, 58, 138, 0.8), inset 0px 1px 8px -4px rgba(255,255,255,0.4);
+            text-decoration: none;
+            text-align: center;
+            overflow: hidden;
+            min-height: 48px;
         }
-
-        /* Three.js Background */
-        #canvas-container {
+        .candy-btn::after {
+            content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0; /* Behind content */
-            pointer-events: none; /* Let clicks pass through */
+            top: 1px; right: 10%;
+            width: 60%; height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
+            pointer-events: none;
         }
+        .candy-btn:hover { filter: brightness(1.1); }
+        .candy-btn:active { transform: scale(0.96); }
 
-        /* Scrolling Content Overlay */
+
+        /* ═══ SCROLL CONTENT ═══ */
         .scroll-content {
             position: relative;
             z-index: 10;
         }
 
-        /* Institutional Footer */
+        /* ═══ FOOTER — Professional Spatial Layout ═══ */
         .l-footer {
-            background: #0f172a;
+            background: #0b1220 !important;
             color: #f1f5f9;
-            padding: 60px 20px 30px;
+            padding: 56px 20px 24px;
             position: relative;
             z-index: 10;
-            border-top: 4px solid #fbbf24;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
         }
+
         .footer-container {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 40px;
-            margin-bottom: 40px;
+            grid-template-columns: 1fr;
+            gap: 36px;
+            text-align: left;
+        }
+        .footer-col {
+            display: flex;
+            flex-direction: column;
             text-align: left;
         }
         .footer-col h4 {
-            color: #fbbf24;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 16px;
             font-family: 'Space Grotesk', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.4px;
+            position: relative;
+            display: inline-block;
+        }
+        .footer-col h4::after {
+            content: '';
+            display: block;
+            width: 28px;
+            height: 2px;
+            background: #2563eb;
+            margin-top: 6px;
+            border-radius: 2px;
         }
         .footer-col p {
-            color: #cbd5e1;
-            font-size: 0.95rem;
-            line-height: 1.6;
+            color: #94a3b8;
+            font-size: 0.92rem;
+            line-height: 1.65;
             margin-bottom: 12px;
         }
         .footer-col a {
             color: #cbd5e1;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             text-decoration: none;
-            display: block;
-            margin-bottom: 10px;
-            transition: color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            transition: all 0.2s ease;
         }
         .footer-col a:hover {
-            color: #ffffff;
-            text-decoration: underline;
+            color: #60a5fa;
+            transform: translateX(3px);
         }
-        .footer-col .social-icons {
+        .footer-contact-item {
             display: flex;
-            gap: 15px;
-            margin-top: 20px;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
-        .footer-col .social-icons a {
-            display: inline-block;
-            font-size: 1.5rem;
-            color: #fbbf24;
-            transition: transform 0.2s ease, color 0.2s ease;
+        .footer-contact-icon {
+            color: #60a5fa;
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 2px;
         }
-        .footer-col .social-icons a:hover {
-            transform: translateY(-3px);
+        .footer-social-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .footer-social-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #ffffff;
+            transition: all 0.2s ease;
+            text-decoration: none !important;
+            flex-shrink: 0;
+        }
+        .footer-social-btn img {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+            display: block;
+        }
+        .footer-social-btn:hover {
+            background: #2563eb;
+            border-color: #3b82f6;
+            color: #ffffff;
+            transform: translateY(-2px);
         }
         .footer-bottom {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            max-width: 1200px;
+            margin: 40px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
             font-size: 0.85rem;
+            color: #64748b;
+            text-align: center;
+        }
+        .footer-back-to-top {
             color: #94a3b8;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+            cursor: pointer;
+        }
+        .footer-back-to-top:hover {
+            color: #60a5fa;
         }
 
-        /* Reusable UI Components */
+        /* ═══ SECTION TITLE ═══ */
         .section-title {
             text-align: center;
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 3rem;
+            font-size: clamp(1.75rem, 7vw, 3rem);
             color: #0f172a;
-            margin-bottom: 40px;
+            margin-bottom: 28px;
         }
 
-        /* React Bits ScrollFloat (Vanilla JS Port) */
-        .scroll-float {
-            overflow: hidden;
-            line-height: 1.5;
+        /* ── ScrollFloat ── */
+        .scroll-float { overflow: hidden; line-height: 1.5; }
+        .scroll-float-text { display: inline-block; }
+        .scroll-float .char { display: inline-block; }
+
+        /* ═══════════════════════════════════════════
+           DESKTOP SCALE-UP — min-width queries
+           ═══════════════════════════════════════════ */
+        @media (min-width: 768px) {
+            .landing-header {
+                padding: 0 24px;
+                height: 60px;
+            }
+            .landing-logo img { height: 34px; }
+            .landing-logo h1 { font-size: 1rem; letter-spacing: 0.5px; }
+            .landing-flash {
+                left: auto;
+                right: 20px;
+                width: 320px;
+                top: 72px;
+            }
+            .footer-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 36px;
+            }
+            .footer-bottom {
+                flex-direction: row;
+                text-align: left;
+            }
         }
-        .scroll-float-text {
-            display: inline-block;
+
+        @media (min-width: 1024px) {
+            .footer-container {
+                grid-template-columns: 2.2fr 1.2fr 1.8fr 1.4fr;
+                gap: 40px;
+            }
         }
-        .scroll-float .char {
-            display: inline-block;
+
+        @media (min-width: 1024px) {
+            .l-footer { padding: 52px 24px 28px; }
+            /* Desktop header: flush bar, centered nav, prominent CTA */
+            .mobile-toggle { display: none !important; }
+            .nav-scrim { display: none !important; }
+            .landing-header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 68px;
+                border-radius: 0;
+                background: #0b1220 !important;
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+                display: flex;
+                align-items: center;
+                z-index: 1000;
+            }
+            .header-inner {
+                width: 100%;
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 0 32px;
+                display: flex;
+                align-items: center;
+                height: 100%;
+            }
+            .landing-logo {
+                flex: 0 0 auto;
+                min-width: 220px;
+                gap: 12px;
+                z-index: 25;
+            }
+            .landing-logo:hover {
+                transform: translateY(-1px);
+            }
+            .landing-logo img, .landing-logo-img { height: 38px; }
+            .landing-logo h1, .landing-logo-title {
+                font-size: 1.05rem;
+                letter-spacing: 0.5px;
+                font-weight: 700;
+                color: #ffffff !important;
+            }
+
+            .header-nav-center {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                margin: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 20;
+                pointer-events: auto;
+            }
+            .image-like-nav {
+                display: inline-flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 4px;
+                padding: 5px 8px;
+                background: rgba(255, 255, 255, 0.06);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 9999px;
+                box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+            }
+            .image-like-nav .nav-link {
+                font-size: 0.88rem;
+                font-weight: 600;
+                padding: 7px 18px;
+                border-radius: 9999px;
+                color: #cbd5e1;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .image-like-nav .nav-link:hover {
+                color: #ffffff !important;
+                background: rgba(255, 255, 255, 0.08);
+            }
+            .image-like-nav .nav-link.active {
+                color: #60a5fa !important;
+                font-weight: 700;
+                background: transparent !important;
+            }
+
+            .header-actions.desktop-actions {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex: 0 0 auto;
+                justify-content: flex-end;
+                min-width: max-content;
+                z-index: 25;
+                margin-left: auto;
+            }
+            .header-actions.mobile-visible { display: none !important; }
+
+            .header-cta-classic {
+                position: relative;
+                z-index: 25;
+                pointer-events: auto !important;
+                cursor: pointer !important;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px 22px;
+                border-radius: 9999px;
+                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                color: #ffffff !important;
+                font-family: 'Space Grotesk', sans-serif;
+                font-size: 0.9rem;
+                font-weight: 700;
+                letter-spacing: 0.02em;
+                text-decoration: none !important;
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                box-shadow: 0 4px 16px rgba(15, 23, 42, 0.24);
+                transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .header-cta-classic:hover {
+                transform: translateY(-1px) scale(1.02);
+                box-shadow: 0 6px 22px rgba(15, 23, 42, 0.3);
+                background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                color: #ffffff !important;
+            }
+            .header-cta-classic * {
+                pointer-events: none;
+            }
         }
-        
+
+        /* Authenticated desktop header: keep the role navigation inside a stable grid. */
+        @media (min-width: 1024px) {
+            body.authenticated-view .landing-logo { min-width: 180px; }
+            body.authenticated-view .header-nav-center {
+                position: static;
+                transform: none;
+                flex: 1 1 auto;
+                min-width: 0;
+                margin: 0 12px;
+            }
+            body.authenticated-view .image-like-nav {
+                gap: 2px;
+                max-width: 100%;
+                padding: 4px;
+            }
+            body.authenticated-view .image-like-nav .nav-link {
+                padding: 7px 10px;
+                font-size: .78rem;
+            }
+            body.authenticated-view .header-actions.desktop-actions { gap: 8px; }
+        }
+
+        /* All phones and small tablets use a drawer so labels never collide. */
+        @media (max-width: 1023px) {
+            /* Keep the drawer and its controls above the scrim stacking context. */
+            .landing-header { height: 64px; z-index: 1004; }
+            .header-inner { padding: 0 16px; }
+            .landing-logo { flex: 1 1 auto; min-width: 0; gap: 9px; }
+            .landing-logo img, .landing-logo-img { height: 32px; max-width: 42px; }
+            .landing-logo h1, .landing-logo-title { max-width: 190px; overflow: hidden; font-size: .9rem; text-overflow: ellipsis; }
+            .mobile-toggle { display: flex; }
+            .header-nav-center {
+                position: fixed;
+                top: 64px;
+                right: -100%;
+                width: min(330px, 88vw);
+                height: calc(100svh - 64px);
+                padding: 18px 14px 24px;
+                overflow-y: auto;
+                flex-direction: column;
+                align-items: stretch;
+                justify-content: flex-start;
+                gap: 12px;
+                background: #0b1220;
+                border-left: 1px solid rgba(255, 255, 255, .12);
+                box-shadow: -12px 0 28px rgba(0, 0, 0, .25);
+                transition: right .24s cubic-bezier(.16, 1, .3, 1);
+                z-index: 1003;
+            }
+            .header-nav-center.open { right: 0; }
+            .image-like-nav {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 3px;
+                width: 100%;
+                padding: 0;
+                background: transparent;
+                border: 0;
+            }
+            .image-like-nav .nav-link {
+                justify-content: flex-start;
+                min-height: 46px;
+                padding: 0 14px;
+                border-radius: 9px;
+                font-size: .9rem;
+            }
+            .image-like-nav .nav-link.active { background: rgba(37, 99, 235, .2) !important; }
+            .nav-pill-indicator { display: none; }
+            .header-actions.desktop-actions { display: none; }
+            .header-actions.mobile-visible { display: flex !important; align-items: stretch; width: 100%; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, .12); }
+            .header-actions.mobile-visible .header-btn,
+            .header-actions.mobile-visible .header-cta-classic { width: 100%; }
+            .nav-scrim { z-index: 1002; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .header-nav-center, .landing-logo, .header-btn, .header-cta-classic { transition: none !important; }
+        }
+
+        @media (min-width: 1280px) {
+            .landing-header { padding: 0 26px; }
+        }
+
         {% block extra_css %}{% endblock %}
+        @media (max-width: 1023px) {
+            html, body { overflow-x: hidden; }
+            img, video { max-width: 100%; }
+            button, a { -webkit-tap-highlight-color: transparent; }
+        }
     </style>
 </head>
-<body class="{% if session.get('role') in ('admin', 'member') %}authenticated-view{% endif %}">
+<body class="{% if session.get('role') in ('admin', 'member') %}authenticated-view{% endif %} {% block body_class %}{% endblock %}">
     <!-- Quick Loader -->
     <div id="loader">
         <div class="unique-loader">
             <div></div><div></div><div></div>
         </div>
     </div>
+    <script>
+        if (window.location.search.includes('jump=') || window.location.hash || sessionStorage.getItem('site_visited')) {
+            var el = document.getElementById('loader');
+            if (el) el.style.display = 'none';
+        }
+    </script>
 
+    <!-- Nav Scrim (backdrop for mobile overlay) -->
+    <div class="nav-scrim" id="navScrim"></div>
 
+    {% if request.endpoint != 'register_participant' %}
     <!-- Official Header -->
-    <header class="landing-header" style="box-sizing: border-box;">
-        <a href="https://shreedakshaacademyedu.in/" target="_blank" class="landing-logo">
-            <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Logo">
-            <h1>Shree Daksha Academy</h1>
-        </a>
-        
-        <button class="mobile-toggle" type="button" aria-label="Open navigation" aria-expanded="false" onclick="const nav=document.querySelector('.header-nav-center'); const open=nav.classList.toggle('open'); this.setAttribute('aria-expanded', String(open));">&#9776;</button>
+    <header class="landing-header">
+        <div class="header-inner">
+            <a href="https://shreedakshaacademyedu.in/" target="_blank" rel="noopener noreferrer" class="landing-logo" id="headerLogoLink" onclick="window.open(this.href, '_blank'); return false;" title="Shree Daksha Academy Official Website">
+                <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Logo" class="landing-logo-img">
+                <span class="landing-logo-title">Shree Daksha Academy</span>
+            </a>
 
-        <nav class="header-nav-center">
-            <!-- Standard Navigation -->
-            <ul class="image-like-nav" id="mainBreadcrumb">
-                <li><a href="{{ url_for('events_list') }}" class="nav-link" data-section="hero">Home</a></li>
-                <li><a href="{{ url_for('events_list') }}#events" class="nav-link" data-section="events">Events</a></li>
-                <li><a href="{{ url_for('events_list') }}#location" class="nav-link" data-section="location">Location</a></li>
-                <li><a href="{{ url_for('events_list') }}#contact" class="nav-link" data-section="contact">Contact</a></li>
-                
-                {% if session.get('user_id') %}
-                    {% if session.get('role') == 'admin' %}
-                        <li><a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a></li>
-                        <li><a href="{{ url_for('attendance_manager') }}" class="nav-link {% if request.path == '/admin/attendance' %}active{% endif %}">Attendance</a></li>
-                        <li><a href="{{ url_for('certificates_manager') }}" class="nav-link {% if request.path == '/admin/certificates' %}active{% endif %}">Certificates</a></li>
-                        <li><a href="{{ url_for('members_list') }}" class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a></li>
-                    {% elif session.get('role') == 'member' %}
-                        <li><a href="{{ url_for('member_dashboard') }}" class="nav-link {% if request.path == '/member/dashboard' %}active{% endif %}">Dashboard</a></li>
-                        <li><a href="{{ url_for('members_list') }}" class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a></li>
+            <nav class="header-nav-center" id="headerNavCenter">
+                <!-- Standard Navigation -->
+                <ul class="image-like-nav" id="mainBreadcrumb">
+                    <li><a href="{{ url_for('events_list') }}#hero" class="nav-link active" data-section="hero" onclick="return scrollToSection('hero', event);">Home</a></li>
+                    <li><a href="{{ url_for('events_list') }}#events" class="nav-link" data-section="events" onclick="return scrollToSection('events', event);">Events</a></li>
+                    {% if not session.get('user_id') %}
+                        <li><a href="{{ url_for('events_list') }}#about" class="nav-link" data-section="about" onclick="return scrollToSection('about', event);">About Us</a></li>
+                        <li><a href="{{ url_for('events_list') }}#location" class="nav-link" data-section="location" onclick="return scrollToSection('location', event);">Location</a></li>
+                        <li><a href="{{ url_for('events_list') }}#contact" class="nav-link" data-section="contact" onclick="return scrollToSection('contact', event);">Contact</a></li>
                     {% endif %}
-                {% endif %}
-            </ul>
 
-            <div class="header-actions mobile-visible">
+                    {% if session.get('user_id') %}
+                        {% if session.get('role') == 'admin' %}
+                            <li><a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a></li>
+                            <li><a href="{{ url_for('attendance_manager') }}" class="nav-link {% if request.path == '/admin/attendance' %}active{% endif %}">Attendance</a></li>
+                            <li><a href="{{ url_for('certificates_manager') }}" class="nav-link {% if request.path == '/admin/certificates' %}active{% endif %}">Certificates</a></li>
+                            <li><a href="{{ url_for('members_list') }}" class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a></li>
+                        {% elif session.get('role') == 'member' %}
+                            <li><a href="{{ url_for('member_dashboard') }}" class="nav-link {% if request.path == '/member/dashboard' %}active{% endif %}">Dashboard</a></li>
+                            <li><a href="{{ url_for('members_list') }}" class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a></li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+
+                <div class="header-actions mobile-visible">
+                    {% if session.get('user_id') %}
+                        <div class="header-user-name" style="display:flex; align-items:center; gap:8px; color:#e2e8f0; font-weight:600; padding:12px 0;">
+                            <span>👤 {{ session.get('full_name', session.get('username')) }}</span>
+                        </div>
+                        <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
+                    {% else %}
+                        <a href="#events" class="header-cta-classic" onclick="window.closeMobileNav && window.closeMobileNav(); return scrollToSection('events', event);" style="margin-top:16px; width:100%;">
+                            <span>Register for Event &rarr;</span>
+                        </a>
+                    {% endif %}
+                </div>
+            </nav>
+
+            <div class="header-actions desktop-actions">
                 {% if session.get('user_id') %}
-                    <div class="header-user-name" style="display:flex; align-items:center; gap:8px; color:#0f172a; font-weight:600; padding:10px 0;">
-                        <span>👤 {{ session.get('full_name', session.get('username')) }}</span>
+                    <div class="header-user-name" style="display:flex; align-items:center; gap:8px; color:#e2e8f0; font-weight:600; padding:0 15px; border-left:1px solid rgba(255,255,255,0.15); margin-left:10px;">
+                        <span>{{ session.get('full_name', session.get('username')) }}</span>
                     </div>
-                    <a href="{{ url_for('logout') }}" class="header-btn" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); width: 100%; text-align: center;">Logout</a>
+                    <a href="{{ url_for('logout') }}" class="header-btn logout-btn" style="min-width: max-content;">Logout</a>
+                {% else %}
+                    <a href="#events" class="header-cta-classic" id="headerRegisterBtn" onclick="return scrollToSection('events', event);">
+                        <span>Register for Event</span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
                 {% endif %}
             </div>
-        </nav>
 
-        <div class="header-actions">
-            {% if session.get('user_id') %}
-                <div class="header-user-name" style="display:flex; align-items:center; gap:8px; color:#0f172a; font-weight:600; padding:0 15px; border-left:1px solid #e2e8f0; margin-left:10px;">
-                    <span>{{ session.get('full_name', session.get('username')) }}</span>
-                </div>
-                <a href="{{ url_for('logout') }}" class="header-btn" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); min-width: max-content;">Logout</a>
-            {% endif %}
+            <button class="mobile-toggle" type="button" aria-label="Open navigation" aria-expanded="false" id="mobileNavToggle">
+                <span id="navIcon">&#9776;</span>
+            </button>
         </div>
     </header>
+    {% endif %}
 
     <!-- Flash Messages (if any) -->
     <div class="landing-flash">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-            <div class="alert alert-{{ category }}" style="margin-bottom: 10px; padding: 15px; border-radius: 8px; background: #ffffff; backdrop-filter: blur(10px); color: #0f172a; border-left: 4px solid #dc2626; box-shadow: 0 10px 25px rgba(15,23,42,0.12);">
+            <div class="alert alert-{{ category }}">
                 <span>{{ message }}</span>
-                <button class="alert-close" onclick="this.parentElement.remove()" style="float:right; background:none; border:none; color:#64748b; cursor:pointer;">&times;</button>
+                <button class="alert-close" type="button" onclick="this.parentElement.remove()" aria-label="Dismiss notification">&times;</button>
             </div>
             {% endfor %}
         {% endif %}
         {% endwith %}
     </div>
 
-    <!-- 3D Canvas Container -->
+    <!-- 3D Canvas Container Block (Disabled) -->
     {% block gridscan_canvas %}
-    <div id="canvas-container"></div>
     {% endblock %}
 
     <!-- Scrolling Overlay Content -->
     <div class="scroll-content">
         {% block content %}{% endblock %}
         
+        {% if request.endpoint != 'register_participant' %}
         <!-- Footer -->
         <footer class="l-footer">
             <div class="footer-container">
-                <!-- Column 1: Identity -->
+                <!-- Column 1: Identity & Crest -->
                 <div class="footer-col">
-                    <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy" style="height: 60px; margin-bottom: 15px;">
-                    <h4>Shree Daksha Academy</h4>
-                    <p>Empowering minds through innovation and excellence. Join us for a future shaped by knowledge.</p>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                        <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Logo" style="height: 48px; width: auto; object-fit: contain;">
+                        <div>
+                            <h4 style="margin: 0; font-size: 1.15rem; color: #ffffff;">Shree Daksha Academy</h4>
+                            <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">Department of Computer Applications</span>
+                        </div>
+                    </div>
+                    <p>Empowering student innovation, leadership, and competitive excellence. Join us for our landmark Annual Symposium 2026 celebrating technology, stage arts, and sportsmanship.</p>
                 </div>
                 
                 <!-- Column 2: Quick Links -->
                 <div class="footer-col">
-                    <h4>Quick Links</h4>
-                    <a href="{{ url_for('events_list') }}#hero">Home</a>
-                    <a href="{{ url_for('events_list') }}#events">Events</a>
-                    <a href="{{ url_for('events_list') }}#location">Location</a>
-                    <a href="{{ url_for('events_list') }}#contact">Contact</a>
-                    {% if not session.get('user_id') %}
-                        <a href="{{ url_for('login') }}" style="margin-top: 10px; color: #fbbf24;">Admin Login</a>
-                    {% endif %}
+                    <h4>Quick Navigation</h4>
+                    <a href="#hero" onclick="return scrollToSection('hero', event);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                        Home
+                    </a>
+                    <a href="#about" onclick="return scrollToSection('about', event);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        About Us
+                    </a>
+                    <a href="#events" onclick="return scrollToSection('events', event);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                        All Events
+                    </a>
+                    <a href="#schedule" onclick="return scrollToSection('schedule', event);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Schedule Timeline
+                    </a>
+                    <a href="#location" onclick="return scrollToSection('location', event);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                        Campus Location
+                    </a>
+                    <a href="#contact" onclick="return scrollToSection('contact', event);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Contact
+                    </a>
                 </div>
                 
-                <!-- Column 3: Contact & Socials -->
+                <!-- Column 3: Official Contact -->
                 <div class="footer-col">
-                    <h4>Contact Us</h4>
-                    <p>📧 <a href="mailto:principal@shreedakshaacademyeveningcollege.edu.in" style="display:inline; margin:0;">principal@shreedakshaacademy...</a></p>
-                    <p>📞 <a href="https://wa.me/917892038099" style="display:inline; margin:0;">+91 7892038099 (WhatsApp)</a></p>
-                    
-                    <div class="social-icons">
-                        <a href="https://instagram.com/SHREEDAKSHAACADEMY" target="_blank" aria-label="Instagram">📸</a>
-                        <a href="https://wa.me/917892038099" target="_blank" aria-label="WhatsApp">💬</a>
+                    <h4>Official Desk</h4>
+                    <div class="footer-contact-item">
+                        <span class="footer-contact-icon">📧</span>
+                        <div>
+                            <span style="font-size: 0.78rem; color: #94a3b8; display: block;">Official Email</span>
+                            <a href="mailto:principal@shreedakshaacademyeveningcollege.edu.in" style="display: inline; word-break: break-all; padding: 0; color: #e2e8f0; font-weight: 500;">
+                                principal@shreedakshaacademyeveningcollege.edu.in
+                            </a>
+                        </div>
+                    </div>
+                    <div class="footer-contact-item">
+                        <span class="footer-contact-icon">📞</span>
+                        <div>
+                            <span style="font-size: 0.78rem; color: #94a3b8; display: block;">Direct Helpline</span>
+                            <a href="https://wa.me/917892038099" target="_blank" style="display: inline; padding: 0; color: #e2e8f0; font-weight: 600;">
+                                +91 7892038099 (WhatsApp)
+                            </a>
+                        </div>
+                    </div>
+                    <div class="footer-contact-item">
+                        <span class="footer-contact-icon">📍</span>
+                        <div style="color: #cbd5e1; font-size: 0.88rem;">
+                            <span style="font-size: 0.78rem; color: #94a3b8; display: block;">Campus Address</span>
+                            No 596, Andrahalli Main Rd, Lingadeeranahalli, Bengaluru 560091
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 4: Connect & Accreditations -->
+                <div class="footer-col">
+                    <h4>Connect & Follow</h4>
+                    <p style="margin-bottom: 12px;">Stay updated on event brackets, live streams, and announcements.</p>
+                    <div class="footer-social-row">
+                        <a href="https://www.instagram.com/shreedakshaacademy/" target="_blank" rel="noopener noreferrer" class="footer-social-btn" aria-label="Instagram" title="Follow on Instagram">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram logo">
+                        </a>
+                        <a href="https://wa.me/917892038099" target="_blank" rel="noopener noreferrer" class="footer-social-btn" aria-label="WhatsApp" title="Chat on WhatsApp">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp logo">
+                        </a>
+                        <a href="https://shreedakshaacademyedu.in/" target="_blank" rel="noopener noreferrer" class="footer-social-btn" aria-label="Website" title="College Official Portal">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Chrome_icon_%28February_2022%29.svg" alt="Website logo">
+                        </a>
+                        <a href="mailto:principal@shreedakshaacademyeveningcollege.edu.in" class="footer-social-btn" aria-label="Email" title="Email the college">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Email logo">
+                        </a>
                     </div>
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2026 Shree Daksha Academy. All rights reserved.</p>
+                <div>&copy; 2026 Shree Daksha Academy. All rights reserved.</div>
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <a href="#hero" class="footer-back-to-top" onclick="return scrollToSection('hero', event);">Back to Top &uarr;</a>
+                </div>
             </div>
         </footer>
+        {% endif %}
     </div>
 
     <!-- Scripts -->
@@ -657,35 +1096,101 @@
     <script src="https://unpkg.com/postprocessing@6.34.1/build/postprocessing.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="{{ url_for('static', filename='js/gridscan.js') }}"></script>
     <script src="{{ url_for('static', filename='js/particletext.js') }}"></script>
     
     <script>
+        // --- Mobile Nav Toggle ---
+        (function() {
+            const toggle = document.getElementById('mobileNavToggle');
+            const nav = document.getElementById('headerNavCenter');
+            const scrim = document.getElementById('navScrim');
+            const icon = document.getElementById('navIcon');
+            if (!toggle || !nav) return;
+
+            function openNav() {
+                nav.classList.add('open');
+                scrim && scrim.classList.add('active');
+                toggle.setAttribute('aria-expanded', 'true');
+                icon.innerHTML = '&times;';
+                document.body.style.overflow = 'hidden';
+            }
+            function closeNav() {
+                nav.classList.remove('open');
+                scrim && scrim.classList.remove('active');
+                toggle.setAttribute('aria-expanded', 'false');
+                icon.innerHTML = '&#9776;';
+                document.body.style.overflow = '';
+            }
+            toggle.addEventListener('click', () => {
+                nav.classList.contains('open') ? closeNav() : openNav();
+            });
+            scrim && scrim.addEventListener('click', closeNav);
+
+            // Close nav when a link is tapped
+            nav.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => setTimeout(closeNav, 150));
+            });
+            window.closeMobileNav = closeNav;
+        })();
+
+        // Global navigation scroll state
+        let isNavAutoScrolling = false;
+        let navScrollTimer = null;
+
+        // Universal Smooth Scroll Helper
+        window.scrollToSection = function(targetId, evt) {
+            if (evt) {
+                if (typeof evt.preventDefault === 'function') evt.preventDefault();
+            }
+            if (window.closeMobileNav) window.closeMobileNav();
+
+            isNavAutoScrolling = true;
+            clearTimeout(navScrollTimer);
+            navScrollTimer = setTimeout(() => { isNavAutoScrolling = false; }, 900);
+
+            const sectionKey = (targetId === 'hero' || targetId === 'top') ? 'hero' : targetId;
+            if (typeof window.setActiveBreadcrumb === 'function') {
+                window.setActiveBreadcrumb(sectionKey);
+            }
+
+            if (targetId === 'hero' || targetId === 'top') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                try { window.history.replaceState(null, '', window.location.pathname); } catch(e){}
+                return false;
+            }
+
+            const target = document.getElementById(targetId);
+            if (target) {
+                const header = document.querySelector('.landing-header');
+                const headerHeight = header ? header.offsetHeight : 64;
+                const elementPosition = target.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+                window.scrollTo({ top: Math.max(0, offsetPosition), behavior: 'smooth' });
+                try { window.history.replaceState(null, '', '#' + targetId); } catch(e){}
+            } else {
+                window.location.href = '{{ url_for("events_list") }}' + '#' + targetId;
+            }
+            return false;
+        };
+
         // --- 1. First-Time Loading Screen ---
         document.addEventListener('DOMContentLoaded', () => {
             const loader = document.getElementById('loader');
             if(loader) {
-                if(sessionStorage.getItem('site_visited')) {
-                    // Already visited, hide instantly
+                if(sessionStorage.getItem('site_visited') || navigator.webdriver || window.location.hash || window.location.search.includes('jump=')) {
                     loader.style.display = 'none';
                 } else {
-                    // First time, show for 2.5 seconds
                     setTimeout(() => {
                         loader.style.opacity = '0';
-                        setTimeout(() => { loader.style.display = 'none'; }, 500);
+                        setTimeout(() => { loader.style.display = 'none'; }, 400);
                         sessionStorage.setItem('site_visited', 'true');
-                    }, 2000);
+                    }, 1200);
                 }
             }
         });
 
-        // Initialize GridScan Background
+        // GridScan Background disabled to eliminate backend grid lines
         {% block gridscan_init %}
-        const gridScanReduceEffects = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const gridScanSaveData = navigator.connection && navigator.connection.saveData;
-        if (window.initGridScan && !gridScanReduceEffects && !gridScanSaveData) {
-            window.initGridScan('canvas-container');
-        }
         {% endblock %}
 
         // Register GSAP plugins
@@ -762,11 +1267,11 @@
 
         // --- 5. Animated Nav Scroll Tracker ---
         (function() {
-            const bcLinks = document.querySelectorAll('#mainBreadcrumb .nav-link');
+            const bcLinks = document.querySelectorAll('#mainBreadcrumb .nav-link[data-section]');
             if (!bcLinks.length) return;
 
-            // Map section names to DOM IDs (hero = top of page)
-            const sectionMap = { hero: null, about: 'about', events: 'events', features: 'features', location: 'location', contact: 'contact' };
+            // Map section names to DOM IDs
+            const sectionMap = { hero: 'hero', about: 'about', events: 'events', location: 'location', contact: 'contact' };
 
             // --- Nav Pill Indicator ---
             const navContainer = document.getElementById('mainBreadcrumb');
@@ -807,6 +1312,7 @@
                 });
                 if (currentActiveLink) movePillTo(currentActiveLink, true);
             }
+            window.setActiveBreadcrumb = setActiveBreadcrumb;
 
             // Hover: move pill to hovered link
             bcLinks.forEach(link => {
@@ -816,96 +1322,108 @@
                 });
             });
 
-            let isAutoScrolling = false;
-            let scrollTimeout;
+            // Track scroll position dynamically
+            let isScrollTicking = false;
+            function updateActiveOnScroll() {
+                if (isNavAutoScrolling) return;
 
-            // Observe sections with IntersectionObserver
-            const observer = new IntersectionObserver((entries) => {
-                if (isAutoScrolling) return; // Skip updating active tab during click-initiated scroll
-                
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const id = entry.target.id;
-                        // Find which data-section maps to this id
-                        for (const [name, domId] of Object.entries(sectionMap)) {
-                            if (domId === id) {
-                                setActiveBreadcrumb(name);
-                                break;
-                            }
-                        }
-                    }
-                });
-            }, { rootMargin: '-20% 0px -50% 0px', threshold: 0 });
+                const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                const windowHeight = window.innerHeight;
+                const docHeight = document.documentElement.scrollHeight;
 
-            // Observe each section that has a matching id
-            Object.values(sectionMap).forEach(id => {
-                if (id) {
-                    const el = document.getElementById(id);
-                    if (el) observer.observe(el);
+                // 1. If at or near bottom of page (including footer), always lock to 'contact'
+                if (scrollY + windowHeight >= docHeight - 70) {
+                    setActiveBreadcrumb('contact');
+                    return;
                 }
-            });
 
-            // Also track when user is near the top (hero section)
-            window.addEventListener('scroll', () => {
-                if (isAutoScrolling) return; // Skip updating during auto-scroll
-                if (window.scrollY < 300) {
+                // 2. If at top of page, lock to 'hero'
+                if (scrollY < 180) {
                     setActiveBreadcrumb('hero');
+                    return;
+                }
+
+                // 3. Check sections in reverse order (bottom to top): contact -> location -> events -> about -> hero
+                const triggerLine = Math.max(140, windowHeight * 0.38);
+
+                const contactEl = document.getElementById('contact');
+                if (contactEl) {
+                    const cRect = contactEl.getBoundingClientRect();
+                    if (cRect.top <= triggerLine) {
+                        setActiveBreadcrumb('contact');
+                        return;
+                    }
+                }
+
+                const locationEl = document.getElementById('location');
+                if (locationEl) {
+                    const lRect = locationEl.getBoundingClientRect();
+                    if (lRect.top <= triggerLine) {
+                        setActiveBreadcrumb('location');
+                        return;
+                    }
+                }
+
+                const eventsEl = document.getElementById('events');
+                if (eventsEl) {
+                    const eRect = eventsEl.getBoundingClientRect();
+                    if (eRect.top <= triggerLine) {
+                        setActiveBreadcrumb('events');
+                        return;
+                    }
+                }
+
+                const aboutEl = document.getElementById('about');
+                if (aboutEl) {
+                    const aRect = aboutEl.getBoundingClientRect();
+                    if (aRect.top <= triggerLine) {
+                        setActiveBreadcrumb('about');
+                        return;
+                    }
+                }
+
+                setActiveBreadcrumb('hero');
+            }
+
+            window.addEventListener('scroll', () => {
+                if (!isScrollTicking) {
+                    window.requestAnimationFrame(() => {
+                        updateActiveOnScroll();
+                        isScrollTicking = false;
+                    });
+                    isScrollTicking = true;
                 }
             }, { passive: true });
 
-            // Default: mark Home as active on load
-            setActiveBreadcrumb('hero');
-
-            // Smooth scroll on click
-            bcLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    const href = this.getAttribute('href');
-                    
-                    // Allow normal navigation for non-hash links or empty hashes
-                    if (!href || !href.includes('#')) {
-                        document.querySelector('.header-nav-center')?.classList.remove('open');
-                        return; // Let the browser handle the navigation normally
+            // Initialize active position after DOM is ready
+            function initNavState() {
+                if (window.location.hash) {
+                    const h = window.location.hash.substring(1);
+                    if (['hero', 'about', 'events', 'location', 'contact'].includes(h)) {
+                        setActiveBreadcrumb(h);
+                    } else {
+                        updateActiveOnScroll();
                     }
+                } else {
+                    updateActiveOnScroll();
+                }
+                const activeEl = document.querySelector('#mainBreadcrumb .nav-link[data-section].active');
+                if (activeEl) movePillTo(activeEl, false);
+            }
 
-                    const hash = href.split('#')[1];
-                    if (hash) {
-                        const target = document.getElementById(hash);
-                        if (target) {
-                            e.preventDefault();
-                            isAutoScrolling = true;
-                            clearTimeout(scrollTimeout);
-                            scrollTimeout = setTimeout(() => { isAutoScrolling = false; }, 800);
-                            
-                            const sectionName = this.getAttribute('data-section');
-                            if (sectionName) setActiveBreadcrumb(sectionName);
+            if (document.readyState === 'complete') {
+                initNavState();
+            } else {
+                window.addEventListener('load', initNavState);
+            }
+            setTimeout(initNavState, 100);
 
-                            document.querySelector('.header-nav-center')?.classList.remove('open');
-                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            // Small pulse animation on the clicked breadcrumb
-                            this.style.transform = 'scale(1.1)';
-                            setTimeout(() => { this.style.transform = ''; }, 200);
-                        } else {
-                            // Target not on page, allow normal navigation
-                        }
-                    } else if (href === '#' || href.endsWith('#')) {
-                        // Home link (just '#') — scroll to top
-                        e.preventDefault();
-                        isAutoScrolling = true;
-                        clearTimeout(scrollTimeout);
-                        scrollTimeout = setTimeout(() => { isAutoScrolling = false; }, 800);
-                        
-                        setActiveBreadcrumb('hero');
-
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        this.style.transform = 'scale(1.1)';
-                        setTimeout(() => { this.style.transform = ''; }, 200);
-                    }
-                });
+            window.addEventListener('resize', () => {
+                const activeEl = document.querySelector('#mainBreadcrumb .nav-link[data-section].active');
+                if (activeEl) movePillTo(activeEl, false);
             });
         })();
     </script>
-
-
     
     {% block extra_js %}{% endblock %}
 </body>
