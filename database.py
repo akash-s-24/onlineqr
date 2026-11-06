@@ -2,8 +2,12 @@ import os
 import re
 import secrets
 import sqlite3
-import psycopg2
-import psycopg2.extras
+try:
+    import psycopg2
+    import psycopg2.extras
+except Exception as e:
+    psycopg2 = None
+    print(f"[Database Warning] psycopg2 could not be loaded: {e}")
 from config import Config
 from werkzeug.security import generate_password_hash
 
