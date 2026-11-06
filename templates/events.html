@@ -209,6 +209,10 @@
 
     /* Mobile-first High-Contrast Cards & Auto-Illuminated Borders */
     .stat-card,
+    .event-grid-card,
+    .rule-card,
+    .procedure-track-card,
+    .contact-card,
     .unified-event-card,
     .disc-cascade-card,
     .principal-message-card {
@@ -220,6 +224,10 @@
     .stat-card.in-view,
     .stat-card:active,
     .stat-card:hover,
+    .event-grid-card.in-view,
+    .rule-card.in-view,
+    .procedure-track-card.in-view,
+    .contact-card.in-view,
     .unified-event-card.in-view,
     .embla__slide.is-active .unified-event-card,
     .disc-cascade-card.in-view,
@@ -7051,7 +7059,7 @@ html[data-theme="light"] #discCascadeTitle {
                 });
             }, { root: null, rootMargin: '0px 0px -30px 0px', threshold: 0.08 });
 
-            document.querySelectorAll('.scroll-reveal, .stat-card, .unified-event-card, .disc-cascade-card, .principal-message-card').forEach(el => {
+            document.querySelectorAll('.scroll-reveal, .stat-card, .event-grid-card, .rule-card, .procedure-track-card, .contact-card, .unified-event-card, .disc-cascade-card, .principal-message-card').forEach(el => {
                 const rect = el.getBoundingClientRect();
                 // If element is already in the viewport on initial load (e.g. hero elements), reveal immediately
                 if (rect.top < window.innerHeight && rect.bottom > 0) {
@@ -7061,7 +7069,7 @@ html[data-theme="light"] #discCascadeTitle {
                 }
             });
         } else {
-            document.querySelectorAll('.scroll-reveal, .stat-card, .unified-event-card, .disc-cascade-card, .principal-message-card').forEach(el => el.classList.add('visible', 'in-view'));
+            document.querySelectorAll('.scroll-reveal, .stat-card, .event-grid-card, .rule-card, .procedure-track-card, .contact-card, .unified-event-card, .disc-cascade-card, .principal-message-card').forEach(el => el.classList.add('visible', 'in-view'));
         }
 
 

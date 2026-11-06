@@ -1372,7 +1372,7 @@ select.f-select {
 
                 <!-- Squad Members List -->
                 <div id="teamMembersList" style="margin-top: 10px;">
-                    <label class="f-label" style="color: #000000; font-weight: 700;">Squad Members (Team Lead + Additional Members)</label>
+                    <label class="f-label" style="color: #000000; font-weight: 700;">Additional Team Members</label>
                     <div id="additionalMembersContainer" style="display: flex; flex-direction: column; gap: 14px;">
                         <!-- Injected dynamically by JavaScript -->
                     </div>
@@ -2069,8 +2069,8 @@ function renderTeamMemberInputs() {
         row.className = 'f-form-group';
         row.style.marginBottom = '0';
         row.innerHTML = `
-            <label class="f-label" for="member_${i}_name">Participant #${i} Full Name *</label>
-            <input type="text" id="member_${i}_name" name="member_${i}_name" class="f-control" placeholder="Enter Member #${i} Full Name" required>
+            <label class="f-label" for="member_${i}_name">Participant #${i} Name *</label>
+            <input type="text" id="member_${i}_name" name="member_${i}_name" class="f-control" placeholder="Enter Member #${i} Name" required>
         `;
         container.appendChild(row);
     }
@@ -2152,10 +2152,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================================
 // Form Submission Validation
 // ============================================================
+let isRegistrationSubmitting = false;
 document.getElementById('eventRegistrationForm').addEventListener('submit', function(e) {
+    if (isRegistrationSubmitting) {
+        e.preventDefault();
+        return false;
+    }
+
     // Validate combobox fields
     let firstInvalidCb = null;
-    ['event_id', 'department'].forEach(id => {
+    ['event_id', 'department', 'semester'].forEach(id => {
         const sel = document.getElementById(id);
         if (sel && sel.hasAttribute('required') && !sel.value) {
             const cb = getCbInstance(id);
@@ -2194,15 +2200,13 @@ document.getElementById('eventRegistrationForm').addEventListener('submit', func
         }
     }
 
-    // Immediate button progress feedback to prevent double submission
+    // Lock submission and provide immediate progress feedback without disabling the native button
+    isRegistrationSubmitting = true;
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
         submitBtn.style.pointerEvents = 'none';
-        submitBtn.style.opacity = '0.75';
+        submitBtn.style.opacity = '0.85';
         submitBtn.innerHTML = '⏳ Submitting registration, please wait...';
-        setTimeout(function() {
-            submitBtn.disabled = true;
-        }, 100);
     }
 });
 
