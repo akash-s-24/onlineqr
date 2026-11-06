@@ -2187,6 +2187,17 @@ document.getElementById('eventRegistrationForm').addEventListener('submit', func
             return false;
         }
     }
+
+    // Immediate button progress feedback to prevent double submission
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        submitBtn.style.pointerEvents = 'none';
+        submitBtn.style.opacity = '0.75';
+        submitBtn.innerHTML = '⏳ Submitting registration, please wait...';
+        setTimeout(function() {
+            submitBtn.disabled = true;
+        }, 100);
+    }
 });
 </script>
 {% endblock %}

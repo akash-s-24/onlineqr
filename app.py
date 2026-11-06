@@ -1159,7 +1159,7 @@ def register_participant():
             confirmation = 'Registration received and awaiting admin verification.'
         else:
             confirmation = 'Registration successful.'
-        flash(f'{confirmation} Reference: {registration["registration_uid"]}{team_info_msg}', 'success')
+        flash(f'Successfully registered! {confirmation} Reference: {registration["registration_uid"]}{team_info_msg}', 'success')
         
         return redirect(url_for('payment_status', registration_uid=registration['registration_uid']))
 

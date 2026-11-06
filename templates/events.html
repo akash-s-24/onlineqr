@@ -6071,6 +6071,28 @@ html[data-theme="light"] #discCascadeTitle {
     </div>
 </section>
 
+{% if request.args.get('registered') == '1' and request.args.get('uid') %}
+<section style="max-width: 960px; margin: 2rem auto 1rem; padding: 0 1.5rem;">
+    <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(5, 150, 105, 0.22)); border: 1.5px solid #10b981; border-radius: 16px; padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3); backdrop-filter: blur(12px);">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <span style="font-size: 2.5rem; line-height: 1;">🎉</span>
+            <div>
+                <h2 style="margin: 0; font-size: 1.45rem; font-weight: 800; color: #34d399; letter-spacing: -0.01em;">Successfully registered!</h2>
+                <p style="margin: 4px 0 0; font-size: 0.95rem; color: #e2e8f0;">Your registration is confirmed. Reference ID: <strong style="font-family: monospace; letter-spacing: 0.05em; background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 4px; color: #fff;">{{ request.args.get('uid') }}</strong></p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="{{ url_for('payment_status', registration_uid=request.args.get('uid')) }}" class="track-btn track-btn-primary" style="padding: 0.65rem 1.25rem; font-size: 0.9rem; text-decoration: none; border-radius: 8px;">
+                📱 View Gate Pass QR
+            </a>
+            <button type="button" onclick="this.closest('section').remove()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 0.65rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem;">
+                ✕
+            </button>
+        </div>
+    </div>
+</section>
+{% endif %}
+
 {% if not showcase_section or showcase_section.is_enabled %}
 {% set showcase_color = showcase_section.background_color if showcase_section and showcase_section.background_color else '#000000' %}
 <section class="disc-cascade-section" id="events" style="--dcc-bg: {{ showcase_color }};{% if showcase_section and showcase_section.banner_image %} --dcc-banner: url('{{ url_for('static', filename='images/' ~ showcase_section.banner_image) }}');{% endif %}" aria-labelledby="disc-cascade-title">

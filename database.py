@@ -5,6 +5,7 @@ import sqlite3
 try:
     import psycopg2
     import psycopg2.extras
+    import psycopg2.pool
 except Exception as e:
     psycopg2 = None
     print(f"[Database Warning] psycopg2 could not be loaded: {e}")
@@ -13,20 +14,60 @@ from werkzeug.security import generate_password_hash
 
 DB_MODE = None # 'postgres' or 'sqlite'
 POSTGRES_AVAILABLE = None
+PG_POOL = None
+_DB_INITIALIZED = False
 
-def get_postgres_connection():
-    """Attempt connection to PostgreSQL server."""
+def get_postgres_pool():
+    global PG_POOL
     if psycopg2 is None:
-        print("[PostgreSQL Connection Error] psycopg2 is not installed or failed to import.")
         return None
+    if PG_POOL is not None and not PG_POOL.closed:
+        return PG_POOL
     try:
         db_url = Config.DATABASE_URL
         if db_url:
             db_url = db_url.strip()
-            # Normalize URL scheme
             if db_url.startswith('postgres://'):
                 db_url = 'postgresql://' + db_url[len('postgres://'):]
-            # Ensure sslmode=require for cloud PostgreSQL (Supabase, Neon, Render)
+            if 'sslmode=' not in db_url and any(host in db_url for host in ('supabase', 'neon.tech', 'render.com', 'aws')):
+                sep = '&' if '?' in db_url else '?'
+                db_url = f"{db_url}{sep}sslmode=require"
+            PG_POOL = psycopg2.pool.ThreadedConnectionPool(1, 10, db_url)
+        else:
+            PG_POOL = psycopg2.pool.ThreadedConnectionPool(
+                1, 10,
+                host=Config.PG_HOST,
+                user=Config.PG_USER,
+                password=Config.PG_PASSWORD,
+                database=Config.PG_DB,
+                port=Config.PG_PORT,
+                sslmode='require' if Config.APP_ENV == 'production' else 'prefer'
+            )
+        return PG_POOL
+    except Exception as err:
+        print(f"[PostgreSQL Pool Init Error] {err}")
+        return None
+
+def get_postgres_connection():
+    """Attempt connection to PostgreSQL server using the pool or fresh connection."""
+    pool = get_postgres_pool()
+    if pool:
+        try:
+            conn = pool.getconn()
+            if conn and not conn.closed:
+                conn.autocommit = True
+                return conn
+            elif conn:
+                pool.putconn(conn, close=True)
+        except Exception:
+            pass
+    # Fallback to direct connection if pool fails
+    try:
+        db_url = Config.DATABASE_URL
+        if db_url:
+            db_url = db_url.strip()
+            if db_url.startswith('postgres://'):
+                db_url = 'postgresql://' + db_url[len('postgres://'):]
             if 'sslmode=' not in db_url and any(host in db_url for host in ('supabase', 'neon.tech', 'render.com', 'aws')):
                 sep = '&' if '?' in db_url else '?'
                 db_url = f"{db_url}{sep}sslmode=require"
@@ -48,6 +89,33 @@ def get_postgres_connection():
             print("[PostgreSQL Supabase Tip] Supabase 'db.xxxx.supabase.co' is IPv6 only. On Render, please use the Supabase Pooler URL ('aws-0-xxxx.pooler.supabase.com:6543') with IPv4 support and ensure your password contains no raw special characters like '@' or '#'.")
         return None
 
+def release_db_connection(conn):
+    """Safely return a connection to pool or close it."""
+    if conn is None:
+        return
+    global DB_MODE, PG_POOL
+    if DB_MODE == 'sqlite':
+        try:
+            conn.close()
+        except Exception:
+            pass
+    else:
+        if PG_POOL and not PG_POOL.closed:
+            try:
+                if not conn.closed:
+                    conn.autocommit = True
+                PG_POOL.putconn(conn)
+            except Exception:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+        else:
+            try:
+                conn.close()
+            except Exception:
+                pass
+
 def get_sqlite_connection():
     """Fallback connection to SQLite with concurrency optimization."""
     db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'eventmate.db')
@@ -65,8 +133,6 @@ def get_db():
     """Return a connection, never silently falling back from configured Postgres."""
     global DB_MODE, POSTGRES_AVAILABLE
 
-    # A hosted deployment must never write registrations to an ephemeral local
-    # SQLite file because a configured database is temporarily unavailable.
     if Config.DATABASE_URL or Config.APP_ENV == 'production':
         if not Config.DATABASE_URL:
             raise RuntimeError('DATABASE_URL is required in production.')
@@ -94,76 +160,60 @@ def get_db():
 def query_db(query, args=(), one=False, commit=False):
     """Execute a query and return dictionary rows or last inserted id."""
     conn = get_db()
-    cursor = None
-    
-    # Adjust placeholders if using SQLite (%s -> ?)
     is_sqlite = (DB_MODE == 'sqlite')
-    if is_sqlite:
-        sqlite_query = query.replace('%s', '?')
-        # Replace Postgres specific functions if any
-        sqlite_query = sqlite_query.replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT')
-        cursor = conn.cursor()
-        try:
-            cursor.execute(sqlite_query, args)
-            if commit:
-                conn.commit()
-                if sqlite_query.lstrip().upper().startswith('INSERT'):
-                    last_id = cursor.lastrowid
-                else:
+    try:
+        if is_sqlite:
+            sqlite_query = query.replace('%s', '?')
+            sqlite_query = sqlite_query.replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT')
+            cursor = conn.cursor()
+            try:
+                cursor.execute(sqlite_query, args)
+                if commit:
+                    conn.commit()
+                    if sqlite_query.lstrip().upper().startswith('INSERT'):
+                        last_id = cursor.lastrowid
+                    else:
+                        last_id = cursor.rowcount
+                    cursor.close()
+                    return last_id
+                rv = cursor.fetchall()
+                cursor.close()
+                result = [dict(row) for row in rv]
+                return (result[0] if result else None) if one else result
+            except Exception as e:
+                print(f"[Database Error SQLite] {e} | Query: {sqlite_query}")
+                raise e
+        else:
+            cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            try:
+                cursor.execute(query, args)
+                if commit:
+                    conn.commit()
                     last_id = cursor.rowcount
+                    try:
+                        if query.strip().upper().startswith('INSERT'):
+                            last_id = 1
+                            cursor.execute("SELECT LASTVAL()")
+                            res = cursor.fetchone()
+                            if res:
+                                last_id = res[0]
+                    except Exception:
+                        pass
+                    cursor.close()
+                    return last_id
+                rv = cursor.fetchall()
                 cursor.close()
-                conn.close()
-                return last_id
-            rv = cursor.fetchall()
-            cursor.close()
-            conn.close()
-            # Convert sqlite3.Row to dict
-            result = [dict(row) for row in rv]
-            return (result[0] if result else None) if one else result
-        except Exception as e:
-            if conn:
-                conn.close()
-            print(f"[Database Error SQLite] {e} | Query: {sqlite_query}")
-            raise e
-    else:
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        try:
-            # Postgres might not support `lastrowid` exactly like MySQL. If inserting, RETURNING id is better, but here we can try fetchone if returning was added.
-            # Since we don't have RETURNING appended to our INSERT queries universally, we can use cursor.lastrowid or fetch depending on driver. 
-            # psycopg2 doesn't have lastrowid. It has lastrowid ONLY if it's an OID. 
-            # Let's adjust cursor execution for commit
-            cursor.execute(query, args)
-            if commit:
-                conn.commit()
-                # We can't get last_id easily without RETURNING. But for this app, we only need last_id for participant_id / registration_id. 
-                # If this is Postgres, let's just return 0 (or we could patch query to append RETURNING id)
-                # Actually, if the query is an INSERT and has no RETURNING, last_id is tricky in psycopg2 without it.
-                # We'll just return 1 as a stub if not fetched, but wait! The app relies on `execute_db` returning the ID!
-                # I will modify the query dynamically if it's an INSERT to append RETURNING id
-                last_id = cursor.rowcount
-                try:
-                    if query.strip().upper().startswith('INSERT'):
-                        last_id = 1
-                        cursor.execute("SELECT LASTVAL()")
-                        res = cursor.fetchone()
-                        if res:
-                            last_id = res[0]
-                except Exception:
-                    pass
-                
-                cursor.close()
-                conn.close()
-                return last_id
-            
-            rv = cursor.fetchall()
-            cursor.close()
-            conn.close()
-            return ([dict(row) for row in rv][0] if rv else None) if one else [dict(row) for row in rv]
-        except Exception as e:
-            if conn:
-                conn.close()
-            print(f"[Database Error Postgres] {e} | Query: {query}")
-            raise e
+                return ([dict(row) for row in rv][0] if rv else None) if one else [dict(row) for row in rv]
+            except Exception as e:
+                if conn and not conn.closed:
+                    try:
+                        conn.rollback()
+                    except Exception:
+                        pass
+                print(f"[Database Error Postgres] {e} | Query: {query}")
+                raise e
+    finally:
+        release_db_connection(conn)
 
 def execute_db(query, args=()):
     """Helper to execute a write query and return its affected-row count or ID."""
@@ -324,9 +374,11 @@ def create_registration(*, full_name, email, phone, college_name, department,
         raise
     finally:
         if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+            try:
+                cursor.close()
+            except Exception:
+                pass
+        release_db_connection(conn)
 
 def init_db():
     """Initialize database tables and initial seed data."""
@@ -334,11 +386,15 @@ def init_db():
     create_tables_and_seed()
 
 
-def normalize_legacy_banner_filenames():
+def normalize_legacy_banner_filenames(cursor=None, is_sqlite=False):
     """Normalize legacy banner filenames so generated URLs are portable."""
-    rows = query_db(
-        "SELECT id, banner_image FROM events WHERE banner_image IS NOT NULL AND banner_image <> ''"
-    )
+    if cursor is not None:
+        cursor.execute("SELECT id, banner_image FROM events WHERE banner_image IS NOT NULL AND banner_image <> ''")
+        rows = [dict(r) for r in cursor.fetchall()]
+    else:
+        rows = query_db(
+            "SELECT id, banner_image FROM events WHERE banner_image IS NOT NULL AND banner_image <> ''"
+        )
     images_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static', 'images')
 
     for row in rows:
@@ -358,670 +414,671 @@ def normalize_legacy_banner_filenames():
         # Point the database at the normalized asset whether the target already
         # existed or was just moved into place.
         if os.path.exists(target):
-            execute_db(
-                "UPDATE events SET banner_image = %s WHERE id = %s",
-                (normalized, row['id'])
-            )
+            if cursor is not None:
+                q = "UPDATE events SET banner_image = ? WHERE id = ?" if is_sqlite else "UPDATE events SET banner_image = %s WHERE id = %s"
+                cursor.execute(q, (normalized, row['id']))
+            else:
+                execute_db(
+                    "UPDATE events SET banner_image = %s WHERE id = %s",
+                    (normalized, row['id'])
+                )
 
 def create_tables_and_seed():
-    """Create all required tables and seed default data."""
-    # Define tables schema
-    tables = [
-        """
-        CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            username VARCHAR(50) NOT NULL UNIQUE,
-            email VARCHAR(100) NOT NULL UNIQUE,
-            password_hash VARCHAR(255) NOT NULL,
-            role VARCHAR(20) NOT NULL DEFAULT 'student',
-            full_name VARCHAR(100) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """,
-        """
-        CREATE TABLE IF NOT EXISTS events (
-            id SERIAL PRIMARY KEY,
-            event_name VARCHAR(100) NOT NULL,
-            event_type VARCHAR(50) NOT NULL,
-            event_date VARCHAR(30) NOT NULL,
-            event_time VARCHAR(30) NOT NULL,
-            venue VARCHAR(100) NOT NULL,
-            description TEXT,
-            max_participants INTEGER DEFAULT 100,
-            is_group INTEGER DEFAULT 0,
-            min_team_size INTEGER DEFAULT 1,
-            max_team_size INTEGER DEFAULT 1,
-            banner_image VARCHAR(255) DEFAULT 'event_default.jpg',
-            event_fee INTEGER DEFAULT 0,
-            upi_id VARCHAR(100) DEFAULT 'admin@upi',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """,
-        """
-        CREATE TABLE IF NOT EXISTS event_showcase_sections (
-            id SERIAL PRIMARY KEY,
-            section_key VARCHAR(80) NOT NULL UNIQUE,
-            eyebrow VARCHAR(120) NOT NULL DEFAULT 'THE LINEUP',
-            title VARCHAR(180) NOT NULL DEFAULT 'Pick your frequency.',
-            description TEXT NULL,
-            background_color VARCHAR(30) NOT NULL DEFAULT '#11131b',
-            banner_image VARCHAR(255) NULL,
-            is_enabled INTEGER NOT NULL DEFAULT 1,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """,
-        """
-        CREATE TABLE IF NOT EXISTS participants (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER NULL,
-            full_name VARCHAR(100) NOT NULL,
-            email VARCHAR(100) NOT NULL,
-            phone VARCHAR(20) NOT NULL,
-            college_name VARCHAR(150) NOT NULL,
-            department VARCHAR(100) NOT NULL,
-            semester VARCHAR(20) DEFAULT '5th Sem',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """,
-        """
-        CREATE TABLE IF NOT EXISTS registrations (
-            id SERIAL PRIMARY KEY,
-            registration_uid VARCHAR(20) UNIQUE,
-            participant_id INTEGER NOT NULL,
-            event_id INTEGER NOT NULL,
-            registered_by INTEGER NULL,
-            is_group INTEGER DEFAULT 0,
-            team_name VARCHAR(100) NULL,
-            team_size INTEGER DEFAULT 1,
-            team_members TEXT NULL,
-            registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            status VARCHAR(20) DEFAULT 'pending',
-            payment_status VARCHAR(20) DEFAULT 'unpaid',
-            amount_paid INTEGER DEFAULT 0,
-            payment_method VARCHAR(50) DEFAULT 'None',
-            utr_number VARCHAR(100) NULL,
-            payment_proof VARCHAR(255) NULL,
-            payment_verified_at TIMESTAMP NULL,
-            payment_verified_by INTEGER NULL,
-            receipt_sent_at TIMESTAMP NULL,
-            receipt_delivery_status VARCHAR(20) DEFAULT 'not_sent'
-        );
-        """,
-        """
-        CREATE TABLE IF NOT EXISTS attendance (
-            id SERIAL PRIMARY KEY,
-            registration_id INTEGER NOT NULL UNIQUE,
-            status VARCHAR(20) DEFAULT 'absent',
-            marked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            marked_by VARCHAR(50) DEFAULT 'admin'
-        );
-        """,
-        """
-        CREATE TABLE IF NOT EXISTS certificates (
-            id SERIAL PRIMARY KEY,
-            certificate_code VARCHAR(50) NOT NULL UNIQUE,
-            registration_id INTEGER NOT NULL UNIQUE,
-            participant_id INTEGER NOT NULL,
-            event_id INTEGER NOT NULL,
-            issue_date VARCHAR(30) NOT NULL,
-            file_path VARCHAR(255) NOT NULL,
-            email_status VARCHAR(20) DEFAULT 'pending',
-            sent_at TIMESTAMP NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """
-    ]
+    """Create all required tables and seed default data using a single database connection."""
+    global _DB_INITIALIZED
+    if _DB_INITIALIZED:
+        return
 
-    for table_sql in tables:
-        try:
-            execute_db(table_sql)
-        except Exception as e:
-            if Config.DATABASE_URL:
-                raise RuntimeError(f'PostgreSQL schema initialization failed: {e}') from e
-            # For SQLite PRIMARY KEY AUTOINCREMENT syntax compatibility
-            if 'SERIAL' in table_sql and DB_MODE == 'sqlite':
-                sqlite_sql = table_sql.replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT')
-                execute_db(sqlite_sql)
-            else:
-                print(f"[Table Init Error] {e}")
+    conn = get_db()
+    is_sqlite = (DB_MODE == 'sqlite')
+    cursor = conn.cursor() if is_sqlite else conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    # The public disc-cascade section is a singleton-style editable content
-    # block. Keeping it in the database lets administrators change copy and
-    # artwork without touching the event records themselves.
-    showcase = query_db(
-        "SELECT id FROM event_showcase_sections WHERE section_key = %s",
-        ('main-events',), one=True
-    )
-    if not showcase:
-        execute_db(
+    def run_exec(sql, args=()):
+        if is_sqlite:
+            sql = sql.replace('%s', '?').replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT')
+        cursor.execute(sql, args)
+
+    def run_query(sql, args=(), one=False):
+        if is_sqlite:
+            sql = sql.replace('%s', '?')
+        cursor.execute(sql, args)
+        rows = cursor.fetchall()
+        result = [dict(r) for r in rows]
+        return (result[0] if result else None) if one else result
+
+    try:
+        # Define tables schema
+        tables = [
             """
-            INSERT INTO event_showcase_sections
-                (section_key, eyebrow, title, description, background_color, is_enabled)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(50) NOT NULL UNIQUE,
+                email VARCHAR(100) NOT NULL UNIQUE,
+                password_hash VARCHAR(255) NOT NULL,
+                role VARCHAR(20) NOT NULL DEFAULT 'student',
+                full_name VARCHAR(100) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
             """,
-            (
-                'main-events',
-                'THE LINEUP',
-                'Pick your frequency.',
-                'A living catalogue of every stage, skill, and squad at Shreedaksha Academy.',
-                '#11131b',
-                1,
-            )
-        )
-
-    # Run auto-migrations for existing tables
-    migration_columns = [
-        ("events", "is_group", "INTEGER DEFAULT 0"),
-        ("events", "min_team_size", "INTEGER DEFAULT 1"),
-        ("events", "max_team_size", "INTEGER DEFAULT 1"),
-        ("events", "event_fee", "INTEGER DEFAULT 0"),
-        ("events", "upi_id", "VARCHAR(100) DEFAULT 'admin@upi'"),
-        ("events", "banner_image", "VARCHAR(255) DEFAULT 'event_default.jpg'"),
-        ("events", "qr_code_image", "VARCHAR(255) NULL"),
-        ("registrations", "is_group", "INTEGER DEFAULT 0"),
-        ("registrations", "team_name", "VARCHAR(100) NULL"),
-        ("registrations", "team_size", "INTEGER DEFAULT 1"),
-        ("registrations", "team_members", "TEXT NULL"),
-        ("registrations", "registered_by", "INTEGER NULL"),
-        ("registrations", "registration_date", "TIMESTAMP NULL"),
-        ("registrations", "status", "VARCHAR(20) DEFAULT 'pending'"),
-        ("registrations", "payment_status", "VARCHAR(20) DEFAULT 'unpaid'"),
-        ("registrations", "amount_paid", "INTEGER DEFAULT 0"),
-        ("registrations", "payment_method", "VARCHAR(50) DEFAULT 'None'"),
-        ("registrations", "utr_number", "VARCHAR(100) NULL"),
-        ("registrations", "payment_proof", "VARCHAR(255) NULL"),
-        ("registrations", "payment_verified_at", "TIMESTAMP NULL"),
-        ("registrations", "payment_verified_by", "INTEGER NULL"),
-        ("registrations", "receipt_sent_at", "TIMESTAMP NULL"),
-        ("registrations", "receipt_delivery_status", "VARCHAR(20) DEFAULT 'not_sent'"),
-        ("registrations", "registration_uid", "VARCHAR(20) NULL"),
-        # Event contact & rules fields
-        ("events", "rules_text", "TEXT NULL"),
-        ("events", "faculty_name", "VARCHAR(100) NULL"),
-        ("events", "faculty_phone", "VARCHAR(20) NULL"),
-        ("events", "student_name", "VARCHAR(100) NULL"),
-        ("events", "student_phone", "VARCHAR(20) NULL"),
-    ]
-    # Inspect the schema before changing it.  This keeps startup quiet and avoids
-    # repeatedly attempting ALTER TABLE on every application restart.
-    table_columns = {}
-    for table_name in {table for table, _, _ in migration_columns}:
-        if DB_MODE == 'sqlite':
-            rows = query_db(f"PRAGMA table_info({table_name})")
-            table_columns[table_name] = {row['name'] for row in rows}
-        else:
-            rows = query_db(
-                "SELECT column_name FROM information_schema.columns WHERE table_name = %s",
-                (table_name,)
-            )
-            table_columns[table_name] = {row['column_name'] for row in rows}
-
-    for tbl, col, col_def in migration_columns:
-        if col in table_columns.get(tbl, set()):
-            continue
-        execute_db(f"ALTER TABLE {tbl} ADD COLUMN {col} {col_def};")
-        table_columns.setdefault(tbl, set()).add(col)
-
-    duplicate_pairs = query_db(
-        """
-        SELECT participant_id, event_id, COUNT(*) AS duplicate_count
-        FROM registrations
-        GROUP BY participant_id, event_id
-        HAVING COUNT(*) > 1
-        """
-    )
-    if duplicate_pairs:
-        raise RuntimeError(
-            'Duplicate participant/event registrations exist; resolve them before enabling registration.'
-        )
-
-    execute_db(
-        "UPDATE registrations SET utr_number = NULL "
-        "WHERE utr_number IS NOT NULL AND TRIM(utr_number) = ''"
-    )
-    duplicate_uids = query_db(
-        """
-        SELECT registration_uid, COUNT(*) AS duplicate_count
-        FROM registrations
-        WHERE registration_uid IS NOT NULL
-        GROUP BY registration_uid
-        HAVING COUNT(*) > 1
-        """
-    )
-    if duplicate_uids:
-        raise RuntimeError(
-            'Duplicate registration references exist; resolve them before enabling registration.'
-        )
-
-    execute_db(
-        "CREATE UNIQUE INDEX IF NOT EXISTS registrations_participant_event_unique "
-        "ON registrations (participant_id, event_id)"
-    )
-    execute_db(
-        "CREATE UNIQUE INDEX IF NOT EXISTS registrations_utr_unique "
-        "ON registrations (utr_number)"
-    )
-    execute_db(
-        "CREATE UNIQUE INDEX IF NOT EXISTS registrations_uid_unique "
-        "ON registrations (registration_uid)"
-    )
-
-    # Backfill the event copy with complete, useful descriptions without
-    # overwriting descriptions that an administrator has already authored.
-    event_descriptions = {
-        'BGMI': 'A strategic battle royale team tournament testing communication, survival skills, and tactical decision-making.',
-        'Ramp Walk': 'A confident fashion showcase judged on presentation, creativity, stage presence, and styling.',
-        'Free Fire': 'A fast-paced battle royale competition where teams compete through precision, strategy, and teamwork.',
-        'Pencil Sketch': 'An individual sketching challenge celebrating observation, composition, detail, and artistic expression.',
-        'Get the Shield': 'A spirited general-knowledge and challenge event where participants compete for the championship shield.',
-        'Photography': 'Capture a compelling visual story using composition, lighting, timing, and creative perspective.',
-        'Content Creator': 'Create an engaging short-form piece that combines originality, storytelling, visual quality, and audience appeal.',
-        'Solo Dance': 'A solo performance judged on choreography, rhythm, expression, stage presence, and originality.',
-        'Group Dance': 'A coordinated team performance judged on synchronization, formation, energy, expression, and creativity.',
-        'Beat Boxing': 'Showcase rhythm, vocal percussion, musicality, and originality in a live beatboxing performance.',
-        'Face Painting': 'Transform a face into an expressive artwork through concept, technique, color, and finishing detail.',
-        'Tech Quiz': 'A rapid-fire technology quiz covering computing fundamentals, innovation, logic, and current digital trends.',
-        'Mad Adds': 'Develop and perform a memorable advertisement that combines a clear message, creativity, humor, and teamwork.',
-        'Mono Acting': 'A solo acting performance focused on character, voice, body language, expression, and storytelling.',
-    }
-    for event_name, description in event_descriptions.items():
-        execute_db(
             """
-            UPDATE events
-            SET description = %s
-            WHERE event_name = %s
-              AND (description IS NULL OR TRIM(description) = '' OR LOWER(TRIM(description)) IN ('desc', 'description'))
+            CREATE TABLE IF NOT EXISTS events (
+                id SERIAL PRIMARY KEY,
+                event_name VARCHAR(100) NOT NULL,
+                event_type VARCHAR(50) NOT NULL,
+                event_date VARCHAR(30) NOT NULL,
+                event_time VARCHAR(30) NOT NULL,
+                venue VARCHAR(100) NOT NULL,
+                description TEXT,
+                max_participants INTEGER DEFAULT 100,
+                is_group INTEGER DEFAULT 0,
+                min_team_size INTEGER DEFAULT 1,
+                max_team_size INTEGER DEFAULT 1,
+                banner_image VARCHAR(255) DEFAULT 'event_default.jpg',
+                event_fee INTEGER DEFAULT 0,
+                upi_id VARCHAR(100) DEFAULT 'admin@upi',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
             """,
-            (description, event_name)
-        )
-
-    # Never leave a card with a placeholder or blank copy, including events
-    # created later through the admin form. Known events use the tailored copy
-    # above; unknown names receive a safe, name-aware baseline description.
-    placeholder_events = query_db(
-        """
-        SELECT id, event_name
-        FROM events
-        WHERE description IS NULL
-           OR TRIM(description) = ''
-           OR LOWER(TRIM(description)) IN ('desc', 'description')
-        """
-    )
-    for event in placeholder_events:
-        event_name = (event.get('event_name') or 'This event').strip()
-        execute_db(
-            "UPDATE events SET description = %s WHERE id = %s",
-            (f'{event_name} is a curated college competition focused on participation, creativity, and skill.', event['id'])
-        )
-
-    normalize_legacy_banner_filenames()
-
-    # Seed admin and team users only when an administrator explicitly supplies a password.
-    # Never create or overwrite accounts with a password embedded in source code.
-    if Config.ADMIN_PASSWORD:
-        admin_pass = generate_password_hash(Config.ADMIN_PASSWORD)
-        users_to_seed = [
-            ('admin', 'admin@shreedakshaacademyedu.in', 'admin', 'admin'),
-            ('admin1', 'admin1@shreedakshaacademyedu.in', 'admin', 'admin SDA1'),
-            ('admin2', 'admin2@shreedakshaacademyedu.in', 'admin', 'admin SDA2')
+            """
+            CREATE TABLE IF NOT EXISTS event_showcase_sections (
+                id SERIAL PRIMARY KEY,
+                section_key VARCHAR(80) NOT NULL UNIQUE,
+                eyebrow VARCHAR(120) NOT NULL DEFAULT 'THE LINEUP',
+                title VARCHAR(180) NOT NULL DEFAULT 'Pick your frequency.',
+                description TEXT NULL,
+                background_color VARCHAR(30) NOT NULL DEFAULT '#11131b',
+                banner_image VARCHAR(255) NULL,
+                is_enabled INTEGER NOT NULL DEFAULT 1,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS participants (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NULL,
+                full_name VARCHAR(100) NOT NULL,
+                email VARCHAR(100) NOT NULL,
+                phone VARCHAR(20) NOT NULL,
+                college_name VARCHAR(150) NOT NULL,
+                department VARCHAR(100) NOT NULL,
+                semester VARCHAR(20) DEFAULT '5th Sem',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS registrations (
+                id SERIAL PRIMARY KEY,
+                registration_uid VARCHAR(20) UNIQUE,
+                participant_id INTEGER NOT NULL,
+                event_id INTEGER NOT NULL,
+                registered_by INTEGER NULL,
+                is_group INTEGER DEFAULT 0,
+                team_name VARCHAR(100) NULL,
+                team_size INTEGER DEFAULT 1,
+                team_members TEXT NULL,
+                registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                status VARCHAR(20) DEFAULT 'pending',
+                payment_status VARCHAR(20) DEFAULT 'unpaid',
+                amount_paid INTEGER DEFAULT 0,
+                payment_method VARCHAR(50) DEFAULT 'None',
+                utr_number VARCHAR(100) NULL,
+                payment_proof VARCHAR(255) NULL,
+                payment_verified_at TIMESTAMP NULL,
+                payment_verified_by INTEGER NULL,
+                receipt_sent_at TIMESTAMP NULL,
+                receipt_delivery_status VARCHAR(20) DEFAULT 'not_sent'
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS attendance (
+                id SERIAL PRIMARY KEY,
+                registration_id INTEGER NOT NULL UNIQUE,
+                status VARCHAR(20) DEFAULT 'absent',
+                marked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                marked_by VARCHAR(50) DEFAULT 'admin'
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS certificates (
+                id SERIAL PRIMARY KEY,
+                certificate_code VARCHAR(50) NOT NULL UNIQUE,
+                registration_id INTEGER NOT NULL UNIQUE,
+                participant_id INTEGER NOT NULL,
+                event_id INTEGER NOT NULL,
+                issue_date VARCHAR(30) NOT NULL,
+                file_path VARCHAR(255) NOT NULL,
+                email_status VARCHAR(20) DEFAULT 'pending',
+                sent_at TIMESTAMP NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            """
         ]
-        for i in range(1, 11):
-            users_to_seed.append((f'member{i}', f'member{i}@shreedakshaacademyedu.in', 'member', f'Team Member {i}'))
 
-        for un, em, role, fn in users_to_seed:
-            existing = query_db("SELECT id FROM users WHERE username = %s", (un,), one=True)
-            if not existing:
-                execute_db(
-                    "INSERT INTO users (username, email, password_hash, role, full_name) VALUES (%s, %s, %s, %s, %s)",
-                    (un, em, admin_pass, role, fn)
-                )
-            else:
-                execute_db(
-                    "UPDATE users SET password_hash = %s, role = %s, full_name = %s, email = %s WHERE username = %s",
-                    (admin_pass, role, fn, em, un)
-                )
-        print("[DB Seed] Synced configured admin and team member accounts")
-    else:
-        print("[DB Seed] Account password sync skipped; set ADMIN_PASSWORD in the environment")
+        for table_sql in tables:
+            try:
+                run_exec(table_sql)
+            except Exception as e:
+                if not is_sqlite:
+                    raise RuntimeError(f'PostgreSQL schema initialization failed: {e}') from e
+                if 'SERIAL' in table_sql and is_sqlite:
+                    sqlite_sql = table_sql.replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT')
+                    run_exec(sqlite_sql)
+                else:
+                    print(f"[Table Init Error] {e}")
 
-    # Migrate any legacy varshitha account to admin
-    legacy_varshitha = query_db("SELECT id FROM users WHERE username = 'varshitha'", one=True)
-    if legacy_varshitha:
-        admin_user = query_db("SELECT id FROM users WHERE username = 'admin'", one=True)
-        if not admin_user:
-            execute_db("UPDATE users SET username = 'admin', full_name = 'admin', email = 'admin@shreedakshaacademyedu.in' WHERE username = 'varshitha'")
-        else:
-            execute_db("DELETE FROM users WHERE username = 'varshitha'")
-
-    # Purge legacy symposium placeholder events if present
-    legacy_old_names = ('Binary Brains', 'Digital Dynamos', 'CodeCraft', 'CodeStorm', 'CodeVerse', 'ByteBattle')
-    execute_db("DELETE FROM events WHERE event_name IN (%s, %s, %s, %s, %s, %s)", legacy_old_names)
-
-    # 14 Official local events
-    official_events = [
-        {
-            'event_name': 'BGMI',
-            'event_type': 'Gaming',
-            'event_date': '19-sep-2026',
-            'event_time': '10:00 AM',
-            'venue': 'Computer Lab 3',
-            'description': 'Battle Royale championship at Daksha Infinitx.',
-            'max_participants': 100,
-            'is_group': 1,
-            'min_team_size': 4,
-            'max_team_size': 4,
-            'banner_image': '89e73e3fb00545329bed5ddb69478ea6.webp',
-            'event_fee': 400,
-            'upi_id': 'admin@upi',
-            'qr_code_image': 'uploads/qr_codes/c8d1eeb6e2fd420fad37edd0c7bb0baa.jpeg',
-            'rules_text': 'Rule 1: Mobile only, no emulators.\nRule 2: Fair play mandatory.',
-            'faculty_name': 'Prof. Rajesh Kumar',
-            'faculty_phone': '9876543210',
-            'student_name': 'Akash S',
-            'student_phone': '8050774071',
-        },
-        {
-            'event_name': 'Free Fire',
-            'event_type': 'Gaming',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'A fast-paced battle royale competition where teams compete through precision, strategy, and teamwork.',
-            'max_participants': 100,
-            'is_group': 1,
-            'min_team_size': 4,
-            'max_team_size': 4,
-            'banner_image': 'freefire.jpeg',
-            'event_fee': 400,
-            'upi_id': 'admin@upi',
-            'qr_code_image': 'uploads/qr_codes/f09529478c554e5d91ed22023082dca2.jpeg',
-            'rules_text': 'Player must belong to the same institution.\r\n\r\nBring own mobile phones and required accessories.\r\n\r\nInternet/network arrangements will be decided by organizers.\r\n\r\nNo account sharing during the match.\r\n\r\nTechnical challenges will be handled by organizers.\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'a',
-            'faculty_phone': '1234567888',
-            'student_name': 's',
-            'student_phone': '123456890',
-        },
-        {
-            'event_name': 'Pencil Sketch',
-            'event_type': 'Art',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'An individual sketching challenge celebrating observation, composition, detail, and artistic expression.',
-            'max_participants': 40,
-            'is_group': 0,
-            'min_team_size': 2,
-            'max_team_size': 4,
-            'banner_image': 'pencilesketch.jpeg',
-            'event_fee': 100,
-            'upi_id': 'admin@upi',
-            'qr_code_image': 'uploads/qr_codes/5c07f555d6444d5398d7b33273b42147.jpeg',
-            'rules_text': 'Theme: Dreams of Tomorrow , A World I Wish to See , Beauty and Beast , Nature and Humanity\r\n\r\nSketch sheets will be provided.\r\n\r\nParticipants must carry all necessary materials,\r\n\r\nArtwork must be based on the given theme.\r\n\r\nCopying, tracing, mobile phones or similar aids will lead to disqualification\r\n\r\nAny form of manipulation will lead to disqualification\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'cdc',
-            'faculty_phone': '4321234567',
-            'student_name': 's',
-            'student_phone': '1234567891',
-        },
-        {
-            'event_name': 'Get the Shield',
-            'event_type': 'Thinking',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'A spirited general-knowledge and challenge event where participants compete for the championship shield.',
-            'max_participants': 40,
-            'is_group': 1,
-            'min_team_size': 2,
-            'max_team_size': 2,
-            'banner_image': 'get_the_shield.jpeg',
-            'event_fee': 200,
-            'upi_id': 'admin@upi',
-            'qr_code_image': 'uploads/qr_codes/2c106876e1e14a049e4bda3ab316a82b.jpeg',
-            'rules_text': 'Follow contest format and instructions announced by organizers.\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'a',
-            'faculty_phone': '4321234567',
-            'student_name': 's',
-            'student_phone': '1234567891',
-        },
-        {
-            'event_name': 'Photography',
-            'event_type': 'Art',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'Capture a compelling visual story using composition, lighting, timing, and creative perspective.',
-            'max_participants': 40,
-            'is_group': 0,
-            'min_team_size': 2,
-            'max_team_size': 4,
-            'banner_image': 'Photography.jpeg',
-            'event_fee': 100,
-            'upi_id': 'admin@upi',
-            'qr_code_image': None,
-            'rules_text': 'Bring your own mobile phone/camera and accessories.\r\n\r\nPictures must be clicked during the competition period within the institution campus.\r\n\r\nEditing is not allowed.\r\n\r\nAl-generated images, downloaded photographs, stock images or previously published content are prohibited\r\n\r\nAny form of manipulation will lead to disqualification.\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'cdc',
-            'faculty_phone': '4321234567',
-            'student_name': 's',
-            'student_phone': '1234567891',
-        },
-        {
-            'event_name': 'Content Creator',
-            'event_type': 'Social Media',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'Create an engaging short-form piece that combines originality, storytelling, visual quality, and audience appeal.',
-            'max_participants': 40,
-            'is_group': 0,
-            'min_team_size': 2,
-            'max_team_size': 4,
-            'banner_image': 'contentcreator.jpeg',
-            'event_fee': 100,
-            'upi_id': 'admin@upi',
-            'qr_code_image': None,
-            'rules_text': 'Topic/Theme: [Theme will be announced by the organizers at the start of the event]\r\n\r\nParticipants must carry all required equipment (camera, mobile phone, tripod, laptop, etc.).\r\n\r\nContent must be created during the event.\r\n\r\nSubmissions must adhere to the specified duration and format.\r\n\r\nUse of unauthorized copyrighted material is prohibited; royalty-free music and assets are allowed.\r\n\r\nAny form of manipulation will lead to disqualification.\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'cdc',
-            'faculty_phone': '4321234567',
-            'student_name': 's',
-            'student_phone': '1234567891',
-        },
-        {
-            'event_name': 'Solo Dance',
-            'event_type': 'Dancing',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'Showcase expressive choreography, rhythm, stage presence, and musical interpretation in a solo routine.',
-            'max_participants': 40,
-            'is_group': 0,
-            'min_team_size': 2,
-            'max_team_size': 4,
-            'banner_image': 'solo_dance.jpeg',
-            'event_fee': 100,
-            'upi_id': 'admin@upi',
-            'qr_code_image': None,
-            'rules_text': 'Time Limit: 3 + 1 min\r\n\r\nParticipants must submit audio tracks in advance.\r\n\r\nPerformances will be judged on choreography, rhythm, expression, and stage utilization.\r\n\r\nCostumes and props must be decent and safe.\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'cdc',
-            'faculty_phone': '4321234567',
-            'student_name': 's',
-            'student_phone': '1234567891',
-        },
-        {
-            'event_name': 'Group Dance',
-            'event_type': 'Dancing',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'A high-energy team dance showcase judged on synchrony, formation complexity, energy, and style.',
-            'max_participants': 40,
-            'is_group': 1,
-            'min_team_size': 6,
-            'max_team_size': 8,
-            'banner_image': 'Group_Dance.jpeg',
-            'event_fee': 500,
-            'upi_id': 'admin@upi',
-            'qr_code_image': None,
-            'rules_text': 'Time Limit: 4 + 1 min\r\n\r\nAll group members must belong to the same institution.\r\n\r\nAudio tracks must be submitted in the specified format before the event.\r\n\r\nProps are allowed with prior notification to organizers.\r\n\r\nJudging criteria include synchronisation, choreography, costumes, energy, and overall impact.\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'cdc',
-            'faculty_phone': '4321234567',
-            'student_name': 's',
-            'student_phone': '1234567891',
-        },
-        {
-            'event_name': 'Beat Boxing',
-            'event_type': 'Art',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'Vocal percussion battles celebrating musicality, technical precision, groove, and crowd energy.',
-            'max_participants': 40,
-            'is_group': 1,
-            'min_team_size': 1,
-            'max_team_size': 2,
-            'banner_image': 'beatboxing.jpeg',
-            'event_fee': 300,
-            'upi_id': 'admin@upi',
-            'qr_code_image': None,
-            'rules_text': 'Time limit/Format: Round 1: 1 min, Round 2: 1 vs 1 face-off, 2 min each.\r\n\r\nNo instruments, backtrack, or loopers.\r\n\r\nNo profanity, offensive gestures, or personal attacks.\r\n\r\nScoring is based on clarity, complexity, musicality, stage presence, and audience response.\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'a',
-            'faculty_phone': '4321234567',
-            'student_name': 's',
-            'student_phone': '1234567891',
-        },
-        {
-            'event_name': 'Face Painting',
-            'event_type': 'Art',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'Transform a face into an expressive artwork through concept, technique, color, and finishing detail.',
-            'max_participants': 30,
-            'is_group': 1,
-            'min_team_size': 2,
-            'max_team_size': 2,
-            'banner_image': 'facepanting.jpeg',
-            'event_fee': 100,
-            'upi_id': 'admin@upi',
-            'qr_code_image': None,
-            'rules_text': 'Theme: Indian Folk and Tribal Art , Under the Sea , Wild and Wonderful\r\n\r\nBring all essential materials.\r\n\r\nNo writing devices or other references may be used.\r\n\r\nUse skin-safe, non-toxic and non-allergic face paints.\r\n\r\nNo permanent markers, industrial paints, chemicals or harmful substances, Painting near sensitive areas must be done carefully.\r\n\r\nThe model must remain comfortable.\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'a',
-            'faculty_phone': '4321234567',
-            'student_name': 's',
-            'student_phone': '1234567891',
-        },
-        {
-            'event_name': 'Tech Quiz',
-            'event_type': 'Technical Quiz & Logic Duel',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'A rapid-fire technology quiz covering computing fundamentals, innovation, logic, and current digital trends.',
-            'max_participants': 40,
-            'is_group': 1,
-            'min_team_size': 2,
-            'max_team_size': 2,
-            'banner_image': 'Tech_Quiz.jpeg',
-            'event_fee': 200,
-            'upi_id': 'admin@upi',
-            'qr_code_image': None,
-            'rules_text': 'Quiz may include technical, logical and current-affairs-related rounds.\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'a',
-            'faculty_phone': '4321234567',
-            'student_name': 's',
-            'student_phone': '1234567891',
-        },
-        {
-            'event_name': 'Mad Adds',
-            'event_type': 'Art',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'Develop and perform a memorable advertisement that combines a clear message, creativity, humor, and teamwork.',
-            'max_participants': 30,
-            'is_group': 1,
-            'min_team_size': 8,
-            'max_team_size': 10,
-            'banner_image': 'mad_adds.jpeg',
-            'event_fee': 500,
-            'upi_id': 'admin@upi',
-            'qr_code_image': None,
-            'rules_text': 'Time Limit/Format: 3 + 1 min\r\n\r\nTeams may use dialogue, acting, music, dance and comedy.\r\n\r\nAdvertisement should clearly promote the assigned product.\r\n\r\nNo offensive personal comments or deliberate brand defamation.\r\n\r\nPerform an advertisement for a real or fictional product.\r\n\r\nNo vulgar, political, religious or offensive content.\r\n\r\nUnsafe props are prohibited.\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'a',
-            'faculty_phone': '4321234567',
-            'student_name': 's',
-            'student_phone': '1234567891',
-        },
-        {
-            'event_name': 'Mono Acting',
-            'event_type': 'Art',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'A solo acting performance focused on character, voice, body language, expression, and storytelling.',
-            'max_participants': 30,
-            'is_group': 0,
-            'min_team_size': 2,
-            'max_team_size': 4,
-            'banner_image': 'monoacting.jpeg',
-            'event_fee': 100,
-            'upi_id': 'admin@upi',
-            'qr_code_image': None,
-            'rules_text': 'Theme: Mythology Characters (acting only in Kannada language)\r\n\r\nPerformance should be an original act or well-prepared portrayal.\r\n\r\nPerform individually without support of other actors.\r\n\r\nVulgar or inappropriate language/content is prohibited.\r\n\r\nBackground music or sound effects may be used if arranged in advance.\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'cdc',
-            'faculty_phone': '4321234567',
-            'student_name': 's',
-            'student_phone': '1234567891',
-        },
-        {
-            'event_name': 'Ramp Walk',
-            'event_type': 'Gaming',
-            'event_date': '18-sep-2026',
-            'event_time': '11:00 AM',
-            'venue': 'Seminar Hall 1',
-            'description': 'A confident fashion showcase judged on presentation, creativity, stage presence, and styling.',
-            'max_participants': 40,
-            'is_group': 1,
-            'min_team_size': 6,
-            'max_team_size': 8,
-            'banner_image': '47a83de9ff4c4712b65dd41197a65d40.jpeg',
-            'event_fee': 500,
-            'upi_id': 'test@upi',
-            'qr_code_image': None,
-            'rules_text': 'Theme: Marine Life, Celestial Dreams ,Seasons of Style\r\n\r\nCostumes and movements should be decent and appropriate.\r\n\r\nCoordination and presentation based on creativity and overall performance.\r\n\r\nNo dangerous props.\r\n\r\nSafe props may be used.\r\n\r\nVulgar or inappropriate songs, movements or costumes are prohibited.\r\n\r\nThe judges decision will be final and binding.',
-            'faculty_name': 'a',
-            'faculty_phone': '4321234567',
-            'student_name': 's',
-            'student_phone': '1234567891',
-        }
-    ]
-
-    # Seed or ensure all 14 official local events exist
-    existing_rows = query_db("SELECT event_name FROM events")
-    existing_names = {r['event_name'] for r in (existing_rows or [])}
-    for ev in official_events:
-        if ev['event_name'] not in existing_names:
-            execute_db(
+        # The public disc-cascade section is a singleton-style editable content
+        # block. Keeping it in the database lets administrators change copy and
+        # artwork without touching the event records themselves.
+        showcase = run_query(
+            "SELECT id FROM event_showcase_sections WHERE section_key = %s",
+            ('main-events',), one=True
+        )
+        if not showcase:
+            run_exec(
                 """
-                INSERT INTO events (
-                    event_name, event_type, event_date, event_time, venue, description,
-                    max_participants, is_group, min_team_size, max_team_size,
-                    banner_image, event_fee, upi_id, qr_code_image, rules_text,
-                    faculty_name, faculty_phone, student_name, student_phone
-                ) VALUES (
-                    %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s
-                )
+                INSERT INTO event_showcase_sections
+                    (section_key, eyebrow, title, description, background_color, is_enabled)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 """,
                 (
-                    ev['event_name'], ev['event_type'], ev['event_date'], ev['event_time'], ev['venue'], ev['description'],
-                    ev['max_participants'], ev['is_group'], ev['min_team_size'], ev['max_team_size'],
-                    ev['banner_image'], ev['event_fee'], ev['upi_id'], ev['qr_code_image'], ev['rules_text'],
-                    ev['faculty_name'], ev['faculty_phone'], ev['student_name'], ev['student_phone']
+                    'main-events',
+                    'THE LINEUP',
+                    'Pick your frequency.',
+                    'A living catalogue of every stage, skill, and squad at Shreedaksha Academy.',
+                    '#11131b',
+                    1,
                 )
             )
-            print(f"[DB Seed] Created official event: {ev['event_name']} (Group: {ev['is_group']})")
+
+        # Run auto-migrations for existing tables
+        migration_columns = [
+            ("events", "is_group", "INTEGER DEFAULT 0"),
+            ("events", "min_team_size", "INTEGER DEFAULT 1"),
+            ("events", "max_team_size", "INTEGER DEFAULT 1"),
+            ("events", "event_fee", "INTEGER DEFAULT 0"),
+            ("events", "upi_id", "VARCHAR(100) DEFAULT 'admin@upi'"),
+            ("events", "banner_image", "VARCHAR(255) DEFAULT 'event_default.jpg'"),
+            ("events", "qr_code_image", "VARCHAR(255) NULL"),
+            ("registrations", "is_group", "INTEGER DEFAULT 0"),
+            ("registrations", "team_name", "VARCHAR(100) NULL"),
+            ("registrations", "team_size", "INTEGER DEFAULT 1"),
+            ("registrations", "team_members", "TEXT NULL"),
+            ("registrations", "registered_by", "INTEGER NULL"),
+            ("registrations", "registration_date", "TIMESTAMP NULL"),
+            ("registrations", "status", "VARCHAR(20) DEFAULT 'pending'"),
+            ("registrations", "payment_status", "VARCHAR(20) DEFAULT 'unpaid'"),
+            ("registrations", "amount_paid", "INTEGER DEFAULT 0"),
+            ("registrations", "payment_method", "VARCHAR(50) DEFAULT 'None'"),
+            ("registrations", "utr_number", "VARCHAR(100) NULL"),
+            ("registrations", "payment_proof", "VARCHAR(255) NULL"),
+            ("registrations", "payment_verified_at", "TIMESTAMP NULL"),
+            ("registrations", "payment_verified_by", "INTEGER NULL"),
+            ("registrations", "receipt_sent_at", "TIMESTAMP NULL"),
+            ("registrations", "receipt_delivery_status", "VARCHAR(20) DEFAULT 'not_sent'"),
+            ("registrations", "registration_uid", "VARCHAR(20) NULL"),
+            # Event contact & rules fields
+            ("events", "rules_text", "TEXT NULL"),
+            ("events", "faculty_name", "VARCHAR(100) NULL"),
+            ("events", "faculty_phone", "VARCHAR(20) NULL"),
+            ("events", "student_name", "VARCHAR(100) NULL"),
+            ("events", "student_phone", "VARCHAR(20) NULL"),
+        ]
+        table_columns = {}
+        for table_name in {table for table, _, _ in migration_columns}:
+            if is_sqlite:
+                cursor.execute(f"PRAGMA table_info({table_name})")
+                rows = cursor.fetchall()
+                table_columns[table_name] = {row['name'] for row in rows}
+            else:
+                cursor.execute(
+                    "SELECT column_name FROM information_schema.columns WHERE table_name = %s",
+                    (table_name,)
+                )
+                rows = cursor.fetchall()
+                table_columns[table_name] = {row['column_name'] for row in rows}
+
+        for tbl, col, col_def in migration_columns:
+            if col in table_columns.get(tbl, set()):
+                continue
+            run_exec(f"ALTER TABLE {tbl} ADD COLUMN {col} {col_def};")
+            table_columns.setdefault(tbl, set()).add(col)
+
+        run_exec(
+            "UPDATE registrations SET utr_number = NULL "
+            "WHERE utr_number IS NOT NULL AND TRIM(utr_number) = ''"
+        )
+
+        run_exec(
+            "CREATE UNIQUE INDEX IF NOT EXISTS registrations_participant_event_unique "
+            "ON registrations (participant_id, event_id)"
+        )
+        run_exec(
+            "CREATE UNIQUE INDEX IF NOT EXISTS registrations_utr_unique "
+            "ON registrations (utr_number)"
+        )
+        run_exec(
+            "CREATE UNIQUE INDEX IF NOT EXISTS registrations_uid_unique "
+            "ON registrations (registration_uid)"
+        )
+
+        # Backfill event copy
+        event_descriptions = {
+            'BGMI': 'A strategic battle royale team tournament testing communication, survival skills, and tactical decision-making.',
+            'Ramp Walk': 'A confident fashion showcase judged on presentation, creativity, stage presence, and styling.',
+            'Free Fire': 'A fast-paced battle royale competition where teams compete through precision, strategy, and teamwork.',
+            'Pencil Sketch': 'An individual sketching challenge celebrating observation, composition, detail, and artistic expression.',
+            'Get the Shield': 'A spirited general-knowledge and challenge event where participants compete for the championship shield.',
+            'Photography': 'Capture a compelling visual story using composition, lighting, timing, and creative perspective.',
+            'Content Creator': 'Create an engaging short-form piece that combines originality, storytelling, visual quality, and audience appeal.',
+            'Solo Dance': 'A solo performance judged on choreography, rhythm, expression, stage presence, and originality.',
+            'Group Dance': 'A coordinated team performance judged on synchronization, formation, energy, expression, and creativity.',
+            'Beat Boxing': 'Showcase rhythm, vocal percussion, musicality, and originality in a live beatboxing performance.',
+            'Face Painting': 'Transform a face into an expressive artwork through concept, technique, color, and finishing detail.',
+            'Tech Quiz': 'A rapid-fire technology quiz covering computing fundamentals, innovation, logic, and current digital trends.',
+            'Mad Adds': 'Develop and perform a memorable advertisement that combines a clear message, creativity, humor, and teamwork.',
+            'Mono Acting': 'A solo acting performance focused on character, voice, body language, expression, and storytelling.',
+        }
+        for event_name, description in event_descriptions.items():
+            run_exec(
+                """
+                UPDATE events
+                SET description = %s
+                WHERE event_name = %s
+                  AND (description IS NULL OR TRIM(description) = '' OR LOWER(TRIM(description)) IN ('desc', 'description'))
+                """,
+                (description, event_name)
+            )
+
+        placeholder_events = run_query(
+            """
+            SELECT id, event_name
+            FROM events
+            WHERE description IS NULL
+               OR TRIM(description) = ''
+               OR LOWER(TRIM(description)) IN ('desc', 'description')
+            """
+        )
+        for event in placeholder_events:
+            event_name = (event.get('event_name') or 'This event').strip()
+            run_exec(
+                "UPDATE events SET description = %s WHERE id = %s",
+                (f'{event_name} is a curated college competition focused on participation, creativity, and skill.', event['id'])
+            )
+
+        normalize_legacy_banner_filenames(cursor=cursor, is_sqlite=is_sqlite)
+
+        # Seed admin and team users only when an administrator explicitly supplies a password.
+        if Config.ADMIN_PASSWORD:
+            admin_pass = generate_password_hash(Config.ADMIN_PASSWORD)
+            users_to_seed = [
+                ('admin', 'admin@shreedakshaacademyedu.in', 'admin', 'admin'),
+                ('admin1', 'admin1@shreedakshaacademyedu.in', 'admin', 'admin SDA1'),
+                ('admin2', 'admin2@shreedakshaacademyedu.in', 'admin', 'admin SDA2')
+            ]
+            for i in range(1, 11):
+                users_to_seed.append((f'member{i}', f'member{i}@shreedakshaacademyedu.in', 'member', f'Team Member {i}'))
+
+            for un, em, role, fn in users_to_seed:
+                existing = run_query("SELECT id FROM users WHERE username = %s", (un,), one=True)
+                if not existing:
+                    run_exec(
+                        "INSERT INTO users (username, email, password_hash, role, full_name) VALUES (%s, %s, %s, %s, %s)",
+                        (un, em, admin_pass, role, fn)
+                    )
+                else:
+                    run_exec(
+                        "UPDATE users SET password_hash = %s, role = %s, full_name = %s, email = %s WHERE username = %s",
+                        (admin_pass, role, fn, em, un)
+                    )
+            print("[DB Seed] Synced configured admin and team member accounts")
+        else:
+            print("[DB Seed] Account password sync skipped; set ADMIN_PASSWORD in the environment")
+
+        # Migrate any legacy varshitha account to admin
+        legacy_varshitha = run_query("SELECT id FROM users WHERE username = 'varshitha'", one=True)
+        if legacy_varshitha:
+            admin_user = run_query("SELECT id FROM users WHERE username = 'admin'", one=True)
+            if not admin_user:
+                run_exec("UPDATE users SET username = 'admin', full_name = 'admin', email = 'admin@shreedakshaacademyedu.in' WHERE username = 'varshitha'")
+            else:
+                run_exec("DELETE FROM users WHERE username = 'varshitha'")
+
+        # Purge legacy symposium placeholder events if present
+        legacy_old_names = ('Binary Brains', 'Digital Dynamos', 'CodeCraft', 'CodeStorm', 'CodeVerse', 'ByteBattle')
+        run_exec("DELETE FROM events WHERE event_name IN (%s, %s, %s, %s, %s, %s)", legacy_old_names)
+
+        # 14 Official local events
+        official_events = [
+            {
+                'event_name': 'BGMI',
+                'event_type': 'Gaming',
+                'event_date': '19-sep-2026',
+                'event_time': '10:00 AM',
+                'venue': 'Computer Lab 3',
+                'description': 'Battle Royale championship at Daksha Infinitx.',
+                'max_participants': 100,
+                'is_group': 1,
+                'min_team_size': 4,
+                'max_team_size': 4,
+                'banner_image': '89e73e3fb00545329bed5ddb69478ea6.webp',
+                'event_fee': 400,
+                'upi_id': 'admin@upi',
+                'qr_code_image': 'uploads/qr_codes/c8d1eeb6e2fd420fad37edd0c7bb0baa.jpeg',
+                'rules_text': 'Rule 1: Mobile only, no emulators.\nRule 2: Fair play mandatory.',
+                'faculty_name': 'Prof. Rajesh Kumar',
+                'faculty_phone': '9876543210',
+                'student_name': 'Akash S',
+                'student_phone': '8050774071',
+            },
+            {
+                'event_name': 'Free Fire',
+                'event_type': 'Gaming',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'A fast-paced battle royale competition where teams compete through precision, strategy, and teamwork.',
+                'max_participants': 100,
+                'is_group': 1,
+                'min_team_size': 4,
+                'max_team_size': 4,
+                'banner_image': 'freefire.jpeg',
+                'event_fee': 400,
+                'upi_id': 'admin@upi',
+                'qr_code_image': 'uploads/qr_codes/f09529478c554e5d91ed22023082dca2.jpeg',
+                'rules_text': 'Player must belong to the same institution.\r\n\r\nBring own mobile phones and required accessories.\r\n\r\nInternet/network arrangements will be decided by organizers.\r\n\r\nNo account sharing during the match.\r\n\r\nTechnical challenges will be handled by organizers.\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'a',
+                'faculty_phone': '1234567888',
+                'student_name': 's',
+                'student_phone': '123456890',
+            },
+            {
+                'event_name': 'Pencil Sketch',
+                'event_type': 'Art',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'An individual sketching challenge celebrating observation, composition, detail, and artistic expression.',
+                'max_participants': 40,
+                'is_group': 0,
+                'min_team_size': 2,
+                'max_team_size': 4,
+                'banner_image': 'pencilesketch.jpeg',
+                'event_fee': 100,
+                'upi_id': 'admin@upi',
+                'qr_code_image': 'uploads/qr_codes/5c07f555d6444d5398d7b33273b42147.jpeg',
+                'rules_text': 'Theme: Dreams of Tomorrow , A World I Wish to See , Beauty and Beast , Nature and Humanity\r\n\r\nSketch sheets will be provided.\r\n\r\nParticipants must carry all necessary materials,\r\n\r\nArtwork must be based on the given theme.\r\n\r\nCopying, tracing, mobile phones or similar aids will lead to disqualification\r\n\r\nAny form of manipulation will lead to disqualification\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'cdc',
+                'faculty_phone': '4321234567',
+                'student_name': 's',
+                'student_phone': '1234567891',
+            },
+            {
+                'event_name': 'Get the Shield',
+                'event_type': 'Thinking',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'A spirited general-knowledge and challenge event where participants compete for the championship shield.',
+                'max_participants': 40,
+                'is_group': 1,
+                'min_team_size': 2,
+                'max_team_size': 2,
+                'banner_image': 'get_the_shield.jpeg',
+                'event_fee': 200,
+                'upi_id': 'admin@upi',
+                'qr_code_image': 'uploads/qr_codes/2c106876e1e14a049e4bda3ab316a82b.jpeg',
+                'rules_text': 'Follow contest format and instructions announced by organizers.\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'a',
+                'faculty_phone': '4321234567',
+                'student_name': 's',
+                'student_phone': '1234567891',
+            },
+            {
+                'event_name': 'Photography',
+                'event_type': 'Art',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'Capture a compelling visual story using composition, lighting, timing, and creative perspective.',
+                'max_participants': 40,
+                'is_group': 0,
+                'min_team_size': 2,
+                'max_team_size': 4,
+                'banner_image': 'Photography.jpeg',
+                'event_fee': 100,
+                'upi_id': 'admin@upi',
+                'qr_code_image': None,
+                'rules_text': 'Bring your own mobile phone/camera and accessories.\r\n\r\nPictures must be clicked during the competition period within the institution campus.\r\n\r\nEditing is not allowed.\r\n\r\nAl-generated images, downloaded photographs, stock images or previously published content are prohibited\r\n\r\nAny form of manipulation will lead to disqualification.\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'cdc',
+                'faculty_phone': '4321234567',
+                'student_name': 's',
+                'student_phone': '1234567891',
+            },
+            {
+                'event_name': 'Content Creator',
+                'event_type': 'Social Media',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'Create an engaging short-form piece that combines originality, storytelling, visual quality, and audience appeal.',
+                'max_participants': 40,
+                'is_group': 0,
+                'min_team_size': 2,
+                'max_team_size': 4,
+                'banner_image': 'contentcreator.jpeg',
+                'event_fee': 100,
+                'upi_id': 'admin@upi',
+                'qr_code_image': None,
+                'rules_text': 'Topic/Theme: [Theme will be announced by the organizers at the start of the event]\r\n\r\nParticipants must carry all required equipment (camera, mobile phone, tripod, laptop, etc.).\r\n\r\nContent must be created during the event.\r\n\r\nSubmissions must adhere to the specified duration and format.\r\n\r\nUse of unauthorized copyrighted material is prohibited; royalty-free music and assets are allowed.\r\n\r\nAny form of manipulation will lead to disqualification.\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'cdc',
+                'faculty_phone': '4321234567',
+                'student_name': 's',
+                'student_phone': '1234567891',
+            },
+            {
+                'event_name': 'Solo Dance',
+                'event_type': 'Dancing',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'Showcase expressive choreography, rhythm, stage presence, and musical interpretation in a solo routine.',
+                'max_participants': 40,
+                'is_group': 0,
+                'min_team_size': 2,
+                'max_team_size': 4,
+                'banner_image': 'solo_dance.jpeg',
+                'event_fee': 100,
+                'upi_id': 'admin@upi',
+                'qr_code_image': None,
+                'rules_text': 'Time Limit: 3 + 1 min\r\n\r\nParticipants must submit audio tracks in advance.\r\n\r\nPerformances will be judged on choreography, rhythm, expression, and stage utilization.\r\n\r\nCostumes and props must be decent and safe.\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'cdc',
+                'faculty_phone': '4321234567',
+                'student_name': 's',
+                'student_phone': '1234567891',
+            },
+            {
+                'event_name': 'Group Dance',
+                'event_type': 'Dancing',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'A high-energy team dance showcase judged on synchrony, formation complexity, energy, and style.',
+                'max_participants': 40,
+                'is_group': 1,
+                'min_team_size': 6,
+                'max_team_size': 8,
+                'banner_image': 'Group_Dance.jpeg',
+                'event_fee': 500,
+                'upi_id': 'admin@upi',
+                'qr_code_image': None,
+                'rules_text': 'Time Limit: 4 + 1 min\r\n\r\nAll group members must belong to the same institution.\r\n\r\nAudio tracks must be submitted in the specified format before the event.\r\n\r\nProps are allowed with prior notification to organizers.\r\n\r\nJudging criteria include synchronisation, choreography, costumes, energy, and overall impact.\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'cdc',
+                'faculty_phone': '4321234567',
+                'student_name': 's',
+                'student_phone': '1234567891',
+            },
+            {
+                'event_name': 'Beat Boxing',
+                'event_type': 'Art',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'Vocal percussion battles celebrating musicality, technical precision, groove, and crowd energy.',
+                'max_participants': 40,
+                'is_group': 1,
+                'min_team_size': 1,
+                'max_team_size': 2,
+                'banner_image': 'beatboxing.jpeg',
+                'event_fee': 300,
+                'upi_id': 'admin@upi',
+                'qr_code_image': None,
+                'rules_text': 'Time limit/Format: Round 1: 1 min, Round 2: 1 vs 1 face-off, 2 min each.\r\n\r\nNo instruments, backtrack, or loopers.\r\n\r\nNo profanity, offensive gestures, or personal attacks.\r\n\r\nScoring is based on clarity, complexity, musicality, stage presence, and audience response.\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'a',
+                'faculty_phone': '4321234567',
+                'student_name': 's',
+                'student_phone': '1234567891',
+            },
+            {
+                'event_name': 'Face Painting',
+                'event_type': 'Art',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'Transform a face into an expressive artwork through concept, technique, color, and finishing detail.',
+                'max_participants': 30,
+                'is_group': 1,
+                'min_team_size': 2,
+                'max_team_size': 2,
+                'banner_image': 'facepanting.jpeg',
+                'event_fee': 100,
+                'upi_id': 'admin@upi',
+                'qr_code_image': None,
+                'rules_text': 'Theme: Indian Folk and Tribal Art , Under the Sea , Wild and Wonderful\r\n\r\nBring all essential materials.\r\n\r\nNo writing devices or other references may be used.\r\n\r\nUse skin-safe, non-toxic and non-allergic face paints.\r\n\r\nNo permanent markers, industrial paints, chemicals or harmful substances, Painting near sensitive areas must be done carefully.\r\n\r\nThe model must remain comfortable.\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'a',
+                'faculty_phone': '4321234567',
+                'student_name': 's',
+                'student_phone': '1234567891',
+            },
+            {
+                'event_name': 'Tech Quiz',
+                'event_type': 'Technical Quiz & Logic Duel',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'A rapid-fire technology quiz covering computing fundamentals, innovation, logic, and current digital trends.',
+                'max_participants': 40,
+                'is_group': 1,
+                'min_team_size': 2,
+                'max_team_size': 2,
+                'banner_image': 'Tech_Quiz.jpeg',
+                'event_fee': 200,
+                'upi_id': 'admin@upi',
+                'qr_code_image': None,
+                'rules_text': 'Quiz may include technical, logical and current-affairs-related rounds.\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'a',
+                'faculty_phone': '4321234567',
+                'student_name': 's',
+                'student_phone': '1234567891',
+            },
+            {
+                'event_name': 'Mad Adds',
+                'event_type': 'Art',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'Develop and perform a memorable advertisement that combines a clear message, creativity, humor, and teamwork.',
+                'max_participants': 30,
+                'is_group': 1,
+                'min_team_size': 8,
+                'max_team_size': 10,
+                'banner_image': 'mad_adds.jpeg',
+                'event_fee': 500,
+                'upi_id': 'admin@upi',
+                'qr_code_image': None,
+                'rules_text': 'Time Limit/Format: 3 + 1 min\r\n\r\nTeams may use dialogue, acting, music, dance and comedy.\r\n\r\nAdvertisement should clearly promote the assigned product.\r\n\r\nNo offensive personal comments or deliberate brand defamation.\r\n\r\nPerform an advertisement for a real or fictional product.\r\n\r\nNo vulgar, political, religious or offensive content.\r\n\r\nUnsafe props are prohibited.\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'a',
+                'faculty_phone': '4321234567',
+                'student_name': 's',
+                'student_phone': '1234567891',
+            },
+            {
+                'event_name': 'Mono Acting',
+                'event_type': 'Art',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'A solo acting performance focused on character, voice, body language, expression, and storytelling.',
+                'max_participants': 30,
+                'is_group': 0,
+                'min_team_size': 2,
+                'max_team_size': 4,
+                'banner_image': 'monoacting.jpeg',
+                'event_fee': 100,
+                'upi_id': 'admin@upi',
+                'qr_code_image': None,
+                'rules_text': 'Theme: Mythology Characters (acting only in Kannada language)\r\n\r\nPerformance should be an original act or well-prepared portrayal.\r\n\r\nPerform individually without support of other actors.\r\n\r\nVulgar or inappropriate language/content is prohibited.\r\n\r\nBackground music or sound effects may be used if arranged in advance.\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'cdc',
+                'faculty_phone': '4321234567',
+                'student_name': 's',
+                'student_phone': '1234567891',
+            },
+            {
+                'event_name': 'Ramp Walk',
+                'event_type': 'Gaming',
+                'event_date': '18-sep-2026',
+                'event_time': '11:00 AM',
+                'venue': 'Seminar Hall 1',
+                'description': 'A confident fashion showcase judged on presentation, creativity, stage presence, and styling.',
+                'max_participants': 40,
+                'is_group': 1,
+                'min_team_size': 6,
+                'max_team_size': 8,
+                'banner_image': '47a83de9ff4c4712b65dd41197a65d40.jpeg',
+                'event_fee': 500,
+                'upi_id': 'test@upi',
+                'qr_code_image': None,
+                'rules_text': 'Theme: Marine Life, Celestial Dreams ,Seasons of Style\r\n\r\nCostumes and movements should be decent and appropriate.\r\n\r\nCoordination and presentation based on creativity and overall performance.\r\n\r\nNo dangerous props.\r\n\r\nSafe props may be used.\r\n\r\nVulgar or inappropriate songs, movements or costumes are prohibited.\r\n\r\nThe judges decision will be final and binding.',
+                'faculty_name': 'a',
+                'faculty_phone': '4321234567',
+                'student_name': 's',
+                'student_phone': '1234567891',
+            }
+        ]
+
+        # Seed or ensure all 14 official local events exist
+        existing_rows = run_query("SELECT event_name FROM events")
+        existing_names = {r['event_name'] for r in (existing_rows or [])}
+        for ev in official_events:
+            if ev['event_name'] not in existing_names:
+                run_exec(
+                    """
+                    INSERT INTO events (
+                        event_name, event_type, event_date, event_time, venue, description,
+                        max_participants, is_group, min_team_size, max_team_size,
+                        banner_image, event_fee, upi_id, qr_code_image, rules_text,
+                        faculty_name, faculty_phone, student_name, student_phone
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s
+                    )
+                    """,
+                    (
+                        ev['event_name'], ev['event_type'], ev['event_date'], ev['event_time'], ev['venue'], ev['description'],
+                        ev['max_participants'], ev['is_group'], ev['min_team_size'], ev['max_team_size'],
+                        ev['banner_image'], ev['event_fee'], ev['upi_id'], ev['qr_code_image'], ev['rules_text'],
+                        ev['faculty_name'], ev['faculty_phone'], ev['student_name'], ev['student_phone']
+                    )
+                )
+                print(f"[DB Seed] Created official event: {ev['event_name']} (Group: {ev['is_group']})")
+
+        if not is_sqlite:
+            conn.commit()
+        _DB_INITIALIZED = True
+    finally:
+        cursor.close()
+        release_db_connection(conn)
 
     # Seed Sample Participants if none exist
     # (Disabled per user request to start with a completely clean slate)
