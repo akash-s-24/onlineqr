@@ -6,22 +6,22 @@
 
 {% block extra_css %}
 /* ═══════════════════════════════════════════════════════════════
-   CLEAN BLACK & WHITE PROFESSIONAL REGISTRATION THEME
+   AUTHENTIC WHITE & BLACK MONOCHROME REGISTRATION THEME
    ═══════════════════════════════════════════════════════════════ */
 
-/* 1. Complete White Page Canvas */
+/* 1. Complete Page Canvas (Pure White in Light, Jet Black in Dark) */
 html:has(body.registration-page),
 body.registration-page {
     background-color: #ffffff !important;
     background: #ffffff !important;
-    color: #09090b !important;
+    color: #000000 !important;
 }
 
 body.registration-page canvas {
     display: none !important;
 }
 
-/* The registration flow is intentionally distraction-free: the form owns the page. */
+/* Distraction-free: the registration form owns the view */
 body.registration-page .landing-header,
 body.registration-page .l-footer,
 body.registration-page #loader,
@@ -33,8 +33,8 @@ body.registration-page .scroll-content {
 }
 
 body.registration-page .registration-section {
-    background: #ffffff !important;
-    padding: 32px 20px 56px;
+    background: #FBFBFC !important;
+    padding: 36px 20px 60px;
     min-height: 100svh;
     display: flex;
     justify-content: center;
@@ -45,12 +45,12 @@ body.registration-page .registration-section {
 .glass-form-card,
 .clean-form-card {
     background: #ffffff !important;
-    border: 1px solid #e4e4e7 !important;
+    border: 1.5px solid #e4e4e7 !important;
     border-radius: 20px !important;
     padding: 44px 40px !important;
     width: 100%;
     max-width: 820px;
-    box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    box-shadow: 0 20px 48px -15px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04) !important;
     box-sizing: border-box;
 }
 
@@ -70,22 +70,23 @@ body.registration-page .registration-section {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
+    padding: 9px 18px;
     background: #ffffff;
-    border: 1px solid #e4e4e7;
-    color: #09090b;
+    border: 1.5px solid #cbd5e1;
+    color: #0f172a;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.88rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: 9999px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .back-btn-ghost:hover {
-    background: #0b1220;
+    background: #0f172a;
     color: #ffffff;
-    border-color: #0b1220;
+    border-color: #0f172a;
 }
 .back-btn-ghost .arrow-icon {
     display: inline-flex;
@@ -98,32 +99,32 @@ body.registration-page .registration-section {
     width: 16px;
     height: 16px;
     stroke: currentColor;
-    stroke-width: 2.2;
+    stroke-width: 2.4;
     fill: none;
 }
 
 /* 4. Typography */
 .form-title {
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    color: #0b1220 !important;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif !important;
+    color: #000000 !important;
     font-size: 2.25rem !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     letter-spacing: -0.025em !important;
     text-align: center;
     margin: 8px 0 6px !important;
 }
 .form-subtitle {
-    color: #71717a !important;
+    color: #52525b !important;
     text-align: center;
     margin-bottom: 28px !important;
     font-size: 0.95rem;
-    font-weight: 400;
+    font-weight: 500;
 }
 
 /* 5. Quick Demo Help Card */
 .help-guide-card {
     background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    border: 1.5px solid #e2e8f0;
     border-radius: 12px;
     padding: 16px 20px;
     margin-bottom: 26px;
@@ -134,38 +135,47 @@ body.registration-page .registration-section {
     gap: 14px;
 }
 .help-guide-card h4 {
-    color: #09090b;
+    color: #000000;
     margin: 0 0 4px;
     font-size: 1rem;
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
 }
 .help-guide-card p {
-    color: #64748b;
+    color: #52525b;
     font-size: 0.88rem;
     margin: 0;
 }
 .help-guide-btn {
     background: #ffffff;
-    border: 1px solid #2563eb;
-    color: #1d4ed8;
+    border: 2px solid #0f172a;
+    color: #0f172a;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.84rem;
-    padding: 7px 16px;
-    border-radius: 20px;
+    padding: 8px 18px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    box-shadow: 3px 3px 0px #0f172a;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     white-space: nowrap;
 }
 .help-guide-btn:hover {
-    background: #2563eb;
-    color: #ffffff;
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #0f172a;
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px #0f172a;
+}
+.help-guide-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0px 0px 0px #0f172a;
 }
 
 /* 6. Form Groups & Inputs */
 .f-form-group {
     margin-bottom: 20px;
+    position: relative;
 }
 .f-form-row {
     display: flex;
@@ -183,8 +193,8 @@ body.registration-page .registration-section {
 
 .f-label {
     display: block;
-    color: #09090b !important;
-    font-weight: 600;
+    color: #000000 !important;
+    font-weight: 700;
     margin-bottom: 8px;
     font-size: 0.88rem;
     letter-spacing: -0.01em;
@@ -194,18 +204,19 @@ body.registration-page .registration-section {
     width: 100%;
     padding: 12px 14px;
     background: #ffffff !important;
-    border: 1px solid #d4d4d8 !important;
+    border: 1.5px solid #d4d4d8 !important;
     border-radius: 10px;
-    color: #09090b !important;
+    color: #000000 !important;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.95rem;
+    font-weight: 500;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     box-sizing: border-box;
 }
 .f-control:focus {
     outline: none !important;
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, .14) !important;
+    border-color: #000000 !important;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12) !important;
     background: #ffffff !important;
 }
 .f-control::placeholder {
@@ -218,36 +229,47 @@ body.registration-page .registration-section {
     margin-top: 5px;
 }
 
-/* 7. Custom Searchable Combobox */
+/* ═══════════════════════════════════════════════════════════════
+   7. SMOOTH ANIMATED COMBOBOX DROPDOWNS (True White & Black)
+   ═══════════════════════════════════════════════════════════════ */
 .cb-wrapper {
     position: relative;
     width: 100%;
+}
+.cb-wrapper.open {
+    z-index: 140;
 }
 .cb-trigger {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 12px 14px;
+    padding: 13px 16px;
     background: #ffffff !important;
-    border: 1px solid #d4d4d8 !important;
+    border: 1.5px solid #d4d4d8 !important;
     border-radius: 10px;
-    color: #09090b !important;
+    color: #000000 !important;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.95rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     box-sizing: border-box;
     text-align: left;
     user-select: none;
+    outline: none;
 }
 .cb-trigger:hover {
-    border-color: #71717a !important;
+    border-color: #000000 !important;
 }
+.cb-trigger:focus-visible,
 .cb-trigger.open {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, .14) !important;
-    border-radius: 10px 10px 0 0;
+    border-color: #000000 !important;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12) !important;
+}
+.cb-wrapper.cb-invalid .cb-trigger {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18) !important;
 }
 .cb-trigger-text {
     flex: 1;
@@ -256,21 +278,23 @@ body.registration-page .registration-section {
     white-space: nowrap;
 }
 .cb-trigger-text.placeholder {
-    color: #a1a1aa !important;
+    color: #71717a !important;
+    font-weight: 500;
 }
 .cb-chevron {
     display: flex;
     align-items: center;
-    opacity: 0.6;
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    color: #000000;
+    opacity: 0.65;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
     flex-shrink: 0;
     margin-left: 8px;
 }
 .cb-chevron svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     stroke: currentColor;
-    stroke-width: 2;
+    stroke-width: 2.5;
     fill: none;
 }
 .cb-trigger.open .cb-chevron {
@@ -278,120 +302,271 @@ body.registration-page .registration-section {
     opacity: 1;
 }
 
+/* Original Smooth Downward Unfurl Animation - GPU Composited */
 .cb-dropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 6px);
     left: 0;
     right: 0;
-    z-index: 100;
+    z-index: 150;
     background: #ffffff !important;
-    border: 1px solid #e4e4e7 !important;
-    border-top: none !important;
-    border-radius: 0 0 10px 10px;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12) !important;
-    max-height: 0;
+    border: 1.5px solid #000000 !important;
+    border-radius: 12px;
+    box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.18), 0 4px 14px rgba(0, 0, 0, 0.06) !important;
     overflow: hidden;
     opacity: 0;
-    transform: translateY(-4px);
-    transition: max-height 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-                opacity 0.2s ease,
-                transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.985);
+    transform-origin: top center;
+    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.22s;
     pointer-events: none;
 }
 .cb-dropdown.open {
-    max-height: 320px;
+    visibility: visible;
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     pointer-events: auto;
 }
 .cb-search-wrap {
-    padding: 8px 10px;
-    border-bottom: 1px solid #f4f4f5;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e4e4e7;
     background: #fafafa;
 }
 .cb-search {
     width: 100%;
-    padding: 8px 12px;
+    padding: 9px 12px;
     background: #ffffff !important;
-    border: 1px solid #d4d4d8 !important;
-    border-radius: 6px;
-    color: #09090b !important;
+    border: 1.5px solid #d4d4d8 !important;
+    border-radius: 8px;
+    color: #000000 !important;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 0.88rem;
+    font-size: 0.9rem;
+    font-weight: 500;
     outline: none;
     box-sizing: border-box;
+    transition: all 0.2s ease;
 }
 .cb-search:focus {
-    border-color: #2563eb !important;
+    border-color: #000000 !important;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08) !important;
 }
 .cb-options {
     overflow-y: auto;
     max-height: 240px;
-    padding: 4px 0;
+    padding: 6px 0;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
 }
 .cb-options::-webkit-scrollbar {
-    width: 4px;
+    width: 5px;
 }
 .cb-options::-webkit-scrollbar-thumb {
     background: #d4d4d8;
-    border-radius: 4px;
+    border-radius: 6px;
+}
+.cb-options::-webkit-scrollbar-thumb:hover {
+    background: #000000;
 }
 .cb-option {
     display: flex;
     align-items: center;
-    padding: 10px 14px;
-    color: #09090b !important;
+    padding: 12px 16px;
+    min-height: 44px;
+    color: #18181b !important;
     font-size: 0.92rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
     gap: 8px;
+    user-select: none;
+    touch-action: manipulation;
 }
-.cb-option:hover {
+.cb-option:hover,
+.cb-option.highlighted {
     background: #f4f4f5 !important;
-    color: #1d4ed8 !important;
+    color: #000000 !important;
+    font-weight: 600;
 }
 .cb-option.selected {
-    background: #2563eb !important;
+    background: #000000 !important;
     color: #ffffff !important;
-    font-weight: 600;
+    font-weight: 700;
 }
 .cb-option.selected::before {
     content: '✓';
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     color: #ffffff;
     font-weight: 800;
 }
 .cb-option.hidden {
-    display: none;
+    display: none !important;
 }
+/* ── Enhanced Category Group Headers & Option Tags ── */
 .cb-option-group-label {
-    padding: 8px 14px;
-    font-size: 0.75rem;
+    padding: 10px 16px 8px;
+    font-size: 0.74rem;
     font-weight: 800;
-    color: #71717a !important;
-    background-color: #fafafa !important;
-    margin: 4px 0;
+    color: #475569 !important;
+    background-color: #f8fafc !important;
+    margin: 6px 0 3px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
     pointer-events: none;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.cb-option-group-label:first-child {
+    border-top: none;
+    margin-top: 0;
+}
+.cb-group-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+.cb-group-icon-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 800;
+    font-size: 0.74rem;
+}
+.cb-group-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    text-transform: uppercase;
+}
+
+/* Commerce Category Header Accent */
+.cb-group-commerce {
+    background: linear-gradient(90deg, #eff6ff 0%, #f8fafc 100%) !important;
+    color: #1e40af !important;
+    border-left: 3.5px solid #2563eb !important;
+}
+.cb-badge-commerce-tag {
+    background: #dbeafe !important;
+    color: #1e40af !important;
+    border: 1px solid #bfdbfe !important;
+}
+
+/* Science Category Header Accent */
+.cb-group-science {
+    background: linear-gradient(90deg, #ecfdf5 0%, #f8fafc 100%) !important;
+    color: #065f46 !important;
+    border-left: 3.5px solid #059669 !important;
+}
+.cb-badge-science-tag {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    border: 1px solid #a7f3d0 !important;
+}
+
+/* General / Other Category Header Accent */
+.cb-group-other {
+    background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%) !important;
+    color: #475569 !important;
+    border-left: 3.5px solid #94a3b8 !important;
+}
+.cb-badge-other-tag {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+/* Option Content Layout & Stream Badges */
+.cb-opt-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 12px;
+}
+.cb-opt-text {
+    flex: 1;
+    font-weight: 600;
+    line-height: 1.35;
+}
+.cb-opt-tag {
+    display: inline-block;
+    font-size: 0.70rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.cb-opt-pill-commerce {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #dbeafe;
+}
+.cb-opt-pill-science {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #d1fae5;
+}
+.cb-opt-pill-other {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+/* Option Hover Accent Bars */
+.cb-opt-commerce:hover,
+.cb-opt-commerce.highlighted {
+    background: #f0f7ff !important;
+    border-left: 3px solid #2563eb !important;
+}
+.cb-opt-science:hover,
+.cb-opt-science.highlighted {
+    background: #f0fdf4 !important;
+    border-left: 3px solid #059669 !important;
+}
+.cb-opt-other:hover,
+.cb-opt-other.highlighted {
+    background: #f8fafc !important;
+    border-left: 3px solid #94a3b8 !important;
 }
 .cb-empty {
-    padding: 16px 14px;
+    padding: 18px 16px;
     text-align: center;
     color: #71717a;
     font-size: 0.88rem;
     display: none;
 }
 
+/* Visually off-screen for custom combobox overlay while keeping native accessibility & test assertions */
+select.f-select {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 /* 8. Selected Event Presentation Card */
 .selected-event-card {
-    background: #fafafa;
-    border: 1px solid #e4e4e7;
-    border-color: #bfdbfe;
-    border-top: 3px solid #2563eb;
-    border-radius: 12px;
-    padding: 20px 22px;
+    background: #ffffff;
+    border: 1.5px solid #000000;
+    border-radius: 14px;
+    padding: 22px 24px;
     margin-bottom: 24px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
     transition: all 0.2s ease;
 }
 .event-card-top {
@@ -412,61 +587,88 @@ body.registration-page .registration-section {
     align-items: center;
     gap: 5px;
     font-size: 0.74rem;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    padding: 4px 10px;
+    padding: 4px 12px;
     border-radius: 9999px;
 }
 .event-pill-type {
-    background: #2563eb;
+    background: #000000;
     color: #ffffff;
 }
 .event-pill-group,
 .event-pill-solo {
     background: #f4f4f5;
-    color: #18181b;
-    border: 1px solid #e4e4e7;
+    color: #000000;
+    border: 1.5px solid #000000;
 }
 .event-pill-fee {
-    background: #f4f4f5;
-    color: #09090b;
+    background: #ffffff;
+    color: #000000;
     font-weight: 800;
-    border: 1px solid #e4e4e7;
+    border: 1.5px solid #000000;
+}
+.event-title-badge-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #0b0f19;
+    border: 1.5px solid #1e293b;
+    padding: 8px 16px;
+    border-radius: 12px;
+    margin-top: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+.event-title-badge-box * {
+    color: #ffffff !important;
 }
 .selected-event-title {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #0b1220;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #ffffff !important;
     margin: 0;
+    letter-spacing: 0.2px;
+}
+.selected-event-title.bgm-highlight,
+.bgm-highlight {
+    color: #ffffff !important;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
 }
 .change-event-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 0.82rem;
-    font-weight: 600;
-    color: #09090b;
+    font-weight: 700;
+    color: #0f172a;
     background: #ffffff;
-    border: 1px solid #d4d4d8;
-    padding: 6px 12px;
+    border: 2px solid #0f172a;
+    padding: 7px 14px;
     border-radius: 8px;
     text-decoration: none;
     white-space: nowrap;
-    transition: all 0.2s ease;
+    box-shadow: 3px 3px 0px #0f172a;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .change-event-btn:hover {
-    background: #2563eb;
-    color: #ffffff;
-    border-color: #2563eb;
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #0f172a;
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px #0f172a;
+}
+.change-event-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0px 0px 0px #0f172a;
 }
 .event-meta-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
-    padding: 14px 16px;
-    background: #ffffff;
+    padding: 16px 18px;
+    background: #fafafa;
     border: 1px solid #e4e4e7;
     border-radius: 10px;
 }
@@ -484,14 +686,14 @@ body.registration-page .registration-section {
     font-size: 0.72rem;
     color: #71717a;
     text-transform: uppercase;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 0.5px;
 }
 .meta-val {
     display: block;
     font-size: 0.88rem;
-    color: #09090b;
-    font-weight: 600;
+    color: #000000;
+    font-weight: 700;
 }
 .event-desc-preview {
     margin-top: 14px;
@@ -504,22 +706,22 @@ body.registration-page .registration-section {
 
 /* 9. Dynamic Cards (Group & Payment) */
 .f-dynamic-card {
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
+    background: #fafafa !important;
+    border: 1.5px solid #e4e4e7 !important;
     border-radius: 14px !important;
     padding: 24px !important;
     margin-bottom: 24px !important;
     transition: all 0.3s ease;
 }
 .f-badge {
-    padding: 4px 12px;
+    padding: 5px 14px;
     border-radius: 9999px;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
-    background: #2563eb !important;
+    background: #000000 !important;
     color: #ffffff !important;
-    border: 1px solid #2563eb !important;
+    border: 1px solid #000000 !important;
 }
 
 /* Payment Method Selection Cards */
@@ -531,68 +733,353 @@ body.registration-page .registration-section {
     padding: 14px 18px;
     border-radius: 10px;
     cursor: pointer;
-    border: 2px solid #e2e8f0;
+    border: 1.5px solid #d4d4d8;
     background: #ffffff;
     transition: all 0.2s ease;
-    color: #09090b;
-    font-weight: 600;
+    color: #000000;
+    font-weight: 700;
     box-sizing: border-box;
 }
 .payment-method-card:hover {
-    border-color: #2563eb;
+    border-color: #000000;
 }
 .payment-method-card.active {
     border-color: #2563eb !important;
-    background: #f5f8ff !important;
+    background: #f0f7ff !important;
     color: #1d4ed8 !important;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, .12);
+    box-shadow: 0 0 0 2px #3b82f6, 0 4px 14px rgba(37, 99, 235, 0.15) !important;
 }
 
-/* Primary registration action */
+#upiPaymentDetails,
+#offlinePaymentDetails {
+    border: 2px solid #3b82f6 !important;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12) !important;
+}
+
+/* Primary registration action button — Candy Button Style (Important Action) */
 .clean-black-submit-btn {
     display: block;
     width: 100%;
-    padding: 16px 24px;
+    padding: 16px 28px;
     text-align: center;
-    background: #2563eb !important;
+    position: relative;
+    overflow: hidden;
     color: #ffffff !important;
-    border: 1px solid #2563eb !important;
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif !important;
     font-size: 1.05rem !important;
     font-weight: 700 !important;
-    letter-spacing: 0.5px !important;
-    text-transform: uppercase !important;
-    border-radius: 12px !important;
+    letter-spacing: 0.02em !important;
+    border-radius: 14px !important;
+    border: 1px solid #54A1FD !important;
+    background: radial-gradient(95% 60% at 50% 75%, #005FD6 0%, #209BFF 100%) !important;
+    box-shadow: 0px 4px 48px -12px #1187FF, inset 0px 1px 8px -4px #FFFFFF !important;
     cursor: pointer !important;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: all 0.2s ease-out !important;
     margin-top: 24px;
     min-height: 52px;
+    text-decoration: none;
+    user-select: none;
+    touch-action: manipulation;
+}
+.clean-black-submit-btn::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    right: 10%;
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    pointer-events: none;
 }
 .clean-black-submit-btn:hover {
-    background: #1d4ed8 !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 24px rgba(37, 99, 235, .2) !important;
+    filter: brightness(1.15) !important;
+    box-shadow: 0px 6px 54px -10px #1187FF, inset 0px 1px 8px -2px #FFFFFF !important;
+    color: #ffffff !important;
 }
 .clean-black-submit-btn:active {
-    transform: translateY(0) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    transform: scale(0.96) rotate(1deg) !important;
+    filter: brightness(1.05) !important;
 }
 
-/* Certificate Assurance Note */
-.cert-assurance-note {
-    margin: 20px 0;
-    padding: 14px 18px;
-    background: #fafafa;
-    border: 1px solid #e4e4e7;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    color: #52525b;
-    text-align: center;
-    line-height: 1.5;
+
+
+/* ═══════════════════════════════════════════════════════════════
+   10. DARK THEME COMPATIBILITY FOR REGISTRATION PAGE
+   ═══════════════════════════════════════════════════════════════ */
+[data-theme="dark"] html:has(body.registration-page),
+[data-theme="dark"] body.registration-page {
+    background-color: #08090C !important;
+    background: #08090C !important;
+    color: #F8FAFC !important;
 }
-.cert-assurance-note strong {
-    color: #09090b;
+[data-theme="dark"] body.registration-page .registration-section {
+    background: #08090C !important;
+}
+[data-theme="dark"] .glass-form-card,
+[data-theme="dark"] .clean-form-card {
+    background: #11131B !important;
+    border-color: rgba(245, 208, 97, 0.16) !important;
+    box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.75) !important;
+}
+[data-theme="dark"] .back-btn-ghost {
+    background: #18181b !important;
+    border-color: #27272a !important;
+    color: #ffffff !important;
+}
+[data-theme="dark"] .back-btn-ghost:hover {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #ffffff !important;
+}
+[data-theme="dark"] .form-title {
+    color: #ffffff !important;
+}
+[data-theme="dark"] .form-subtitle {
+    color: #a1a1aa !important;
+}
+[data-theme="dark"] .help-guide-card {
+    background: #18181b !important;
+    border-color: #27272a !important;
+}
+[data-theme="dark"] .help-guide-card h4 {
+    color: #ffffff !important;
+}
+[data-theme="dark"] .help-guide-card p {
+    color: #a1a1aa !important;
+}
+[data-theme="dark"] .help-guide-btn {
+    background: #000000 !important;
+    border: 2px solid rgba(255, 255, 255, 0.4) !important;
+    color: #ffffff !important;
+    box-shadow: 3px 3px 0px rgba(255, 255, 255, 0.25) !important;
+}
+[data-theme="dark"] .help-guide-btn:hover {
+    background: #18181b !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 5px 5px 0px rgba(255, 255, 255, 0.45) !important;
+}
+[data-theme="dark"] .help-guide-btn:active {
+    transform: translate(3px, 3px) !important;
+    box-shadow: 0px 0px 0px rgba(255, 255, 255, 0.25) !important;
+}
+[data-theme="dark"] .f-label {
+    color: #ffffff !important;
+}
+[data-theme="dark"] .f-control {
+    background: #18181b !important;
+    border-color: #27272a !important;
+    color: #ffffff !important;
+}
+[data-theme="dark"] .f-control:focus {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15) !important;
+}
+[data-theme="dark"] .cb-trigger {
+    background: #18181b !important;
+    border-color: #27272a !important;
+    color: #ffffff !important;
+}
+[data-theme="dark"] .cb-trigger:hover,
+[data-theme="dark"] .cb-trigger.open {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15) !important;
+}
+[data-theme="dark"] .cb-chevron {
+    color: #ffffff !important;
+}
+[data-theme="dark"] .cb-dropdown {
+    background: #121215 !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.8) !important;
+}
+[data-theme="dark"] .cb-search-wrap {
+    background: #18181b !important;
+    border-color: #27272a !important;
+}
+[data-theme="dark"] .cb-search {
+    background: #09090b !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
+}
+[data-theme="dark"] .cb-search:focus {
+    border-color: #ffffff !important;
+}
+[data-theme="dark"] .cb-option {
+    color: #f4f4f5 !important;
+}
+[data-theme="dark"] .cb-option:hover,
+[data-theme="dark"] .cb-option.highlighted {
+    background: #27272a !important;
+    color: #ffffff !important;
+}
+[data-theme="dark"] .cb-option.selected {
+    background: #ffffff !important;
+    color: #000000 !important;
+}
+[data-theme="dark"] .cb-option-group-label {
+    background-color: #18181b !important;
+    color: #94a3b8 !important;
+    border-top-color: #27272a !important;
+    border-bottom-color: #1f1f23 !important;
+}
+[data-theme="dark"] .cb-group-commerce {
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.18) 0%, #18181b 100%) !important;
+    color: #93c5fd !important;
+    border-left: 3.5px solid #3b82f6 !important;
+}
+[data-theme="dark"] .cb-badge-commerce-tag {
+    background: rgba(37, 99, 235, 0.25) !important;
+    color: #bfdbfe !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+}
+[data-theme="dark"] .cb-group-science {
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.18) 0%, #18181b 100%) !important;
+    color: #6ee7b7 !important;
+    border-left: 3.5px solid #10b981 !important;
+}
+[data-theme="dark"] .cb-badge-science-tag {
+    background: rgba(16, 185, 129, 0.25) !important;
+    color: #a7f3d0 !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+}
+[data-theme="dark"] .cb-group-other {
+    background: linear-gradient(90deg, rgba(148, 163, 184, 0.15) 0%, #18181b 100%) !important;
+    color: #cbd5e1 !important;
+    border-left: 3.5px solid #64748b !important;
+}
+[data-theme="dark"] .cb-badge-other-tag {
+    background: #27272a !important;
+    color: #cbd5e1 !important;
+    border-color: #3f3f46 !important;
+}
+[data-theme="dark"] .cb-opt-pill-commerce {
+    background: rgba(37, 99, 235, 0.2) !important;
+    color: #93c5fd !important;
+    border-color: rgba(59, 130, 246, 0.35) !important;
+}
+[data-theme="dark"] .cb-opt-pill-science {
+    background: rgba(16, 185, 129, 0.2) !important;
+    color: #6ee7b7 !important;
+    border-color: rgba(16, 185, 129, 0.35) !important;
+}
+[data-theme="dark"] .cb-opt-pill-other {
+    background: #27272a !important;
+    color: #cbd5e1 !important;
+    border-color: #3f3f46 !important;
+}
+[data-theme="dark"] .cb-opt-commerce:hover,
+[data-theme="dark"] .cb-opt-commerce.highlighted {
+    background: rgba(37, 99, 235, 0.15) !important;
+    border-left: 3px solid #3b82f6 !important;
+}
+[data-theme="dark"] .cb-opt-science:hover,
+[data-theme="dark"] .cb-opt-science.highlighted {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-left: 3px solid #10b981 !important;
+}
+[data-theme="dark"] .cb-opt-other:hover,
+[data-theme="dark"] .cb-opt-other.highlighted {
+    background: rgba(148, 163, 184, 0.12) !important;
+    border-left: 3px solid #64748b !important;
+}
+[data-theme="dark"] .selected-event-card {
+    background: #121215 !important;
+    border-color: #27272a !important;
+}
+[data-theme="dark"] .selected-event-title {
+    color: #ffffff !important;
+}
+[data-theme="dark"] .event-meta-grid {
+    background: #18181b !important;
+    border-color: #27272a !important;
+}
+[data-theme="dark"] .meta-val {
+    color: #ffffff !important;
+}
+[data-theme="dark"] .event-desc-preview {
+    border-top-color: #27272a !important;
+    color: #a1a1aa !important;
+}
+[data-theme="dark"] .change-event-btn {
+    background: #18181b !important;
+    border: 2px solid rgba(255, 255, 255, 0.4) !important;
+    color: #ffffff !important;
+    box-shadow: 3px 3px 0px rgba(255, 255, 255, 0.25) !important;
+}
+[data-theme="dark"] .change-event-btn:hover {
+    background: #27272a !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 5px 5px 0px rgba(255, 255, 255, 0.45) !important;
+}
+[data-theme="dark"] .change-event-btn:active {
+    transform: translate(3px, 3px) !important;
+    box-shadow: 0px 0px 0px rgba(255, 255, 255, 0.25) !important;
+}
+[data-theme="dark"] .f-dynamic-card {
+    background: #121215 !important;
+    border-color: #27272a !important;
+}
+[data-theme="dark"] .payment-method-card {
+    background: #18181b !important;
+    border-color: #27272a !important;
+    color: #ffffff !important;
+    transition: all 0.25s ease !important;
+}
+[data-theme="dark"] .payment-method-card:hover {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.35) !important;
+}
+[data-theme="dark"] .payment-method-card.active {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 22px rgba(255, 255, 255, 0.5) !important;
+}
+[data-theme="dark"] #upiPaymentDetails,
+[data-theme="dark"] #offlinePaymentDetails {
+    background: #18181b !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8), 0 0 22px rgba(255, 255, 255, 0.35) !important;
+    color: #ffffff !important;
+}
+[data-theme="dark"] #upiPaymentDetails p,
+[data-theme="dark"] #offlinePaymentDetails p {
+    color: #ffffff !important;
+}
+[data-theme="dark"] #displayUpiId {
+    background: #27272a !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
+}
+/* ── Green Highlight for Amount in Payment Section ── */
+#displayEventFee {
+    color: #16a34a !important;
+}
+[data-theme="dark"] .selected-event-title {
+    color: #ffffff !important;
+}
+[data-theme="dark"] .meta-val {
+    color: #ffffff !important;
+}
+[data-theme="dark"] #displayEventFee {
+    color: #22c55e !important;
+}
+[data-theme="dark"] .payment-fee-headline {
+    color: #ffffff !important;
+}
+[data-theme="dark"] .payment-method-card {
+    background: #18181b !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+}
+[data-theme="dark"] .payment-method-card.active {
+    border-color: #60a5fa !important;
+    background: rgba(37, 99, 235, 0.2) !important;
+    box-shadow: 0 0 0 2px #60a5fa, 0 0 20px rgba(59, 130, 246, 0.4) !important;
 }
 
 /* Phone-first refinements */
@@ -616,8 +1103,8 @@ body.registration-page .registration-section {
 {% endblock %}
 
 {% block content %}
-<section class="registration-section">
-    <div class="glass-form-card">
+<section class="registration-section" data-lenis-prevent>
+    <div class="glass-form-card" data-lenis-prevent>
         <!-- Ghost Back Button -->
         <div style="margin-bottom: 20px;">
             <a href="{{ url_for('events_list') }}#events" class="back-btn-ghost">
@@ -642,14 +1129,14 @@ body.registration-page .registration-section {
             </button>
         </div>
 
-        <div id="demo-video-container" style="display: none; margin-bottom: 28px; border-radius: 12px; overflow: hidden; border: 1px solid #e4e4e7; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #000;">
+        <div id="demo-video-container" style="display: none; margin-bottom: 28px; border-radius: 12px; overflow: hidden; border: 1.5px solid #000000; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: #000;">
             <video width="100%" controls preload="metadata" style="display: block;">
                 <source src="{{ url_for('static', filename='videos/demovideo.mp4') }}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
 
-        <form method="POST" action="{{ url_for('register_participant') }}" id="eventRegistrationForm">
+        <form method="POST" action="{{ url_for('register_participant') }}" id="eventRegistrationForm" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <!-- ── EVENT SELECTION SECTION ── -->
@@ -683,7 +1170,10 @@ body.registration-page .registration-section {
                                         {% if selected_event.event_fee and selected_event.event_fee > 0 %}₹ {{ selected_event.event_fee }} Fee{% else %}Free Entry{% endif %}
                                     </span>
                                 </div>
-                                <h3 class="selected-event-title">{{ selected_event.event_name }}</h3>
+                                <div class="event-title-badge-box">
+                                    <span class="event-emoji-icon" style="font-size: 1.35rem; line-height: 1;">{% if 'BGM' in selected_event.event_name.upper() %}🎮{% elif 'CHESS' in selected_event.event_name.upper() %}♟️{% elif 'DANCE' in selected_event.event_name.upper() %}💃{% elif 'SING' in selected_event.event_name.upper() or 'MUSIC' in selected_event.event_name.upper() %}🎤{% elif 'COD' in selected_event.event_name.upper() or 'HACK' in selected_event.event_name.upper() %}💻{% else %}🏆{% endif %}</span>
+                                    <h3 class="selected-event-title {% if 'BGM' in selected_event.event_name.upper() %}bgm-highlight{% endif %}">{{ selected_event.event_name }}</h3>
+                                </div>
                             </div>
                             <a href="{{ url_for('events_list') }}#events" class="change-event-btn" title="Choose another event">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m16 3 5 5-5 5"/><path d="M4 20h7a4 4 0 0 0 4-4V8"/><path d="M21 8h-7"/></svg>
@@ -730,7 +1220,7 @@ body.registration-page .registration-section {
                     </div>
 
                     <!-- Hidden Select required for JS and form submission -->
-                    <select id="event_id" name="event_id" style="display:none;" onchange="handleEventSelectionChange(this)">
+                    <select id="event_id" name="event_id" class="f-control f-select" onchange="handleEventSelectionChange(this)">
                         <option value="{{ selected_event.id }}"
                                 data-is-group="{{ selected_event.is_group }}"
                                 data-min-team="{{ selected_event.min_team_size }}"
@@ -749,8 +1239,8 @@ body.registration-page .registration-section {
                     </select>
 
                 {% else %}
-                    <!-- Searchable Dropdown for Direct Registration -->
-                    <select id="event_id" name="event_id" required style="display:none;" onchange="handleEventSelectionChange(this)">
+                    <!-- Accessible Form Select and Animated Custom Combobox -->
+                    <select id="event_id" name="event_id" required class="f-control f-select" onchange="handleEventSelectionChange(this)">
                         <option value="">-- Choose an Event --</option>
                         {% for ev in events %}
                             <option value="{{ ev.id }}" 
@@ -771,17 +1261,19 @@ body.registration-page .registration-section {
                         {% endfor %}
                     </select>
 
-                    <div class="cb-wrapper" data-cb-for="event_id">
-                        <div class="cb-trigger" tabindex="0">
+                    <div class="cb-wrapper" data-cb-for="event_id" data-lenis-prevent>
+                        <div class="cb-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
                             <span class="cb-trigger-text placeholder">-- Choose an Event --</span>
-                            <span class="cb-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                            <span class="cb-chevron">
+                                <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                            </span>
                         </div>
-                        <div class="cb-dropdown">
+                        <div class="cb-dropdown" data-lenis-prevent>
                             <div class="cb-search-wrap">
-                                <input type="text" class="cb-search" placeholder="Search events by name or category…">
+                                <input type="text" class="cb-search" placeholder="🔍 Search events by name or category…" autocomplete="off">
                             </div>
-                            <div class="cb-options"></div>
-                            <div class="cb-empty">No events found.</div>
+                            <div class="cb-options" role="listbox" data-lenis-prevent></div>
+                            <div class="cb-empty">No matching events found.</div>
                         </div>
                     </div>
 
@@ -794,7 +1286,10 @@ body.registration-page .registration-section {
                                     <span id="dynEvFormat" class="event-pill-badge event-pill-group">Format</span>
                                     <span id="dynEvFee" class="event-pill-badge event-pill-fee">Fee</span>
                                 </div>
-                                <h3 id="dynEvName" class="selected-event-title">Event Title</h3>
+                                <div class="event-title-badge-box">
+                                    <span id="dynEvEmoji" class="event-emoji-icon" style="font-size: 1.35rem; line-height: 1;">🎮</span>
+                                    <h3 id="dynEvName" class="selected-event-title">Event Title</h3>
+                                </div>
                             </div>
                         </div>
 
@@ -839,28 +1334,33 @@ body.registration-page .registration-section {
             <!-- ── DYNAMIC GROUP / TEAM SQUAD CONFIGURATION CARD ── -->
             <div id="groupEventCard" class="f-dynamic-card" style="display: none;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                    <strong style="color: #000000; font-size: 1.1rem; font-family: 'Space Grotesk', sans-serif;" id="groupEventHeading">👥 Group Event Squad Details</strong>
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: #0b0f19; padding: 6px 14px; border-radius: 10px; border: 1.5px solid #1e293b;">
+                        <span style="font-size: 1.15rem; line-height: 1;">👥</span>
+                        <strong style="color: #ffffff !important; font-size: 1.05rem; font-family: 'Space Grotesk', sans-serif;" id="groupEventHeading">Group Event Squad Details</strong>
+                    </div>
                     <span class="f-badge" id="groupSizeBadge">Team Size: 2 - 4</span>
                 </div>
-                <p style="font-size: 0.88rem; color: #71717a; margin-bottom: 20px;">
+                <p style="font-size: 0.88rem; color: #52525b; margin-bottom: 20px;">
                     This competition is a team-based event. Please configure your squad roster below.
                 </p>
 
                 <div class="f-form-row">
                     <div class="f-form-group">
-                        <label class="f-label">Number of Participants *</label>
-                        <select id="team_size" name="team_size" style="display:none;" onchange="renderTeamMemberInputs()">
+                        <label class="f-label" for="team_size">Number of Participants *</label>
+                        <select id="team_size" name="team_size" class="f-control f-select" onchange="renderTeamMemberInputs()">
                             <option value="2">2 Participants (Duo)</option>
                             <option value="3" selected>3 Participants (Trio)</option>
                             <option value="4">4 Participants (Squad)</option>
                         </select>
-                        <div class="cb-wrapper" data-cb-for="team_size">
-                            <div class="cb-trigger" tabindex="0">
+                        <div class="cb-wrapper" data-cb-for="team_size" data-lenis-prevent>
+                            <div class="cb-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
                                 <span class="cb-trigger-text">3 Participants (Trio)</span>
-                                <span class="cb-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                                <span class="cb-chevron">
+                                    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                                </span>
                             </div>
-                            <div class="cb-dropdown">
-                                <div class="cb-options"></div>
+                            <div class="cb-dropdown" data-lenis-prevent>
+                                <div class="cb-options" role="listbox" data-lenis-prevent></div>
                             </div>
                         </div>
                     </div>
@@ -873,7 +1373,7 @@ body.registration-page .registration-section {
                 <!-- Squad Members List -->
                 <div id="teamMembersList" style="margin-top: 10px;">
                     <label class="f-label" style="color: #000000;">Squad Members Roster</label>
-                    <div style="background: #ffffff; border: 1px dashed #d4d4d8; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #52525b;">
+                    <div style="background: #ffffff; border: 1.5px dashed #d4d4d8; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #52525b;">
                         <strong>Lead Participant (Member 1):</strong> Captured automatically from the Registrant Details below.
                     </div>
                     <div id="additionalMembersContainer" style="display: flex; flex-direction: column; gap: 14px;">
@@ -900,19 +1400,20 @@ body.registration-page .registration-section {
                     <input type="tel" id="phone" name="phone" class="f-control" placeholder="e.g. 9876543210" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" required>
                 </div>
                 <div class="f-form-group">
-                    <label class="f-label">Academic Year / Class</label>
-                    <select id="semester" name="semester" style="display:none;">
+                    <label class="f-label" for="semester">Academic Year / Class *</label>
+                    <select id="semester" name="semester" class="f-control f-select">
                         <option value="I PUC">I PUC</option>
                         <option value="II PUC" selected>II PUC</option>
-                        <option value="UG / Degree">UG / Degree</option>
                     </select>
-                    <div class="cb-wrapper" data-cb-for="semester">
-                        <div class="cb-trigger" tabindex="0">
+                    <div class="cb-wrapper" data-cb-for="semester" data-lenis-prevent>
+                        <div class="cb-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
                             <span class="cb-trigger-text">II PUC</span>
-                            <span class="cb-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                            <span class="cb-chevron">
+                                <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                            </span>
                         </div>
-                        <div class="cb-dropdown">
-                            <div class="cb-options"></div>
+                        <div class="cb-dropdown" data-lenis-prevent>
+                            <div class="cb-options" role="listbox" data-lenis-prevent></div>
                         </div>
                     </div>
                 </div>
@@ -924,31 +1425,35 @@ body.registration-page .registration-section {
             </div>
 
             <div class="f-form-group">
-                <label class="f-label">Stream / Department Category *</label>
-                <select id="department" name="department" required style="display:none;" onchange="handleDepartmentChange(this)">
+                <label class="f-label" for="department">Stream / Department Category *</label>
+                <select id="department" name="department" required class="f-control f-select" onchange="handleDepartmentChange(this)">
                     <option value="">-- Select Stream / Category --</option>
-                    <optgroup label="Commerce Streams">
+                    <optgroup label="📊 Commerce Streams">
                         <option value="CEBA">CEBA (Computer, Eco, Business, Accounts)</option>
                         <option value="SEBA">SEBA (Stats, Eco, Business, Accounts)</option>
                         <option value="HEBA">HEBA (History, Eco, Business, Accounts)</option>
                     </optgroup>
-                    <optgroup label="Science Streams">
+                    <optgroup label="🔬 Science Streams">
                         <option value="PCMB">PCMB (Physics, Chem, Math, Bio)</option>
                         <option value="PCMC">PCMC (Physics, Chem, Math, Comp)</option>
                     </optgroup>
-                    <option value="Other">Other (Specify below)</option>
+                    <optgroup label="✨ General / Other Streams">
+                        <option value="Other">Other (Specify below)</option>
+                    </optgroup>
                 </select>
-                <div class="cb-wrapper" data-cb-for="department">
-                    <div class="cb-trigger" tabindex="0">
+                <div class="cb-wrapper" data-cb-for="department" data-lenis-prevent>
+                    <div class="cb-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
                         <span class="cb-trigger-text placeholder">-- Select Stream / Category --</span>
-                        <span class="cb-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        <span class="cb-chevron">
+                            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </span>
                     </div>
-                    <div class="cb-dropdown">
+                    <div class="cb-dropdown" data-lenis-prevent>
                         <div class="cb-search-wrap">
-                            <input type="text" class="cb-search" placeholder="Search streams or courses…">
+                            <input type="text" class="cb-search" placeholder="🔍 Search streams or courses…" autocomplete="off">
                         </div>
-                        <div class="cb-options"></div>
-                        <div class="cb-empty">No streams found.</div>
+                        <div class="cb-options" role="listbox" data-lenis-prevent></div>
+                        <div class="cb-empty">No matching streams found.</div>
                     </div>
                 </div>
             </div>
@@ -961,72 +1466,74 @@ body.registration-page .registration-section {
             <!-- ── PAYMENT SECTION ── -->
             <div id="paymentSection" class="f-dynamic-card" style="display: none;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
-                    <strong style="color: #0b1220; font-size: 1.15rem; font-family: 'Plus Jakarta Sans', sans-serif;">🏦 Registration Fee & Settlement</strong>
-                    <span id="displayEventFee" style="font-size: 1.4rem; font-weight: 800; color: #1d4ed8; font-family: 'Plus Jakarta Sans', sans-serif;">₹ 0</span>
+                    <strong style="font-size: 1.15rem; font-family: 'Space Grotesk', sans-serif;">Payment Options</strong>
+                    <div style="display: inline-flex; align-items: baseline; gap: 6px; background: rgba(34, 197, 94, 0.12); border: 1.5px solid #16a34a; padding: 5px 16px; border-radius: 9999px; box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);">
+                        <span style="font-size: 0.78rem; font-weight: 800; color: #15803d; text-transform: uppercase; letter-spacing: 0.5px;">Amount:</span>
+                        <span id="displayEventFee" style="font-size: 1.45rem; font-weight: 900; color: #16a34a !important; font-family: 'Space Grotesk', sans-serif;">₹ 400</span>
+                    </div>
                 </div>
-                
-                <p style="font-size: 0.9rem; color: #52525b; margin-bottom: 20px;">
-                    Please select your preferred payment settlement mode for this event entry:
-                </p>
 
                 <div class="f-form-group" style="text-align: left;">
-                    <label class="f-label">Payment Method *</label>
+                    <label class="f-label">Select Payment Mode *</label>
                     <div style="display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap;">
                         <label class="payment-method-card" id="payOnlineCard">
                             <input type="radio" name="payment_method" value="Online" id="payOnlineRadio" onchange="togglePaymentMethod()" style="accent-color: #2563eb; width: 18px; height: 18px;">
-                            <span>💳 Pay Online (UPI / QR)</span>
+                            <div>
+                                <span style="display: block; font-weight: 800; font-size: 0.95rem;">⚡ Pay Online (UPI / QR)</span>
+                                <span style="display: block; font-size: 0.78rem; opacity: 0.85;">Pay via UPI and upload transaction screenshot.</span>
+                            </div>
                         </label>
                         <label class="payment-method-card" id="payOfflineCard">
                             <input type="radio" name="payment_method" value="Cash" id="payOfflineRadio" onchange="togglePaymentMethod()" style="accent-color: #2563eb; width: 18px; height: 18px;">
-                            <span>💵 Pay on Spot (Cash Desk)</span>
+                            <div>
+                                <span style="display: block; font-weight: 800; font-size: 0.95rem;">💵 Pay at College Desk (Cash)</span>
+                                <span style="display: block; font-size: 0.78rem; opacity: 0.85;">Receive pass now, pay at registration desk on event day.</span>
+                            </div>
                         </label>
                     </div>
                 </div>
 
                 <!-- Online UPI Payment Details -->
-                <div id="upiPaymentDetails" style="display: none; text-align: center; margin-top: 20px; padding: 24px; background: #ffffff; border: 1px solid #e4e4e7; border-radius: 12px;">
-                    <p style="color: #000000; font-weight: 700; font-size: 1rem; margin-bottom: 14px;">Step 1: Scan UPI QR Code to Settle Entry Fee</p>
-                    <img id="upiQrCode" src="{{ url_for('static', filename='favicon.svg') }}" alt="UPI QR Code" style="width: 190px; height: 190px; margin: 0 auto 14px; display: block; border: 2px solid #2563eb; border-radius: 12px; padding: 6px; background: #ffffff;">
-                    <a id="upiPayButton" href="#" class="clean-black-submit-btn" style="display: inline-flex; width: auto; margin: 0 auto 14px; text-decoration: none;">Open UPI App to Pay</a>
+                <div id="upiPaymentDetails" style="display: none; text-align: center; margin-top: 20px; padding: 24px; background: #ffffff; border: 2px solid #2563eb; border-radius: 14px; box-shadow: 0 4px 16px rgba(37, 99, 235, 0.1);">
+                    <p style="color: #0f172a; font-weight: 800; font-size: 1.05rem; margin-bottom: 14px;">Scan UPI QR Code to Complete Payment</p>
+                    <img id="upiQrCode" src="{{ url_for('static', filename='favicon.svg') }}" alt="UPI QR Code" style="width: 190px; height: 190px; margin: 0 auto 14px; display: block; border: 2px solid #000000; border-radius: 12px; padding: 6px; background: #ffffff;">
+                    <a id="upiPayButton" href="#" class="clean-black-submit-btn" style="display: inline-flex; width: auto; margin: 0 auto 14px; text-decoration: none; padding: 10px 22px; font-size: 0.92rem;">Open UPI App to Pay</a>
 
-                    <p style="font-size: 0.92rem; color: #09090b; margin-bottom: 12px;">
-                        <strong>UPI ID:</strong> <span id="displayUpiId" style="font-family: monospace; font-weight: 700; background: #f4f4f5; padding: 4px 10px; border-radius: 6px; border: 1px solid #e4e4e7;">demopay@ybl</span>
+                    <p style="font-size: 0.92rem; color: #0f172a; margin-bottom: 16px;">
+                        <strong>UPI ID:</strong> <span id="displayUpiId" style="font-family: monospace; font-weight: 700; background: #f4f4f5; padding: 4px 10px; border-radius: 6px; border: 1px solid #d4d4d8;">demopay@ybl</span>
                     </p>
 
-                    <div style="background: #fafafa; border: 1px solid #e4e4e7; border-radius: 8px; padding: 12px 16px; margin-bottom: 22px; display: inline-block; text-align: left;">
-                        <strong style="color: #09090b; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Beneficiary Details</strong><br>
-                        <span style="color: #52525b; font-size: 0.88rem;"><strong>Account:</strong> Shree Daksha Academy</span><br>
-                        <span style="color: #52525b; font-size: 0.85rem;">Official Symposium Event Desk</span>
-                    </div>
-
-                    <p style="color: #000000; font-weight: 700; font-size: 0.98rem; margin-bottom: 8px;">Step 2: Enter Transaction Reference / UTR Number</p>
-                    <div class="f-form-group" style="text-align: left; max-width: 440px; margin: 0 auto;">
+                    <div class="f-form-group" style="text-align: left; max-width: 440px; margin: 0 auto 18px;">
                         <label class="f-label" for="utr_number">UPI UTR / Reference ID *</label>
                         <input type="text" id="utr_number" name="utr_number" class="f-control" placeholder="e.g. 12-digit UPI UTR" pattern="[A-Za-z0-9][A-Za-z0-9._/-]{5,63}" maxlength="64" autocapitalize="characters" title="Please enter a valid UPI transaction reference (6-64 characters)">
-                        <span class="f-hint">After completing payment via your UPI app, paste the transaction reference ID above.</span>
+                        <span class="f-hint">After payment, enter transaction reference ID above.</span>
+                    </div>
+
+                    <div class="f-form-group" style="text-align: left; max-width: 440px; margin: 0 auto;">
+                        <label class="f-label" for="payment_screenshot">Payment Screenshot *</label>
+                        <input type="file" id="payment_screenshot" name="payment_screenshot" class="f-control" accept="image/png, image/jpeg, image/jpg, image/webp" style="padding: 9px 12px; background: #fafafa;">
+                        <span class="f-hint" style="color: #dc2626; font-weight: 600;">Upload screenshot of completed UPI transfer showing amount and UTR number.</span>
                     </div>
                 </div>
 
                 <!-- Cash / Spot Payment Details -->
-                <div id="offlinePaymentDetails" style="display: none; margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #e4e4e7; border-radius: 12px;">
+                <div id="offlinePaymentDetails" style="display: none; margin-top: 20px; padding: 20px; background: #ffffff; border: 2px solid #16a34a; border-radius: 14px; box-shadow: 0 4px 16px rgba(22, 163, 74, 0.1);">
                     <div style="display: flex; align-items: flex-start; gap: 14px;">
-                        <span style="font-size: 1.8rem; line-height: 1;">🏛️</span>
+                        <span style="font-size: 2rem; line-height: 1;">🏛️</span>
                         <div>
-                            <p style="font-size: 0.95rem; color: #000000; font-weight: 700; margin: 0 0 6px;">Pay at College Registration Desk</p>
-                            <p style="font-size: 0.88rem; color: #52525b; line-height: 1.5; margin: 0;">
-                                You have selected <strong>Pay on Spot (Cash Desk)</strong>. No payment is required online now. Simply arrive at Shree Daksha Academy with the registration fee in cash and settle it at the entry desk on symposium day.
+                            <p style="font-size: 1rem; color: #15803d; font-weight: 800; margin: 0 0 6px;">Pay at College Registration Desk</p>
+                            <p style="font-size: 0.9rem; color: #334155; line-height: 1.5; margin: 0;">
+                                You have selected <strong>Pay on Spot (Cash Desk)</strong>. Settle your payment at your college desk upon campus arrival on 19th/20th Nov.
+                            </p>
+                            <p style="font-size: 0.85rem; color: #64748b; line-height: 1.5; margin: 8px 0 0;">
+                                You will receive your official digital Gate Pass QR upon submission to present at the desk.
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Certificate Assurance Note -->
-            <div class="cert-assurance-note">
-                <strong>📜 Official Certification Guarantee:</strong> Every registered attendee and team participant will receive an official, verified Shree Daksha Academy Certificate of Participation & Achievement upon check-in.
-            </div>
-
-<!-- Submit Button -->
+            <!-- Submit Button -->
             <button type="submit" id="submitBtn" class="clean-black-submit-btn">Submit Registration →</button>
         </form>
     </div>
@@ -1036,7 +1543,7 @@ body.registration-page .registration-section {
 {% block extra_js %}
 <script>
 // ============================================================
-// Combobox Engine — converts hidden <select> to custom dropdowns
+// Smooth Animated Combobox Engine with Non-Stuck Scroll & Touch
 // ============================================================
 class Combobox {
     constructor(wrapper) {
@@ -1052,6 +1559,7 @@ class Combobox {
         this.searchInput = wrapper.querySelector('.cb-search');
         this.emptyMsg = wrapper.querySelector('.cb-empty');
         this.isOpen = false;
+        this.highlightedIndex = -1;
 
         this.buildOptions();
         this.bindEvents();
@@ -1059,41 +1567,103 @@ class Combobox {
     }
 
     buildOptions() {
+        if (!this.optionsList) return;
         this.optionsList.innerHTML = '';
-        const options = this.hiddenSelect.querySelectorAll('option, optgroup');
+        const children = Array.from(this.hiddenSelect.children);
         
-        options.forEach(node => {
+        children.forEach(node => {
             if (node.tagName === 'OPTGROUP') {
                 const groupLabel = document.createElement('div');
                 groupLabel.className = 'cb-option-group-label';
-                groupLabel.textContent = node.label;
+                
+                const labelText = node.label || '';
+                const lower = labelText.toLowerCase();
+                let catClass = '';
+                let badgeText = '';
+                let badgeClass = '';
+                
+                if (lower.includes('commerce')) {
+                    catClass = 'cb-group-commerce';
+                    badgeText = 'Commerce';
+                    badgeClass = 'cb-badge-commerce-tag';
+                } else if (lower.includes('science')) {
+                    catClass = 'cb-group-science';
+                    badgeText = 'Science';
+                    badgeClass = 'cb-badge-science-tag';
+                } else if (lower.includes('general') || lower.includes('other')) {
+                    catClass = 'cb-group-other';
+                    badgeText = 'General';
+                    badgeClass = 'cb-badge-other-tag';
+                }
+                
+                if (catClass) groupLabel.classList.add(catClass);
+                
+                groupLabel.innerHTML = `
+                    <div class="cb-group-title-row">
+                        <span class="cb-group-icon-title">${labelText}</span>
+                        ${badgeText ? `<span class="cb-group-badge ${badgeClass}">${badgeText}</span>` : ''}
+                    </div>
+                `;
                 this.optionsList.appendChild(groupLabel);
                 
-                node.querySelectorAll('option').forEach(opt => {
-                    this.createOption(opt);
+                Array.from(node.children).forEach(opt => {
+                    this.createOption(opt, catClass);
                 });
-            } else if (node.tagName === 'OPTION' && node.parentElement === this.hiddenSelect) {
+            } else if (node.tagName === 'OPTION') {
                 this.createOption(node);
             }
         });
     }
 
-    createOption(opt) {
-        if (opt.value === '' && opt.textContent.startsWith('--')) return; // skip placeholder
+    createOption(opt, catClass) {
+        if (!opt.value && opt.textContent.trim().startsWith('--')) return; // skip placeholder
         const div = document.createElement('div');
         div.className = 'cb-option';
         div.setAttribute('data-value', opt.value);
-        div.textContent = opt.textContent.trim();
-        if (opt.selected && opt.value !== '') div.classList.add('selected');
+        div.setAttribute('role', 'option');
         
-        // Copy all data attributes
+        const optLabel = opt.textContent.trim();
+        let badgeHtml = '';
+        if (catClass === 'cb-group-commerce') {
+            div.classList.add('cb-opt-commerce');
+            badgeHtml = '<span class="cb-opt-tag cb-opt-pill-commerce">Commerce</span>';
+        } else if (catClass === 'cb-group-science') {
+            div.classList.add('cb-opt-science');
+            badgeHtml = '<span class="cb-opt-tag cb-opt-pill-science">Science</span>';
+        } else if (catClass === 'cb-group-other') {
+            div.classList.add('cb-opt-other');
+            badgeHtml = '<span class="cb-opt-tag cb-opt-pill-other">General</span>';
+        }
+        
+        if (badgeHtml) {
+            div.innerHTML = `
+                <div class="cb-opt-content">
+                    <span class="cb-opt-text">${optLabel}</span>
+                    ${badgeHtml}
+                </div>
+            `;
+        } else {
+            div.textContent = optLabel;
+        }
+        
+        if (opt.selected && opt.value !== '') {
+            div.classList.add('selected');
+        }
+        
+        // Copy all data- attributes
         Array.from(opt.attributes).forEach(attr => {
             if (attr.name.startsWith('data-')) {
                 div.setAttribute(attr.name, attr.value);
             }
         });
 
-        div.addEventListener('click', () => this.selectOption(div));
+        // Use click for snappy response on mouse & mobile touch
+        div.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.selectOption(div);
+        });
+
         this.optionsList.appendChild(div);
     }
 
@@ -1102,11 +1672,27 @@ class Combobox {
         if (selected && selected.value) {
             this.triggerText.textContent = selected.textContent.trim();
             this.triggerText.classList.remove('placeholder');
+            this.wrapper.classList.remove('cb-invalid');
+            if (this.optionsList) {
+                this.optionsList.querySelectorAll('.cb-option').forEach(o => {
+                    o.classList.toggle('selected', o.getAttribute('data-value') === selected.value);
+                });
+            }
+        } else {
+            const firstOpt = this.hiddenSelect.options[0];
+            const placeholder = (firstOpt && firstOpt.value === '') ? firstOpt.textContent.trim() : '-- Select an Option --';
+            this.triggerText.textContent = placeholder;
+            this.triggerText.classList.add('placeholder');
+            if (this.optionsList) {
+                this.optionsList.querySelectorAll('.cb-option').forEach(o => o.classList.remove('selected'));
+            }
         }
     }
 
     selectOption(optionDiv) {
-        this.optionsList.querySelectorAll('.cb-option').forEach(o => o.classList.remove('selected'));
+        if (this.optionsList) {
+            this.optionsList.querySelectorAll('.cb-option').forEach(o => o.classList.remove('selected'));
+        }
         optionDiv.classList.add('selected');
 
         const value = optionDiv.getAttribute('data-value');
@@ -1114,30 +1700,50 @@ class Combobox {
         
         this.triggerText.textContent = text;
         this.triggerText.classList.remove('placeholder');
+        this.wrapper.classList.remove('cb-invalid');
 
-        this.hiddenSelect.value = value;
-        this.hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        if (this.hiddenSelect.value !== value) {
+            this.hiddenSelect.value = value;
+            this.hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
 
         this.close();
+        try { this.trigger.focus(); } catch(e) {}
     }
 
     open() {
         if (this.isOpen) return;
+        // Close other comboboxes
+        document.querySelectorAll('.cb-wrapper').forEach(w => {
+            if (w !== this.wrapper && w._cbInstance) w._cbInstance.close();
+        });
+
         this.isOpen = true;
+        this.wrapper.classList.add('open');
         this.trigger.classList.add('open');
+        this.trigger.setAttribute('aria-expanded', 'true');
         this.dropdown.classList.add('open');
+
         if (this.searchInput) {
             this.searchInput.value = '';
             this.filterOptions('');
-            setTimeout(() => this.searchInput.focus(), 100);
+            setTimeout(() => {
+                if (this.isOpen) this.searchInput.focus();
+            }, 60);
         }
+        this.highlightedIndex = -1;
+        this.updateHighlight();
     }
 
     close() {
         if (!this.isOpen) return;
         this.isOpen = false;
+        this.wrapper.classList.remove('open');
         this.trigger.classList.remove('open');
+        this.trigger.setAttribute('aria-expanded', 'false');
         this.dropdown.classList.remove('open');
+        this.highlightedIndex = -1;
+        this.updateHighlight();
     }
 
     toggle() {
@@ -1145,7 +1751,8 @@ class Combobox {
     }
 
     filterOptions(query) {
-        const q = query.toLowerCase().trim();
+        if (!this.optionsList) return;
+        const q = (query || '').toLowerCase().trim();
         let visibleCount = 0;
         this.optionsList.querySelectorAll('.cb-option').forEach(opt => {
             const text = opt.textContent.toLowerCase();
@@ -1167,38 +1774,89 @@ class Combobox {
         if (this.emptyMsg) {
             this.emptyMsg.style.display = visibleCount === 0 ? 'block' : 'none';
         }
+        this.highlightedIndex = -1;
+        this.updateHighlight();
+    }
+
+    getVisibleOptions() {
+        if (!this.optionsList) return [];
+        return Array.from(this.optionsList.querySelectorAll('.cb-option:not(.hidden)'));
+    }
+
+    updateHighlight() {
+        const visible = this.getVisibleOptions();
+        visible.forEach((opt, idx) => {
+            opt.classList.toggle('highlighted', idx === this.highlightedIndex);
+            if (idx === this.highlightedIndex) {
+                opt.scrollIntoView({ block: 'nearest' });
+            }
+        });
+    }
+
+    markInvalid() {
+        this.wrapper.classList.add('cb-invalid');
+        this.trigger.focus();
     }
 
     bindEvents() {
+        // Toggle on trigger click
         this.trigger.addEventListener('click', (e) => {
             e.stopPropagation();
-            document.querySelectorAll('.cb-wrapper').forEach(w => {
-                if (w !== this.wrapper) {
-                    const inst = w._cbInstance;
-                    if (inst) inst.close();
-                }
-            });
             this.toggle();
         });
 
+        // Trigger keyboard events
         this.trigger.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
                 e.preventDefault();
-                this.toggle();
+                this.open();
             } else if (e.key === 'Escape') {
                 this.close();
             }
         });
 
+        // Search input events
         if (this.searchInput) {
             this.searchInput.addEventListener('input', (e) => {
                 this.filterOptions(e.target.value);
             });
             this.searchInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') this.close();
+                const visible = this.getVisibleOptions();
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (visible.length > 0) {
+                        this.highlightedIndex = (this.highlightedIndex + 1) % visible.length;
+                        this.updateHighlight();
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (visible.length > 0) {
+                        this.highlightedIndex = (this.highlightedIndex - 1 + visible.length) % visible.length;
+                        this.updateHighlight();
+                    }
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (this.highlightedIndex >= 0 && visible[this.highlightedIndex]) {
+                        this.selectOption(visible[this.highlightedIndex]);
+                    } else if (visible.length === 1) {
+                        this.selectOption(visible[0]);
+                    }
+                } else if (e.key === 'Escape') {
+                    this.close();
+                    this.trigger.focus();
+                }
             });
         }
 
+        // Prevent wheel & touchmove inside dropdown from being captured by document Lenis scroll
+        this.dropdown.addEventListener('wheel', (e) => {
+            e.stopPropagation();
+        }, { passive: true });
+        this.dropdown.addEventListener('touchmove', (e) => {
+            e.stopPropagation();
+        }, { passive: true });
+
+        // Global outside click to close
         document.addEventListener('click', (e) => {
             if (!this.wrapper.contains(e.target)) {
                 this.close();
@@ -1212,6 +1870,12 @@ class Combobox {
     }
 }
 
+// Global lookup helper
+function getCbInstance(selectId) {
+    const wrapper = document.querySelector(`.cb-wrapper[data-cb-for="${selectId}"]`);
+    return wrapper ? wrapper._cbInstance : null;
+}
+
 // Initialize all comboboxes
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.cb-wrapper').forEach(wrapper => {
@@ -1219,11 +1883,6 @@ document.addEventListener('DOMContentLoaded', () => {
         wrapper._cbInstance = instance;
     });
 });
-
-function getCbInstance(selectId) {
-    const wrapper = document.querySelector(`.cb-wrapper[data-cb-for="${selectId}"]`);
-    return wrapper ? wrapper._cbInstance : null;
-}
 
 // ============================================================
 // Event Selection Handler — updates all elements in Event section
@@ -1263,7 +1922,23 @@ function handleEventSelectionChange(selectElement) {
             const dynDescContainer = document.getElementById('dynEvDescContainer');
             const dynDesc = document.getElementById('dynEvDesc');
 
-            if (dynName) dynName.textContent = eventName;
+            if (dynName) {
+                dynName.textContent = eventName;
+                if (eventName.toUpperCase().includes('BGM')) {
+                    dynName.classList.add('bgm-highlight');
+                } else {
+                    dynName.classList.remove('bgm-highlight');
+                }
+            }
+            const dynEmoji = document.getElementById('dynEvEmoji');
+            if (dynEmoji) {
+                if (eventName.toUpperCase().includes('BGM')) dynEmoji.textContent = '🎮';
+                else if (eventName.toUpperCase().includes('CHESS')) dynEmoji.textContent = '♟️';
+                else if (eventName.toUpperCase().includes('DANCE')) dynEmoji.textContent = '💃';
+                else if (eventName.toUpperCase().includes('SING') || eventName.toUpperCase().includes('MUSIC')) dynEmoji.textContent = '🎤';
+                else if (eventName.toUpperCase().includes('COD') || eventName.toUpperCase().includes('HACK')) dynEmoji.textContent = '💻';
+                else dynEmoji.textContent = '🏆';
+            }
             if (dynType) dynType.textContent = eventType;
             if (dynFormat) dynFormat.textContent = isGroup ? `👥 Group Event (${minTeam}–${maxTeam} Members)` : '👤 Individual / Solo';
             if (dynFee) dynFee.textContent = eventFee > 0 ? `₹ ${eventFee} Fee` : 'Free Entry';
@@ -1404,6 +2079,7 @@ function togglePaymentMethod() {
     const upiSection = document.getElementById('upiPaymentDetails');
     const offlineSection = document.getElementById('offlinePaymentDetails');
     const utrInput = document.getElementById('utr_number');
+    const screenshotInput = document.getElementById('payment_screenshot');
     const submitBtn = document.getElementById('submitBtn');
 
     const onlineCard = document.getElementById('payOnlineCard');
@@ -1417,7 +2093,8 @@ function togglePaymentMethod() {
         if (upiSection) upiSection.style.display = 'block';
         if (offlineSection) offlineSection.style.display = 'none';
         if (utrInput) utrInput.required = true;
-        if (submitBtn) submitBtn.textContent = 'Submit Registration with Payment →';
+        if (screenshotInput) screenshotInput.required = true;
+        if (submitBtn) submitBtn.textContent = 'Submit Registration with Payment Proof →';
     } else if (payOffline && payOffline.checked) {
         if (offlineCard) offlineCard.classList.add('active');
         if (upiSection) upiSection.style.display = 'none';
@@ -1426,11 +2103,16 @@ function togglePaymentMethod() {
             utrInput.required = false;
             utrInput.value = '';
         }
+        if (screenshotInput) {
+            screenshotInput.required = false;
+            screenshotInput.value = '';
+        }
         if (submitBtn) submitBtn.textContent = 'Submit Registration (Pay Later at College) →';
     } else {
         if (upiSection) upiSection.style.display = 'none';
         if (offlineSection) offlineSection.style.display = 'none';
         if (utrInput) utrInput.required = false;
+        if (screenshotInput) screenshotInput.required = false;
         if (submitBtn) submitBtn.textContent = 'Submit Registration →';
     }
 }
@@ -1465,6 +2147,26 @@ document.addEventListener('DOMContentLoaded', () => {
 // Form Submission Validation
 // ============================================================
 document.getElementById('eventRegistrationForm').addEventListener('submit', function(e) {
+    // Validate combobox fields
+    let firstInvalidCb = null;
+    ['event_id', 'department'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (sel && sel.hasAttribute('required') && !sel.value) {
+            const cb = getCbInstance(id);
+            if (cb) {
+                cb.markInvalid();
+                if (!firstInvalidCb) firstInvalidCb = cb;
+            }
+        }
+    });
+
+    if (firstInvalidCb) {
+        e.preventDefault();
+        firstInvalidCb.open();
+        firstInvalidCb.trigger.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+
     const deptSelect = document.getElementById('department');
     const otherInput = document.getElementById('other_department');
     if (deptSelect && deptSelect.value === 'Other' && otherInput && otherInput.value.trim()) {

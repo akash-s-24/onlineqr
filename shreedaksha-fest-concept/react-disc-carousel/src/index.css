@@ -1,10 +1,89 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
 
-:root { font-family: Manrope, sans-serif; color: #f2ede2; background: #11131b; font-synthesis: none; }
-* { box-sizing: border-box; }
-html, body, #root { min-height: 100%; margin: 0; }
-body { min-width: 320px; background: #11131b; }
-.app-shell { min-height: 100vh; position: relative; }
-.app-note { position: fixed; left: 28px; bottom: 24px; margin: 0; color: rgba(242,237,226,.45); font: 10px/1.4 "DM Mono", monospace; letter-spacing: .16em; text-transform: uppercase; z-index: 8; pointer-events: none; }
-@media (max-width: 720px) { .app-note { left: 16px; bottom: 16px; font-size: 9px; } }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+:root {
+  font-family: Manrope, sans-serif;
+  color: #f2ede2;
+  background: #242a3f;
+  font-synthesis: none;
+
+  --main: #88aaee;
+  --overlay: rgba(0, 0, 0, 0.8);
+
+  --bg: #dfe5f2;
+  --bw: #fff;
+  --blank: #000;
+  --border: #000;
+  --text: #000;
+  --mtext: #000;
+  --ring: #000;
+  --ring-offset: #fff;
+
+  --border-radius: 5px;
+  --box-shadow-x: 4px;
+  --box-shadow-y: 4px;
+  --reverse-box-shadow-x: -4px;
+  --reverse-box-shadow-y: -4px;
+  --base-font-weight: 500;
+  --heading-font-weight: 700;
+
+  --shadow: var(--box-shadow-x) var(--box-shadow-y) 0px 0px var(--border);
+}
+
+.dark {
+  --bg: #272933;
+  --bw: #212121;
+  --blank: #fff;
+  --border: #000;
+  --text: #e6e6e6;
+  --mtext: #000;
+  --ring: #fff;
+  --ring-offset: #000;
+
+  --shadow: var(--box-shadow-x) var(--box-shadow-y) 0px 0px var(--border);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 320px;
+  background: #11131b;
+}
+
+.app-shell {
+  min-height: 100vh;
+  position: relative;
+}
+
+.app-note {
+  position: fixed;
+  left: 28px;
+  bottom: 24px;
+  margin: 0;
+  color: rgba(242, 237, 226, .45);
+  font: 10px/1.4 "DM Mono", monospace;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  z-index: 8;
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .app-note {
+    left: 16px;
+    bottom: 16px;
+    font-size: 9px;
+  }
+}

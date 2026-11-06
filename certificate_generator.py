@@ -233,7 +233,7 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
     """
     if not cert_code:
         prefix = "".join([w[0] for w in event_name.split() if w]).upper()[:3]
-        cert_code = f"EM-2026-{prefix}-{uuid.uuid4().hex[:6].upper()}"
+        cert_code = f"SDA-2026-{prefix}-{uuid.uuid4().hex[:6].upper()}"
 
     # Canvas Dimensions: High-Res A4 Landscape (2480 x 1754 at 300 DPI equivalent)
     width, height = 2480, 1754
@@ -309,23 +309,23 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         draw_award_emblem(draw, width - 210, 205)
 
         # 5. Top Center Institution Branding
-        # Institution Name in bold uppercase serif lettering: "SHREE DAKSHA ACADEMY"
-        f_inst = get_font_by_name("georgiab.ttf", 62)
-        f_sub1 = get_font_by_name("georgia.ttf", 25)
-        f_addr = get_font_by_name("georgia.ttf", 22)
+        # Institution Name in bold uppercase serif lettering: "SHREE DAKSHA ACADEMY PU COLLEGE"
+        f_inst = get_font_by_name("georgiab.ttf", 52)
+        f_sub1 = get_font_by_name("georgia.ttf", 20)
+        f_addr = get_font_by_name("georgia.ttf", 19)
 
-        inst_name = "SHREE DAKSHA ACADEMY"
+        inst_name = "SHREE DAKSHA ACADEMY PU COLLEGE"
         draw.text((width // 2, 130), inst_name,
                   fill=border_navy, font=f_inst, anchor="mm")
 
-        # Affiliation Subtitle: "Recognised by Govt. of Karnataka · Affiliated to Bangalore University · Approved by AICTE"
-        sub1_text = "Recognised by Govt. of Karnataka · Affiliated to Bangalore University · Approved by AICTE"
-        draw.text((width // 2, 195), sub1_text,
+        # Affiliation Subtitle: "RECOGNIZED BY THE GOVT. OF KARNATAKA, AFFILIATED TO BANGALORE UNIVERSITY - APPROVED BY AICTE"
+        sub1_text = "RECOGNIZED BY THE GOVT. OF KARNATAKA, AFFILIATED TO BANGALORE UNIVERSITY - APPROVED BY AICTE"
+        draw.text((width // 2, 190), sub1_text,
                   fill=(51, 65, 85), font=f_sub1, anchor="mm")
 
-        # Address Line: "No. 526, Andrahalli Main Road, Opp. D Group Layout Arch, Bengaluru - 560 091"
-        addr_text = "No. 526, Andrahalli Main Road, Opp. D Group Layout Arch, Bengaluru - 560 091"
-        draw.text((width // 2, 238), addr_text,
+        # Address Line: "No.596, Andrahalli Main Road, Opp. D.Group Layout Arch, Bengaluru - 560091"
+        addr_text = "No.596, Andrahalli Main Road, Opp. D.Group Layout Arch, Bengaluru - 560091"
+        draw.text((width // 2, 232), addr_text,
                   fill=(100, 116, 139), font=f_addr, anchor="mm")
 
         # Decorative Divider Line with Center Diamond
@@ -412,10 +412,10 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         border_navy = (11, 25, 44)
         
         coords = {
-            'name_x': 1240, 'name_y': 610,
-            'rank_x': 1240, 'rank_y': 740,
-            'event_x': 1240, 'event_y': 870,
-            'date_x': 115, 'date_y': 1540
+            'name_x': 1532, 'name_y': 920,
+            'rank_x': 0, 'rank_y': 0,
+            'event_x': 0, 'event_y': 0,
+            'date_x': 0, 'date_y': 0
         }
         coords_path = os.path.join(
             "static", "uploads", "cert_coordinates.json")
@@ -426,17 +426,22 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
             except Exception:
                 pass
 
-        # Print only raw variables at specified coordinates
+        # Print candidate name right above the signature line
         draw.text((coords['name_x'], coords['name_y']), p_name,
                   fill=blue_ink, font=f_handwriting_name, anchor="mm")
-        draw.text((coords['rank_x'], coords['rank_y']), place_text,
-                  fill=blue_ink, font=f_handwriting, anchor="mm")
-        draw.text((coords['event_x'], coords['event_y']), event_name,
-                  fill=blue_ink, font=f_handwriting, anchor="mm")
-        draw.text((coords['date_x'], coords['date_y']), event_date,
-                  fill=border_navy, font=get_font_by_name("arialbd.ttf", 14))
+        
+        # Only draw rank/event/date if explicitly configured in coordinates file
+        if coords.get('rank_x', 0) > 0 and coords.get('rank_y', 0) > 0:
+            draw.text((coords['rank_x'], coords['rank_y']), place_text,
+                      fill=blue_ink, font=f_handwriting, anchor="mm")
+        if coords.get('event_x', 0) > 0 and coords.get('event_y', 0) > 0:
+            draw.text((coords['event_x'], coords['event_y']), event_name,
+                      fill=blue_ink, font=f_handwriting, anchor="mm")
+        if coords.get('date_x', 0) > 0 and coords.get('date_y', 0) > 0:
+            draw.text((coords['date_x'], coords['date_y']), event_date,
+                      fill=border_navy, font=get_font_by_name("arialbd.ttf", 14))
 
-        if team_name:
+        if team_name and coords.get('event_x', 0) > 0:
             team_display = f"(Team: {team_name})"
             draw.text((coords['event_x'], coords['event_y'] + 60), team_display, fill=(
                 71, 85, 105), font=get_font_by_name("georgiai.ttf", 28), anchor="mm")
@@ -619,7 +624,7 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
 
 if __name__ == '__main__':
     code, path, rel = generate_certificate(
-        participant_name="Varshitha H",
+        participant_name="Student Participant",
         event_name="Binary Brains",
         event_date="18-Sep-2026",
         rank="1st",

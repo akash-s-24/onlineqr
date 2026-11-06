@@ -1,21 +1,25 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#11131b" />
-  <title>Pulse / Shreedaksha Academy</title>
+  <title>Pulse / Shree daksha Academy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <div class="page-shell">
     <header class="site-header" id="top">
       <a class="brand" href="#top" aria-label="Shreedaksha Academy home">
         <span class="crest" aria-hidden="true"><span>SA</span></span>
-        <span class="brand-copy"><strong>Shreedaksha</strong><small>Academy · Bengaluru</small></span>
+        <span class="brand-copy"><strong>Shree Daksha</strong><small>Academy · Bengaluru</small></span>
       </a>
       <nav class="main-nav" aria-label="Primary navigation">
         <a href="#events">The lineup</a>
@@ -26,7 +30,8 @@
         <button class="text-button" data-scroll="help">Need help?</button>
         <button class="nav-register" data-scroll="events">Register <span aria-hidden="true">↗</span></button>
       </div>
-      <button class="menu-button" type="button" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span></button>
+      <button class="menu-button" type="button" aria-label="Toggle menu"
+        aria-expanded="false"><span></span><span></span></button>
     </header>
 
     <main>
@@ -34,14 +39,16 @@
         <div class="hero-copy">
           <p class="status-line"><span class="pulse-dot"></span> Registrations open · 14 events · 22 Feb 2025</p>
           <h1 id="hero-title">Make some<br><em>noise.</em></h1>
-          <p class="hero-description">A two-day inter-college showcase for the people who turn up, take the mic, and leave a mark.</p>
+          <p class="hero-description">A two-day inter-college showcase for the people who turn up, take the mic, and
+            leave a mark.</p>
           <div class="hero-ctas">
             <button class="button button-primary" data-scroll="events">Explore events <span>↓</span></button>
             <button class="button button-quiet" data-scroll="about">Why Pulse? <span>↘</span></button>
           </div>
         </div>
         <div class="hero-art" aria-label="Pulse event disc preview">
-          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
           <div class="disc-stage">
             <div class="event-disc" id="heroDisc">
               <span class="disc-label">PULSE<br><b>25</b></span>
@@ -54,7 +61,8 @@
           <p class="art-note note-bottom">Vol. 01 / 2025<br><span>Turn the dial</span></p>
         </div>
         <div class="hero-marquee" aria-label="Event categories">
-          <span>Dance</span><i>✦</i><span>Music</span><i>✦</i><span>Street culture</span><i>✦</i><span>Ideas</span><i>✦</i><span>Dance</span><i>✦</i><span>Music</span>
+          <span>Dance</span><i>✦</i><span>Music</span><i>✦</i><span>Street
+            culture</span><i>✦</i><span>Ideas</span><i>✦</i><span>Dance</span><i>✦</i><span>Music</span>
         </div>
       </section>
 
@@ -62,47 +70,142 @@
         <div class="section-index">01 / <span>THE INVITATION</span></div>
         <div class="intro-content">
           <h2>One campus.<br><span>Every kind of spark.</span></h2>
-          <p>Pulse is Shreedaksha Academy opening its doors to the next wave of PUC talent. Bring a solo, bring your crew, bring the idea that has been living rent-free in your head.</p>
-          <div class="proof-row"><div><strong>14</strong><span>events</span></div><div><strong>02</strong><span>days</span></div><div><strong>01</strong><span>loud campus</span></div></div>
+          <p>Pulse is Shree Daksha Academy opening its doors to the next wave of PUC talent. Bring a solo, bring your
+            crew, bring the idea that has been living rent-free in your head.</p>
+          <div class="proof-row">
+            <div><strong>14</strong><span>events</span></div>
+            <div><strong>02</strong><span>days</span></div>
+            <div><strong>01</strong><span>loud campus</span></div>
+          </div>
         </div>
       </section>
 
       <section class="events-section" id="events">
         <div class="events-heading section-grid">
           <div class="section-index">02 / <span>THE LINEUP</span></div>
-          <div><h2>Pick your<br><span>frequency.</span></h2><p class="heading-note">Spin through the full lineup. Select an event to open its brief, rules, and registration desk.</p></div>
+          <div>
+            <h2>Pick your<br><span>frequency.</span></h2>
+            <p class="heading-note">Spin through the full lineup. Select an event to open its brief, rules, and
+              registration desk.</p>
+          </div>
         </div>
         <div class="carousel-wrap">
           <button class="carousel-arrow arrow-prev" aria-label="Previous event">←</button>
-          <div class="carousel-viewport"><div class="carousel-track" id="eventTrack"></div></div>
+          <div class="carousel-viewport">
+            <div class="carousel-track" id="eventTrack"></div>
+          </div>
           <button class="carousel-arrow arrow-next" aria-label="Next event">→</button>
         </div>
-        <div class="carousel-footer"><div class="carousel-progress"><span id="progressBar"></span></div><span id="eventCount">01 / 14</span><span class="drag-hint">Drag / use arrows to browse</span></div>
+        <div class="carousel-footer">
+          <div class="carousel-progress"><span id="progressBar"></span></div><span id="eventCount">01 / 14</span><span
+            class="drag-hint">Drag / use arrows to browse</span>
+        </div>
       </section>
 
       <section class="event-detail" id="eventDetail" aria-live="polite">
-        <div class="detail-art"><div class="detail-stamp">EVENT<br>BRIEF</div><img id="detailImage" src="../static/images/Solo_Dance.jpeg" alt="Selected event preview" /></div>
-        <div class="detail-copy"><p class="detail-kicker" id="detailType">SOLO / PERFORMANCE</p><h2 id="detailTitle">Solo Dance</h2><p id="detailDescription">Own the floor. One performer, one track, one chance to make the room stay with you.</p><div class="detail-meta"><div><span>Entry</span><strong id="detailFee">₹150 / person</strong></div><div><span>Venue</span><strong id="detailVenue">Main stage</strong></div><div><span>Format</span><strong id="detailFormat">Solo</strong></div></div><div class="detail-actions"><button class="button button-primary" id="detailRegister">Register for this event <span>↗</span></button><button class="text-button" id="rulesButton">View rules ↓</button></div></div>
+        <div class="detail-art">
+          <div class="detail-stamp">EVENT<br>BRIEF</div><img id="detailImage" src="../static/images/Solo_Dance.jpeg"
+            alt="Selected event preview" />
+        </div>
+        <div class="detail-copy">
+          <p class="detail-kicker" id="detailType">SOLO / PERFORMANCE</p>
+          <h2 id="detailTitle">Solo Dance</h2>
+          <p id="detailDescription">Own the floor. One performer, one track, one chance to make the room stay with you.
+          </p>
+          <div class="detail-meta">
+            <div><span>Entry</span><strong id="detailFee">₹150 / person</strong></div>
+            <div><span>Venue</span><strong id="detailVenue">Main stage</strong></div>
+            <div><span>Format</span><strong id="detailFormat">Solo</strong></div>
+          </div>
+          <div class="detail-actions"><button class="button button-primary" id="detailRegister">Register for this event
+              <span>↗</span></button><button class="text-button" id="rulesButton">View rules ↓</button></div>
+        </div>
       </section>
 
       <section class="venue-section section-grid" id="venue">
         <div class="section-index">03 / <span>THE PLACE</span></div>
-        <div class="venue-content"><div><h2>Find the<br><span>signal.</span></h2><p>Shreedaksha Academy, 4th Cross, Kengeri Satellite Town, Bengaluru. The stage is set; now find your way to it.</p><a class="button button-outline" href="https://maps.google.com/?q=Shreedaksha+Academy+Bengaluru" target="_blank" rel="noreferrer">Open in Maps <span>↗</span></a></div><div class="map-card"><div class="map-lines"></div><div class="map-label label-academy"><span class="map-pin"></span>Shreedaksha Academy</div><div class="map-label label-stage">PULSE / MAIN STAGE</div><div class="map-roads"><span>4th Cross</span><span>Mysore Road</span></div></div></div>
+        <div class="venue-content">
+          <div>
+            <h2>Find the<br><span>signal.</span></h2>
+            <p>Shreedaksha Academy, 4th Cross, Kengeri Satellite Town, Bengaluru. The stage is set; now find your way to
+              it.</p><a class="button button-outline" href="https://maps.google.com/?q=Shreedaksha+Academy+Bengaluru"
+              target="_blank" rel="noreferrer">Open in Maps <span>↗</span></a>
+          </div>
+          <div class="map-card">
+            <div class="map-lines"></div>
+            <div class="map-label label-academy"><span class="map-pin"></span>Shreedaksha Academy</div>
+            <div class="map-label label-stage">PULSE / MAIN STAGE</div>
+            <div class="map-roads"><span>4th Cross</span><span>Mysore Road</span></div>
+          </div>
+        </div>
       </section>
 
       <section class="help-section section-grid" id="help">
         <div class="section-index">04 / <span>THE DESK</span></div>
-        <div class="help-content"><div><h2>Need a<br><span>hand?</span></h2><p>We made a quick walkthrough for team leaders. Registration, payment, UTR entry — all in one clean pass.</p><button class="button button-primary" id="videoButton">Watch 01:32 demo <span>▶</span></button></div><div class="video-card" id="videoCard"><div class="video-lines"></div><span class="video-play">▶</span><span class="video-caption">HOW TO REGISTER<br><small>Step-by-step / 01:32</small></span></div></div>
+        <div class="help-content">
+          <div>
+            <h2>Need a<br><span>hand?</span></h2>
+            <p>We made a quick walkthrough for team leaders. Registration, payment, UTR entry — all in one clean pass.
+            </p><button class="button button-primary" id="videoButton">Watch 01:32 demo <span>▶</span></button>
+          </div>
+          <div class="video-card" id="videoCard">
+            <div class="video-lines"></div><span class="video-play">▶</span><span class="video-caption">HOW TO
+              REGISTER<br><small>Step-by-step / 01:32</small></span>
+          </div>
+        </div>
       </section>
 
-      <section class="connect-section" id="connect"><div class="connect-inner"><div><p class="section-index">05 / <span>STAY IN THE LOOP</span></p><h2>Bring your<br><em>people.</em></h2></div><div class="contact-list"><a href="mailto:pulse@shreedakshaacademy.edu.in"><span>Faculty coordinator</span><strong>pulse@shreedakshaacademy.edu.in ↗</strong></a><a href="tel:+919876543210"><span>Student coordinator</span><strong>+91 98765 43210 ↗</strong></a><a href="https://instagram.com" target="_blank" rel="noreferrer"><span>Instagram</span><strong>@shreedakshaacademy ↗</strong></a></div></div></section>
+      <section class="connect-section" id="connect">
+        <div class="connect-inner">
+          <div>
+            <p class="section-index">05 / <span>STAY IN THE LOOP</span></p>
+            <h2>Bring your<br><em>people.</em></h2>
+          </div>
+          <div class="contact-list"><a href="mailto:pulse@shreedakshaacademy.edu.in"><span>Faculty
+                coordinator</span><strong>pulse@shreedakshaacademy.edu.in ↗</strong></a><a
+              href="tel:+919876543210"><span>Student coordinator</span><strong>+91 98765 43210 ↗</strong></a><a
+              href="https://instagram.com" target="_blank"
+              rel="noreferrer"><span>Instagram</span><strong>@shreedakshaacademy ↗</strong></a></div>
+        </div>
+      </section>
     </main>
 
-    <footer class="site-footer"><a class="brand footer-brand" href="#top"><span class="crest" aria-hidden="true"><span>SA</span></span><span class="brand-copy"><strong>Shreedaksha</strong><small>Academy · Bengaluru</small></span></a><span>© 2025 Pulse / An official Shreedaksha Academy event</span><a href="#top">Back to top ↑</a></footer>
+    <footer class="site-footer"><a class="brand footer-brand" href="#top"><span class="crest"
+          aria-hidden="true"><span>SA</span></span><span class="brand-copy"><strong>Shreedaksha</strong><small>Academy ·
+            Bengaluru</small></span></a><span>© 2025 Pulse / An official Shreedaksha Academy event</span><a
+        href="#top">Back to top ↑</a></footer>
   </div>
 
-  <div class="modal-backdrop" id="registrationModal" aria-hidden="true"><div class="registration-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" id="modalClose" aria-label="Close registration">×</button><div class="modal-step"><span class="active">01</span><span>02</span><span>03</span><span>04</span></div><p class="detail-kicker">REGISTRATION DESK</p><h2 id="modalTitle">Join the <span id="modalEventName">Solo Dance</span> desk.</h2><p class="modal-sub">Team leaders only. Keep participant details and payment reference ready.</p><form id="registrationForm"><label>College name<input required name="college" placeholder="Your college name" /></label><div class="form-row"><label>Team / participant name<input required name="team" placeholder="e.g. Rhythm Theory" /></label><label>Leader's mobile<input required name="mobile" type="tel" placeholder="10 digit number" /></label></div><label>Leader's email<input required name="email" type="email" placeholder="you@college.edu" /></label><div class="payment-box"><div><span>Entry fee</span><strong id="modalFee">₹150 / person</strong></div><p>Pay to <b>shreedaksha@upi</b> · UPI / QR accepted</p><label>UTR / transaction reference<input required name="utr" placeholder="Enter 12-digit UTR number" /></label></div><button class="button button-primary submit-button" type="submit">Submit registration <span>↗</span></button><p class="form-note">By submitting, you confirm the details are correct.</p></form><div class="success-state" id="successState"><span class="success-mark">✓</span><h3>You're on the list.</h3><p>Your registration request has been received. Save your confirmation at the desk.</p><button class="button button-outline" id="successClose">Done</button></div></div></div>
+  <div class="modal-backdrop" id="registrationModal" aria-hidden="true">
+    <div class="registration-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button
+        class="modal-close" id="modalClose" aria-label="Close registration">×</button>
+      <div class="modal-step"><span class="active">01</span><span>02</span><span>03</span><span>04</span></div>
+      <p class="detail-kicker">REGISTRATION DESK</p>
+      <h2 id="modalTitle">Join the <span id="modalEventName">Solo Dance</span> desk.</h2>
+      <p class="modal-sub">Team leaders only. Keep participant details and payment reference ready.</p>
+      <form id="registrationForm"><label>College name<input required name="college"
+            placeholder="Your college name" /></label>
+        <div class="form-row"><label>Team / participant name<input required name="team"
+              placeholder="e.g. Rhythm Theory" /></label><label>Leader's mobile<input required name="mobile" type="tel"
+              placeholder="10 digit number" /></label></div><label>Leader's email<input required name="email"
+            type="email" placeholder="you@college.edu" /></label>
+        <div class="payment-box">
+          <div><span>Entry fee</span><strong id="modalFee">₹150 / person</strong></div>
+          <p>Pay to <b>shreedaksha@upi</b> · UPI / QR accepted</p><label>UTR / transaction reference<input required
+              name="utr" placeholder="Enter 12-digit UTR number" /></label>
+        </div><button class="button button-primary submit-button" type="submit">Submit registration
+          <span>↗</span></button>
+        <p class="form-note">By submitting, you confirm the details are correct.</p>
+      </form>
+      <div class="success-state" id="successState"><span class="success-mark">✓</span>
+        <h3>You're on the list.</h3>
+        <p>Your registration request has been received. Save your confirmation at the desk.</p><button
+          class="button button-outline" id="successClose">Done</button>
+      </div>
+    </div>
+  </div>
   <div class="toast" id="toast" role="status">Copied to clipboard</div>
   <script src="app.js"></script>
 </body>
+
 </html>

@@ -32,6 +32,18 @@ def is_demo_mode():
     Returns: (is_demo: bool, reason: str)
     """
     load_dotenv(override=True)
+
+    # Guard: Automated test environments and test runners always operate in Safe Demo Mode
+    if os.environ.get('FLASK_TESTING') == 'True' or os.environ.get('TESTING') == 'True' or getattr(Config, 'TESTING', False):
+        return True, "Automated test execution detected (FLASK_TESTING=True)"
+
+    try:
+        from flask import current_app
+        if current_app and current_app.config.get('TESTING'):
+            return True, "Flask application TESTING flag is active"
+    except Exception:
+        pass
+
     smtp_mode = os.environ.get('SMTP_MODE', getattr(Config, 'SMTP_MODE', 'demo')).strip().lower()
     smtp_username = os.environ.get('SMTP_USERNAME', getattr(Config, 'SMTP_USERNAME', '')).strip()
     smtp_password = os.environ.get('SMTP_PASSWORD', getattr(Config, 'SMTP_PASSWORD', '')).strip()
@@ -61,7 +73,7 @@ def get_smtp_info():
     load_dotenv(override=True)
     is_demo, reason = is_demo_mode()
     smtp_username = os.environ.get('SMTP_USERNAME', getattr(Config, 'SMTP_USERNAME', '')).strip()
-    smtp_sender = os.environ.get('SMTP_SENDER_EMAIL', getattr(Config, 'SMTP_SENDER_EMAIL', smtp_username or 'eventmate.college@gmail.com')).strip()
+    smtp_sender = os.environ.get('SMTP_SENDER_EMAIL', getattr(Config, 'SMTP_SENDER_EMAIL', smtp_username or 'info@shreedakshaacademyedu.in')).strip()
     resend_sender = os.environ.get('RESEND_FROM_EMAIL', getattr(Config, 'RESEND_FROM_EMAIL', '')).strip()
     resend_configured = bool(os.environ.get('RESEND_API_KEY', getattr(Config, 'RESEND_API_KEY', '')).strip() and resend_sender)
 
@@ -140,7 +152,7 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
     smtp_port = int(os.environ.get('SMTP_PORT', Config.SMTP_PORT))
     smtp_username = os.environ.get('SMTP_USERNAME', '').strip()
     smtp_password = os.environ.get('SMTP_PASSWORD', '').strip()
-    smtp_sender = os.environ.get('SMTP_SENDER_EMAIL', smtp_username or 'eventmate.college@gmail.com').strip()
+    smtp_sender = os.environ.get('SMTP_SENDER_EMAIL', smtp_username or 'info@shreedakshaacademyedu.in').strip()
     use_ssl = os.environ.get('SMTP_USE_SSL', 'False').lower() in ('true', '1', 't')
     use_tls = os.environ.get('SMTP_USE_TLS', 'True').lower() in ('true', '1', 't')
 
@@ -148,9 +160,8 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
         msg = MIMEMultipart('alternative')
         msg['From'] = f"{Config.COLLEGE_NAME} <{smtp_sender}>"
         msg['To'] = recipient_email
-        msg['Subject'] = f"Congratulations! Your Certificate of Participation for {event_name} - EventMate"
+        msg['Subject'] = f"Congratulations! Your Certificate of Participation for {event_name} - Shree Daksha Academy"
 
-        verify_url = f"{Config.BASE_URL}/verify?id={certificate_code}"
         html_content = f"""
         <!DOCTYPE html>
         <html>
@@ -185,7 +196,7 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
                     </div>
                 </div>
                 <div class="footer">
-                    <p>This is an automated notification from EventMate College Event Management System.</p>
+                    <p>This is an automated notification from Shree Daksha Academy Event Management System.</p>
                     <p>&copy; 2026 {Config.COLLEGE_NAME}. All rights reserved.</p>
                 </div>
             </div>
@@ -230,7 +241,7 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
 
         resend_result = _send_via_resend(
             recipient_email,
-            f"Congratulations! Your Certificate of Participation for {event_name} - EventMate",
+            f"Congratulations! Your Certificate of Participation for {event_name} - Shree Daksha Academy",
             html_content,
             resend_attachments,
         )
@@ -287,7 +298,7 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
     smtp_port = int(os.environ.get('SMTP_PORT', Config.SMTP_PORT))
     smtp_username = os.environ.get('SMTP_USERNAME', '').strip()
     smtp_password = os.environ.get('SMTP_PASSWORD', '').strip()
-    smtp_sender = os.environ.get('SMTP_SENDER_EMAIL', smtp_username or 'eventmate.college@gmail.com').strip()
+    smtp_sender = os.environ.get('SMTP_SENDER_EMAIL', smtp_username or 'info@shreedakshaacademyedu.in').strip()
     use_ssl = os.environ.get('SMTP_USE_SSL', 'False').lower() in ('true', '1', 't')
     use_tls = os.environ.get('SMTP_USE_TLS', 'True').lower() in ('true', '1', 't')
 
@@ -342,7 +353,7 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
                     <p>Thank you for registering. We look forward to seeing you at the event!</p>
                 </div>
                 <div class="footer">
-                    <p>This is an automated receipt from EventMate College Event Management System.</p>
+                    <p>This is an automated receipt from Shree Daksha Academy Event Management System.</p>
                     <p>&copy; 2026 {safe_college_name}. All rights reserved.</p>
                 </div>
             </div>

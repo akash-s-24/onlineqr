@@ -1,49 +1,60 @@
 {% extends 'base.html' %}
 
-{% block title %}Certificates Hub – EventMate{% endblock %}
+{% block title %}Certificates Hub – Shree Daksha Academy{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div class="page-title">
         <h1>Certificate of Achievement Hub</h1>
-        <p>Generate high-resolution Shree Daksha Academy certificates for present attendees and dispatch via SMTP email</p>
+        <p>Generate high-resolution Shree Daksha Academy certificates for present attendees and dispatch via SMTP email
+        </p>
     </div>
     <div class="page-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <button type="button" class="candy-btn candy-btn-secondary" onclick="window.history.back()" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">
+        <button type="button" class="candy-btn candy-btn-secondary" onclick="window.history.back()"
+            style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">
             <span style="font-size: 1.1rem;">&larr;</span> Previous
         </button>
-        <a href="{{ url_for('attendance_manager') }}" class="candy-btn" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">&larr; Back to Attendance Tracker</a>
+        <a href="{{ url_for('attendance_manager') }}" class="candy-btn"
+            style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">&larr; Back to Attendance Tracker</a>
         <form method="POST" action="{{ url_for('generate_bulk_certificates') }}" style="display: inline;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="candy-btn candy-btn-success" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;" 
-                onclick="if(confirm('Generate certificates for all participants marked PRESENT?')) { showGlobalLoading('Generating certificates...'); return true; } return false;">⚡ Generate All</button>
+            <button type="submit" class="candy-btn candy-btn-success"
+                style="padding: 0.6rem 1.2rem; font-size: 0.95rem;"
+                onclick="if(confirm('Generate certificates for all participants?')) { showGlobalLoading('Generating certificates...'); return true; } return false;">⚡
+                Generate All</button>
         </form>
         <form method="POST" action="{{ url_for('send_bulk_certificate_emails') }}" style="display: inline;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="candy-btn" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;"
-                onclick="return confirm('Email all generated certificates to participants?');">📧 Email All Generated</button>
+                onclick="return confirm('Email all generated certificates to participants?');">📧 Email All
+                Generated</button>
         </form>
     </div>
 </div>
 
 <!-- Email Dispatch Mode Banner -->
-<div style="background: var(--surface, #ffffff); border: 1px solid var(--border, #e2e8f0); border-radius: 12px; padding: 14px 20px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+<div
+    style="background: var(--surface, #ffffff); border: 1px solid var(--border, #e2e8f0); border-radius: 12px; padding: 14px 20px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     <div style="display: flex; align-items: center; gap: 14px;">
-        <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(37, 99, 235, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+        <div
+            style="width: 42px; height: 42px; border-radius: 10px; background: rgba(37, 99, 235, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
             ✉️
         </div>
         <div>
             <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
                 <span>Email Dispatch:</span>
                 {% if smtp_info and smtp_info.is_demo %}
-                <span class="badge badge-info" style="font-size: 0.78rem; padding: 3px 10px; border-radius: 20px;">Safe Demo Mode (Simulated)</span>
+                <span class="badge badge-info" style="font-size: 0.78rem; padding: 3px 10px; border-radius: 20px;">Safe
+                    Demo Mode (Simulated)</span>
                 {% else %}
-                <span class="badge badge-success" style="font-size: 0.78rem; padding: 3px 10px; border-radius: 20px;">Live Gmail SMTP Active</span>
+                <span class="badge badge-success"
+                    style="font-size: 0.78rem; padding: 3px 10px; border-radius: 20px;">Live Gmail SMTP Active</span>
                 {% endif %}
             </div>
             <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
                 {% if smtp_info and smtp_info.is_demo %}
-                Clicking <strong>Email</strong> simulates full delivery with no SMTP credentials needed. Ideal for vivas & presentations.
+                Clicking <strong>Email</strong> simulates full delivery with no SMTP credentials needed. Ideal for vivas
+                & presentations.
                 {% else %}
                 Live delivery active via Gmail SMTP ({{ smtp_info.username }}).
                 {% endif %}
@@ -51,66 +62,91 @@
         </div>
     </div>
     <div>
-        <button type="button" class="candy-btn candy-btn-warning" onclick="openSmtpModal()" style="display: inline-flex; align-items: center; gap: 6px; padding: 0.5rem 1rem; font-size: 0.85rem;">
+        <button type="button" class="candy-btn candy-btn-warning" onclick="openSmtpModal()"
+            style="display: inline-flex; align-items: center; gap: 6px; padding: 0.5rem 1rem; font-size: 0.85rem;">
             <span>⚙️</span> <span>Email Settings & Guide</span>
         </button>
     </div>
 </div>
 
 <div class="table-card">
-    <div class="table-header" style="border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 30px;">
+    <div class="table-header"
+        style="border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 30px;">
         <!-- Template Upload -->
-        <div style="flex: 1; min-width: 300px;">
+        <div style="flex: 1; min-width: 240px;">
             <div class="page-title" style="margin-bottom: 10px;">
                 <h3 style="margin: 0; font-size: 1.15rem;">1. Background Template</h3>
-                <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted);">Upload a custom background image (A4 size recommended).</p>
+                <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted);">Upload a custom background
+                    image (A4 size recommended).</p>
             </div>
-            <form method="POST" action="{{ url_for('upload_certificate_template') }}" enctype="multipart/form-data" style="display: flex; gap: 10px; align-items: center;">
+            <form method="POST" action="{{ url_for('upload_certificate_template') }}" enctype="multipart/form-data"
+                style="display: flex; gap: 10px; align-items: center;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="file" name="template_image" accept="image/png, image/jpeg" required class="form-control" style="width: auto; max-width: 250px; font-size: 0.85rem;">
-                <button type="submit" class="candy-btn candy-btn-success" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">Upload Template</button>
+                <input type="file" name="template_image" accept="image/png, image/jpeg" required class="form-control"
+                    style="width: auto; max-width: 250px; font-size: 0.85rem;">
+                <button type="submit" class="candy-btn candy-btn-success"
+                    style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">Upload Template</button>
             </form>
         </div>
 
         <!-- Coordinates Settings -->
-        <div style="flex: 2; min-width: 400px;">
+        <div style="flex: 2; min-width: 260px;">
             <div class="page-title" style="margin-bottom: 10px;">
                 <h3 style="margin: 0; font-size: 1.15rem;">2. Text Coordinates (X, Y)</h3>
-                <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted);">Set the pixel coordinates to center the text variables onto your custom design.</p>
+                <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted);">Set the pixel coordinates to
+                    center the text variables onto your custom design.</p>
             </div>
-            <form method="POST" action="{{ url_for('save_certificate_coords') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; align-items: end;">
+            <form method="POST" action="{{ url_for('save_certificate_coords') }}"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; align-items: end;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                
+
                 <div>
-                    <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Participant Name (X, Y)</label>
+                    <label
+                        style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Participant
+                        Name (X, Y)</label>
                     <div style="display: flex; gap: 5px;">
-                        <input type="number" name="name_x" value="{{ coords.get('name_x', 1240) }}" class="form-control" style="padding: 4px 8px; font-size: 0.85rem;" placeholder="X">
-                        <input type="number" name="name_y" value="{{ coords.get('name_y', 610) }}" class="form-control" style="padding: 4px 8px; font-size: 0.85rem;" placeholder="Y">
+                        <input type="number" name="name_x" value="{{ coords.get('name_x', 1240) }}" class="form-control"
+                            style="padding: 4px 8px; font-size: 0.85rem;" placeholder="X">
+                        <input type="number" name="name_y" value="{{ coords.get('name_y', 610) }}" class="form-control"
+                            style="padding: 4px 8px; font-size: 0.85rem;" placeholder="Y">
                     </div>
                 </div>
                 <div>
-                    <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Rank / Place (X, Y)</label>
+                    <label
+                        style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Rank /
+                        Place (X, Y)</label>
                     <div style="display: flex; gap: 5px;">
-                        <input type="number" name="rank_x" value="{{ coords.get('rank_x', 1240) }}" class="form-control" style="padding: 4px 8px; font-size: 0.85rem;" placeholder="X">
-                        <input type="number" name="rank_y" value="{{ coords.get('rank_y', 740) }}" class="form-control" style="padding: 4px 8px; font-size: 0.85rem;" placeholder="Y">
+                        <input type="number" name="rank_x" value="{{ coords.get('rank_x', 1240) }}" class="form-control"
+                            style="padding: 4px 8px; font-size: 0.85rem;" placeholder="X">
+                        <input type="number" name="rank_y" value="{{ coords.get('rank_y', 740) }}" class="form-control"
+                            style="padding: 4px 8px; font-size: 0.85rem;" placeholder="Y">
                     </div>
                 </div>
                 <div>
-                    <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Event Name (X, Y)</label>
+                    <label
+                        style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Event
+                        Name (X, Y)</label>
                     <div style="display: flex; gap: 5px;">
-                        <input type="number" name="event_x" value="{{ coords.get('event_x', 1240) }}" class="form-control" style="padding: 4px 8px; font-size: 0.85rem;" placeholder="X">
-                        <input type="number" name="event_y" value="{{ coords.get('event_y', 870) }}" class="form-control" style="padding: 4px 8px; font-size: 0.85rem;" placeholder="Y">
+                        <input type="number" name="event_x" value="{{ coords.get('event_x', 1240) }}"
+                            class="form-control" style="padding: 4px 8px; font-size: 0.85rem;" placeholder="X">
+                        <input type="number" name="event_y" value="{{ coords.get('event_y', 870) }}"
+                            class="form-control" style="padding: 4px 8px; font-size: 0.85rem;" placeholder="Y">
                     </div>
                 </div>
                 <div>
-                    <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Date (X, Y)</label>
+                    <label
+                        style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Date
+                        (X, Y)</label>
                     <div style="display: flex; gap: 5px;">
-                        <input type="number" name="date_x" value="{{ coords.get('date_x', 115) }}" class="form-control" style="padding: 4px 8px; font-size: 0.85rem;" placeholder="X">
-                        <input type="number" name="date_y" value="{{ coords.get('date_y', 1540) }}" class="form-control" style="padding: 4px 8px; font-size: 0.85rem;" placeholder="Y">
+                        <input type="number" name="date_x" value="{{ coords.get('date_x', 115) }}" class="form-control"
+                            style="padding: 4px 8px; font-size: 0.85rem;" placeholder="X">
+                        <input type="number" name="date_y" value="{{ coords.get('date_y', 1540) }}" class="form-control"
+                            style="padding: 4px 8px; font-size: 0.85rem;" placeholder="Y">
                     </div>
                 </div>
-                
-                <button type="submit" class="candy-btn candy-btn-success" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">Save Coords</button>
+
+                <button type="submit" class="candy-btn candy-btn-success"
+                    style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">Save Coords</button>
             </form>
         </div>
     </div>
@@ -132,8 +168,7 @@
             </select>
         </div>
         <div>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Only participants marked
-                <strong>PRESENT</strong> are eligible for certificates</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Direct Certificate Hub &bull; Generate & Dispatch to Attendees</span>
         </div>
     </div>
 
@@ -157,19 +192,22 @@
                     <td>
                         <strong>{{ row.full_name }}</strong><br>
                         <span style="font-size: 0.78rem; color: var(--text-muted);">{{ row.email }}</span>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ row.department }} &bull; {{ row.semester }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ row.department }} &bull; {{
+                            row.semester }}</div>
                     </td>
                     <td>
                         <span class="badge badge-primary">{{ row.event_name }}</span>
                         {% if row.is_group or row.team_name %}
                         <div style="margin-top: 4px;">
-                            <span class="badge badge-info" style="font-size: 0.72rem;">👥 Group ({{ row.team_size }} Participants)</span>
+                            <span class="badge badge-info" style="font-size: 0.72rem;">👥 Group ({{ row.team_size }}
+                                Participants)</span>
                             <div style="font-size: 0.8rem; font-weight: 700; color: #1e40af;">
                                 Team: {{ row.team_name if row.team_name else 'Squad' }}
                             </div>
                         </div>
                         {% endif %}
-                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">{{ row.event_date }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">{{ row.event_date }}
+                        </div>
                     </td>
                     <td>
                         {% if row.att_status == 'present' %}
@@ -202,7 +240,8 @@
                         <div style="display: inline-flex; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end;">
                             {% if row.cert_id %}
                             <!-- View / Preview Modal -->
-                            <button type="button" class="candy-btn candy-btn-secondary cert-preview-trigger" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;"
+                            <button type="button" class="candy-btn candy-btn-secondary cert-preview-trigger"
+                                style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;"
                                 data-image-src="{{ url_for('download_certificate_file', filename=row.certificate_code + '.png')|e }}"
                                 data-cert-code="{{ row.certificate_code|e }}">
                                 👁️ Preview
@@ -210,7 +249,8 @@
 
                             <!-- Download Button -->
                             <a href="{{ url_for('download_certificate_file', filename=row.certificate_code + '.png') }}"
-                                download class="candy-btn" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">
+                                download class="candy-btn"
+                                style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">
                                 ⬇️ Download
                             </a>
 
@@ -219,21 +259,29 @@
                                 action="{{ url_for('send_certificate_email_route', cert_id=row.cert_id) }}"
                                 style="display:inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="candy-btn" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">📧 Email</button>
+                                <button type="submit" class="candy-btn"
+                                    style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">📧
+                                    Email</button>
                             </form>
-                            
-                                                                                    <!-- Send WA Cert Button -->
-                            {% set wa_msg = "Hello " ~ row.full_name ~ ",\n\nThank you for attending " ~ row.event_name ~ ".\nStatus: Verified\nIssue Date: " ~ (row.sent_at[:10] if row.sent_at else "Today") %}
-                            <a href="https://wa.me/91{{ row.phone|replace(' ', '')|replace('+91', '') }}?text={{ wa_msg | urlencode }}" target="_blank" class="candy-btn candy-btn-success" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">📱 WA</a>
+
+                            <!-- Send WA Cert Button -->
+                            {% set wa_msg = "Hello " ~ row.full_name ~ ",\n\nThank you for attending " ~ row.event_name
+                            ~ ".\nStatus: Verified\nIssue Date: " ~ (row.sent_at[:10] if row.sent_at else "Today") %}
+                            <a href="https://wa.me/91{{ row.phone|replace(' ', '')|replace('+91', '') }}?text={{ wa_msg | urlencode }}"
+                                target="_blank" class="candy-btn candy-btn-success"
+                                style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">📱 WA</a>
                             {% else %}
                             {% if row.att_status == 'present' %}
                             <form method="POST"
                                 action="{{ url_for('generate_single_certificate', reg_id=row.registration_id) }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="candy-btn candy-btn-success" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">Generate Certificate</button>
+                                <button type="submit" class="candy-btn candy-btn-success"
+                                    style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">Generate
+                                    Certificate</button>
                             </form>
                             {% else %}
-                            <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">Mark Present to Generate</span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">Mark Present
+                                to Generate</span>
                             {% endif %}
                             {% endif %}
                         </div>
@@ -241,7 +289,8 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">No participants available for certification.</td>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">No participants
+                        available for certification.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -250,19 +299,25 @@
 </div>
 
 <!-- Email & SMTP Settings Modal -->
-<div id="smtpSettingsModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-    <div style="background: #ffffff; width: 90%; max-width: 580px; border-radius: 16px; padding: 24px 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); max-height: 90vh; overflow-y: auto;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 18px;">
-            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+<div id="smtpSettingsModal"
+    style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div
+        style="background: #ffffff; width: 90%; max-width: 580px; border-radius: 16px; padding: 24px 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); max-height: 90vh; overflow-y: auto;">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 18px;">
+            <h3
+                style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
                 <span>⚙️</span> Email Dispatch Configuration
             </h3>
-            <button type="button" onclick="closeSmtpModal()" style="background: none; border: none; font-size: 1.5rem; line-height: 1; cursor: pointer; color: #64748b;">&times;</button>
+            <button type="button" onclick="closeSmtpModal()"
+                style="background: none; border: none; font-size: 1.5rem; line-height: 1; cursor: pointer; color: #64748b;">&times;</button>
         </div>
 
         <div style="margin-bottom: 20px;">
             <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; color: #1e293b;">Active Configuration:</h4>
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6;">
-                <div><strong>Current Mode:</strong> 
+            <div
+                style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6;">
+                <div><strong>Current Mode:</strong>
                     {% if smtp_info and smtp_info.is_demo %}
                     <span class="badge badge-info">DEMO (Simulated)</span>
                     {% else %}
@@ -281,30 +336,36 @@
                 <form method="POST" action="{{ url_for('toggle_smtp_mode') }}" style="flex: 1;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="mode" value="demo">
-                    <button type="submit" class="btn {% if smtp_info and smtp_info.is_demo %}btn-primary{% else %}btn-outline-primary{% endif %}" style="width: 100%;">
+                    <button type="submit"
+                        class="btn {% if smtp_info and smtp_info.is_demo %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                        style="width: 100%;">
                         ✔ Safe Demo Mode
                     </button>
                 </form>
                 <form method="POST" action="{{ url_for('toggle_smtp_mode') }}" style="flex: 1;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="mode" value="live">
-                    <button type="submit" class="btn {% if smtp_info and not smtp_info.is_demo %}btn-primary{% else %}btn-outline-primary{% endif %}" style="width: 100%;">
+                    <button type="submit"
+                        class="btn {% if smtp_info and not smtp_info.is_demo %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                        style="width: 100%;">
                         🚀 Live Gmail Mode
                     </button>
                 </form>
             </div>
             <p style="font-size: 0.78rem; color: #64748b; margin-top: 6px;">
-                * In <strong>Safe Demo Mode</strong>, email dispatches are instantly simulated and marked successful without requiring a Gmail password.
+                * In <strong>Safe Demo Mode</strong>, email dispatches are instantly simulated and marked successful
+                without requiring a Gmail password.
             </p>
         </div>
 
-        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 14px 18px; margin-bottom: 18px;">
+        <div
+            style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 14px 18px; margin-bottom: 18px;">
             <h5 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #166534;">📖 How to Setup Live Gmail Delivery:</h5>
             <ol style="margin: 0; padding-left: 18px; font-size: 0.82rem; color: #166534; line-height: 1.6;">
                 <li>Open your <strong>Google Account</strong> &rsaquo; <strong>Security</strong>.</li>
                 <li>Turn ON <strong>2-Step Verification</strong> if not already enabled.</li>
                 <li>Under 2-Step Verification, click <strong>App passwords</strong>.</li>
-                <li>Create an app named <code>EventMate</code> and copy the 16-letter password.</li>
+                <li>Create an app named <code>Shree Daksha Academy</code> and copy the 16-letter password.</li>
                 <li>In your <code>.env</code> file, set:<br>
                     <code>SMTP_MODE=live</code><br>
                     <code>SMTP_PASSWORD=your_16_letter_code</code>
@@ -319,19 +380,19 @@
 </div>
 
 <script>
-function openSmtpModal() {
-    const modal = document.getElementById('smtpSettingsModal');
-    if (modal) modal.style.display = 'flex';
-}
-function closeSmtpModal() {
-    const modal = document.getElementById('smtpSettingsModal');
-    if (modal) modal.style.display = 'none';
-}
-// Close modal on click outside
-window.addEventListener('click', function(e) {
-    const modal = document.getElementById('smtpSettingsModal');
-    if (e.target === modal) modal.style.display = 'none';
-});
+    function openSmtpModal() {
+        const modal = document.getElementById('smtpSettingsModal');
+        if (modal) modal.style.display = 'flex';
+    }
+    function closeSmtpModal() {
+        const modal = document.getElementById('smtpSettingsModal');
+        if (modal) modal.style.display = 'none';
+    }
+    // Close modal on click outside
+    window.addEventListener('click', function (e) {
+        const modal = document.getElementById('smtpSettingsModal');
+        if (e.target === modal) modal.style.display = 'none';
+    });
 </script>
 {% endblock %}
 

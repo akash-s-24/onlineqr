@@ -1,21 +1,1570 @@
 {% extends 'base.html' %}
-{% block title %}Admin dashboard – EventMate{% endblock %}
-{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">{% endblock %}
+{% block title %}Admin dashboard – Shree Daksha Academy{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<style>
+    .dash-subtabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid var(--dash-line);
+        padding-bottom: 10px;
+    }
+
+    .dash-subtab-btn {
+        padding: 6px 14px;
+        border-radius: 7px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--dash-muted);
+        font-size: 0.8rem;
+        font-weight: 750;
+        cursor: pointer;
+        transition: all 0.18s ease;
+    }
+
+    .dash-subtab-btn:hover {
+        background: #f1f5f9;
+        color: var(--dash-ink);
+    }
+
+    .dash-subtab-btn.active {
+        background: #ffffff;
+        color: var(--dash-blue);
+        border-color: var(--dash-line);
+        box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+    }
+
+    .reg-subview {
+        display: none;
+    }
+
+    .reg-subview.active {
+        display: block;
+    }
+
+    .dash-progress-track {
+        width: 100%;
+        height: 7px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+        margin: 6px 0;
+    }
+
+    .dash-progress-fill {
+        height: 100%;
+        border-radius: 999px;
+        transition: width 0.4s ease;
+    }
+
+    .dash-stat-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 10px;
+        padding: 14px 18px;
+        background: #fafbfc;
+        border-bottom: 1px solid var(--dash-line);
+    }
+
+    .dash-mini-stat {
+        padding: 10px 14px;
+        background: #ffffff;
+        border: 1px solid #eef2f6;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .dash-mini-stat-label {
+        font-size: 0.68rem;
+        font-weight: 750;
+        text-transform: uppercase;
+        color: var(--dash-muted);
+        letter-spacing: 0.04em;
+    }
+
+    .dash-mini-stat-val {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--dash-ink);
+        margin-top: 4px;
+        line-height: 1.1;
+    }
+
+    .dash-mini-stat-sub {
+        font-size: 0.72rem;
+        color: var(--dash-muted);
+        margin-top: 4px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="dashboard-shell">
-    <header class="dashboard-topbar"><div><p class="dashboard-kicker">Administration</p><h1 class="dashboard-title">Event operations</h1><p class="dashboard-subtitle">Review registrations, verify payments, manage attendance, and keep participant records accurate.</p></div><div class="dashboard-actions"><a class="dashboard-btn" href="{{ url_for('qr_scanner') }}">Scan attendance</a><a class="dashboard-btn" href="{{ url_for('export_csv', status='all') }}">Export CSV</a><a class="dashboard-btn primary" href="{{ url_for('add_event') }}">Create event</a></div></header>
-    <nav class="dashboard-nav" aria-label="Admin sections"><a class="active" href="#overview">Overview</a><a href="#registrations">Registrations</a><a href="#payments">Payments</a><a href="#operations">Operations</a></nav>
-    {% if stats.total_pending %}<div class="dashboard-alert" role="status"><span><strong>{{ stats.total_pending }} registration{{ '' if stats.total_pending == 1 else 's' }}</strong> need approval before online payments can be verified.</span><a class="dashboard-btn small" href="#registrations">Review now</a></div>{% endif %}
+    <header class="dashboard-topbar">
+        <div>
+            <p class="dashboard-kicker">Administration</p>
+            <h1 class="dashboard-title">Event operations</h1>
+            <p class="dashboard-subtitle">Review registrations, verify payments, manage attendance, and keep participant
+                records accurate.</p>
+        </div>
+        <div class="dashboard-actions">
+            <a class="dashboard-btn" href="{{ url_for('qr_scanner') }}">📷 Scan attendance</a>
+            <a class="dashboard-btn" href="{{ url_for('attendance_manager') }}">📋 Attendance sheet</a>
+            <a class="dashboard-btn" href="{{ url_for('certificates_manager') }}">🏆 Certificates</a>
+            <a class="dashboard-btn" href="{{ url_for('export_csv', status='all') }}">Export CSV</a>
+            <a class="dashboard-btn primary" href="{{ url_for('add_event') }}">Create event</a>
+        </div>
+    </header>
 
-    <section id="overview" aria-labelledby="overview-title"><h2 id="overview-title" class="sr-only">Overview</h2><div class="dash-grid metrics">
-        <div class="metric info"><span class="metric-label">Events</span><span class="metric-value">{{ stats.total_events }}</span><span class="metric-meta">Configured events</span></div><div class="metric"><span class="metric-label">Registrations</span><span class="metric-value">{{ stats.total_registrations }}</span><span class="metric-meta">{{ stats.total_participants }} unique participants</span></div><div class="metric good"><span class="metric-label">Approved</span><span class="metric-value">{{ stats.total_approved }}</span><span class="metric-meta">Ready for participation</span></div><div class="metric warn"><span class="metric-label">Pending</span><span class="metric-value">{{ stats.total_pending }}</span><span class="metric-meta">Awaiting review</span></div><div class="metric"><span class="metric-label">Attendance</span><span class="metric-value">{{ stats.attendance_rate }}%</span><span class="metric-meta">{{ stats.total_present }} marked present</span></div>
-    </div><div class="dash-grid two"><section class="dash-panel"><div class="dash-panel-head"><div><h2 class="dash-panel-title">Registration activity</h2><p class="dash-panel-note">Participation by event, ordered by volume.</p></div><a class="dashboard-btn small" href="{{ url_for('events_list') }}">View events</a></div>{% if event_stats %}<ul class="dash-list">{% for item in event_stats[:6] %}<li><span>{{ item.event_name }}</span><span class="dash-badge info">{{ item.reg_count }} registered</span></li>{% endfor %}</ul>{% else %}<div class="dash-empty">No event activity yet.</div>{% endif %}</section><section class="dash-panel"><div class="dash-panel-head"><div><h2 class="dash-panel-title">System readiness</h2><p class="dash-panel-note">Delivery and payment controls.</p></div></div><ul class="dash-list"><li><span>Email delivery</span>{% if smtp_info.is_demo %}<span class="dash-badge warn">Demo mode</span>{% else %}<span class="dash-badge good">Live {{ smtp_info.mode|upper }}</span>{% endif %}</li><li><span>Online records</span><span class="dash-badge info">{{ analytics.online_count }}</span></li><li><span>On-site records</span><span class="dash-badge">{{ analytics.offline_count }}</span></li><li><span>Certificates</span><span class="dash-badge">{{ stats.total_sent }}/{{ stats.total_certificates }} sent</span></li></ul></section></div></section>
+    <!-- Animated Tab Navigation -->
+    <nav class="dashboard-nav" aria-label="Admin sections" id="dashboardNav">
+        <div class="dash-nav-pill" id="dashNavPill"></div>
+        <a class="dash-nav-link active" href="#overview" data-tab="overview"><span>📊</span> Overview</a>
+        <a class="dash-nav-link" href="#registrations" data-tab="registrations"><span>📝</span> Registrations</a>
+        <a class="dash-nav-link" href="#screenshots" data-tab="screenshots"><span>📸</span> Payment Screenshots ({{ payment_screenshots|length if payment_screenshots else 0 }})</a>
+        <a class="dash-nav-link" href="#payments" data-tab="payments"><span>💳</span> Verification Desk</a>
+        <a class="dash-nav-link" href="#attendance-desk" data-tab="attendance-desk"><span>📋</span> Attendance &amp; QR</a>
+        <a class="dash-nav-link" href="#events-config" data-tab="events-config"><span>🎯</span> Events &amp; Rules</a>
+        <a class="dash-nav-link" href="#operations" data-tab="operations"><span>⚙️</span> Operations</a>
+    </nav>
 
-    <section id="registrations" class="dash-panel" style="margin-top:18px;" aria-labelledby="registrations-title"><div class="dash-panel-head"><div><h2 id="registrations-title" class="dash-panel-title">Registration review</h2><p class="dash-panel-note">Approve participant records before treating online payment as verified.</p></div><a class="dashboard-btn small" href="{{ url_for('members_list') }}">Team members</a></div>{% if pending_registrations %}<div class="dash-table-wrap"><table class="dash-table"><thead><tr><th>Reference</th><th>Participant</th><th>Event</th><th>Payment evidence</th><th>Action</th></tr></thead><tbody>{% for reg in pending_registrations %}<tr><td><span class="dash-id">{{ reg.registration_uid }}</span><br><span class="dash-muted">{{ reg.registered_by_name or 'Public registration' }}</span></td><td><strong>{{ reg.full_name }}</strong><br><span class="dash-muted">{{ reg.email }}<br>{{ reg.college_name }}</span></td><td>{{ reg.event_name }}{% if reg.team_name %}<br><span class="dash-muted">{{ reg.team_name }} · {{ reg.team_size }} members</span>{% endif %}</td><td>{% if reg.payment_method == 'Online' %}<span class="dash-badge info">Online · UTR submitted</span><br><span class="dash-id">{{ reg.utr_number }}</span>{% else %}<span class="dash-badge warn">Pay on site</span>{% endif %}</td><td><form method="POST" action="{{ url_for('approve_registration', reg_id=reg.registration_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="dashboard-btn small primary" type="submit">Approve record</button></form></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="dash-empty">All registrations are reviewed.</div>{% endif %}</section>
+    {% if stats.total_pending %}
+    <div class="dashboard-alert" role="status">
+        <span><strong>{{ stats.total_pending }} registration{{ '' if stats.total_pending == 1 else 's' }}</strong> need
+            approval before online payments can be verified.</span>
+        <button type="button" class="dashboard-btn small" onclick="switchDashboardTab('registrations')">Review
+            now</button>
+    </div>
+    {% endif %}
 
-    <section id="payments" class="dash-panel" style="margin-top:18px;" aria-labelledby="payments-title"><div class="dash-panel-head"><div><h2 id="payments-title" class="dash-panel-title">Payment verification</h2><p class="dash-panel-note">Confirm against the college bank statement before issuing a receipt.</p></div><a class="dashboard-btn small" href="{{ url_for('export_csv', status='approved') }}">Export approved</a></div>{% if online_approved %}<div class="dash-table-wrap"><table class="dash-table"><thead><tr><th>Reference</th><th>Participant / event</th><th>Amount</th><th>UTR</th><th>Receipt</th><th>Action</th></tr></thead><tbody>{% for reg in online_approved %}<tr><td><span class="dash-id">{{ reg.registration_uid }}</span></td><td><strong>{{ reg.full_name }}</strong><br><span class="dash-muted">{{ reg.event_name }} · {{ reg.email }}</span></td><td>₹{{ reg.amount_paid if reg.payment_status == 'paid' else '0' }}<br><span class="dash-muted">Amount set from event fee</span></td><td><span class="dash-id">{{ reg.utr_number or 'Missing' }}</span></td><td>{% if reg.receipt_delivery_status == 'sent' %}<span class="dash-badge good">Sent</span>{% elif reg.receipt_delivery_status == 'failed' %}<span class="dash-badge bad">Failed</span>{% else %}<span class="dash-badge warn">Not sent</span>{% endif %}</td><td><div class="dash-actions">{% if reg.payment_status == 'paid' %}<span class="dash-badge good">Verified</span>{% else %}<form method="POST" action="{{ url_for('toggle_payment', reg_id=reg.registration_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="dashboard-btn small primary" type="submit">Verify payment</button></form>{% endif %}{% if reg.payment_status == 'paid' %}<form method="POST" action="{{ url_for('send_receipt_email_route', reg_id=reg.registration_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="dashboard-btn small" type="submit">Resend receipt</button></form>{% endif %}</div></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="dash-empty">No approved online payments to review.</div>{% endif %}
-        <div class="dash-panel-head" style="margin-top:1px;"><div><h3 class="dash-panel-title">On-site payments</h3><p class="dash-panel-note">Cash or another in-person method recorded by an administrator.</p></div></div>{% if cash_approved %}<div class="dash-table-wrap"><table class="dash-table"><thead><tr><th>Reference</th><th>Participant / event</th><th>Status</th><th>Receipt</th><th>Action</th></tr></thead><tbody>{% for reg in cash_approved %}<tr><td><span class="dash-id">{{ reg.registration_uid }}</span></td><td><strong>{{ reg.full_name }}</strong><br><span class="dash-muted">{{ reg.event_name }} · {{ reg.email }}</span></td><td>{% if reg.payment_status == 'paid' %}<span class="dash-badge good">Paid · ₹{{ reg.amount_paid }}</span>{% else %}<span class="dash-badge warn">Awaiting cash</span>{% endif %}</td><td>{% if reg.receipt_delivery_status == 'sent' %}<span class="dash-badge good">Sent</span>{% elif reg.receipt_delivery_status == 'failed' %}<span class="dash-badge bad">Failed</span>{% else %}<span class="dash-badge warn">Not sent</span>{% endif %}</td><td><div class="dash-actions">{% if reg.payment_status == 'paid' %}<span class="dash-badge good">Verified</span><form method="POST" action="{{ url_for('send_receipt_email_route', reg_id=reg.registration_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="dashboard-btn small" type="submit">Resend receipt</button></form>{% else %}<form method="POST" action="{{ url_for('toggle_payment', reg_id=reg.registration_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="dashboard-btn small primary" type="submit">Mark paid</button></form>{% endif %}</div></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="dash-empty">No on-site payment records.</div>{% endif %}</section>
+    <!-- ── TAB 1: OVERVIEW ── -->
+    <section id="overview" class="dash-tab-pane active" aria-labelledby="overview-title">
+        <h2 id="overview-title" class="sr-only">Overview</h2>
+        <div class="dash-grid metrics">
+            <div class="metric info"><span class="metric-label">Events</span><span class="metric-value">{{
+                    stats.total_events }}</span><span class="metric-meta">Configured events</span></div>
+            <div class="metric"><span class="metric-label">Registrations</span><span class="metric-value">{{
+                    stats.total_registrations }}</span><span class="metric-meta">{{ stats.total_participants }} unique
+                    participants</span></div>
+            <div class="metric good"><span class="metric-label">Approved</span><span class="metric-value">{{
+                    stats.total_approved }}</span><span class="metric-meta">Ready for participation</span></div>
+            <div class="metric warn"><span class="metric-label">Pending</span><span class="metric-value">{{
+                    stats.total_pending }}</span><span class="metric-meta">Awaiting review</span></div>
+            <div class="metric"><span class="metric-label">Attendance</span><span class="metric-value">{{
+                    stats.attendance_rate }}%</span><span class="metric-meta">{{ stats.total_present }} marked
+                    present</span></div>
+        </div>
 
-    <section id="operations" style="margin-top:18px;" aria-labelledby="operations-title"><h2 id="operations-title" class="sr-only">Operations</h2><div class="dash-grid two"><section class="dash-panel"><div class="dash-panel-head"><div><h2 class="dash-panel-title">Event management</h2><p class="dash-panel-note">Keep event details and public registration controls current.</p></div><a class="dashboard-btn small primary" href="{{ url_for('add_event') }}">Add event</a></div><ul class="dash-list">{% for event in events[:8] %}<li><span><strong>{{ event.event_name }}</strong><br><span class="dash-muted">{{ event.event_date }} · {{ event.venue }}</span></span><a class="dashboard-btn small" href="{{ url_for('edit_event', event_id=event.id) }}">Edit</a></li>{% else %}<li class="dash-empty">No events configured.</li>{% endfor %}</ul></section><section class="dash-panel"><div class="dash-panel-head"><div><h2 class="dash-panel-title">Team performance</h2><p class="dash-panel-note">Registrations recorded by each member.</p></div><a class="dashboard-btn small" href="{{ url_for('members_list') }}">Members</a></div><ul class="dash-list">{% for member in team_performance %}<li><span><strong>{{ member.full_name or member.username }}</strong><br><span class="dash-muted">{{ member.total_registered }} registrations</span></span><span class="dash-badge good">{{ member.total_paid }} paid</span></li>{% else %}<li class="dash-empty">No team activity yet.</li>{% endfor %}</ul></section></div><section class="dash-panel dash-danger"><div class="dash-panel-head"><div><h2 class="dash-panel-title">Maintenance tools</h2><p class="dash-panel-note">Use exports before any destructive maintenance action.</p></div></div><div class="dash-callout">Attendance, certificates, QR scanning, event editing, and participant exports remain available from the navigation and quick actions.</div><div class="dashboard-actions" style="padding:0 18px 18px; justify-content:flex-start;"><a class="dashboard-btn small" href="{{ url_for('attendance_manager') }}">Attendance</a><a class="dashboard-btn small" href="{{ url_for('certificates_manager') }}">Certificates</a><a class="dashboard-btn small" href="{{ url_for('members_list') }}">Participants</a><a class="dashboard-btn small danger" href="{{ url_for('export_registrations_csv') }}">Download backup</a></div></section></section>
+        <!-- ── Attendance & Certificate Sections in Overview ── -->
+        <div class="dash-grid two" style="margin-bottom: 18px;">
+            <!-- Attendance Operations Center -->
+            <section class="dash-panel">
+                <div class="dash-panel-head">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 1.15rem;">📋</span>
+                            <h2 class="dash-panel-title">Attendance Tracking & Operations</h2>
+                        </div>
+                        <p class="dash-panel-note">Live attendee check-ins, presence validation, and attendance rate.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <a class="dashboard-btn small" href="{{ url_for('qr_scanner') }}">📷 QR Scanner</a>
+                        <a class="dashboard-btn small primary" href="{{ url_for('attendance_manager') }}">Full Sheet
+                            &rarr;</a>
+                    </div>
+                </div>
+
+                <div class="dash-stat-strip">
+                    <div class="dash-mini-stat">
+                        <span class="dash-mini-stat-label">Present</span>
+                        <span class="dash-mini-stat-val" style="color: var(--dash-green);">{{ stats.total_present
+                            }}</span>
+                        <span class="dash-mini-stat-sub">Marked attended</span>
+                    </div>
+                    <div class="dash-mini-stat">
+                        <span class="dash-mini-stat-label">Absent</span>
+                        <span class="dash-mini-stat-val" style="color: var(--dash-red);">{{ stats.total_absent }}</span>
+                        <span class="dash-mini-stat-sub">Marked absent</span>
+                    </div>
+                    <div class="dash-mini-stat">
+                        <span class="dash-mini-stat-label">Awaiting Check-in</span>
+                        <span class="dash-mini-stat-val" style="color: var(--dash-amber);">{{ stats.unmarked_attendance
+                            }}</span>
+                        <span class="dash-mini-stat-sub">Pending at gate</span>
+                    </div>
+                    <div class="dash-mini-stat">
+                        <span class="dash-mini-stat-label">Attendance Rate</span>
+                        <span class="dash-mini-stat-val" style="color: var(--dash-blue);">{{ stats.attendance_rate
+                            }}%</span>
+                        <span class="dash-mini-stat-sub">Of approved entries</span>
+                    </div>
+                </div>
+
+                <div style="padding: 14px 18px 12px; border-bottom: 1px solid var(--dash-line);">
+                    <div
+                        style="display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 700; margin-bottom: 4px;">
+                        <span>Gate Check-in Progress</span>
+                        <span>{{ stats.total_present }} of {{ stats.total_approved }} Approved ({{ stats.attendance_rate
+                            }}%)</span>
+                    </div>
+                    <div class="dash-progress-track">
+                        <div class="dash-progress-fill"
+                            style="width: {{ stats.attendance_rate }}%; background: var(--dash-green);"></div>
+                    </div>
+                </div>
+
+                <div style="padding: 10px 18px 4px;">
+                    <div
+                        style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dash-muted); margin-bottom: 8px;">
+                        Recent Check-ins
+                    </div>
+                </div>
+                {% if recent_checkins %}
+                <div class="dash-table-wrap">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Participant</th>
+                                <th>Event</th>
+                                <th>Status</th>
+                                <th>Marked By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for chk in recent_checkins %}
+                            <tr>
+                                <td><strong>{{ chk.full_name }}</strong></td>
+                                <td><span class="dash-badge">{{ chk.event_name }}</span></td>
+                                <td><span class="dash-badge good">✅ Present</span></td>
+                                <td><span class="dash-muted">{{ chk.marked_by or 'Admin' }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="dash-empty" style="padding: 20px 18px;">
+                    No attendees marked present yet. Click <strong>QR Scanner</strong> or <strong>Full Sheet</strong> to
+                    mark attendance.
+                </div>
+                {% endif %}
+            </section>
+
+            <!-- Certificate Operations Center -->
+            <section class="dash-panel">
+                <div class="dash-panel-head">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 1.15rem;">🏆</span>
+                            <h2 class="dash-panel-title">Certificate Generation & Email Hub</h2>
+                        </div>
+                        <p class="dash-panel-note">Issue certificates for present attendees and track delivery status.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <a class="dashboard-btn small primary" href="{{ url_for('certificates_manager') }}">Certificate
+                            Hub &rarr;</a>
+                    </div>
+                </div>
+
+                <div class="dash-stat-strip">
+                    <div class="dash-mini-stat">
+                        <span class="dash-mini-stat-label">Generated</span>
+                        <span class="dash-mini-stat-val" style="color: var(--dash-blue);">{{ stats.total_certificates
+                            }}</span>
+                        <span class="dash-mini-stat-sub">High-res PDFs</span>
+                    </div>
+                    <div class="dash-mini-stat">
+                        <span class="dash-mini-stat-label">Delivered</span>
+                        <span class="dash-mini-stat-val" style="color: var(--dash-green);">{{ stats.total_sent }}</span>
+                        <span class="dash-mini-stat-sub">Sent via email</span>
+                    </div>
+                    <div class="dash-mini-stat">
+                        <span class="dash-mini-stat-label">Pending Delivery</span>
+                        <span class="dash-mini-stat-val" style="color: var(--dash-amber);">{{ stats.pending_cert_emails
+                            }}</span>
+                        <span class="dash-mini-stat-sub">Ready to dispatch</span>
+                    </div>
+                    <div class="dash-mini-stat">
+                        <span class="dash-mini-stat-label">Eligible Unissued</span>
+                        <span class="dash-mini-stat-val" style="color: var(--dash-muted);">{{
+                            stats.pending_cert_generation }}</span>
+                        <span class="dash-mini-stat-sub">Present attendees</span>
+                    </div>
+                </div>
+
+                <div
+                    style="padding: 14px 18px 12px; border-bottom: 1px solid var(--dash-line); display: flex; flex-direction: column; gap: 10px;">
+                    <div>
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 700; margin-bottom: 4px;">
+                            <span>Generation Coverage (Present Attendees)</span>
+                            <span>{{ stats.total_certificates }} / {{ stats.total_present }} ({{
+                                stats.cert_generation_rate }}%)</span>
+                        </div>
+                        <div class="dash-progress-track">
+                            <div class="dash-progress-fill"
+                                style="width: {{ stats.cert_generation_rate }}%; background: var(--dash-blue);"></div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+                        <form method="POST" action="{{ url_for('generate_bulk_certificates') }}"
+                            style="display: inline;"
+                            onsubmit="return confirm('Generate certificates for all participants marked PRESENT?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="dashboard-btn small primary">⚡ Generate All Eligible ({{
+                                stats.pending_cert_generation }})</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('send_bulk_certificate_emails') }}"
+                            style="display: inline;"
+                            onsubmit="return confirm('Email all generated certificates to participants?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="dashboard-btn small">📧 Email All Generated</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div style="padding: 10px 18px 4px;">
+                    <div
+                        style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dash-muted); margin-bottom: 8px;">
+                        Recent Issued Certificates
+                    </div>
+                </div>
+                {% if recent_certificates %}
+                <div class="dash-table-wrap">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Participant</th>
+                                <th>Event</th>
+                                <th>Certificate Code</th>
+                                <th>Email Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cert in recent_certificates %}
+                            <tr>
+                                <td><strong>{{ cert.full_name }}</strong></td>
+                                <td><span class="dash-badge">{{ cert.event_name }}</span></td>
+                                <td><span class="dash-id">{{ cert.certificate_code }}</span></td>
+                                <td>
+                                    {% if cert.email_status == 'sent' %}
+                                    <span class="dash-badge good">✉️ Sent</span>
+                                    {% elif cert.email_status == 'failed' %}
+                                    <span class="dash-badge bad">⚠️ Failed</span>
+                                    {% else %}
+                                    <span class="dash-badge warn">⏳ In Queue</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="dash-empty" style="padding: 20px 18px;">
+                    No certificates issued yet. Attendees marked present will appear ready for certificate generation.
+                </div>
+                {% endif %}
+            </section>
+        </div>
+
+        <!-- ── Event-by-Event Operations Matrix in Overview ── -->
+        <section class="dash-panel" style="margin-bottom: 18px;">
+            <div class="dash-panel-head">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.15rem;">📊</span>
+                        <h2 class="dash-panel-title">Event Operations Matrix (Attendance & Certificates)</h2>
+                    </div>
+                    <p class="dash-panel-note">Direct overview of registrations, attendance check-ins, and certificate
+                        issues for every individual event.</p>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a class="dashboard-btn small" href="{{ url_for('attendance_manager') }}">Open Attendance Sheet</a>
+                    <a class="dashboard-btn small" href="{{ url_for('certificates_manager') }}">Open Certificate Hub</a>
+                </div>
+            </div>
+
+            {% if event_attendance_stats %}
+            <div class="dash-table-wrap">
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Event Name & Date</th>
+                            <th>Approved Registrations</th>
+                            <th>Attendance (Present / Total)</th>
+                            <th>Attendance Rate</th>
+                            <th>Certificates Status</th>
+                            <th style="text-align: right;">Quick Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ev in event_attendance_stats %}
+                        <tr>
+                            <td>
+                                <strong>{{ ev.event_name }}</strong>
+                                {% if ev.event_date %}
+                                <div class="dash-muted">📅 {{ ev.event_date }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="dash-badge info"><strong>{{ ev.total_approved }}</strong> approved</span>
+                            </td>
+                            <td>
+                                <span
+                                    style="font-weight: 750; color: {% if ev.present_count > 0 %}var(--dash-green){% else %}var(--dash-muted){% endif %};">
+                                    {{ ev.present_count }}
+                                </span>
+                                <span class="dash-muted">/ {{ ev.total_approved }}</span>
+                                {% if ev.absent_count > 0 %}
+                                <span class="dash-badge bad" style="margin-left: 6px; font-size: 0.65rem;">{{
+                                    ev.absent_count }} absent</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set att_pct = (ev.present_count / ev.total_approved * 100)|round|int if
+                                ev.total_approved > 0 else 0 %}
+                                <div style="display: flex; align-items: center; gap: 8px; min-width: 110px;">
+                                    <div class="dash-progress-track" style="margin: 0; flex: 1;">
+                                        <div class="dash-progress-fill"
+                                            style="width: {{ att_pct }}%; background: var(--dash-green);"></div>
+                                    </div>
+                                    <span style="font-size: 0.74rem; font-weight: 750; color: var(--dash-ink);">{{
+                                        att_pct }}%</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                    <span class="dash-badge {% if ev.certs_generated > 0 %}info{% endif %}">
+                                        {{ ev.certs_generated }} generated
+                                    </span>
+                                    <span class="dash-badge {% if ev.certs_sent > 0 %}good{% endif %}">
+                                        {{ ev.certs_sent }} sent
+                                    </span>
+                                </div>
+                            </td>
+                            <td style="text-align: right;">
+                                <div class="dash-actions" style="justify-content: flex-end;">
+                                    <a class="dashboard-btn small primary" href="{{ url_for('edit_event', event_id=ev.event_id) }}"
+                                        title="Edit event details, contacts & rules">✏️ Edit</a>
+                                    <a class="dashboard-btn small" href="{{ url_for('attendance_manager') }}"
+                                        title="Take attendance for this event">Attendance</a>
+                                    <a class="dashboard-btn small" href="{{ url_for('certificates_manager') }}"
+                                        title="Manage certificates for this event">Certificates</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="dash-empty">No events configured yet.</div>
+            {% endif %}
+        </section>
+
+        <div class="dash-grid two">
+            <section class="dash-panel">
+                <div class="dash-panel-head">
+                    <div>
+                        <h2 class="dash-panel-title">Registration activity</h2>
+                        <p class="dash-panel-note">Participation by event, ordered by volume.</p>
+                    </div>
+                    <a class="dashboard-btn small" href="{{ url_for('events_list') }}">View events</a>
+                </div>
+                {% if event_stats %}
+                <ul class="dash-list">
+                    {% for item in event_stats[:6] %}
+                    <li><span>{{ item.event_name }}</span><span class="dash-badge info">{{ item.reg_count }}
+                            registered</span></li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="dash-empty">No event activity yet.</div>
+                {% endif %}
+            </section>
+
+            <section class="dash-panel">
+                <div class="dash-panel-head">
+                    <div>
+                        <h2 class="dash-panel-title">System readiness</h2>
+                        <p class="dash-panel-note">Delivery and payment controls.</p>
+                    </div>
+                </div>
+                <ul class="dash-list">
+                    <li><span>Email delivery</span>{% if smtp_info.is_demo %}<span class="dash-badge warn">Demo
+                            mode</span>{% else %}<span class="dash-badge good">Live {{ smtp_info.mode|upper }}</span>{%
+                        endif %}</li>
+                    <li><span>Online records</span><span class="dash-badge info">{{ analytics.online_count }}</span>
+                    </li>
+                    <li><span>On-site records</span><span class="dash-badge">{{ analytics.offline_count }}</span></li>
+                    <li><span>Certificates</span><span class="dash-badge">{{ stats.total_sent }}/{{
+                            stats.total_certificates }} sent</span></li>
+                </ul>
+            </section>
+        </div>
+    </section>
+
+    <!-- ── TAB 2: REGISTRATIONS ── -->
+    <section id="registrations" class="dash-tab-pane" aria-labelledby="registrations-title">
+        <div class="dash-panel" style="margin-bottom: 18px;">
+            <div class="dash-panel-head">
+                <div>
+                    <h2 id="registrations-title" class="dash-panel-title">Registration management</h2>
+                    <p class="dash-panel-note">Review, export, approve, or selectively delete participant registrations.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a class="dashboard-btn small" href="{{ url_for('export_registrations_csv') }}">⬇️ Export All
+                        CSV</a>
+                    <button type="button" class="dashboard-btn small danger" onclick="openClearModal()">⚠️ Clear
+                        All</button>
+                </div>
+            </div>
+
+            <!-- Batch Selection Action Bar -->
+            <div id="batchActionBar" class="dash-batch-bar" style="margin: 14px 18px 0;">
+                <span id="selectedCountMsg"><strong>0</strong> registrations selected</span>
+                <div class="dash-batch-actions">
+                    <button type="button" class="dashboard-btn small" onclick="exportSelected()">⬇️ Export Selected
+                        (CSV)</button>
+                    <button type="button" class="dashboard-btn small danger" onclick="openBatchDeleteModal()">🗑️ Delete
+                        Selected</button>
+                    <button type="button" class="dashboard-btn small" onclick="clearAllSelections()"
+                        style="border-color: #cbd5e1;">Deselect All</button>
+                </div>
+            </div>
+
+            <div style="padding: 16px 18px 0;">
+                <div class="dash-subtabs">
+                    <button type="button" class="dash-subtab-btn active" onclick="switchRegSubtab('pendingView', this)">
+                        Pending Review ({{ pending_registrations|length }})
+                    </button>
+                    <button type="button" class="dash-subtab-btn" onclick="switchRegSubtab('approvedView', this)">
+                        All Approved Records ({{ recent_registrations|length }})
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pending Registrations Sub-view -->
+            <div id="pendingView" class="reg-subview active">
+                {% if pending_registrations %}
+                <div class="dash-table-wrap">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 38px;"><input type="checkbox" class="dash-cb" id="selectAllPending"
+                                        onchange="toggleSelectAll('pending', this)" title="Select all pending"></th>
+                                <th>Reference</th>
+                                <th>Participant</th>
+                                <th>Event</th>
+                                <th>Payment evidence</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reg in pending_registrations %}
+                            <tr id="reg-row-{{ reg.registration_id }}">
+                                <td>
+                                    <input type="checkbox" class="dash-cb reg-cb" value="{{ reg.registration_id }}"
+                                        onchange="onCheckboxChange()">
+                                </td>
+                                <td>
+                                    <span class="dash-id">{{ reg.registration_uid }}</span><br>
+                                    <span class="dash-muted">{{ reg.registered_by_name or 'Public registration'
+                                        }}</span>
+                                </td>
+                                <td>
+                                    <strong>{{ reg.full_name }}</strong><br>
+                                    <span class="dash-muted">{{ reg.email }}<br>{{ reg.college_name }} · {{
+                                        reg.department }}</span>
+                                </td>
+                                <td>
+                                    {{ reg.event_name }}
+                                    {% if reg.team_name %}
+                                    <br><span class="dash-muted">{{ reg.team_name }} · {{ reg.team_size }}
+                                        members</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if reg.payment_method == 'Online' %}
+                                    <span class="dash-badge info">Online · UTR submitted</span><br>
+                                    <span class="dash-id">{{ reg.utr_number }}</span>
+                                    {% if reg.payment_proof %}
+                                    <br><a href="{{ url_for('static', filename='uploads/payment_proofs/' + reg.payment_proof) }}" target="_blank" rel="noopener noreferrer" class="dash-id" style="color: #2563eb; text-decoration: underline; font-size: 0.74rem; display: inline-flex; align-items: center; gap: 3px; margin-top: 3px;">
+                                        📸 Proof ↗
+                                    </a>
+                                    {% endif %}
+                                    {% else %}
+                                    <span class="dash-badge warn">Pay on site (Cash)</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: right;">
+                                    <div class="dash-actions" style="justify-content: flex-end;">
+                                        <form method="POST"
+                                            action="{{ url_for('approve_registration', reg_id=reg.registration_id) }}"
+                                            style="display:inline;">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button class="dashboard-btn small primary" type="submit">Approve</button>
+                                        </form>
+                                        <button type="button" class="dashboard-btn small danger"
+                                            onclick="confirmDeleteOne({{ reg.registration_id }}, '{{ reg.full_name }}')">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="dash-empty">All registrations are reviewed. No pending requests.</div>
+                {% endif %}
+            </div>
+
+            <!-- Approved Registrations Sub-view -->
+            <div id="approvedView" class="reg-subview">
+                {% if recent_registrations %}
+                <div class="dash-table-wrap">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 38px;"><input type="checkbox" class="dash-cb" id="selectAllApproved"
+                                        onchange="toggleSelectAll('approved', this)" title="Select all approved"></th>
+                                <th>Reference</th>
+                                <th>Participant</th>
+                                <th>Event</th>
+                                <th>Payment status</th>
+                                <th>Attendance</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reg in recent_registrations %}
+                            <tr id="reg-row-{{ reg.registration_id }}">
+                                <td>
+                                    <input type="checkbox" class="dash-cb reg-cb" value="{{ reg.registration_id }}"
+                                        onchange="onCheckboxChange()">
+                                </td>
+                                <td>
+                                    <span class="dash-id">{{ reg.registration_uid }}</span><br>
+                                    <span class="dash-muted">{{ reg.registered_by_name or 'Public' }}</span>
+                                </td>
+                                <td>
+                                    <strong>{{ reg.full_name }}</strong><br>
+                                    <span class="dash-muted">{{ reg.email }} · {{ reg.phone }}<br>{{ reg.college_name
+                                        }}</span>
+                                </td>
+                                <td>
+                                    {{ reg.event_name }}
+                                </td>
+                                <td>
+                                    {% if reg.payment_status == 'paid' %}
+                                    <span class="dash-badge good">Paid · ₹{{ reg.amount_paid }}</span>
+                                    {% if reg.utr_number %}<br><span class="dash-id" style="font-size:0.7rem;">UTR: {{
+                                        reg.utr_number }}</span>{% endif %}
+                                    {% else %}
+                                    <span class="dash-badge warn">Unpaid ({{ reg.payment_method }})</span>
+                                    {% if reg.utr_number %}<br><span class="dash-id" style="font-size:0.7rem;">UTR: {{
+                                        reg.utr_number }}</span>{% endif %}
+                                    {% endif %}
+                                    {% if reg.payment_proof %}
+                                    <br><a href="{{ url_for('static', filename='uploads/payment_proofs/' + reg.payment_proof) }}" target="_blank" rel="noopener noreferrer" class="dash-id" style="color: #2563eb; text-decoration: underline; font-size: 0.74rem; display: inline-flex; align-items: center; gap: 3px; margin-top: 3px;">
+                                        📸 Proof ↗
+                                    </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if reg.att_status == 'present' %}
+                                    <span class="dash-badge good">Present</span>
+                                    {% else %}
+                                    <span class="dash-badge">Absent</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: right;">
+                                    <div class="dash-actions" style="justify-content: flex-end;">
+                                        {% if reg.payment_status == 'paid' %}
+                                        <form method="POST"
+                                            action="{{ url_for('send_receipt_email_route', reg_id=reg.registration_id) }}"
+                                            style="display:inline;">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button class="dashboard-btn small" type="submit">Receipt</button>
+                                        </form>
+                                        {% endif %}
+                                        <button type="button" class="dashboard-btn small danger"
+                                            onclick="confirmDeleteOne({{ reg.registration_id }}, '{{ reg.full_name }}')">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="dash-empty">No approved participant records.</div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- ── TAB 3: PAYMENT SCREENSHOTS GALLERY ── -->
+    <section id="screenshots" class="dash-tab-pane" aria-labelledby="screenshots-title">
+        <div class="dash-panel" style="margin-bottom: 18px;">
+            <div class="dash-panel-head">
+                <div>
+                    <h2 id="screenshots-title" class="dash-panel-title">📸 Payment Proof Screenshots Gallery</h2>
+                    <p class="dash-panel-note">Live gallery of all uploaded UPI transaction screenshots submitted by participants. Click any screenshot to inspect full resolution.</p>
+                </div>
+                <div class="dash-panel-meta">
+                    <span class="dash-badge good">{{ payment_screenshots|length if payment_screenshots else 0 }} Screenshot{{ 's' if (not payment_screenshots or payment_screenshots|length != 1) else '' }} Uploaded</span>
+                </div>
+            </div>
+
+            {% if payment_screenshots %}
+            <div class="screenshot-gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 12px 0;">
+                {% for item in payment_screenshots %}
+                {% set proof_url = url_for('static', filename=item.payment_proof if item.payment_proof.startswith('uploads/') else ('uploads/payment_proofs/' + item.payment_proof)) %}
+                <div class="screenshot-card" style="background: var(--card-bg, #ffffff); border: 1.5px solid var(--border-color, #e2e8f0); border-radius: 14px; overflow: hidden; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;">
+                    <!-- Image Box with Click to View Modal -->
+                    <div style="position: relative; width: 100%; height: 210px; background: #0f172a; overflow: hidden; cursor: pointer;" onclick="openScreenshotModal('{{ proof_url }}', '{{ item.full_name|e }}', '{{ item.event_name|e }}', '{{ (item.utr_number or 'N/A')|e }}')">
+                        <img src="{{ proof_url }}" alt="Payment screenshot for {{ item.full_name }}" style="width: 100%; height: 100%; object-fit: contain; background: #090d16;" onerror="this.src='{{ url_for('static', filename='favicon.svg') }}'">
+                        <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.75); color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                            <span>🔍 Click to Zoom</span>
+                        </div>
+                        <span style="position: absolute; top: 8px; left: 8px;" class="dash-badge {% if item.payment_status == 'paid' %}good{% else %}warn{% endif %}">
+                            {{ 'Verified Paid' if item.payment_status == 'paid' else 'Pending Review' }}
+                        </span>
+                    </div>
+
+                    <!-- Metadata Details -->
+                    <div style="padding: 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                                <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: inherit;">{{ item.full_name }}</h4>
+                                <span style="font-weight: 800; color: #16a34a; font-size: 0.95rem;">₹{{ item.amount_paid }}</span>
+                            </div>
+                            <p style="margin: 0 0 6px; font-size: 0.82rem; color: #64748b;"><strong>Event:</strong> {{ item.event_name }}</p>
+                            <p style="margin: 0 0 6px; font-size: 0.82rem; color: #64748b;"><strong>College:</strong> {{ item.college_name }}</p>
+                            <p style="margin: 0 0 10px; font-size: 0.82rem; color: inherit; word-break: break-all;">
+                                <strong>UTR:</strong> <code style="background: rgba(100, 116, 139, 0.12); padding: 2px 6px; border-radius: 4px; font-weight: 700;">{{ item.utr_number or 'No UTR' }}</code>
+                            </p>
+                        </div>
+
+                        <div style="display: flex; gap: 8px; margin-top: 10px; border-top: 1px solid var(--border-color, #f1f5f9); padding-top: 10px;">
+                            <a href="{{ proof_url }}" target="_blank" download class="dashboard-btn small" style="flex: 1; text-align: center; text-decoration: none;">Download</a>
+                            {% if item.payment_status != 'paid' %}
+                            <form method="POST" action="{{ url_for('verify_payment', reg_id=item.registration_id) }}" style="flex: 1.2;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="dashboard-btn small primary" style="width: 100%;">Verify &amp; Settle</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="dash-empty">No payment screenshots uploaded yet. Screenshots uploaded by students during UPI registration will appear here automatically.</div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ── TAB 4: PAYMENTS VERIFICATION DESK ── -->
+    <section id="payments" class="dash-tab-pane" aria-labelledby="payments-title">
+        <div class="dash-panel" style="margin-bottom: 18px;">
+            <div class="dash-panel-head">
+                <div>
+                    <h2 id="payments-title" class="dash-panel-title">Online payment verification</h2>
+                    <p class="dash-panel-note">Confirm against college bank statement before marking paid.</p>
+                </div>
+                <a class="dashboard-btn small" href="{{ url_for('export_csv', status='approved') }}">Export approved</a>
+            </div>
+            {% if online_approved %}
+            <div class="dash-table-wrap">
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Participant / event</th>
+                            <th>Amount</th>
+                            <th>UTR</th>
+                            <th>Receipt</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reg in online_approved %}
+                        <tr>
+                            <td><span class="dash-id">{{ reg.registration_uid }}</span></td>
+                            <td><strong>{{ reg.full_name }}</strong><br><span class="dash-muted">{{ reg.event_name }} ·
+                                    {{ reg.email }}</span></td>
+                            <td>₹{{ reg.amount_paid if reg.payment_status == 'paid' else '0' }}<br><span
+                                    class="dash-muted">Event fee</span></td>
+                            <td>
+                                <span class="dash-id">{{ reg.utr_number or 'Missing' }}</span>
+                                {% if reg.payment_proof %}
+                                <br><a href="{{ url_for('static', filename='uploads/payment_proofs/' + reg.payment_proof) }}" target="_blank" rel="noopener noreferrer" class="dash-id" style="color: #2563eb; text-decoration: underline; font-size: 0.74rem; display: inline-flex; align-items: center; gap: 3px; margin-top: 3px;">
+                                    📸 Proof ↗
+                                </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if reg.receipt_delivery_status == 'sent' %}<span class="dash-badge good">Sent</span>
+                                {% elif reg.receipt_delivery_status == 'failed' %}<span
+                                    class="dash-badge bad">Failed</span>
+                                {% else %}<span class="dash-badge warn">Not sent</span>{% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                <div class="dash-actions" style="justify-content: flex-end;">
+                                    {% if reg.payment_status == 'paid' %}
+                                    <span class="dash-badge good">Verified</span>
+                                    {% else %}
+                                    <form method="POST"
+                                        action="{{ url_for('toggle_payment', reg_id=reg.registration_id) }}"
+                                        style="display:inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button class="dashboard-btn small primary" type="submit">Verify
+                                            payment</button>
+                                    </form>
+                                    {% endif %}
+                                    {% if reg.payment_status == 'paid' %}
+                                    <form method="POST"
+                                        action="{{ url_for('send_receipt_email_route', reg_id=reg.registration_id) }}"
+                                        style="display:inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button class="dashboard-btn small" type="submit">Resend receipt</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="dash-empty">No approved online payments to review.</div>
+            {% endif %}
+
+            <div class="dash-panel-head" style="margin-top: 1px; border-top: 1px solid var(--dash-line);">
+                <div>
+                    <h3 class="dash-panel-title">On-site cash payments</h3>
+                    <p class="dash-panel-note">Cash or in-person payments recorded by administrators.</p>
+                </div>
+            </div>
+            {% if cash_approved %}
+            <div class="dash-table-wrap">
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Participant / event</th>
+                            <th>Status</th>
+                            <th>Receipt</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reg in cash_approved %}
+                        <tr>
+                            <td><span class="dash-id">{{ reg.registration_uid }}</span></td>
+                            <td><strong>{{ reg.full_name }}</strong><br><span class="dash-muted">{{ reg.event_name }} ·
+                                    {{ reg.email }}</span></td>
+                            <td>
+                                {% if reg.payment_status == 'paid' %}
+                                <span class="dash-badge good">Paid · ₹{{ reg.amount_paid }}</span>
+                                {% else %}
+                                <span class="dash-badge warn">Awaiting cash</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if reg.receipt_delivery_status == 'sent' %}<span class="dash-badge good">Sent</span>
+                                {% elif reg.receipt_delivery_status == 'failed' %}<span
+                                    class="dash-badge bad">Failed</span>
+                                {% else %}<span class="dash-badge warn">Not sent</span>{% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                <div class="dash-actions" style="justify-content: flex-end;">
+                                    {% if reg.payment_status == 'paid' %}
+                                    <span class="dash-badge good">Verified</span>
+                                    <form method="POST"
+                                        action="{{ url_for('send_receipt_email_route', reg_id=reg.registration_id) }}"
+                                        style="display:inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button class="dashboard-btn small" type="submit">Resend receipt</button>
+                                    </form>
+                                    {% else %}
+                                    <form method="POST"
+                                        action="{{ url_for('toggle_payment', reg_id=reg.registration_id) }}"
+                                        style="display:inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button class="dashboard-btn small primary" type="submit">Mark paid</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="dash-empty">No on-site payment records.</div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ── TAB 5: ON-SITE ATTENDANCE & QR DESK ── -->
+    <section id="attendance-desk" class="dash-tab-pane" aria-labelledby="attendance-desk-title">
+        <div class="dash-grid two" style="margin-bottom: 18px;">
+            <!-- QR Scanner & Quick Gate Check-in -->
+            <section class="dash-panel">
+                <div class="dash-panel-head">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 1.25rem;">📷</span>
+                            <h2 id="attendance-desk-title" class="dash-panel-title">QR Scanner &amp; Mobile Check-in</h2>
+                        </div>
+                        <p class="dash-panel-note">Instant gate check-in via mobile camera or webcam.</p>
+                    </div>
+                    <a class="dashboard-btn small primary" href="{{ url_for('qr_scanner') }}">Launch Scanner ↗</a>
+                </div>
+                <div style="padding: 16px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.15); border-radius: 12px; margin-bottom: 16px;">
+                    <p style="margin: 0 0 10px; font-weight: 700; color: inherit;">⚡ Fast Desk Procedures:</p>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.88rem; line-height: 1.6; color: #64748b;">
+                        <li>Scan candidate's digital pass QR code from their mobile screen or printed ticket.</li>
+                        <li>Cash-pending contenders can pay cash directly to the member/admin desk to be marked as Paid.</li>
+                        <li>Attendance is verified in real-time and synced with the certificate generation pipeline.</li>
+                    </ul>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <a href="{{ url_for('attendance_manager') }}" class="dashboard-btn" style="flex: 1; text-align: center; text-decoration: none;">View Master Attendance Sheet</a>
+                    <a href="{{ url_for('qr_scanner') }}" class="dashboard-btn primary" style="flex: 1; text-align: center; text-decoration: none;">Open Scanner Camera</a>
+                </div>
+            </section>
+
+            <!-- Real-time Attendance Stats & Summary -->
+            <section class="dash-panel">
+                <div class="dash-panel-head">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 1.25rem;">📊</span>
+                            <h2 class="dash-panel-title">Attendance Overview</h2>
+                        </div>
+                        <p class="dash-panel-note">Live gate turn-out metrics.</p>
+                    </div>
+                    <span class="dash-badge good">{{ stats.total_attended }} Checked In</span>
+                </div>
+                <div class="dash-grid metrics" style="margin-bottom: 14px;">
+                    <div class="metric good">
+                        <span class="metric-label">Present</span>
+                        <span class="metric-value">{{ stats.total_attended }}</span>
+                        <span class="metric-meta">Verified on campus</span>
+                    </div>
+                    <div class="metric info">
+                        <span class="metric-label">Approved</span>
+                        <span class="metric-value">{{ stats.total_approved }}</span>
+                        <span class="metric-meta">Eligible for entry</span>
+                    </div>
+                </div>
+                {% if recent_checkins %}
+                <h4 style="font-size: 0.88rem; margin: 12px 0 8px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Recent Check-ins</h4>
+                <ul class="dash-list">
+                    {% for checkin in recent_checkins[:5] %}
+                    <li class="dash-list-item">
+                        <div>
+                            <strong>{{ checkin.full_name }}</strong>
+                            <div class="dash-muted">{{ checkin.event_name }} · {{ checkin.college_name }}</div>
+                        </div>
+                        <span class="dash-badge good">Present</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="dash-empty">No check-in activity recorded yet. Check-ins will update live here as participants arrive.</div>
+                {% endif %}
+            </section>
+        </div>
+    </section>
+
+    <!-- ── TAB: EVENTS & RULES CONFIGURATION ── -->
+    <section id="events-config" class="dash-tab-pane" aria-labelledby="events-config-title">
+        <div class="dash-panel">
+            <div class="dash-panel-head">
+                <div>
+                    <h2 id="events-config-title" class="dash-panel-title">🎯 Event Customization &amp; Rules Configuration Hub</h2>
+                    <p class="dash-panel-note">Configure event schedules, descriptions, competition rules, faculty in-charge, and student coordinator contacts.</p>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a class="dashboard-btn small primary" href="{{ url_for('add_event') }}">➕ Add New Event</a>
+                    <a class="dashboard-btn small" href="{{ url_for('events_list') }}#events" target="_blank">🌐 View Live Portal</a>
+                </div>
+            </div>
+
+            <div style="padding: 18px 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 18px;">
+                    {% for ev in events %}
+                    <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.15s ease, box-shadow 0.15s ease;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+                                <div>
+                                    <span class="dash-badge info" style="font-size: 0.72rem; text-transform: uppercase;">{{ ev.event_type }}</span>
+                                    {% if ev.is_group %}
+                                    <span class="dash-badge" style="font-size: 0.72rem; background: #e0e7ff; color: #3730a3;">👥 Group ({{ ev.min_team_size }}–{{ ev.max_team_size }})</span>
+                                    {% else %}
+                                    <span class="dash-badge" style="font-size: 0.72rem; background: #f1f5f9; color: #475569;">👤 Solo</span>
+                                    {% endif %}
+                                    <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 6px 0 2px; font-family: 'Space Grotesk', sans-serif;">{{ ev.event_name }}</h3>
+                                </div>
+                                <span class="dash-badge good" style="font-size: 0.85rem; font-weight: 800;">
+                                    {% if ev.event_fee and ev.event_fee > 0 %}₹ {{ ev.event_fee }}{% else %}Free{% endif %}
+                                </span>
+                            </div>
+
+                            <div style="font-size: 0.82rem; color: #64748b; line-height: 1.5; margin-bottom: 12px; display: flex; flex-direction: column; gap: 3px;">
+                                <div>📅 <strong>Date:</strong> {{ ev.event_date }}{% if ev.event_time %} @ {{ ev.event_time }}{% endif %}</div>
+                                <div>📍 <strong>Venue:</strong> {{ ev.venue }}</div>
+                                <div>👥 <strong>Capacity:</strong> Max {{ ev.max_participants or 100 }} participants</div>
+                            </div>
+
+                            <!-- Coordinator Contacts -->
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 0.8rem;">
+                                <div style="font-weight: 750; color: #1e293b; margin-bottom: 4px;">📞 Coordinator Contacts:</div>
+                                <div style="color: #334155;">
+                                    <strong>Faculty:</strong> {{ ev.faculty_name or 'Not assigned' }}
+                                    {% if ev.faculty_phone %}<a href="tel:{{ ev.faculty_phone }}" style="color:#2563eb; text-decoration:none;">({{ ev.faculty_phone }})</a>{% endif %}
+                                </div>
+                                <div style="color: #334155; margin-top: 2px;">
+                                    <strong>Student:</strong> {{ ev.student_name or 'Not assigned' }}
+                                    {% if ev.student_phone %}<a href="tel:{{ ev.student_phone }}" style="color:#2563eb; text-decoration:none;">({{ ev.student_phone }})</a>{% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Rules Preview -->
+                            <div style="background: #fafafa; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; font-size: 0.78rem; color: #475569;">
+                                <div style="font-weight: 750; color: #1e293b; margin-bottom: 4px;">📜 Rules &amp; Regulations:</div>
+                                <div style="max-height: 60px; overflow-y: auto; line-height: 1.4;">
+                                    {{ ev.rules_text or 'No specific rules configured. Click Edit to add rules.' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid #f1f5f9;">
+                            <a class="dashboard-btn small primary" href="{{ url_for('edit_event', event_id=ev.id) }}" style="flex: 1; text-align: center; justify-content: center; font-weight: 750;">
+                                ✏️ Edit &amp; Configure
+                            </a>
+                            <a class="dashboard-btn small" href="{{ url_for('events_list') }}#events" target="_blank" style="padding: 6px 10px;" title="View in public portal">
+                                👁️ View
+                            </a>
+                            <form method="POST" action="{{ url_for('delete_event', event_id=ev.id) }}" onsubmit="return confirm('Are you sure you want to permanently delete event \'{{ ev.event_name }}\'?');" style="margin: 0;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="dashboard-btn small danger" style="padding: 6px 10px;" title="Delete event">🗑️</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="dash-empty" style="grid-column: 1 / -1;">No events configured. Click "Add New Event" above to create one.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── TAB 6: OPERATIONS & BACKUPS ── -->
+    <section id="operations" class="dash-tab-pane" aria-labelledby="operations-title">
+        <h2 id="operations-title" class="sr-only">Operations</h2>
+        <div class="dash-grid two">
+            <section class="dash-panel">
+                <div class="dash-panel-head">
+                    <div>
+                        <h2 class="dash-panel-title">Event management</h2>
+                        <p class="dash-panel-note">Keep event details and public registration controls current.</p>
+                    </div>
+                    <a class="dashboard-btn small primary" href="{{ url_for('add_event') }}">Add event</a>
+                </div>
+                <ul class="dash-list">
+                    {% for event in events %}
+                    <li>
+                        <span><strong>{{ event.event_name }}</strong><br><span class="dash-muted">{{ event.event_date }}
+                                · {{ event.venue }}{% if event.faculty_name %} · Faculty: {{ event.faculty_name }}{% endif %}</span></span>
+                        <a class="dashboard-btn small primary" href="{{ url_for('edit_event', event_id=event.id) }}">✏️ Edit &amp; Rules</a>
+                    </li>
+                    {% else %}
+                    <li class="dash-empty">No events configured.</li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <section class="dash-panel">
+                <div class="dash-panel-head">
+                    <div>
+                        <h2 class="dash-panel-title">Team performance</h2>
+                        <p class="dash-panel-note">Registrations recorded by each member.</p>
+                    </div>
+                    <a class="dashboard-btn small" href="{{ url_for('members_list') }}">Members</a>
+                </div>
+                <ul class="dash-list">
+                    {% for member in team_performance %}
+                    <li>
+                        <span><strong>{{ member.full_name or member.username }}</strong><br><span class="dash-muted">{{
+                                member.total_registered }} registrations</span></span>
+                        <span class="dash-badge good">{{ member.total_paid }} paid</span>
+                    </li>
+                    {% else %}
+                    <li class="dash-empty">No team activity yet.</li>
+                    {% endfor %}
+                </ul>
+            </section>
+        </div>
+
+        <!-- Attendance & Certificate Dedicated Operations Hub -->
+        <div class="dash-panel" style="margin-top: 18px;">
+            <div class="dash-panel-head">
+                <div>
+                    <h2 class="dash-panel-title">Attendance & Certificate Operations</h2>
+                    <p class="dash-panel-note">Access dedicated tools for live check-in scanning, manual attendance
+                        registers, and bulk certificate issuance.</p>
+                </div>
+            </div>
+            <div
+                style="padding: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px;">
+                <div
+                    style="padding: 14px 16px; border: 1px solid var(--dash-line); border-radius: 10px; background: #fafbfc;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span style="font-size: 1.2rem;">📷</span>
+                        <strong style="font-size: 0.92rem;">QR Attendance Scanner</strong>
+                    </div>
+                    <p style="font-size: 0.78rem; color: var(--dash-muted); margin: 0 0 12px;">Fast gate check-in using
+                        mobile camera or barcode scanner.</p>
+                    <a class="dashboard-btn small primary" href="{{ url_for('qr_scanner') }}">Launch Scanner &rarr;</a>
+                </div>
+
+                <div
+                    style="padding: 14px 16px; border: 1px solid var(--dash-line); border-radius: 10px; background: #fafbfc;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span style="font-size: 1.2rem;">📋</span>
+                        <strong style="font-size: 0.92rem;">Attendance Sheet & Register</strong>
+                    </div>
+                    <p style="font-size: 0.78rem; color: var(--dash-muted); margin: 0 0 12px;">Review attendees by event
+                        and toggle present/absent with instant save.</p>
+                    <a class="dashboard-btn small" href="{{ url_for('attendance_manager') }}">Open Attendance Sheet
+                        &rarr;</a>
+                </div>
+
+                <div
+                    style="padding: 14px 16px; border: 1px solid var(--dash-line); border-radius: 10px; background: #fafbfc;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span style="font-size: 1.2rem;">🏆</span>
+                        <strong style="font-size: 0.92rem;">Certificate Hub & Dispatch</strong>
+                    </div>
+                    <p style="font-size: 0.78rem; color: var(--dash-muted); margin: 0 0 12px;">Generate high-res
+                        certificates, customize coordinates, and send emails.</p>
+                    <a class="dashboard-btn small" href="{{ url_for('certificates_manager') }}">Open Certificate Hub
+                        &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance Tools Panel (Unwanted quick links removed) -->
+        <section class="dash-panel dash-danger" style="margin-top: 18px;">
+            <div class="dash-panel-head">
+                <div>
+                    <h2 class="dash-panel-title">Maintenance & data controls</h2>
+                    <p class="dash-panel-note">Export full databases or perform critical maintenance.</p>
+                </div>
+            </div>
+            <div class="dash-callout">
+                Always ensure you have exported a full CSV backup before initiating any database wipe or batch
+                participant removal.
+            </div>
+            <div class="dashboard-actions" style="padding: 0 18px 18px; justify-content: flex-start;">
+                <a class="dashboard-btn small" href="{{ url_for('export_registrations_csv') }}">⬇️ Download Full CSV
+                    Backup</a>
+                <button type="button" class="dashboard-btn small danger" onclick="openClearModal()">⚠️ Clear All
+                    Registrations</button>
+            </div>
+        </section>
+    </section>
+</div>
+
+<!-- ── MODAL 1: CLEAR ALL REGISTRATIONS ── -->
+<div id="clearModal" class="dash-modal-overlay">
+    <div class="dash-modal-box">
+        <div class="dash-modal-head">
+            <h3 style="color:#b42318; display:flex; align-items:center; gap:8px;">
+                <span>⚠️</span> Clear All Data
+            </h3>
+            <button type="button" class="dash-modal-close" onclick="closeClearModal()">&times;</button>
+        </div>
+        <p style="color:#334155; font-size:0.92rem; line-height:1.5; margin:0 0 12px;">
+            You are about to permanently delete <strong>ALL</strong> registrations, participants, attendance logs, and
+            generated certificates.
+        </p>
+        <div
+            style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px 14px; margin-bottom:18px; color:#991b1b; font-size:0.82rem; font-weight:600;">
+            🚨 This destructive action cannot be undone. To prevent accidental data loss, you must download a backup
+            before the deletion button is unlocked.
+        </div>
+
+        <div class="dash-step-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <strong style="font-size:0.86rem; color:#0f172a;">Step 1: Download Complete CSV Backup</strong>
+                <span id="backupBadge" class="dash-badge good" style="display:none;">✓ Backup downloaded</span>
+            </div>
+            <p style="margin:0 0 10px; font-size:0.78rem; color:#64748b;">Export all current registrations and
+                participants into a safe CSV file.</p>
+            <a href="{{ url_for('export_registrations_csv') }}" id="modalBackupLink" onclick="onBackupClicked()"
+                class="dashboard-btn small"
+                style="width:100%; text-align:center; background:#fff; border-color:#cbd5e1; font-weight:750;">
+                ⬇️ Download Full CSV Backup
+            </a>
+        </div>
+
+        <div class="dash-step-card" style="margin-bottom:20px;">
+            <strong style="font-size:0.86rem; color:#0f172a; display:block; margin-bottom:6px;">Step 2: Confirm
+                Deletion</strong>
+            <p style="margin:0 0 12px; font-size:0.78rem; color:#64748b;">Unlocked immediately after initiating the
+                backup download above.</p>
+            <form method="POST" action="{{ url_for('clear_all_registrations') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" id="confirmClearAllBtn" class="dashboard-btn small danger"
+                    style="width:100%; min-height:38px; opacity:0.4; pointer-events:none; font-weight:800;" disabled>
+                    🗑️ Permanently Delete All Registrations
+                </button>
+            </form>
+        </div>
+
+        <div style="text-align:right;">
+            <button type="button" class="dashboard-btn small" onclick="closeClearModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL 2: BATCH DELETE SELECTED ── -->
+<div id="batchDeleteModal" class="dash-modal-overlay">
+    <div class="dash-modal-box">
+        <div class="dash-modal-head">
+            <h3 style="color:#b42318; display:flex; align-items:center; gap:8px;">
+                <span>🗑️</span> Delete Selected Registrations
+            </h3>
+            <button type="button" class="dash-modal-close" onclick="closeBatchDeleteModal()">&times;</button>
+        </div>
+        <p style="color:#334155; font-size:0.92rem; line-height:1.5; margin:0 0 12px;">
+            You have selected <strong id="batchModalCount">0</strong> registration(s) to delete.
+        </p>
+        <p style="color:#64748b; font-size:0.82rem; margin:0 0 18px;">
+            Would you like to download a CSV backup of these selected records before deleting them?
+        </p>
+
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;">
+            <button type="button" class="dashboard-btn small" onclick="exportSelectedAndThenDelete()"
+                style="width:100%; justify-content:center; font-weight:750;">
+                ⬇️ Download Backup First & Delete
+            </button>
+            <button type="button" class="dashboard-btn small danger" onclick="executeBatchDelete()"
+                style="width:100%; justify-content:center; font-weight:750;">
+                🗑️ Delete Immediately Without Backup
+            </button>
+        </div>
+
+        <div style="text-align:right;">
+            <button type="button" class="dashboard-btn small" onclick="closeBatchDeleteModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden forms for single and batch deletion -->
+<form id="singleDeleteForm" method="POST" action="" style="display:none;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+<form id="batchDeleteForm" method="POST" action="{{ url_for('delete_selected_registrations') }}" style="display:none;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="reg_ids" id="batchFormIds" value="">
+</form>
+
+<form id="batchExportForm" method="POST" action="{{ url_for('export_selected_registrations') }}" style="display:none;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="reg_ids" id="exportFormIds" value="">
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ── TAB CONTROLLER & SLIDING PILL ANIMATION ──
+    function moveNavPill(targetLink) {
+        const nav = document.getElementById('dashboardNav');
+        const pill = document.getElementById('dashNavPill');
+        if (!nav || !pill || !targetLink) return;
+        const navRect = nav.getBoundingClientRect();
+        const linkRect = targetLink.getBoundingClientRect();
+        pill.style.transform = `translateX(${linkRect.left - navRect.left}px)`;
+        pill.style.width = `${linkRect.width}px`;
+    }
+
+    function switchDashboardTab(tabId) {
+        const nav = document.getElementById('dashboardNav');
+        if (!nav) return;
+        const links = nav.querySelectorAll('.dash-nav-link');
+        const panes = document.querySelectorAll('.dash-tab-pane');
+
+        let activeLink = null;
+        links.forEach(link => {
+            const isMatch = link.getAttribute('data-tab') === tabId;
+            link.classList.toggle('active', isMatch);
+            if (isMatch) activeLink = link;
+        });
+
+        panes.forEach(pane => {
+            pane.classList.toggle('active', pane.id === tabId);
+        });
+
+        if (activeLink) {
+            moveNavPill(activeLink);
+        }
+
+        if (history.replaceState) {
+            history.replaceState(null, null, '#' + tabId);
+        } else {
+            window.location.hash = tabId;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const nav = document.getElementById('dashboardNav');
+        if (nav) {
+            const links = nav.querySelectorAll('.dash-nav-link');
+            links.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabId = link.getAttribute('data-tab');
+                    switchDashboardTab(tabId);
+                });
+                link.addEventListener('mouseenter', () => {
+                    moveNavPill(link);
+                });
+            });
+
+            nav.addEventListener('mouseleave', () => {
+                const currentActive = nav.querySelector('.dash-nav-link.active');
+                if (currentActive) moveNavPill(currentActive);
+            });
+
+            // Initialize from URL hash or default to overview
+            const hash = (window.location.hash || '').replace('#', '');
+            const valid = ['overview', 'registrations', 'screenshots', 'payments', 'attendance-desk', 'events-config', 'operations'];
+            const startTab = valid.includes(hash) ? hash : 'overview';
+            switchDashboardTab(startTab);
+
+            setTimeout(() => {
+                const currentActive = nav.querySelector('.dash-nav-link.active');
+                if (currentActive) moveNavPill(currentActive);
+            }, 50);
+
+            window.addEventListener('resize', () => {
+                const currentActive = nav.querySelector('.dash-nav-link.active');
+                if (currentActive) moveNavPill(currentActive);
+            });
+        }
+    });
+
+    // ── REGISTRATIONS SUB-TAB TOGGLE ──
+    function switchRegSubtab(viewId, btn) {
+        document.querySelectorAll('.dash-subtab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.reg-subview').forEach(v => v.classList.remove('active'));
+        btn.classList.add('active');
+        const target = document.getElementById(viewId);
+        if (target) target.classList.add('active');
+        clearAllSelections();
+    }
+
+    // ── CHECKBOX & BATCH SELECTION ──
+    function getSelectedIds() {
+        const cbs = document.querySelectorAll('.reg-cb:checked');
+        return Array.from(cbs).map(cb => cb.value);
+    }
+
+    function onCheckboxChange() {
+        const ids = getSelectedIds();
+        const bar = document.getElementById('batchActionBar');
+        const countMsg = document.getElementById('selectedCountMsg');
+        if (ids.length > 0) {
+            if (bar) bar.classList.add('visible');
+            if (countMsg) countMsg.innerHTML = `<strong>${ids.length}</strong> registration${ids.length === 1 ? '' : 's'} selected`;
+        } else {
+            if (bar) bar.classList.remove('visible');
+        }
+    }
+
+    function toggleSelectAll(view, masterCb) {
+        const container = view === 'pending' ? document.getElementById('pendingView') : document.getElementById('approvedView');
+        if (!container) return;
+        const cbs = container.querySelectorAll('.reg-cb');
+        cbs.forEach(cb => { cb.checked = masterCb.checked; });
+        onCheckboxChange();
+    }
+
+    function clearAllSelections() {
+        document.querySelectorAll('.reg-cb').forEach(cb => { cb.checked = false; });
+        const pAll = document.getElementById('selectAllPending');
+        const aAll = document.getElementById('selectAllApproved');
+        if (pAll) pAll.checked = false;
+        if (aAll) aAll.checked = false;
+        onCheckboxChange();
+    }
+
+    // ── EXPORT SELECTED ──
+    function exportSelected() {
+        const ids = getSelectedIds();
+        if (ids.length === 0) {
+            alert('Please select at least one registration to export.');
+            return;
+        }
+        const form = document.getElementById('batchExportForm');
+        const input = document.getElementById('exportFormIds');
+        if (form && input) {
+            input.value = ids.join(',');
+            form.submit();
+        }
+    }
+
+    // ── BATCH DELETE ──
+    function openBatchDeleteModal() {
+        const ids = getSelectedIds();
+        if (ids.length === 0) {
+            alert('Please select at least one registration to delete.');
+            return;
+        }
+        document.getElementById('batchModalCount').textContent = ids.length;
+        document.getElementById('batchDeleteModal').classList.add('open');
+    }
+
+    function closeBatchDeleteModal() {
+        document.getElementById('batchDeleteModal').classList.remove('open');
+    }
+
+    function executeBatchDelete() {
+        const ids = getSelectedIds();
+        if (ids.length === 0) return;
+        const form = document.getElementById('batchDeleteForm');
+        const input = document.getElementById('batchFormIds');
+        if (form && input) {
+            input.value = ids.join(',');
+            form.submit();
+        }
+    }
+
+    function exportSelectedAndThenDelete() {
+        exportSelected();
+        setTimeout(() => {
+            executeBatchDelete();
+        }, 1200);
+    }
+
+    // ── SINGLE REGISTRATION DELETE WITH AUTOMATIC BACKUP DOWNLOAD ──
+    function confirmDeleteOne(regId, name) {
+        if (!confirm(`Are you sure you want to delete registration for "${name}"?\n\nA backup copy of this participant's data will automatically download first to prevent accidental data loss.`)) {
+            return;
+        }
+
+        // 1. Immediately trigger backup file download
+        const dlLink = document.createElement('a');
+        dlLink.href = `/admin/export/registration/${regId}`;
+        dlLink.download = `backup_registration_${regId}.json`;
+        document.body.appendChild(dlLink);
+        dlLink.click();
+        dlLink.remove();
+
+        // 2. Submit deletion form after brief timeout so download begins
+        setTimeout(() => {
+            const form = document.getElementById('singleDeleteForm');
+            if (form) {
+                form.action = `/admin/registrations/delete/${regId}`;
+                form.submit();
+            }
+        }, 600);
+    }
+
+    // ── SCREENSHOT ZOOM MODAL ──
+    function openScreenshotModal(imgSrc, name, event, utr) {
+        const modal = document.getElementById('screenshotZoomModal');
+        const modalImg = document.getElementById('zoomModalImg');
+        const title = document.getElementById('zoomModalTitle');
+        const meta = document.getElementById('zoomModalMeta');
+        const dl = document.getElementById('zoomModalDownload');
+        if (!modal || !modalImg) return;
+        modalImg.src = imgSrc;
+        if (title) title.textContent = `${name} – ${event}`;
+        if (meta) meta.innerHTML = `<strong>UTR:</strong> <code>${utr}</code>`;
+        if (dl) dl.href = imgSrc;
+        modal.style.display = 'flex';
+    }
+
+    function closeScreenshotModal() {
+        const modal = document.getElementById('screenshotZoomModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    // ── CLEAR ALL MODAL ──
+    function openClearModal() {
+        const modal = document.getElementById('clearModal');
+        if (modal) modal.classList.add('open');
+    }
+
+    function closeClearModal() {
+        const modal = document.getElementById('clearModal');
+        if (modal) modal.classList.remove('open');
+        // Reset state
+        const btn = document.getElementById('confirmClearAllBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.style.opacity = '0.4';
+            btn.style.pointerEvents = 'none';
+        }
+        const badge = document.getElementById('backupBadge');
+        if (badge) badge.style.display = 'none';
+    }
+
+    function onBackupClicked() {
+        const badge = document.getElementById('backupBadge');
+        if (badge) badge.style.display = 'inline-flex';
+        const btn = document.getElementById('confirmClearAllBtn');
+        if (btn) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+        }
+    }
+
+    // Close modals when clicking outside box
+    window.addEventListener('click', (e) => {
+        const clearMod = document.getElementById('clearModal');
+        const batchMod = document.getElementById('batchDeleteModal');
+        const zoomMod = document.getElementById('screenshotZoomModal');
+        if (e.target === clearMod) closeClearModal();
+        if (e.target === batchMod) closeBatchDeleteModal();
+        if (e.target === zoomMod) closeScreenshotModal();
+    });
+</script>
+
+<!-- Dedicated Screenshot Zoom Modal -->
+<div id="screenshotZoomModal" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;">
+    <div style="position: relative; max-width: 900px; width: 100%; max-height: 90vh; background: #0f172a; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.15); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+            <div id="zoomModalTitle" style="color: #ffffff; font-weight: 700; font-size: 1.05rem;">Payment Screenshot Proof</div>
+            <button type="button" onclick="closeScreenshotModal()" style="background: none; border: none; color: #ffffff; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+        <div style="flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 16px; background: #000000;">
+            <img id="zoomModalImg" src="" alt="Payment Proof" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px;">
+        </div>
+        <div style="padding: 12px 20px; background: #1e293b; color: #94a3b8; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+            <span id="zoomModalMeta"></span>
+            <a id="zoomModalDownload" href="" download class="dashboard-btn small primary" style="text-decoration: none;">Download Full Image</a>
+        </div>
+    </div>
 </div>
 {% endblock %}

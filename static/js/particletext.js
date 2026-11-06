@@ -361,6 +361,18 @@ window.initParticleText = function(container, options = {}) {
     pointer.active = true;
   };
 
+  const handleTouchMove = event => {
+    if (!event.touches || !event.touches[0]) return;
+    const rect = canvas.getBoundingClientRect();
+    pointer.x = event.touches[0].clientX - rect.left;
+    pointer.y = event.touches[0].clientY - rect.top;
+    pointer.active = true;
+  };
+
+  const handleTouchEnd = () => {
+    pointer.active = false;
+  };
+
   const handlePointerLeave = () => {
     pointer.active = false;
   };
@@ -389,6 +401,10 @@ window.initParticleText = function(container, options = {}) {
   canvas.addEventListener('pointermove', handlePointerMove);
   canvas.addEventListener('pointerleave', handlePointerLeave);
   canvas.addEventListener('click', handleClick);
+  canvas.addEventListener('touchstart', handleTouchMove, { passive: true });
+  canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
+  canvas.addEventListener('touchend', handleTouchEnd, { passive: true });
+  canvas.addEventListener('touchcancel', handleTouchEnd, { passive: true });
 
   const resizeObserver = new ResizeObserver(queueSample);
   resizeObserver.observe(container);
@@ -405,6 +421,10 @@ window.initParticleText = function(container, options = {}) {
     canvas.removeEventListener('pointermove', handlePointerMove);
     canvas.removeEventListener('pointerleave', handlePointerLeave);
     canvas.removeEventListener('click', handleClick);
+    canvas.removeEventListener('touchstart', handleTouchMove);
+    canvas.removeEventListener('touchmove', handleTouchMove);
+    canvas.removeEventListener('touchend', handleTouchEnd);
+    canvas.removeEventListener('touchcancel', handleTouchEnd);
 
     if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
     if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);

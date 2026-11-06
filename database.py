@@ -29,10 +29,16 @@ def get_postgres_connection():
         return None
 
 def get_sqlite_connection():
-    """Fallback connection to SQLite."""
+    """Fallback connection to SQLite with concurrency optimization."""
     db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'eventmate.db')
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, timeout=10.0)
     conn.row_factory = sqlite3.Row
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
     return conn
 
 def get_db():
@@ -148,7 +154,7 @@ def create_registration(*, full_name, email, phone, college_name, department,
                         semester, event_id, team_name, team_size,
                         team_members, payment_status, amount_paid,
                         payment_method, utr_number, registered_by,
-                        is_group_event):
+                        is_group_event, payment_proof=None):
     """Create a participant, registration, and attendance row atomically.
 
     Capacity, duplicate-registration, and duplicate-UTR checks happen inside
@@ -264,8 +270,8 @@ def create_registration(*, full_name, email, phone, college_name, department,
             INSERT INTO registrations
                 (registration_uid, participant_id, event_id, registered_by,
                  is_group, team_name, team_size, team_members,
-                 payment_status, status, amount_paid, payment_method, utr_number)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 payment_status, status, amount_paid, payment_method, utr_number, payment_proof)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         if is_sqlite:
             execute(
@@ -273,7 +279,7 @@ def create_registration(*, full_name, email, phone, college_name, department,
                 (registration_uid, participant_id, event_id, registered_by,
                  is_group_event, team_name, team_size, team_members,
                  payment_status, 'approved' if registered_by else 'pending',
-                 amount_paid, payment_method, utr_number)
+                 amount_paid, payment_method, utr_number, payment_proof)
             )
             registration_id = cursor.lastrowid
         else:
@@ -282,14 +288,9 @@ def create_registration(*, full_name, email, phone, college_name, department,
                 (registration_uid, participant_id, event_id, registered_by,
                  is_group_event, team_name, team_size, team_members,
                  payment_status, 'approved' if registered_by else 'pending',
-                 amount_paid, payment_method, utr_number)
+                 amount_paid, payment_method, utr_number, payment_proof)
             )
             registration_id = cursor.fetchone()['id']
-
-        execute(
-            "INSERT INTO attendance (registration_id, status, marked_by) VALUES (%s, %s, %s)",
-            (registration_id, 'absent', 'system')
-        )
 
         conn.commit()
         return {
@@ -419,6 +420,7 @@ def create_tables_and_seed():
             amount_paid INTEGER DEFAULT 0,
             payment_method VARCHAR(50) DEFAULT 'None',
             utr_number VARCHAR(100) NULL,
+            payment_proof VARCHAR(255) NULL,
             payment_verified_at TIMESTAMP NULL,
             payment_verified_by INTEGER NULL,
             receipt_sent_at TIMESTAMP NULL,
@@ -507,6 +509,7 @@ def create_tables_and_seed():
         ("registrations", "amount_paid", "INTEGER DEFAULT 0"),
         ("registrations", "payment_method", "VARCHAR(50) DEFAULT 'None'"),
         ("registrations", "utr_number", "VARCHAR(100) NULL"),
+        ("registrations", "payment_proof", "VARCHAR(255) NULL"),
         ("registrations", "payment_verified_at", "TIMESTAMP NULL"),
         ("registrations", "payment_verified_by", "INTEGER NULL"),
         ("registrations", "receipt_sent_at", "TIMESTAMP NULL"),
@@ -633,15 +636,17 @@ def create_tables_and_seed():
 
     normalize_legacy_banner_filenames()
 
-    # Seed demo users only when an administrator explicitly supplies a password.
+    # Seed admin and team users only when an administrator explicitly supplies a password.
     # Never create or overwrite accounts with a password embedded in source code.
     if Config.ADMIN_PASSWORD:
         admin_pass = generate_password_hash(Config.ADMIN_PASSWORD)
         users_to_seed = [
-            ('varshitha', 'varshitha@eventmate.college', 'admin', 'Varshitha H')
+            ('admin', 'admin@shreedakshaacademyedu.in', 'admin', 'admin'),
+            ('admin1', 'admin1@shreedakshaacademyedu.in', 'admin', 'admin SDA1'),
+            ('admin2', 'admin2@shreedakshaacademyedu.in', 'admin', 'admin SDA2')
         ]
         for i in range(1, 11):
-            users_to_seed.append((f'member{i}', f'member{i}@eventmate.college', 'member', f'Team Member {i}'))
+            users_to_seed.append((f'member{i}', f'member{i}@shreedakshaacademyedu.in', 'member', f'Team Member {i}'))
 
         for un, em, role, fn in users_to_seed:
             existing = query_db("SELECT id FROM users WHERE username = %s", (un,), one=True)
@@ -652,17 +657,21 @@ def create_tables_and_seed():
                 )
             else:
                 execute_db(
-                    "UPDATE users SET password_hash = %s, role = %s, full_name = %s WHERE username = %s",
-                    (admin_pass, role, fn, un)
+                    "UPDATE users SET password_hash = %s, role = %s, full_name = %s, email = %s WHERE username = %s",
+                    (admin_pass, role, fn, em, un)
                 )
         print("[DB Seed] Synced configured admin and team member accounts")
     else:
         print("[DB Seed] Account password sync skipped; set ADMIN_PASSWORD in the environment")
 
-    # Clean up any legacy admin user if exists
-    legacy_admin = query_db("SELECT id FROM users WHERE username = 'admin'", one=True)
-    if legacy_admin:
-        execute_db("DELETE FROM users WHERE username = 'admin'")
+    # Migrate any legacy varshitha account to admin
+    legacy_varshitha = query_db("SELECT id FROM users WHERE username = 'varshitha'", one=True)
+    if legacy_varshitha:
+        admin_user = query_db("SELECT id FROM users WHERE username = 'admin'", one=True)
+        if not admin_user:
+            execute_db("UPDATE users SET username = 'admin', full_name = 'admin', email = 'admin@shreedakshaacademyedu.in' WHERE username = 'varshitha'")
+        else:
+            execute_db("DELETE FROM users WHERE username = 'varshitha'")
 
     # Seed or ensure core & group events exist
     required_events = [

@@ -2,14 +2,14 @@
 
 **EventMate** is a full-featured, modern, and user-friendly Web Application designed for managing college symposiums, hackathons, and technical events (such as **CodeCraft**, **CodeStorm**, **CodeVerse**, and **ByteBattle**).
 
-Built using **Python (Flask)**, **MySQL**, **Vanilla HTML/CSS/JavaScript**, and **SMTP**, it provides automated workflows for participant registrations, duplicate prevention, attendance tracking, instant high-resolution certificate generation with verification QR codes, and automated email dispatch.
+Built using **Python (Flask)**, **PostgreSQL** (with an automatic SQLite fallback), **Vanilla HTML/CSS/JavaScript**, and **SMTP/Resend**, it provides automated workflows for participant registrations, duplicate prevention, attendance tracking, instant high-resolution certificate generation, and automated email dispatch.
 
 ---
 
 ## 🌟 Key Features
 
 1. **Authentication & Role-Based Access Control**:
-   - Dedicated **Admin Login** (`admin` / `admin123`) for faculty/organizers.
+   - Dedicated **Admin Login** for faculty/organizers, provisioned via the `ADMIN_PASSWORD` environment variable (no hardcoded credentials).
    - **Student / Participant Portal** with registration and personal dashboard (`my_events`).
    - Secure hashed password storage (`werkzeug.security`).
 
@@ -45,7 +45,6 @@ Built using **Python (Flask)**, **MySQL**, **Vanilla HTML/CSS/JavaScript**, and 
      - Event Dates (18-Sep-2026, 19-Sep-2026, 20-Sep-2026)
      - Unique Certificate ID (e.g. `EM-2026-CC-8742`)
      - Official Gold Seal Emblem & Authorized Signatures
-     - Live Verification QR code pointing directly to the verification portal.
    - Single-click bulk generator for all verified attendees.
    - Instant high-res PNG download and preview modal.
 
@@ -62,9 +61,9 @@ Built using **Python (Flask)**, **MySQL**, **Vanilla HTML/CSS/JavaScript**, and 
 ## 🛠️ Technology Stack
 
 | Layer | Technology |
-|---|---|
+| --- | --- |
 | **Backend Framework** | Python 3.x with Flask |
-| **Database** | MySQL (with SQLite dual connector fallback) |
+| **Database** | PostgreSQL (via `psycopg2`), with an automatic SQLite fallback (`eventmate.db`) for local/dev runs |
 | **Frontend** | HTML5, Modern CSS3 (Variables, Flexbox, Grid), JavaScript (Vanilla ES6) |
 | **Certificate Generator** | Pillow (PIL) + QRCode |
 | **Email Protocol** | SMTP (`smtplib` + `email.mime`) |
@@ -78,12 +77,11 @@ Built using **Python (Flask)**, **MySQL**, **Vanilla HTML/CSS/JavaScript**, and 
 EventMate/
 │
 ├── app.py                      # Flask application main routes & server entry
-├── config.py                   # Centralized configuration (MySQL, SMTP, College info)
+├── config.py                   # Centralized configuration (PostgreSQL/SQLite, SMTP/Resend, College info)
 ├── database.py                 # Database connector, parameterized query runner & seeder
 ├── certificate_generator.py    # Pillow-based high-res Certificate & QR code generator
 ├── mailer.py                   # SMTP email dispatcher with certificate attachment
-├── schema.sql                  # MySQL database schema and initial seed data
-├── setup_db.py                 # Automatic DB initialization & directory setup script
+├── database.py                 # Schema creation + seed data (run automatically at startup)
 ├── requirements.txt            # Python dependencies
 ├── .env.example                # Sample environment variables template
 ├── README.md                   # Project documentation & viva explanation
@@ -118,50 +116,51 @@ EventMate/
 ## 🚀 Step-by-Step Installation & Setup
 
 ### Step 1: Open the Project in Visual Studio Code
+
 Open your terminal in the project directory:
+
 ```bash
 cd c:\Users\varshitha.h\OneDrive\Desktop\Eventmanagement
 ```
 
 ### Step 2: Install Required Python Packages
-Run the following command to install Flask, MySQL connector, Pillow, and other dependencies:
+
+Run the following command to install Flask, psycopg2, Pillow, and other dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-## 🗄️ MySQL Database Setup
+## 🗄️ Database Setup
 
-### Option A: Automatic Setup (Recommended)
-1. Ensure your MySQL service is running (e.g., via XAMPP, WampServer, or MySQL Server).
-2. Configure your MySQL username and password in `.env` (or `config.py`):
+The application supports two backends; it picks PostgreSQL automatically when `DATABASE_URL` is set, otherwise it falls back to an embedded SQLite file (`eventmate.db`). All tables and seed data are created automatically at startup — there is no manual schema import.
+
+### Option A: PostgreSQL (Recommended for production)
+
+1. Set `DATABASE_URL` in `.env` to a PostgreSQL connection string, for example:
+
    ```ini
-   MYSQL_HOST=localhost
-   MYSQL_USER=root
-   MYSQL_PASSWORD=your_mysql_password
-   MYSQL_DB=eventmate_db
-   MYSQL_PORT=3306
+   DATABASE_URL=postgresql://user:password@host:5432/eventmate_db
    ```
-3. Run the setup script:
-   ```bash
-   python setup_db.py
-   ```
-   *This will automatically create the database `eventmate_db`, all tables, and seed initial symposium events and default users.*
 
-### Option B: Manual Import via phpMyAdmin / MySQL CLI
-1. Open phpMyAdmin or MySQL Workbench.
-2. Create a new database named `eventmate_db`.
-3. Import the provided [`schema.sql`](file:///c:/Users/varshitha.h/OneDrive/Desktop/Eventmanagement/schema.sql) file.
+2. Start the app — the schema and seed data are applied automatically.
 
-> **Note on Standby Mode:** If MySQL is not running or credentials are empty, EventMate automatically initializes an embedded database file (`eventmate.db`) so you can test and demonstrate the entire project immediately without any setup errors.
+### Option B: SQLite (Zero-setup local dev)
+
+- Leave `DATABASE_URL` unset. The app automatically initializes `eventmate.db` in the project root, so you can run and demonstrate the entire project immediately with no external database server.
+
+> **Note:** The codebase uses raw parameterized SQL (no ORM). For PostgreSQL it uses `%s` placeholders via `psycopg2`; the SQLite fallback swaps these to `?` automatically.
 
 ---
 
 ## ✉️ SMTP Email Setup (Optional for Live Emails)
 
 To send real emails to participants with the attached certificate:
+
 1. In your `.env` file, configure your Gmail SMTP settings:
+
    ```ini
    SMTP_SERVER=smtp.gmail.com
    SMTP_PORT=587
@@ -170,6 +169,7 @@ To send real emails to participants with the attached certificate:
    SMTP_SENDER_EMAIL=your_email@gmail.com
    SMTP_USE_TLS=True
    ```
+
    *(For Gmail, generate an 16-character **App Password** under Google Account -> Security -> 2-Step Verification -> App Passwords).*
 2. If left blank, EventMate runs in **Safe Demo Mode**, simulating email delivery and notifying you via the UI.
 
@@ -178,11 +178,13 @@ To send real emails to participants with the attached certificate:
 ## ▶️ Running the Application
 
 Start the Flask development server:
+
 ```bash
 python app.py
 ```
 
 Open your web browser and navigate to:
+
 ```
 http://127.0.0.1:5000
 ```
@@ -217,13 +219,10 @@ Set `ADMIN_PASSWORD` to a strong, private value before creating or provisioning 
    - Uses asynchronous `fetch()` API to update attendance status in the database without page refresh, providing instant UI feedback.
 
 5. **Automated Certificate Generation Module (`certificate_generator.py`)**:
-   - Utilizes Python Pillow (PIL) to draw a 1920x1080 high-resolution certificate.
-   - Embeds a dynamic QR code generated using `qrcode` that links to the verification portal.
+   - Utilizes Python Pillow (PIL) to draw a 2480x1754 high-resolution certificate.
+   - Embeds a dynamic QR code generated using `qrcode`.
 
-6. **Verification Module (`templates/verify_certificate.html`)**:
-   - Public endpoint allowing universities or employers to enter a Certificate ID to verify participation authenticity.
-
-7. **Email Dispatcher (`mailer.py`)**:
+6. **Email Dispatcher (`mailer.py`)**:
    - Constructs MIME multipart messages containing HTML styling and the certificate image attachment dispatched via secure SMTP.
 
 ---
@@ -245,8 +244,3 @@ Set `ADMIN_PASSWORD` to a strong, private value before creating or provisioning 
    - Go to **Register** (`/register`) -> Fill out details for a participant (Name, Email, Phone, College, Department, Event).
    - Submit registration and observe confirmation.
    - Attempt to re-register with the same email for the same event to observe duplicate prevention.
-
-3. **Test Public Verification**:
-   - Copy any generated Certificate ID (e.g., from the Certificates Hub).
-   - Open **Verify Certificate** (`/verify`).
-   - Paste the ID and click **Verify** to see the official verified credentials badge.

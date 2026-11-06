@@ -3,7 +3,7 @@ import os
 from functools import wraps
 from flask import (
     Flask, render_template, request, redirect, url_for, 
-    flash, session, jsonify, send_from_directory, send_file, abort, Response
+    flash, session, jsonify, send_from_directory, send_file, abort, Response, make_response
 )
 import csv
 import io
@@ -11,9 +11,11 @@ import re
 import uuid
 import secrets
 import hmac
-from urllib.parse import quote
+import base64
+from urllib.parse import quote, urlparse
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.middleware.proxy_fix import ProxyFix
 from PIL import Image, UnidentifiedImageError
 import qrcode
 from config import Config
@@ -24,14 +26,18 @@ from mailer import send_certificate_email, get_smtp_info, send_receipt_email
 
 app = Flask(__name__)
 app.config.from_object(Config)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 # Configure upload folders
 UPLOAD_FOLDER_QR = os.path.join(app.root_path, 'static', 'uploads', 'qr_codes')
 UPLOAD_FOLDER_BANNERS = os.path.join(app.root_path, 'static', 'images')
+UPLOAD_FOLDER_PAYMENTS = os.path.join(app.root_path, 'static', 'uploads', 'payment_proofs')
 os.makedirs(UPLOAD_FOLDER_QR, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER_BANNERS, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER_PAYMENTS, exist_ok=True)
 app.config['UPLOAD_FOLDER_QR'] = UPLOAD_FOLDER_QR
 app.config['UPLOAD_FOLDER_BANNERS'] = UPLOAD_FOLDER_BANNERS
+app.config['UPLOAD_FOLDER_PAYMENTS'] = UPLOAD_FOLDER_PAYMENTS
 app.config['ALLOWED_IMAGE_EXTENSIONS'] = {'jpg', 'jpeg', 'png', 'webp', 'gif'}
 
 # Lightweight in-process login throttling keeps repeated credential attacks from
@@ -120,13 +126,29 @@ def protect_state_changing_requests():
     if request.method not in {'POST', 'PUT', 'PATCH', 'DELETE'}:
         return None
 
-    expected_origin = request.host_url.rstrip('/')
+    expected_hostname = (request.host.split(':')[0] if request.host else '').lower()
+    base_hostname = (urlparse(Config.BASE_URL).hostname or '').lower() if Config.BASE_URL else ''
     origin = request.headers.get('Origin', '').rstrip('/')
     referer = request.headers.get('Referer', '')
-    if origin and origin != expected_origin:
-        abort(400, description='Invalid request origin.')
-    if not origin and referer and not referer.startswith(f'{expected_origin}/'):
-        abort(400, description='Invalid request origin.')
+
+    def _is_safe_host(candidate_host):
+        if not candidate_host:
+            return True
+        c_host = candidate_host.lower()
+        if c_host == expected_hostname or (base_hostname and c_host == base_hostname):
+            return True
+        if Config.APP_ENV != 'production' and c_host in ('localhost', '127.0.0.1', '0.0.0.0') and expected_hostname in ('localhost', '127.0.0.1', '0.0.0.0'):
+            return True
+        return False
+
+    if origin:
+        origin_hostname = urlparse(origin).hostname or ''
+        if not _is_safe_host(origin_hostname):
+            abort(400, description='Invalid request origin.')
+    elif referer:
+        referer_hostname = urlparse(referer).hostname or ''
+        if not _is_safe_host(referer_hostname):
+            abort(400, description='Invalid request origin.')
 
     submitted_token = request.form.get('csrf_token') or request.headers.get('X-CSRF-Token')
     stored_token = session.get('_csrf_token')
@@ -143,17 +165,18 @@ def add_security_headers(response):
     response.headers.setdefault('X-Content-Type-Options', 'nosniff')
     response.headers.setdefault('X-Frame-Options', 'SAMEORIGIN')
     response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
-    response.headers.setdefault('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+    response.headers.setdefault('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()')
     response.headers.setdefault(
         'Content-Security-Policy',
         "default-src 'self'; "
         "base-uri 'self'; object-src 'none'; form-action 'self'; "
         "img-src 'self' data: https: blob:; "
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; "
-        "font-src 'self' data: https://fonts.gstatic.com; "
+        "media-src 'self' data: blob:; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdnjs.cloudflare.com; "
+        "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
         "script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; "
         "connect-src 'self' https://*.tile.openstreetmap.org https://*.openstreetmap.org; "
-        "frame-src 'self' https://maps.google.com https://www.google.com"
+        "frame-src 'self' https://maps.google.com https://www.google.com https://*.google.com https://*.google.co.in"
     )
     if request.is_secure:
         response.headers.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
@@ -228,12 +251,22 @@ def login():
             (identifier, identifier),
             one=True
         )
+        if not user and identifier.isdigit():
+            user = query_db("SELECT * FROM users WHERE id = %s", (int(identifier),), one=True)
 
-        if user and user.get('role') in ('admin', 'member') and not Config.ADMIN_PASSWORD and not app.config.get('TESTING'):
+        if user and user.get('role') in ('admin', 'member') and not Config.ADMIN_PASSWORD and not app.config.get('TESTING') and password:
             flash('Administrator password configuration is required before sign-in is enabled.', 'danger')
             return render_template('login.html'), 503
 
-        if user and check_password_hash(user['password_hash'], password):
+        is_authenticated = False
+        if user:
+            if password:
+                is_authenticated = check_password_hash(user['password_hash'], password)
+            else:
+                # ID-only login: valid staff/member ID grants access without password requirement
+                is_authenticated = True
+
+        if is_authenticated:
             clear_login_failures(client_key)
             # Rotate the signed session contents after authentication to avoid
             # carrying pre-login session state into the authenticated session.
@@ -244,14 +277,13 @@ def login():
             session['full_name'] = user['full_name']
             session['role'] = user['role']
 
-            flash(f"Welcome back, {user['full_name']}!", 'success')
             if user['role'] == 'admin':
                 return redirect(url_for('admin_dashboard'))
             else:
                 return redirect(url_for('member_dashboard'))
         else:
             record_login_failure(client_key)
-            flash('Invalid username or password. Please check your credentials and try again.', 'danger')
+            flash('Invalid ID or credentials. Please check and try again.', 'danger')
 
     return render_template('login.html')
 
@@ -282,11 +314,22 @@ def admin_dashboard():
     reg_res = query_db("SELECT COUNT(*) as count FROM registrations", one=True)
     total_registrations = reg_res['count'] if reg_res else 0
 
-    # 3. Attendance Counts
-    pres_res = query_db("SELECT COUNT(*) as count FROM attendance WHERE status = 'present'", one=True)
+    # 3. Attendance Counts (tied strictly to approved active registrations)
+    pres_res = query_db("""
+        SELECT COUNT(DISTINCT a.registration_id) as count 
+        FROM attendance a
+        JOIN registrations r ON a.registration_id = r.id
+        WHERE a.status = 'present' AND r.status = 'approved'
+    """, one=True)
     total_present = pres_res['count'] if pres_res else 0
 
-    attendance_rate = round((total_present / total_registrations * 100), 1) if total_registrations > 0 else 0
+    abs_res = query_db("""
+        SELECT COUNT(DISTINCT a.registration_id) as count 
+        FROM attendance a
+        JOIN registrations r ON a.registration_id = r.id
+        WHERE a.status = 'absent' AND a.marked_by != 'system' AND r.status = 'approved'
+    """, one=True)
+    total_absent = abs_res['count'] if abs_res else 0
 
     # 4. Certificates Generated & Sent
     cert_res = query_db("SELECT COUNT(*) as count FROM certificates", one=True)
@@ -295,6 +338,11 @@ def admin_dashboard():
     sent_res = query_db("SELECT COUNT(*) as count FROM certificates WHERE email_status = 'sent'", one=True)
     total_sent = sent_res['count'] if sent_res else 0
 
+    failed_res = query_db("SELECT COUNT(*) as count FROM certificates WHERE email_status = 'failed'", one=True)
+    total_failed = failed_res['count'] if failed_res else 0
+
+    pending_cert_emails = max(0, total_certificates - total_sent - total_failed)
+
     # 5. Approved and Pending Counts
     appr_res = query_db("SELECT COUNT(*) as count FROM registrations WHERE status = 'approved'", one=True)
     total_approved = appr_res['count'] if appr_res else 0
@@ -302,14 +350,38 @@ def admin_dashboard():
     pend_res = query_db("SELECT COUNT(*) as count FROM registrations WHERE status = 'pending'", one=True)
     total_pending = pend_res['count'] if pend_res else 0
 
+    # Attendance rate calculated against approved registrations
+    attendance_rate = round((total_present / total_approved * 100), 1) if total_approved > 0 else 0
+    unmarked_attendance = max(0, total_approved - (total_present + total_absent))
+
+    # Eligible attendees for certificates (present in attendance, but certificate not generated yet)
+    eligible_pending_cert = query_db("""
+        SELECT COUNT(r.id) as count
+        FROM registrations r
+        JOIN attendance a ON a.registration_id = r.id AND a.status = 'present'
+        LEFT JOIN certificates c ON c.registration_id = r.id
+        WHERE r.status = 'approved' AND c.id IS NULL
+    """, one=True)
+    pending_cert_generation = eligible_pending_cert['count'] if eligible_pending_cert else 0
+
+    cert_generation_rate = round((total_certificates / total_present * 100), 1) if total_present > 0 else 0
+    cert_delivery_rate = round((total_sent / total_certificates * 100), 1) if total_certificates > 0 else 0
+
     stats = {
         'total_events': total_events,
         'total_participants': total_participants,
         'total_registrations': total_registrations,
         'total_present': total_present,
+        'total_absent': total_absent,
+        'unmarked_attendance': unmarked_attendance,
         'attendance_rate': attendance_rate,
         'total_certificates': total_certificates,
         'total_sent': total_sent,
+        'total_failed': total_failed,
+        'pending_cert_emails': pending_cert_emails,
+        'pending_cert_generation': pending_cert_generation,
+        'cert_generation_rate': cert_generation_rate,
+        'cert_delivery_rate': cert_delivery_rate,
         'total_approved': total_approved,
         'total_pending': total_pending
     }
@@ -336,9 +408,49 @@ def admin_dashboard():
     """)
     top_event = event_stats[0] if event_stats else {'event_name': 'None', 'reg_count': 0}
 
+    # Event Operations Matrix (combining registration, attendance & certificates per event)
+    event_attendance_stats = query_db("""
+        SELECT e.id as event_id, e.event_name, e.event_date,
+               COUNT(r.id) as total_approved,
+               SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) as present_count,
+               SUM(CASE WHEN a.status = 'absent' THEN 1 ELSE 0 END) as absent_count,
+               SUM(CASE WHEN r.id IS NOT NULL AND (a.status IS NULL OR a.status = '') THEN 1 ELSE 0 END) as unmarked_count,
+               COUNT(c.id) as certs_generated,
+               SUM(CASE WHEN c.email_status = 'sent' THEN 1 ELSE 0 END) as certs_sent
+        FROM events e
+        LEFT JOIN registrations r ON e.id = r.event_id AND r.status = 'approved'
+        LEFT JOIN attendance a ON a.registration_id = r.id
+        LEFT JOIN certificates c ON c.registration_id = r.id
+        GROUP BY e.id, e.event_name, e.event_date
+        ORDER BY total_approved DESC, e.event_name ASC
+    """)
+
+    # Recent Attendance Check-ins
+    recent_checkins = query_db("""
+        SELECT p.full_name, e.event_name, a.status, a.marked_at, a.marked_by
+        FROM attendance a
+        JOIN registrations r ON a.registration_id = r.id
+        JOIN participants p ON r.participant_id = p.id
+        JOIN events e ON r.event_id = e.id
+        WHERE a.status = 'present'
+        ORDER BY a.marked_at DESC
+        LIMIT 6
+    """)
+
+    # Recent Certificates Issued
+    recent_certificates = query_db("""
+        SELECT p.full_name, e.event_name, c.certificate_code, c.email_status, c.sent_at, c.created_at
+        FROM certificates c
+        JOIN registrations r ON c.registration_id = r.id
+        JOIN participants p ON r.participant_id = p.id
+        JOIN events e ON r.event_id = e.id
+        ORDER BY c.created_at DESC
+        LIMIT 6
+    """)
+
     # Pending Registrations
     pending_registrations = query_db("""
-        SELECT r.id as registration_id, r.registration_uid, r.is_group, r.team_name, r.team_size, r.team_members, r.payment_status, r.amount_paid, r.payment_method, r.utr_number,
+        SELECT r.id as registration_id, r.registration_uid, r.is_group, r.team_name, r.team_size, r.team_members, r.payment_status, r.amount_paid, r.payment_method, r.utr_number, r.payment_proof,
                r.payment_verified_at, r.payment_verified_by, r.receipt_sent_at, r.receipt_delivery_status,
                p.full_name, p.email, p.phone, p.college_name, p.department, 
                e.event_name, u.username as registered_by_name
@@ -352,7 +464,7 @@ def admin_dashboard():
 
     # Approved Recent Registrations
     recent_registrations = query_db("""
-        SELECT r.id as registration_id, r.registration_uid, r.is_group, r.team_name, r.team_size, r.team_members, r.payment_status, r.amount_paid, r.payment_method, r.utr_number,
+        SELECT r.id as registration_id, r.registration_uid, r.is_group, r.team_name, r.team_size, r.team_members, r.payment_status, r.amount_paid, r.payment_method, r.utr_number, r.payment_proof,
                r.payment_verified_at, r.payment_verified_by, r.receipt_sent_at, r.receipt_delivery_status,
                p.full_name, p.email, p.phone, p.college_name, p.department, 
                e.event_name, a.status as att_status, u.username as registered_by_name
@@ -380,6 +492,20 @@ def admin_dashboard():
         ORDER BY total_registered DESC, u.username ASC
     """)
 
+    # Dedicated Payment Proofs Gallery Query
+    payment_screenshots = query_db("""
+        SELECT r.id as registration_id, r.registration_uid, r.payment_status, r.amount_paid,
+               r.payment_method, r.utr_number, r.payment_proof, r.status as reg_status,
+               r.registration_date,
+               p.full_name, p.email, p.phone, p.college_name,
+               e.event_name
+        FROM registrations r
+        JOIN participants p ON r.participant_id = p.id
+        JOIN events e ON r.event_id = e.id
+        WHERE r.payment_proof IS NOT NULL AND r.payment_proof != ''
+        ORDER BY r.id DESC
+    """)
+
     events = query_db("SELECT * FROM events ORDER BY id ASC")
     showcase_section = query_db(
         "SELECT * FROM event_showcase_sections WHERE section_key = %s",
@@ -392,11 +518,15 @@ def admin_dashboard():
                            recent_registrations=recent_registrations,
                            online_approved=online_approved,
                            cash_approved=cash_approved,
+                           payment_screenshots=payment_screenshots,
                            team_performance=team_performance,
                            events=events,
                            analytics=analytics,
                            event_stats=event_stats,
                            top_event=top_event,
+                           event_attendance_stats=event_attendance_stats,
+                           recent_checkins=recent_checkins,
+                           recent_certificates=recent_certificates,
                            showcase_section=showcase_section,
                            smtp_info=get_smtp_info())
 
@@ -408,13 +538,27 @@ def approve_registration(reg_id):
     flash("Registration has been approved and moved to the completed list.", "success")
     return redirect(request.referrer or url_for('admin_dashboard'))
 
+@app.route('/sw.js')
+def service_worker():
+    """Serve the root-scoped service worker for offline pass caching."""
+    sw_path = os.path.join(app.root_path, 'static', 'sw.js')
+    if not os.path.exists(sw_path):
+        abort(404)
+    with open(sw_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    response = make_response(content)
+    response.headers['Content-Type'] = 'application/javascript'
+    response.headers['Service-Worker-Allowed'] = '/'
+    response.headers['Cache-Control'] = 'no-cache'
+    return response
+
 @app.route('/payment-status/<registration_uid>')
 def payment_status(registration_uid):
     """Show a limited, shareable payment-status record."""
     registration = query_db(
         """
         SELECT r.registration_uid, r.payment_status, r.amount_paid, r.payment_method,
-               r.utr_number, r.payment_verified_at, r.receipt_delivery_status,
+               r.utr_number, r.payment_proof, r.payment_verified_at, r.receipt_delivery_status,
                p.full_name, e.event_name, e.event_fee
         FROM registrations r
         JOIN participants p ON p.id = r.participant_id
@@ -425,7 +569,20 @@ def payment_status(registration_uid):
     )
     if not registration:
         abort(404)
-    return render_template('payment_status.html', registration=registration)
+
+    qr_b64 = None
+    try:
+        qr = qrcode.QRCode(box_size=6, border=2)
+        qr.add_data(registration_uid)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        qr_b64 = base64.b64encode(buf.getvalue()).decode('ascii')
+    except Exception:
+        pass
+
+    return render_template('payment_status.html', registration=registration, qr_b64=qr_b64)
 
 @app.route('/admin/export/csv')
 @admin_required
@@ -881,6 +1038,7 @@ def register_participant():
         payment_status = 'paid' if event_fee == 0 else 'unpaid'
         amount_paid = 0
 
+        payment_proof = None
         if event_fee == 0:
             payment_method = 'None'
             utr_number = None
@@ -889,6 +1047,17 @@ def register_participant():
                 flash('Enter a valid UPI transaction reference (6–64 letters, numbers, or separators).', 'danger')
                 return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
             payment_status = 'pending'
+
+            # Secure payment screenshot upload (MANDATORY for Online / UPI)
+            screenshot_file = request.files.get('payment_screenshot')
+            if not screenshot_file or not screenshot_file.filename:
+                flash('Please upload your UPI payment screenshot to complete online registration.', 'danger')
+                return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
+            try:
+                payment_proof = save_image_upload(screenshot_file, app.config['UPLOAD_FOLDER_PAYMENTS'])
+            except ValueError as img_err:
+                flash(f'Payment screenshot error: {img_err}', 'danger')
+                return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
         elif payment_method == 'Cash':
             utr_number = None
             payment_status = 'pay_on_site'
@@ -939,7 +1108,11 @@ def register_participant():
             team_size = 1
             team_name = None
 
-        if not full_name or not email or not phone or not college_name or not event_id:
+        if not email or '@' not in email or '.' not in email.split('@')[-1] or len(email.strip()) < 5:
+            flash('A valid email address is required for registration.', 'danger')
+            return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
+
+        if not full_name or not phone or not college_name or not event_id:
             flash('All required fields must be filled.', 'danger')
             return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
 
@@ -958,6 +1131,7 @@ def register_participant():
             amount_paid=amount_paid,
             payment_method=payment_method,
             utr_number=utr_number,
+            payment_proof=payment_proof,
             registered_by=registered_by,
             is_group_event=is_group_event
         )
@@ -975,7 +1149,12 @@ def register_participant():
             return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
 
         team_info_msg = f" (Team: {team_name} with {team_size} members)" if is_group_event and team_name else ""
-        confirmation = 'Registration received and awaiting admin verification.' if payment_status == 'pending' else 'Registration successful.'
+        if payment_status == 'pay_on_site':
+            confirmation = 'Registration submitted! Please pay at your college desk upon arrival.'
+        elif payment_status == 'pending':
+            confirmation = 'Registration received and awaiting admin verification.'
+        else:
+            confirmation = 'Registration successful.'
         flash(f'{confirmation} Reference: {registration["registration_uid"]}{team_info_msg}', 'success')
         
         return redirect(url_for('payment_status', registration_uid=registration['registration_uid']))
@@ -988,11 +1167,19 @@ def register_participant():
 @app.route('/admin/participants')
 @admin_required
 def participants_list():
-    # Aggregated query fetching participants and their registrations with group details
-    participants = query_db("""
-        SELECT p.*, 
-               GROUP_CONCAT(e.event_name SEPARATOR ', ') as event_names,
-               GROUP_CONCAT(COALESCE(r.team_name, '') SEPARATOR ', ') as team_names,
+    # Aggregated query fetching participants and their registrations with group details.
+    # PostgreSQL uses string_agg; SQLite uses GROUP_CONCAT.
+    if database.DB_MODE == 'postgres':
+        event_names_expr = "string_agg(e.event_name, ', ')"
+        team_names_expr = "string_agg(COALESCE(r.team_name, ''), ', ')"
+    else:
+        event_names_expr = "GROUP_CONCAT(e.event_name SEPARATOR ', ')"
+        team_names_expr = "GROUP_CONCAT(COALESCE(r.team_name, '') SEPARATOR ', ')"
+
+    participants = query_db(f"""
+        SELECT p.*,
+               {event_names_expr} as event_names,
+               {team_names_expr} as team_names,
                MAX(r.team_size) as max_team_size,
                MAX(r.is_group) as has_group_reg
         FROM participants p
@@ -1050,7 +1237,7 @@ def attendance_manager():
         SELECT r.id as registration_id, r.is_group, r.team_name, r.team_size, r.team_members,
                p.full_name, p.email, p.college_name, p.department, 
                e.event_name, e.event_date, e.is_group as event_is_group,
-               COALESCE(a.status, 'absent') as att_status
+               COALESCE(CASE WHEN a.status = 'absent' AND a.marked_by = 'system' THEN 'pending' ELSE a.status END, 'pending') as att_status
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
         JOIN events e ON r.event_id = e.id
@@ -1061,14 +1248,16 @@ def attendance_manager():
     events = query_db("SELECT * FROM events ORDER BY id ASC")
 
     present_count = sum(1 for r in attendance_records if r['att_status'] == 'present')
-    absent_count = len(attendance_records) - present_count
+    absent_count = sum(1 for r in attendance_records if r['att_status'] == 'absent')
+    pending_count = len(attendance_records) - present_count - absent_count
 
     return render_template(
         'attendance.html', 
         attendance_records=attendance_records, 
         events=events,
         present_count=present_count,
-        absent_count=absent_count
+        absent_count=absent_count,
+        pending_count=pending_count
     )
 
 @app.route('/attendance/toggle', methods=['POST'])
@@ -1136,6 +1325,7 @@ def delete_attendance_record(registration_id):
 # ---------------------------------------------------------
 # Certificate Hub & Automatic Generation
 # ---------------------------------------------------------
+
 @app.route('/verify')
 def verify_certificate():
     """Publicly verify a certificate without exposing private participant data."""
@@ -1269,15 +1459,11 @@ def generate_single_certificate(reg_id):
         JOIN participants p ON r.participant_id = p.id
         JOIN events e ON r.event_id = e.id
         LEFT JOIN attendance a ON a.registration_id = r.id
-        WHERE r.id = %s AND r.status = 'approved'
+        WHERE r.id = %s
     """, (reg_id,), one=True)
 
     if not reg:
-        flash('Registration record not found or not approved.', 'danger')
-        return redirect(url_for('certificates_manager'))
-
-    if reg['att_status'] != 'present':
-        flash('Cannot generate certificate: Participant attendance is not marked as PRESENT.', 'warning')
+        flash('Registration record not found.', 'danger')
         return redirect(url_for('certificates_manager'))
 
     # Check if certificate already exists on disk
@@ -1310,13 +1496,13 @@ def generate_single_certificate(reg_id):
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (cert_code, reg_id, reg['participant_id'], reg['event_id'], reg['event_date'], file_path, 'pending'))
 
-    flash(f"Certificate of Achievement generated successfully! Certificate ID: {cert_code}", 'success')
+    flash(f"Certificate generated successfully! Certificate ID: {cert_code}", 'success')
     return redirect(url_for('certificates_manager'))
 
 @app.route('/admin/certificates/generate-bulk', methods=['POST'])
 @admin_required
 def generate_bulk_certificates():
-    # Find all registrations marked present
+    # Direct generation for all registered participants without validation barriers
     eligible = query_db("""
         SELECT r.id as registration_id, r.participant_id, r.event_id, r.team_name,
                p.full_name, p.college_name, p.department, p.semester,
@@ -1325,7 +1511,6 @@ def generate_bulk_certificates():
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
         JOIN events e ON r.event_id = e.id
-        JOIN attendance a ON a.registration_id = r.id AND a.status = 'present'
         LEFT JOIN certificates c ON c.registration_id = r.id
     """)
 
@@ -1611,7 +1796,8 @@ def my_events():
 # Application Entry Point
 # ---------------------------------------------------------
 
-@app.route('/admin/export/csv')
+@app.route('/admin/export/full-backup-csv', endpoint='export_registrations_csv')
+@app.route('/admin/export/registrations-csv', endpoint='export_registrations_csv_alias')
 @admin_required
 def export_registrations_csv():
     import csv
@@ -1655,16 +1841,199 @@ def export_registrations_csv():
     )
 
 
+def remove_registration_record(registration_id):
+    """Safely delete a registration, its attendance, certificate file/record, and orphan participant."""
+    reg = query_db("SELECT id, participant_id, event_id FROM registrations WHERE id = %s", (registration_id,), one=True)
+    if not reg:
+        return False
+    
+    participant_id = reg['participant_id']
+    cert = query_db("SELECT file_path FROM certificates WHERE registration_id = %s", (registration_id,), one=True)
+    if cert and cert.get('file_path') and os.path.exists(cert['file_path']):
+        try:
+            os.remove(cert['file_path'])
+        except Exception as e:
+            app.logger.warning(f"Failed to delete certificate file: {e}")
+            
+    execute_db("DELETE FROM certificates WHERE registration_id = %s", (registration_id,))
+    execute_db("DELETE FROM attendance WHERE registration_id = %s", (registration_id,))
+    execute_db("DELETE FROM registrations WHERE id = %s", (registration_id,))
+    
+    # Check if participant has remaining registrations
+    remaining = query_db("SELECT id FROM registrations WHERE participant_id = %s", (participant_id,))
+    if not remaining:
+        execute_db("DELETE FROM participants WHERE id = %s", (participant_id,))
+    return True
+
+
+@app.route('/admin/export/registration/<int:reg_id>', endpoint='export_single_registration')
+@admin_required
+def export_single_registration(reg_id):
+    """Download backup file of a single registration before deletion."""
+    import json
+    from flask import Response
+    row = query_db("""
+        SELECT r.id, r.registration_uid, r.payment_status, r.payment_method, r.amount_paid,
+               r.registration_date, r.utr_number, r.payment_proof, r.team_name,
+               p.full_name, p.email, p.phone, p.college_name, p.department,
+               e.event_name
+        FROM registrations r
+        JOIN participants p ON r.participant_id = p.id
+        JOIN events e ON r.event_id = e.id
+        WHERE r.id = %s
+    """, (reg_id,), one=True)
+    if not row:
+        return jsonify({'error': 'Registration not found'}), 404
+        
+    data = dict(row)
+    for k, v in data.items():
+        if hasattr(v, 'isoformat'):
+            data[k] = v.isoformat()
+            
+    content = json.dumps(data, indent=2)
+    filename = f"backup_registration_{data.get('registration_uid', reg_id)}.json"
+    
+    return Response(
+        content,
+        mimetype='application/json',
+        headers={"Content-disposition": f"attachment; filename={filename}"}
+    )
+
+
+@app.route('/admin/registrations/delete/<int:reg_id>', methods=['POST'])
+@admin_required
+def delete_single_registration(reg_id):
+    success = remove_registration_record(reg_id)
+    if request.is_json:
+        if success:
+            return jsonify({'success': True, 'message': 'Registration deleted successfully.'})
+        return jsonify({'success': False, 'error': 'Registration not found.'}), 404
+    if success:
+        flash('Registration deleted successfully.', 'info')
+    else:
+        flash('Registration record not found.', 'danger')
+    return redirect(url_for('admin_dashboard') + '#registrations')
+
+
+@app.route('/admin/registrations/delete_selected', methods=['POST'])
+@admin_required
+def delete_selected_registrations():
+    data = request.get_json(silent=True) or {}
+    reg_ids = data.get('reg_ids')
+    if not reg_ids:
+        reg_ids = request.form.getlist('selected_reg_ids')
+        if not reg_ids and request.form.get('reg_ids'):
+            reg_ids = [x.strip() for x in request.form.get('reg_ids').split(',') if x.strip()]
+            
+    if not reg_ids:
+        if request.is_json:
+            return jsonify({'success': False, 'error': 'No registrations selected.'}), 400
+        flash('No registrations selected for deletion.', 'warning')
+        return redirect(url_for('admin_dashboard') + '#registrations')
+        
+    deleted_count = 0
+    for r_id in reg_ids:
+        try:
+            reg_int = int(r_id)
+            if remove_registration_record(reg_int):
+                deleted_count += 1
+        except ValueError:
+            continue
+            
+    if request.is_json:
+        return jsonify({'success': True, 'deleted_count': deleted_count, 'message': f'Deleted {deleted_count} registration(s).'})
+        
+    flash(f'Successfully deleted {deleted_count} registration(s).', 'success')
+    return redirect(url_for('admin_dashboard') + '#registrations')
+
+
+@app.route('/admin/registrations/export_selected', methods=['POST', 'GET'])
+@admin_required
+def export_selected_registrations():
+    ids_param = request.args.get('ids', '')
+    if ids_param:
+        reg_ids = [x.strip() for x in ids_param.split(',') if x.strip()]
+    else:
+        data = request.get_json(silent=True) or {}
+        reg_ids = data.get('reg_ids') or request.form.getlist('selected_reg_ids')
+        if not reg_ids and request.form.get('reg_ids'):
+            reg_ids = [x.strip() for x in request.form.get('reg_ids').split(',') if x.strip()]
+
+    if not reg_ids:
+        flash('No registrations selected for export.', 'warning')
+        return redirect(url_for('admin_dashboard') + '#registrations')
+
+    valid_ids = []
+    for x in reg_ids:
+        try:
+            valid_ids.append(int(x))
+        except ValueError:
+            pass
+
+    if not valid_ids:
+        flash('Invalid registration IDs.', 'danger')
+        return redirect(url_for('admin_dashboard') + '#registrations')
+
+    placeholders = ', '.join(['%s'] * len(valid_ids))
+    records = query_db(f"""
+        SELECT r.registration_uid, p.full_name, p.email, p.phone, p.college_name, p.department,
+               COALESCE(e.event_name, 'Event N/A') as event_name, r.payment_status, r.amount_paid, r.registration_date, r.utr_number
+        FROM registrations r
+        JOIN participants p ON r.participant_id = p.id
+        LEFT JOIN events e ON r.event_id = e.id
+        WHERE r.id IN ({placeholders})
+        ORDER BY r.registration_date DESC
+    """, tuple(valid_ids))
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Registration UID', 'Full Name', 'Email', 'Phone', 'College', 'Department', 'Event', 'Payment Status', 'Amount Paid', 'Registration Date', 'UTR'])
+
+    if records:
+        for row in records:
+            writer.writerow([
+                row.get('registration_uid', ''),
+                row.get('full_name', ''),
+                row.get('email', ''),
+                row.get('phone', ''),
+                row.get('college_name', ''),
+                row.get('department', ''),
+                row.get('event_name', ''),
+                row.get('payment_status', ''),
+                row.get('amount_paid', ''),
+                row.get('registration_date', ''),
+                row.get('utr_number', '')
+            ])
+
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={"Content-disposition": "attachment; filename=selected_registrations_backup.csv"}
+    )
+
+
 @app.route('/admin/clear_all', methods=['POST'])
 @admin_required
 def clear_all_registrations():
+    # Remove physical certificate files
+    try:
+        certs = query_db("SELECT file_path FROM certificates")
+        for c in certs:
+            if c.get('file_path') and os.path.exists(c['file_path']):
+                try:
+                    os.remove(c['file_path'])
+                except Exception:
+                    pass
+    except Exception as e:
+        app.logger.warning(f"Error cleaning certificate files: {e}")
+
     # Only clear tables tracking user registration
     execute_db("DELETE FROM attendance")
     execute_db("DELETE FROM certificates")
     execute_db("DELETE FROM registrations")
     execute_db("DELETE FROM participants")
-    flash("All registrations, attendance, and certificates have been permanently cleared.", "success")
-    return redirect(url_for('admin_dashboard'))
+    flash("All registrations, participants, attendance, and certificates have been permanently cleared.", "success")
+    return redirect(url_for('admin_dashboard') + '#registrations')
 
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
@@ -1691,21 +2060,24 @@ def api_chat():
     time.sleep(1.2)
     return jsonify({'status': 'success', 'reply': reply})
 
+@app.route('/scanner')
 @app.route('/admin/qr_scanner')
-@admin_required
+@member_required
 def qr_scanner():
     return render_template('qr_scanner.html')
 
 @app.route('/api/scan_qr')
-@admin_required
+@member_required
 def api_scan_qr():
     uid = request.args.get('uid', '').strip()
     if not uid:
         return jsonify({'status': 'error', 'message': 'No UID provided'})
         
     res = query_db("""
-        SELECT r.id as registration_id, r.registration_uid, r.is_group, r.team_name, r.team_size, r.payment_status, r.payment_method,
-               p.full_name, p.college_name, p.department, e.event_name,
+        SELECT r.id as registration_id, r.registration_uid, r.is_group, r.team_name, r.team_size,
+               r.payment_status, r.payment_method, r.amount_paid, r.utr_number, r.payment_proof,
+               p.full_name, p.college_name, p.department, p.phone, p.email,
+               e.event_name, e.event_fee,
                (SELECT status FROM attendance a WHERE a.registration_id = r.id) as attendance_status
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
@@ -1718,18 +2090,19 @@ def api_scan_qr():
     return jsonify({'status': 'error', 'message': 'Invalid QR Code'})
 
 @app.route('/api/mark_attended', methods=['POST'])
-@admin_required
+@member_required
 def api_mark_attended():
     data = request.get_json() or {}
     reg_id = data.get('registration_id')
+    collect_cash = data.get('collect_cash', False)
     
     if not reg_id:
-        return jsonify({'status': 'error', 'message': 'Invalid data'})
+        return jsonify({'status': 'error', 'message': 'Invalid registration ID'}), 400
         
     # Verify cash payment and record the same audit trail as online payment.
     reg = query_db(
         """
-        SELECT r.payment_status, r.payment_method, r.utr_number,
+        SELECT r.id, r.payment_status, r.payment_method, r.utr_number,
                p.full_name, p.email, e.event_name, e.event_fee
         FROM registrations r
         JOIN participants p ON p.id = r.participant_id
@@ -1742,27 +2115,33 @@ def api_mark_attended():
         return jsonify({'status': 'error', 'message': 'Registration not found'}), 404
 
     receipt_warning = None
-    if reg['payment_status'] == 'pay_on_site':
-        fee = max(0, safe_int(reg.get('event_fee'), 0))
+    fee = max(0, safe_int(reg.get('event_fee'), 0))
+    user_id = session.get('user_id')
+
+    # If it was pay_on_site, unpaid, or the coordinator collected cash
+    if reg['payment_status'] in ('pay_on_site', 'unpaid') or collect_cash:
         claimed = execute_db(
             """
             UPDATE registrations
-            SET payment_status = 'paid', amount_paid = %s,
+            SET payment_status = 'paid',
+                payment_method = 'Cash',
+                amount_paid = %s,
                 payment_verified_at = CURRENT_TIMESTAMP,
                 payment_verified_by = %s,
+                status = 'approved',
                 receipt_delivery_status = 'pending'
-            WHERE id = %s AND payment_status = 'pay_on_site'
+            WHERE id = %s AND payment_status <> 'paid'
             """,
-            (fee, session.get('user_id'), reg_id)
+            (fee, user_id, reg_id)
         )
         if claimed == 1:
             receipt_ok, receipt_msg = send_receipt_email(
                 recipient_email=reg['email'],
                 participant_name=reg['full_name'],
                 event_name=reg['event_name'],
-                payment_method=reg['payment_method'],
+                payment_method='Cash',
                 amount_paid=fee,
-                utr_number=reg['utr_number']
+                utr_number=None
             )
             if receipt_ok:
                 execute_db(
@@ -1775,15 +2154,31 @@ def api_mark_attended():
                     (reg_id,)
                 )
                 receipt_warning = f'Payment recorded, but receipt delivery failed: {receipt_msg}'
+    elif reg['payment_status'] == 'pending':
+        # On-spot verification of pending online registration by member/admin
+        execute_db(
+            """
+            UPDATE registrations
+            SET payment_status = 'paid',
+                amount_paid = %s,
+                payment_verified_at = CURRENT_TIMESTAMP,
+                payment_verified_by = %s,
+                status = 'approved'
+            WHERE id = %s
+            """,
+            (fee, user_id, reg_id)
+        )
         
     # Check attendance
     att = query_db("SELECT id FROM attendance WHERE registration_id = %s", (reg_id,), one=True)
     if not att:
-        execute_db("INSERT INTO attendance (registration_id, status) VALUES (%s, 'present')", (reg_id,))
+        execute_db("INSERT INTO attendance (registration_id, status, marked_by) VALUES (%s, 'present', %s)", (reg_id, str(user_id)))
     else:
-        execute_db("UPDATE attendance SET status = 'present' WHERE registration_id = %s", (reg_id,))
+        execute_db("UPDATE attendance SET status = 'present', marked_by = %s WHERE registration_id = %s", (str(user_id), reg_id))
         
-    message = 'Marked Paid and Attended'
+    message = 'Marked as Present and Verified'
+    if collect_cash or reg['payment_status'] == 'pay_on_site':
+        message = f'Cash payment of ₹{fee} collected & marked as Present'
     if receipt_warning:
         message += f'. {receipt_warning} An administrator can resend the receipt.'
     return jsonify({'status': 'success', 'message': message})
@@ -1791,7 +2186,7 @@ def api_mark_attended():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
     print("=" * 60)
-    print("  EventMate – College Event Management System")
+    print("  Shree Daksha Academy – College Event Management System")
     print(f"  Server running on http://0.0.0.0:{port} (Accessible on local network)")
     print("=" * 60)
     app.run(debug=Config.APP_ENV != 'production', host='0.0.0.0', port=port)

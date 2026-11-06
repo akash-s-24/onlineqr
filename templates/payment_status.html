@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Payment Status - EventMate{% endblock %}
+{% block title %}Payment Status - Shree Daksha Academy{% endblock %}
 
 {% block content %}
 <section class="page-section" style="max-width: 760px; margin: 0 auto;">
@@ -17,13 +17,29 @@
             <div><small>Registration ID</small><br><strong style="font-family:monospace;">{{ registration.registration_uid }}</strong></div>
             <div><small>Event fee</small><br><strong>₹{{ registration.event_fee }}</strong></div>
         </div>
+
+        {% if qr_b64 %}
+        <div style="margin: 1.5rem 0; padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.75rem;">
+            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+                <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR Ticket Pass for {{ registration.registration_uid }}" style="width: 180px; height: 180px; display: block;" />
+            </div>
+            <div>
+                <strong style="font-size: 0.95rem; color: #0f172a;">Official Gate Pass QR</strong>
+                <p style="margin: 4px 0 0; font-size: 0.8rem; color: #64748b;">Present this QR code at the desk for instant check-in</p>
+                <div id="swOfflineBadge" style="margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #059669; font-weight: 600;">
+                    <span>⚡ Available Offline</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <hr style="margin:1.5rem 0; border:0; border-top:1px solid #e5e7eb;">
         {% if registration.payment_status == 'paid' %}
             <div class="alert alert-success" style="padding:1rem; border-radius:8px;">
                 <strong>Payment verified</strong><br>
                 ₹{{ registration.amount_paid }} received by the college.
             </div>
-            <p><strong>Payment ID / UTR:</strong> <code>{{ registration.utr_number or 'Recorded by admin' }}</code></p>
+            <p><strong>Payment ID / UTR:</strong> <code>{{ registration.utr_number or 'Recorded by desk/admin' }}</code></p>
             <p><strong>Receipt:</strong> {{ 'Sent to the registered email address.' if registration.receipt_delivery_status == 'sent' else 'Being prepared or available from the registration desk.' }}</p>
         {% elif registration.payment_status == 'pending' %}
             <div class="alert alert-warning" style="padding:1rem; border-radius:8px;">
@@ -31,11 +47,17 @@
                 The college will verify the UTR against its bank records before confirming payment.
             </div>
             <p><strong>Submitted payment ID / UTR:</strong> <code>{{ registration.utr_number }}</code></p>
+            {% if registration.payment_proof %}
+            <p><strong>Payment screenshot attached:</strong> <a href="{{ url_for('static', filename='uploads/payment_proofs/' + registration.payment_proof) }}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">View Uploaded Screenshot ↗</a></p>
+            {% endif %}
         {% elif registration.payment_status == 'pay_on_site' %}
-            <div class="alert alert-warning" style="padding:1rem; border-radius:8px;">
-                <strong>Pay on spot selected</strong><br>
-                Please pay the registration fee at the college desk.
+            <div class="alert alert-warning" style="padding:1.15rem; border-radius:8px; border-left: 4px solid #f59e0b;">
+                <strong>Registration submitted (Cash Payment Pending)</strong><br>
+                You have submitted your registration, but you have to pay <strong>₹{{ registration.event_fee }}</strong> at your college desk upon arrival.
             </div>
+            <p style="font-size: 0.9rem; color: #475569; margin-top: 0.75rem;">
+                Present the Official Gate Pass QR code above to any student coordinator or desk member when entering the campus. They will collect your cash, confirm payment, and check you in.
+            </p>
         {% else %}
             <div class="alert alert-warning" style="padding:1rem; border-radius:8px;">
                 <strong>Payment not completed</strong><br>
@@ -45,4 +67,20 @@
         <a href="{{ url_for('events_list') }}" class="btn btn-primary" style="margin-top:1rem;">Back to Events</a>
     </div>
 </section>
+
+<script>
+    // Register Service Worker for offline ticket pass access
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                .then(function(reg) {
+                    var badge = document.getElementById('swOfflineBadge');
+                    if (badge) badge.style.display = 'inline-flex';
+                })
+                .catch(function(err) {
+                    console.debug('ServiceWorker registration skipped:', err);
+                });
+        });
+    }
+</script>
 {% endblock %}

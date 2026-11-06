@@ -1,215 +1,397 @@
 {% extends 'base.html' %}
 
-{% block title %}QR Scanner – EventMate{% endblock %}
+{% block title %}QR Scanner & Desk Check-in – Shree Daksha Academy{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<div class="page-header" style="margin-bottom: 1.25rem;">
     <div class="page-title">
-        <h1>On-Site QR Scanner</h1>
-        <p>Scan participant QR codes to verify payment and mark attendance</p>
+        <h1 style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <span>📱 On-Site QR Scanner & Desk Check-in</span>
+            <span class="badge badge-info" style="font-size: 0.75rem; text-transform: uppercase;">{{ session.get('role')|capitalize }} Access</span>
+        </h1>
+        <p>Scan participant gate pass QR codes to verify fees, collect cash on spot, and mark attendance.</p>
+    </div>
+    <div class="page-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        {% if session.get('role') == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">&larr; Admin Dashboard</a>
+        <a href="{{ url_for('attendance_manager') }}" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Attendance Sheet</a>
+        {% else %}
+        <a href="{{ url_for('member_dashboard') }}" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">&larr; Member Workspace</a>
+        {% endif %}
     </div>
 </div>
 
-<div style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start;">
-    
-    <!-- Camera Section -->
-    <div class="table-card" style="flex: 1; min-width: 320px; padding: 2rem; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-top: 4px solid #06b6d4; display: flex; flex-direction: column; align-items: center;">
-        <h3 style="color: #fff; margin-bottom: 1rem;">Camera Feed</h3>
-        <div id="reader" style="width: 100%; max-width: 400px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"></div>
-        <button id="startScanBtn" class="candy-btn" style="margin-top: 1.5rem; width: 100%; max-width: 400px;">Start Scanner</button>
+<!-- Manual Lookup Bar for fast check-in fallback -->
+<div class="table-card" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px;">
+    <form id="manualLookupForm" onsubmit="handleManualLookup(event)" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 240px; position: relative;">
+            <input type="text" id="manualUidInput" placeholder="🔍 Or enter Pass ID (e.g. REG-A1B2C3D4)..." 
+                   style="width: 100%; padding: 0.65rem 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: monospace; font-size: 0.95rem; text-transform: uppercase;" />
+        </div>
+        <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.25rem; font-size: 0.9rem; font-weight: 700; white-space: nowrap;">
+            Lookup Pass &rarr;
+        </button>
+    </form>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; align-items: flex-start;">
+
+    <!-- Camera / Viewport Section -->
+    <div class="table-card" style="padding: 1.5rem; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 14px rgba(0,0,0,0.04);">
+        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0; font-size: 1.05rem; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                <span>📷</span> Camera Viewport
+            </h3>
+            <span id="cameraStatusBadge" class="badge" style="background: #f1f5f9; color: #64748b; font-size: 0.75rem;">Idle</span>
+        </div>
+
+        <div id="reader" style="width: 100%; max-width: 380px; border-radius: 10px; overflow: hidden; background: #0f172a; min-height: 260px; display: flex; align-items: center; justify-content: center; position: relative;">
+            <div id="readerPlaceholder" style="color: #94a3b8; text-align: center; padding: 2rem;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📸</div>
+                <p style="margin: 0; font-size: 0.9rem;">Tap button below to launch device camera</p>
+            </div>
+        </div>
+
+        <button id="startScanBtn" class="btn btn-primary" style="margin-top: 1.25rem; width: 100%; max-width: 380px; padding: 0.75rem; font-size: 0.95rem; font-weight: 700;">
+            ⚡ Start Camera Scanner
+        </button>
+        <p style="margin: 0.5rem 0 0; font-size: 0.78rem; color: #64748b; text-align: center;">
+            Point your mobile camera at the participant's QR Gate Pass.
+        </p>
     </div>
 
     <!-- Results Section -->
-    <div class="table-card" style="flex: 1; min-width: 320px; padding: 2rem; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-top: 4px solid #fbbf24;">
-        <h3 style="color: #fbbf24; margin-bottom: 1.5rem;">Scan Result</h3>
-        
-        <div id="loadingIndicator" style="display: none; color: #94a3b8; text-align: center; padding: 2rem;">
-            Loading participant details...
+    <div class="table-card" style="padding: 1.5rem; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.04); min-height: 380px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+            <h3 style="margin: 0; font-size: 1.05rem; color: #0f172a; font-weight: 700;">
+                Gate Pass Record
+            </h3>
+            <button type="button" id="scanNextTopBtn" onclick="resetForNextScan()" class="btn btn-outline" style="display: none; padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+                📸 Scan Next
+            </button>
+        </div>
+
+        <div id="loadingIndicator" style="display: none; color: #64748b; text-align: center; padding: 3rem 1rem;">
+            <div class="spinner" style="display: inline-block; width: 28px; height: 28px; border: 3px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 0.75rem;"></div>
+            <p style="margin: 0; font-size: 0.9rem; font-weight: 600;">Verifying participant UID with server...</p>
         </div>
 
         <div id="scanResult" style="display: none;">
+            <!-- Participant Header -->
             <div style="margin-bottom: 1rem;">
-                <span style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase;">Participant</span>
-                <div id="resName" style="font-size: 1.5rem; color: #fff; font-weight: bold;"></div>
-                <div id="resCollege" style="color: #cbd5e1; font-size: 0.95rem;"></div>
-            </div>
-            
-            <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px;">
-                <span style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase;">Event</span>
-                <div id="resEvent" style="font-size: 1.1rem; color: #fff;"></div>
-                <div id="resTeam" style="color: #cbd5e1; font-size: 0.9rem; margin-top: 0.5rem;"></div>
-            </div>
-
-            <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
-                <div style="flex: 1; padding: 1rem; border-radius: 8px; background: rgba(255,255,255,0.05); text-align: center;">
-                    <span style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase;">Payment</span>
-                    <div id="resPayment" style="font-size: 1.1rem; font-weight: bold; margin-top: 0.25rem;"></div>
-                </div>
-                <div style="flex: 1; padding: 1rem; border-radius: 8px; background: rgba(255,255,255,0.05); text-align: center;">
-                    <span style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase;">Attendance</span>
-                    <div id="resAttendance" style="font-size: 1.1rem; font-weight: bold; margin-top: 0.25rem;"></div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                    <div>
+                        <span style="color: #64748b; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Participant</span>
+                        <div id="resName" style="font-size: 1.35rem; color: #0f172a; font-weight: 800; line-height: 1.2; margin-top: 2px;"></div>
+                        <div id="resCollege" style="color: #475569; font-size: 0.88rem; margin-top: 4px;"></div>
+                        <div id="resContact" style="color: #64748b; font-size: 0.8rem; margin-top: 2px;"></div>
+                    </div>
+                    <span id="resUidBadge" style="font-family: monospace; font-weight: 700; font-size: 0.82rem; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1;"></span>
                 </div>
             </div>
 
-            <form id="verifyForm">
+            <!-- Event Card -->
+            <div style="margin-bottom: 1rem; padding: 0.85rem 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <span style="color: #64748b; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Registered Competition</span>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 3px;">
+                    <div id="resEvent" style="font-size: 1.05rem; color: #0f172a; font-weight: 700;"></div>
+                    <div id="resFee" style="font-size: 1.05rem; color: #0f172a; font-weight: 800;"></div>
+                </div>
+                <div id="resTeam" style="color: #2563eb; font-size: 0.84rem; font-weight: 600; margin-top: 4px;"></div>
+            </div>
+
+            <!-- Status Grid -->
+            <div style="margin-bottom: 1.25rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div style="padding: 0.75rem 1rem; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">Payment Status</span>
+                    <div id="resPayment" style="font-size: 0.95rem; font-weight: 700; margin-top: 3px;"></div>
+                </div>
+                <div style="padding: 0.75rem 1rem; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">Attendance</span>
+                    <div id="resAttendance" style="font-size: 0.95rem; font-weight: 700; margin-top: 3px;"></div>
+                </div>
+            </div>
+
+            <!-- Proof link if uploaded -->
+            <div id="resProofContainer" style="display: none; margin-bottom: 1.25rem; padding: 0.6rem 0.9rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 0.84rem;">
+                <span>📸 Attached Proof: </span>
+                <a id="resProofLink" href="#" target="_blank" rel="noopener noreferrer" style="color: #2563eb; font-weight: 600; text-decoration: underline;">
+                    View Payment Screenshot ↗
+                </a>
+            </div>
+
+            <!-- Dynamic Action Card -->
+            <div id="actionContainer" style="display: flex; flex-direction: column; gap: 0.65rem;">
                 <input type="hidden" id="verifyRegId" name="registration_id">
-                <button type="button" id="markPaidAttendedBtn" class="candy-btn" style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border:none;">Mark Paid & Attended</button>
-            </form>
+                
+                <!-- Cash Collect Button (Primary when Cash is pending) -->
+                <button type="button" id="collectCashBtn" class="btn" 
+                        style="width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 800; background: #059669; color: #ffffff; border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25); display: none;">
+                    💵 Collect ₹<span id="cashCollectAmount">0</span> Cash & Mark Present
+                </button>
+
+                <!-- Normal Mark Present Button -->
+                <button type="button" id="markPresentBtn" class="btn btn-primary" 
+                        style="width: 100%; padding: 0.85rem; font-size: 0.95rem; font-weight: 700; border-radius: 8px;">
+                    ✅ Mark Present (Checked-in)
+                </button>
+
+                <!-- Scan Next Button -->
+                <button type="button" onclick="resetForNextScan()" class="btn btn-outline" 
+                        style="width: 100%; padding: 0.65rem; font-size: 0.88rem; font-weight: 600; border-radius: 8px;">
+                    📸 Ready for Next Participant
+                </button>
+            </div>
         </div>
-        
-        <div id="scanIdle" style="color: #94a3b8; text-align: center; padding: 3rem 1rem;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">📷</div>
-            Waiting for QR scan...
+
+        <div id="scanIdle" style="color: #94a3b8; text-align: center; padding: 4rem 1rem;">
+            <div style="font-size: 3rem; margin-bottom: 0.75rem;">🎫</div>
+            <strong style="color: #475569; font-size: 1rem;">Awaiting Pass Scan or ID Lookup</strong>
+            <p style="margin: 0.4rem 0 0; font-size: 0.84rem; color: #94a3b8;">
+                Scan with the camera above or type a UID to inspect details.
+            </p>
         </div>
     </div>
 </div>
 
+<style>
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
-    let html5QrcodeScanner;
-    
-    document.getElementById('startScanBtn').addEventListener('click', function() {
+    let html5QrcodeScanner = null;
+    let isScanning = false;
+    let currentParticipantData = null;
+
+    document.getElementById('startScanBtn').addEventListener('click', function () {
         if (!html5QrcodeScanner) {
+            const placeholder = document.getElementById('readerPlaceholder');
+            if (placeholder) placeholder.style.display = 'none';
+
             html5QrcodeScanner = new Html5QrcodeScanner(
-                "reader", { fps: 10, qrbox: 250 }, false);
+                "reader", 
+                { 
+                    fps: 10, 
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0,
+                    showTorchButtonIfSupported: true
+                }, 
+                false
+            );
             html5QrcodeScanner.render(onScanSuccess, onScanFailure);
             this.style.display = 'none';
+            document.getElementById('cameraStatusBadge').innerText = 'Active';
+            document.getElementById('cameraStatusBadge').style.background = '#dcfce7';
+            document.getElementById('cameraStatusBadge').style.color = '#15803d';
         }
     });
 
-    let isScanning = false;
-    function onScanSuccess(decodedText, decodedResult) {
-        if (isScanning) return; // Prevent double firing
-        
-        // Assume decodedText is the registration_uid
-        const uid = decodedText.trim();
+    function onScanSuccess(decodedText) {
+        if (isScanning) return;
+        const uid = (decodedText || '').trim();
         if (!uid) return;
-        
+        fetchParticipantByUid(uid);
+    }
+
+    function onScanFailure(error) {
+        // Continuous scanning frame failures are ignored silently
+    }
+
+    function handleManualLookup(e) {
+        e.preventDefault();
+        const input = document.getElementById('manualUidInput');
+        const uid = (input.value || '').trim();
+        if (!uid) {
+            alert('Please enter a Registration UID (e.g. REG-A1B2C3D4)');
+            return;
+        }
+        fetchParticipantByUid(uid);
+    }
+
+    function fetchParticipantByUid(uid) {
         isScanning = true;
-        
-        // UI Updates
         document.getElementById('scanIdle').style.display = 'none';
         document.getElementById('scanResult').style.display = 'none';
         document.getElementById('loadingIndicator').style.display = 'block';
-        
+
+        if (html5QrcodeScanner) {
+            try { html5QrcodeScanner.pause(); } catch(e) {}
+        }
+
         fetch(`/api/scan_qr?uid=${encodeURIComponent(uid)}`)
             .then(res => res.json())
             .then(data => {
                 document.getElementById('loadingIndicator').style.display = 'none';
-                
+
                 if (data.status === 'success') {
-                    const r = data.data;
-                    document.getElementById('scanResult').style.display = 'block';
-                    
-                    document.getElementById('resName').innerText = r.full_name;
-                    document.getElementById('resCollege').innerText = `${r.college_name} - ${r.department}`;
-                    document.getElementById('resEvent').innerText = r.event_name;
-                    
-                    if (r.is_group) {
-                        document.getElementById('resTeam').innerText = `Team: ${r.team_name} (${r.team_size} members)`;
-                    } else {
-                        document.getElementById('resTeam').innerText = '';
-                    }
-
-                    // Payment logic
-                    const pEl = document.getElementById('resPayment');
-                    if (r.payment_status === 'pay_on_site' || r.payment_method === 'Cash') {
-                        pEl.innerText = 'Pay On-Site (Cash)';
-                        pEl.style.color = '#fbbf24';
-                    } else if (r.payment_status === 'paid') {
-                        pEl.innerText = 'Paid Online';
-                        pEl.style.color = '#10b981';
-                    } else {
-                        pEl.innerText = r.payment_status;
-                        pEl.style.color = '#ef4444';
-                    }
-
-                    // Attendance logic
-                    const aEl = document.getElementById('resAttendance');
-                    if (r.attendance_status === 'present') {
-                        aEl.innerText = 'Present';
-                        aEl.style.color = '#10b981';
-                        document.getElementById('markPaidAttendedBtn').innerText = 'Already Marked Attended';
-                        document.getElementById('markPaidAttendedBtn').disabled = true;
-                        document.getElementById('markPaidAttendedBtn').style.opacity = '0.5';
-                    } else {
-                        aEl.innerText = 'Absent';
-                        aEl.style.color = '#ef4444';
-                        document.getElementById('markPaidAttendedBtn').innerText = 'Mark Paid & Attended';
-                        document.getElementById('markPaidAttendedBtn').disabled = false;
-                        document.getElementById('markPaidAttendedBtn').style.opacity = '1';
-                    }
-
-                    document.getElementById('verifyRegId').value = r.registration_id;
-                    
-                    // Automatically pause scanning while reviewing
-                    html5QrcodeScanner.pause();
+                    displayParticipant(data.data);
                 } else {
-                    alert('QR Code Invalid: ' + data.message);
+                    alert('Lookup Failed: ' + (data.message || 'Pass not found.'));
                     document.getElementById('scanIdle').style.display = 'block';
+                    resetForNextScan();
                 }
-                
-                setTimeout(() => { isScanning = false; }, 2000);
             })
             .catch(err => {
                 console.error(err);
-                alert('Error fetching details.');
+                alert('Network error while querying pass.');
                 document.getElementById('loadingIndicator').style.display = 'none';
                 document.getElementById('scanIdle').style.display = 'block';
-                setTimeout(() => { isScanning = false; }, 2000);
+                resetForNextScan();
             });
     }
 
-    function onScanFailure(error) {
-        // handle scan failure, usually better to ignore and keep scanning
+    function displayParticipant(r) {
+        currentParticipantData = r;
+        document.getElementById('scanResult').style.display = 'block';
+        document.getElementById('scanNextTopBtn').style.display = 'inline-block';
+        document.getElementById('verifyRegId').value = r.registration_id;
+        document.getElementById('resUidBadge').innerText = r.registration_uid;
+
+        // Details
+        document.getElementById('resName').innerText = r.full_name;
+        document.getElementById('resCollege').innerText = `${r.college_name}${r.department ? ' · ' + r.department : ''}`;
+        
+        let contactInfo = [];
+        if (r.phone) contactInfo.push(`📞 ${r.phone}`);
+        if (r.email) contactInfo.push(`📧 ${r.email}`);
+        document.getElementById('resContact').innerText = contactInfo.join('  ');
+
+        // Event
+        document.getElementById('resEvent').innerText = r.event_name;
+        const fee = Number(r.event_fee) || 0;
+        document.getElementById('resFee').innerText = fee > 0 ? `₹${fee}` : 'Free Entry';
+
+        if (r.is_group) {
+            document.getElementById('resTeam').innerText = `👥 Team: ${r.team_name || 'Squad'} (${r.team_size || 1} Members)`;
+            document.getElementById('resTeam').style.display = 'block';
+        } else {
+            document.getElementById('resTeam').style.display = 'none';
+        }
+
+        // Payment Proof Link
+        const proofCont = document.getElementById('resProofContainer');
+        const proofLink = document.getElementById('resProofLink');
+        if (r.payment_proof) {
+            proofLink.href = `/static/uploads/payment_proofs/${r.payment_proof}`;
+            proofCont.style.display = 'block';
+        } else {
+            proofCont.style.display = 'none';
+        }
+
+        // Payment Status Display
+        const pEl = document.getElementById('resPayment');
+        const collectCashBtn = document.getElementById('collectCashBtn');
+        const markPresentBtn = document.getElementById('markPresentBtn');
+        const isCashPending = (r.payment_status === 'pay_on_site' || r.payment_status === 'unpaid');
+
+        if (r.payment_status === 'paid') {
+            pEl.innerHTML = `<span style="color: #059669;">✔ Paid (${r.payment_method || 'Online'})</span>`;
+            collectCashBtn.style.display = 'none';
+            markPresentBtn.style.display = 'block';
+            markPresentBtn.innerText = '✅ Mark Present (Checked-in)';
+        } else if (isCashPending) {
+            pEl.innerHTML = `<span style="color: #d97706;">💵 Pay on Spot (Cash Due: ₹${fee})</span>`;
+            document.getElementById('cashCollectAmount').innerText = fee;
+            collectCashBtn.style.display = 'block';
+            markPresentBtn.style.display = 'none';
+        } else if (r.payment_status === 'pending') {
+            pEl.innerHTML = `<span style="color: #2563eb;">⏳ Online Submitted (UTR: ${r.utr_number || 'N/A'})</span>`;
+            collectCashBtn.style.display = 'none';
+            markPresentBtn.style.display = 'block';
+            markPresentBtn.innerText = '✅ Verify & Mark Present';
+        } else {
+            pEl.innerText = r.payment_status;
+            collectCashBtn.style.display = 'none';
+            markPresentBtn.style.display = 'block';
+        }
+
+        // Attendance Status
+        const aEl = document.getElementById('resAttendance');
+        if (r.attendance_status === 'present') {
+            aEl.innerHTML = `<span style="color: #059669;">✔ Present</span>`;
+            markPresentBtn.disabled = true;
+            markPresentBtn.innerText = '✔ Already Marked Present';
+            markPresentBtn.style.opacity = '0.6';
+            collectCashBtn.disabled = true;
+            collectCashBtn.style.opacity = '0.6';
+        } else {
+            aEl.innerHTML = `<span style="color: #dc2626;">❌ Absent</span>`;
+            markPresentBtn.disabled = false;
+            markPresentBtn.style.opacity = '1';
+            collectCashBtn.disabled = false;
+            collectCashBtn.style.opacity = '1';
+        }
     }
 
-    // Handle "Mark Paid & Attended" button click
-    document.getElementById('markPaidAttendedBtn').addEventListener('click', function() {
+    // Submit Cash Collection & Attendance
+    document.getElementById('collectCashBtn').addEventListener('click', function () {
+        submitAttendance(true);
+    });
+
+    // Submit Normal Attendance
+    document.getElementById('markPresentBtn').addEventListener('click', function () {
+        submitAttendance(false);
+    });
+
+    function submitAttendance(collectCash) {
         const regId = document.getElementById('verifyRegId').value;
         if (!regId) return;
-        
-        this.innerText = 'Processing...';
-        this.disabled = true;
+
+        const activeBtn = collectCash ? document.getElementById('collectCashBtn') : document.getElementById('markPresentBtn');
+        const originalText = activeBtn.innerText;
+        activeBtn.innerText = 'Processing...';
+        activeBtn.disabled = true;
 
         fetch('/api/mark_attended', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
+                'X-CSRF-Token': '{{ csrf_token() }}'
             },
-            body: JSON.stringify({ registration_id: regId })
+            body: JSON.stringify({ 
+                registration_id: Number(regId),
+                collect_cash: collectCash
+            })
         })
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
-                // Update UI immediately to show success
-                document.getElementById('resAttendance').innerText = 'Present';
-                document.getElementById('resAttendance').style.color = '#10b981';
-                
-                // If it was pay_on_site, assume they paid
-                if (document.getElementById('resPayment').innerText.includes('Cash')) {
-                     document.getElementById('resPayment').innerText = 'Paid (Cash)';
-                     document.getElementById('resPayment').style.color = '#10b981';
+                document.getElementById('resAttendance').innerHTML = `<span style="color: #059669;">✔ Present</span>`;
+                if (collectCash) {
+                    document.getElementById('resPayment').innerHTML = `<span style="color: #059669;">✔ Paid (Cash Collected)</span>`;
                 }
 
-                alert('Success: Participant marked as Paid & Attended!');
-                
-                // Reset UI for next scan
-                document.getElementById('scanResult').style.display = 'none';
-                document.getElementById('scanIdle').style.display = 'block';
-                html5QrcodeScanner.resume(); // Resume scanning next person
+                alert(data.message || 'Check-in confirmed!');
+                resetForNextScan();
             } else {
-                alert('Error: ' + data.message);
-                this.innerText = 'Mark Paid & Attended';
-                this.disabled = false;
+                alert('Action Failed: ' + data.message);
+                activeBtn.innerText = originalText;
+                activeBtn.disabled = false;
             }
         })
         .catch(err => {
-            alert('Request Failed');
-            this.innerText = 'Mark Paid & Attended';
-            this.disabled = false;
+            console.error(err);
+            alert('Request failed. Please check network connection.');
+            activeBtn.innerText = originalText;
+            activeBtn.disabled = false;
         });
-    });
+    }
+
+    function resetForNextScan() {
+        document.getElementById('scanResult').style.display = 'none';
+        document.getElementById('scanNextTopBtn').style.display = 'none';
+        document.getElementById('scanIdle').style.display = 'block';
+        document.getElementById('manualUidInput').value = '';
+        currentParticipantData = null;
+        isScanning = false;
+
+        if (html5QrcodeScanner) {
+            try { html5QrcodeScanner.resume(); } catch(e) {}
+        }
+    }
 </script>
 {% endblock %}

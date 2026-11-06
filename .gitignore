@@ -25,6 +25,15 @@ certificates/*.png
 certificates/*.pdf
 !certificates/.gitkeep
 
+# Uploaded payment proofs & QR codes
+static/uploads/payment_proofs/*
+!static/uploads/payment_proofs/.gitkeep
+static/uploads/qr_codes/*
+!static/uploads/qr_codes/.gitkeep
+
+# Internal agent planning
+.planning/
+
 # Test output images
 kannada_test.png
 kannada_test_bold.png

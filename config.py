@@ -41,7 +41,7 @@ class Config:
     SIGNATORY_TITLE = os.environ.get('SIGNATORY_TITLE', 'Head of Department (HOD)')
 
     # Base URL for Verification Links
-    BASE_URL = os.environ.get('BASE_URL') or os.environ.get('RENDER_EXTERNAL_URL', 'http://127.0.0.1:5000')
+    BASE_URL = os.environ.get('BASE_URL') or os.environ.get('RENDER_EXTERNAL_URL', 'http://127.0.0.1:5001')
 
     # Certificate Storage Path
     CERTIFICATE_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'certificates')
@@ -52,7 +52,7 @@ class Config:
     SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
     SMTP_USERNAME = os.environ.get('SMTP_USERNAME', '')
     SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
-    SMTP_SENDER_EMAIL = os.environ.get('SMTP_SENDER_EMAIL', os.environ.get('SMTP_USERNAME', 'eventmate.college@gmail.com'))
+    SMTP_SENDER_EMAIL = os.environ.get('SMTP_SENDER_EMAIL', os.environ.get('SMTP_USERNAME', 'info@shreedakshaacademyedu.in'))
     SMTP_USE_TLS = os.environ.get('SMTP_USE_TLS', 'True').lower() in ('true', '1', 't')
     SMTP_USE_SSL = os.environ.get('SMTP_USE_SSL', 'False').lower() in ('true', '1', 't')
     RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '').strip()

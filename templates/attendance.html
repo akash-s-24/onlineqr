@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Attendance Management – EventMate{% endblock %}
+{% block title %}Attendance Management – Shree Daksha Academy{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -21,7 +21,7 @@
 <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
     <div class="stat-card">
         <div class="stat-info">
-            <span class="stat-label">Total Registrations</span>
+            <span class="stat-label">Total Approved Registrations</span>
             <span class="stat-value" id="statTotalCount">{{ attendance_records|length }}</span>
         </div>
         <div class="stat-icon-wrapper">
@@ -30,7 +30,7 @@
     </div>
     <div class="stat-card stat-success">
         <div class="stat-info">
-            <span class="stat-label">Present Count</span>
+            <span class="stat-label">Present (Checked In)</span>
             <span class="stat-value" id="statPresentCount">{{ present_count }}</span>
         </div>
         <div class="stat-icon-wrapper success">
@@ -39,13 +39,24 @@
     </div>
     <div class="stat-card stat-warning">
         <div class="stat-info">
-            <span class="stat-label">Absent Count</span>
-            <span class="stat-value" id="statAbsentCount">{{ absent_count }}</span>
+            <span class="stat-label">Awaiting Check-in</span>
+            <span class="stat-value" id="statPendingCount">{{ pending_count }}</span>
         </div>
         <div class="stat-icon-wrapper warning">
+            <span>⏳</span>
+        </div>
+    </div>
+    {% if absent_count > 0 %}
+    <div class="stat-card" style="border-left: 4px solid #ef4444;">
+        <div class="stat-info">
+            <span class="stat-label">Marked Absent</span>
+            <span class="stat-value" id="statAbsentCount">{{ absent_count }}</span>
+        </div>
+        <div class="stat-icon-wrapper" style="color: #ef4444;">
             <span>❌</span>
         </div>
     </div>
+    {% endif %}
 </div>
 
 <div class="table-card">
@@ -114,8 +125,10 @@
                     <td>
                         {% if row.att_status == 'present' %}
                             <span class="badge badge-success attendance-badge">PRESENT</span>
-                        {% else %}
+                        {% elif row.att_status == 'absent' %}
                             <span class="badge badge-danger attendance-badge">ABSENT</span>
+                        {% else %}
+                            <span class="badge badge-secondary attendance-badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">AWAITING CHECK-IN</span>
                         {% endif %}
                     </td>
                     <td style="text-align: right;">
@@ -125,8 +138,7 @@
                             {% else %}
                                 <button type="button" class="candy-btn candy-btn-success" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;" onclick="toggleAttendance({{ row.registration_id }}, 'absent', this)">Mark Present</button>
                             {% endif %}
-
-                            
+                            <button type="button" class="candy-btn candy-btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 6px;" onclick="deleteAttendanceRow({{ row.registration_id }}, '{{ row.full_name }}', this)" title="Delete registration record">🗑️</button>
                         </div>
                     </td>
                 </tr>

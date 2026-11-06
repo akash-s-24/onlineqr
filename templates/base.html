@@ -5,13 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{% block title %}EventMate – College Event Management System{% endblock %}</title>
+    <title>{% block title %}Shree Daksha Academy – College Event Management System{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -33,25 +32,32 @@
             border-bottom: 1px solid #e2e8f0;
             box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
         }
+
         .landing-logo {
             display: flex;
             align-items: center;
             text-decoration: none;
-            gap: 12px;
+            gap: 14px;
             flex: 1;
-            min-width: 220px;
+            min-width: 240px;
         }
+
         .landing-logo img {
-            height: 35px;
+            height: 44px;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
         }
+
         .landing-logo h1 {
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: #0f172a;
             margin: 0;
-            font-size: 1.1rem;
+            font-size: 1.22rem;
+            font-weight: 800;
             letter-spacing: 0.5px;
         }
-        
+
         .header-nav-center {
             display: flex;
             gap: clamp(10px, 1.5vw, 18px);
@@ -60,6 +66,7 @@
             justify-content: center;
             flex-wrap: nowrap;
         }
+
         .header-nav-link {
             position: relative;
             color: #475569;
@@ -70,9 +77,11 @@
             padding: 8px 0;
             letter-spacing: 1px;
         }
+
         .header-nav-link:hover {
             color: #2563eb;
         }
+
         .header-nav-link::after {
             content: '';
             position: absolute;
@@ -84,8 +93,11 @@
             background: #2563eb;
             transition: right 0.25s ease;
         }
+
         .header-nav-link:hover::after,
-        .header-nav-link.active::after { right: 0; }
+        .header-nav-link.active::after {
+            right: 0;
+        }
 
         .header-actions {
             display: flex;
@@ -96,6 +108,7 @@
             min-width: max-content;
             white-space: nowrap;
         }
+
         .header-btn {
             background: rgba(37, 99, 235, 0.08);
             color: #1d4ed8;
@@ -108,17 +121,20 @@
             backdrop-filter: blur(5px);
             font-size: 0.9rem;
         }
+
         .header-btn:hover {
             background: rgba(37, 99, 235, 0.14);
             border-color: #2563eb;
             box-shadow: 0 3px 10px rgba(15, 23, 42, 0.12);
             color: #ffffff;
         }
+
         .header-btn.active {
             background: rgba(37, 99, 235, 0.18);
             color: #ffffff;
             border-color: #2563eb;
         }
+
         .landing-logo:focus-visible,
         .image-like-nav .nav-link:focus-visible,
         .header-btn:focus-visible,
@@ -136,6 +152,7 @@
             border-bottom: 1px solid #e5eaf2;
             box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
         }
+
         .workspace-header-inner {
             width: min(100% - 32px, 1480px);
             min-height: 72px;
@@ -145,6 +162,7 @@
             align-items: center;
             gap: 24px;
         }
+
         .workspace-brand {
             display: inline-flex;
             align-items: center;
@@ -153,6 +171,7 @@
             color: #172033;
             text-decoration: none;
         }
+
         .workspace-brand-mark {
             display: inline-grid;
             place-items: center;
@@ -166,11 +185,28 @@
             letter-spacing: .08em;
             box-shadow: 0 5px 12px rgba(15, 23, 42, .16);
         }
+
         .workspace-brand-copy,
-        .workspace-user-copy { display: flex; flex-direction: column; min-width: 0; }
-        .workspace-brand-copy strong { font-size: .98rem; letter-spacing: -.02em; }
+        .workspace-user-copy {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .workspace-brand-copy strong {
+            font-size: .98rem;
+            letter-spacing: -.02em;
+        }
+
         .workspace-brand-copy small,
-        .workspace-user-copy small { margin-top: 2px; color: #596579; font-size: .68rem; font-weight: 700; letter-spacing: .04em; }
+        .workspace-user-copy small {
+            margin-top: 2px;
+            color: #596579;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+        }
+
         .workspace-nav {
             display: flex;
             align-items: center;
@@ -178,6 +214,7 @@
             gap: 3px;
             min-width: 0;
         }
+
         .workspace-nav a {
             position: relative;
             display: inline-flex;
@@ -192,33 +229,187 @@
             white-space: nowrap;
             transition: color .18s ease, background .18s ease, transform .18s ease;
         }
-        .workspace-nav a:hover { color: #1d4ed8; background: #f3f6ff; transform: translateY(-1px); }
-        .workspace-nav a.active { color: #1d4ed8; background: #edf3ff; }
-        .workspace-nav a.active::after { content: ''; position: absolute; left: 11px; right: 11px; bottom: 5px; height: 2px; border-radius: 999px; background: #2563eb; }
-        .workspace-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; min-width: max-content; }
-        .workspace-user { display: inline-flex; align-items: center; gap: 9px; max-width: 200px; }
-        .workspace-avatar { display: inline-grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; border-radius: 50%; background: #e9efff; color: #1d4ed8; font-size: .78rem; font-weight: 850; }
-        .workspace-user-copy strong { overflow: hidden; color: #26344d; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
-        .workspace-logout { display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border: 1px solid #f0c5c1; border-radius: 8px; background: #fffafa; color: #b42318; font-size: .76rem; font-weight: 800; text-decoration: none; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
-        .workspace-logout:hover { border-color: #e59b94; background: #fff2f1; transform: translateY(-1px); }
-        .workspace-menu-toggle { display: none; align-items: center; gap: 7px; min-height: 38px; padding: 0 10px; border: 1px solid #dbe3ef; border-radius: 8px; background: #ffffff; color: #334155; font: inherit; font-size: .76rem; font-weight: 800; cursor: pointer; }
-        .workspace-menu-icon { display: grid; gap: 3px; }
-        .workspace-menu-icon i { display: block; width: 15px; height: 2px; border-radius: 2px; background: currentColor; }
+
+        .workspace-nav a:hover {
+            color: #1d4ed8;
+            background: #f3f6ff;
+            transform: translateY(-1px);
+        }
+
+        .workspace-nav a.active {
+            color: #1d4ed8;
+            background: #edf3ff;
+        }
+
+        .workspace-nav a.active::after {
+            content: '';
+            position: absolute;
+            left: 11px;
+            right: 11px;
+            bottom: 5px;
+            height: 2px;
+            border-radius: 999px;
+            background: #2563eb;
+        }
+
+        .workspace-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            min-width: max-content;
+        }
+
+        .workspace-user {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            max-width: 200px;
+        }
+
+        .workspace-avatar {
+            display: inline-grid;
+            place-items: center;
+            flex: 0 0 32px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e9efff;
+            color: #1d4ed8;
+            font-size: .78rem;
+            font-weight: 850;
+        }
+
+        .workspace-user-copy strong {
+            overflow: hidden;
+            color: #26344d;
+            font-size: .78rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .workspace-logout {
+            display: inline-flex;
+            align-items: center;
+            min-height: 36px;
+            padding: 0 12px;
+            border: 1px solid #f0c5c1;
+            border-radius: 8px;
+            background: #fffafa;
+            color: #b42318;
+            font-size: .76rem;
+            font-weight: 800;
+            text-decoration: none;
+            transition: background .18s ease, border-color .18s ease, transform .18s ease;
+        }
+
+        .workspace-logout:hover {
+            border-color: #e59b94;
+            background: #fff2f1;
+            transform: translateY(-1px);
+        }
+
+        .workspace-menu-toggle {
+            display: none;
+            align-items: center;
+            gap: 7px;
+            min-height: 38px;
+            padding: 0 10px;
+            border: 1px solid #dbe3ef;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #334155;
+            font: inherit;
+            font-size: .76rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .workspace-menu-icon {
+            display: grid;
+            gap: 3px;
+        }
+
+        .workspace-menu-icon i {
+            display: block;
+            width: 15px;
+            height: 2px;
+            border-radius: 2px;
+            background: currentColor;
+        }
 
         @media (max-width: 1050px) {
-            .workspace-header-inner { grid-template-columns: auto auto; justify-content: space-between; gap: 12px; }
-            .workspace-menu-toggle { display: inline-flex; justify-self: end; }
-            .workspace-nav { position: absolute; top: calc(100% + 8px); right: 16px; left: 16px; display: none; align-items: stretch; flex-direction: column; gap: 2px; padding: 8px; border: 1px solid #e0e7f0; border-radius: 12px; background: #ffffff; box-shadow: 0 10px 16px rgba(15, 23, 42, .12); }
-            .workspace-nav.open { display: flex; }
-            .workspace-nav a { min-height: 44px; padding: 0 12px; }
-            .workspace-nav a.active::after { left: 12px; right: auto; bottom: 10px; width: 3px; height: 22px; }
-            .workspace-actions { grid-column: 1 / -1; justify-content: space-between; padding: 10px 0 12px; border-top: 1px solid #eef1f6; }
+            .workspace-header-inner {
+                grid-template-columns: auto auto;
+                justify-content: space-between;
+                gap: 12px;
+            }
+
+            .workspace-menu-toggle {
+                display: inline-flex;
+                justify-self: end;
+            }
+
+            .workspace-nav {
+                position: absolute;
+                top: calc(100% + 8px);
+                right: 16px;
+                left: 16px;
+                display: none;
+                align-items: stretch;
+                flex-direction: column;
+                gap: 2px;
+                padding: 8px;
+                border: 1px solid #e0e7f0;
+                border-radius: 12px;
+                background: #ffffff;
+                box-shadow: 0 10px 16px rgba(15, 23, 42, .12);
+            }
+
+            .workspace-nav.open {
+                display: flex;
+            }
+
+            .workspace-nav a {
+                min-height: 44px;
+                padding: 0 12px;
+            }
+
+            .workspace-nav a.active::after {
+                left: 12px;
+                right: auto;
+                bottom: 10px;
+                width: 3px;
+                height: 22px;
+            }
+
+            .workspace-actions {
+                grid-column: 1 / -1;
+                justify-content: space-between;
+                padding: 10px 0 12px;
+                border-top: 1px solid #eef1f6;
+            }
         }
+
         @media (max-width: 520px) {
-            .workspace-header-inner { width: min(100% - 24px, 1480px); min-height: 64px; }
-            .workspace-brand-copy small, .workspace-user-copy small { display: none; }
-            .workspace-user { max-width: 130px; }
-            .workspace-logout { min-height: 34px; padding: 0 10px; }
+            .workspace-header-inner {
+                width: min(100% - 24px, 1480px);
+                min-height: 64px;
+            }
+
+            .workspace-brand-copy small,
+            .workspace-user-copy small {
+                display: none;
+            }
+
+            .workspace-user {
+                max-width: 130px;
+            }
+
+            .workspace-logout {
+                min-height: 34px;
+                padding: 0 10px;
+            }
         }
 
         /* Mobile Menu */
@@ -231,16 +422,38 @@
             cursor: pointer;
             z-index: 1002;
         }
+
         .mobile-visible {
             display: none;
         }
+
         @media (max-width: 1150px) {
-            .mobile-toggle { display: block; }
+            .landing-header {
+                min-height: 66px;
+                padding: 10px 18px;
+            }
+
+            .landing-logo img {
+                height: 46px;
+            }
+
+            .landing-logo h1 {
+                font-size: 1.25rem;
+                font-weight: 800;
+            }
+
+            .mobile-toggle {
+                display: block;
+                font-size: 2.2rem;
+            }
+
             .header-nav-center {
                 position: fixed;
-                top: 0; right: -100%;
-                width: 250px; height: 100vh;
-                background: rgba(255,255,255,0.98);
+                top: 0;
+                right: -100%;
+                width: 250px;
+                height: 100vh;
+                background: rgba(255, 255, 255, 0.98);
                 backdrop-filter: blur(10px);
                 flex-direction: column;
                 justify-content: flex-start;
@@ -249,13 +462,20 @@
                 z-index: 1000;
                 border-left: 1px solid #e2e8f0;
             }
-            .header-nav-center.open { right: 0; }
-            .header-actions { display: none; }
+
+            .header-nav-center.open {
+                right: 0;
+            }
+
+            .header-actions {
+                display: none;
+            }
+
             .header-actions.mobile-visible {
                 display: flex;
                 flex-direction: column;
                 padding: 20px;
-                border-top: 1px solid rgba(255,255,255,0.1);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
                 margin-top: auto;
             }
         }
@@ -269,7 +489,7 @@
             color: #64748b;
             position: relative;
             z-index: 10;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
             margin-top: auto;
         }
     </style>
@@ -281,72 +501,122 @@
     <!-- Authenticated workspace header: compact, role-aware, and independent from the public event header. -->
     <header class="workspace-header">
         <div class="workspace-header-inner">
-            <a class="workspace-brand" href="{{ url_for('admin_dashboard' if session.get('role') == 'admin' else 'member_dashboard') }}" aria-label="EventMate workspace home">
-                <span class="workspace-brand-mark" aria-hidden="true">EM</span>
-                <span class="workspace-brand-copy"><strong>EventMate</strong><small>{{ session.get('role', 'member')|capitalize }} workspace</small></span>
+            <a class="workspace-brand"
+                href="{{ url_for('admin_dashboard' if session.get('role') == 'admin' else 'member_dashboard') }}"
+                aria-label="Shree Daksha Academy workspace home">
+                <span class="workspace-brand-mark" aria-hidden="true">SDA</span>
+                <span class="workspace-brand-copy"><strong>Shree Daksha Academy</strong><small>{{ session.get('role',
+                        'member')|capitalize }} workspace</small></span>
             </a>
-            <button class="workspace-menu-toggle" type="button" aria-expanded="false" aria-controls="workspace-navigation">
+            <button class="workspace-menu-toggle" type="button" aria-expanded="false"
+                aria-controls="workspace-navigation">
                 <span class="workspace-menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
                 <span>Menu</span>
             </button>
             <nav id="workspace-navigation" class="workspace-nav" aria-label="Workspace navigation">
                 <a href="{{ url_for('events_list') }}">Public events</a>
                 {% if session.get('role') == 'admin' %}
-                    <a href="{{ url_for('admin_dashboard') }}" class="{% if request.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a>
-                    <a href="{{ url_for('attendance_manager') }}" class="{% if request.path == '/admin/attendance' %}active{% endif %}">Attendance</a>
-                    <a href="{{ url_for('certificates_manager') }}" class="{% if request.path == '/admin/certificates' %}active{% endif %}">Certificates</a>
-                    <a href="{{ url_for('members_list') }}" class="{% if request.path == '/members' %}active{% endif %}">Members</a>
+                <a href="{{ url_for('admin_dashboard') }}"
+                    class="{% if request.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{{ url_for('qr_scanner') }}"
+                    class="{% if request.path in ('/scanner', '/admin/qr_scanner') %}active{% endif %}">QR Scanner</a>
+                <a href="{{ url_for('attendance_manager') }}"
+                    class="{% if request.path == '/admin/attendance' %}active{% endif %}">Attendance</a>
+                <a href="{{ url_for('certificates_manager') }}"
+                    class="{% if request.path == '/admin/certificates' %}active{% endif %}">Certificates</a>
+                <a href="{{ url_for('members_list') }}"
+                    class="{% if request.path == '/members' %}active{% endif %}">Members</a>
                 {% else %}
-                    <a href="{{ url_for('member_dashboard') }}" class="{% if request.path == '/member/dashboard' %}active{% endif %}">Dashboard</a>
-                    <a href="{{ url_for('members_list') }}" class="{% if request.path == '/members' %}active{% endif %}">Team directory</a>
+                <a href="{{ url_for('member_dashboard') }}"
+                    class="{% if request.path == '/member/dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{{ url_for('qr_scanner') }}"
+                    class="{% if request.path in ('/scanner', '/admin/qr_scanner') %}active{% endif %}">QR Scanner</a>
+                <a href="{{ url_for('members_list') }}"
+                    class="{% if request.path == '/members' %}active{% endif %}">Team directory</a>
                 {% endif %}
             </nav>
             <div class="workspace-actions">
                 <div class="workspace-user">
-                    <span class="workspace-avatar" aria-hidden="true">{{ (session.get('full_name', session.get('username', 'U')) or 'U')[0]|upper }}</span>
-                    <span class="workspace-user-copy"><strong>{{ session.get('full_name', session.get('username')) }}</strong><small>{{ session.get('role', 'member')|capitalize }}</small></span>
+                    <span class="workspace-avatar" aria-hidden="true">{{ (session.get('full_name',
+                        session.get('username', 'U')) or 'U')[0]|upper }}</span>
+                    <span class="workspace-user-copy"><strong>{{ session.get('full_name', session.get('username'))
+                            }}</strong><small>{{ session.get('role', 'member')|capitalize }}</small></span>
                 </div>
                 <a class="workspace-logout" href="{{ url_for('logout') }}">Log out</a>
             </div>
         </div>
     </header>
+    {% elif request.endpoint == 'login' %}
+    <!-- Dedicated Minimalist Header for Admin Login Page -->
+    <header class="landing-header auth-clean-header" style="box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; padding: 12px clamp(16px, 4vw, 32px); min-height: 70px; background: rgba(255, 255, 255, 0.98); border-bottom: 1px solid #e2e8f0;">
+        <a href="https://shreedakshaacademyedu.in/" target="_blank" class="landing-logo" style="display: flex; align-items: center; gap: 14px; text-decoration: none;">
+            <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Logo"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='favicon.svg') }}';" style="height: 48px; width: auto; object-fit: contain;">
+            <div class="landing-logo-copy" style="display: flex; flex-direction: column;">
+                <span style="font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 800; color: #0f172a; line-height: 1.2;">SHREE DAKSHA ACADEMY PU COLLEGE</span>
+                <span style="font-size: 0.65rem; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">RECOGNIZED BY GOVT. OF KARNATAKA &bull; AFFILIATED TO BU &bull; AICTE</span>
+                <span style="font-size: 0.62rem; color: #64748b;">No.596, Andrahalli Main Road, Opp. D.Group Layout Arch, Bengaluru - 560091</span>
+            </div>
+        </a>
+        <div class="header-actions">
+            <a href="{{ url_for('events_list') }}" class="btn btn-outline-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 9999px; font-weight: 700; text-decoration: none; border: 1.5px solid #2563eb; color: #2563eb;">
+                <span>&larr;</span> <span>Back to Events</span>
+            </a>
+        </div>
+    </header>
     {% else %}
     <!-- Public event header -->
     <header class="landing-header" style="box-sizing: border-box;">
-        <a href="https://shreedakshaacademyedu.in/" target="_blank" class="landing-logo">
-            <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Logo">
-            <h1>Shree Daksha Academy</h1>
+        <a href="https://shreedakshaacademyedu.in/" target="_blank" class="landing-logo" style="text-decoration: none; gap: 12px;">
+            <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Logo"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='favicon.svg') }}';" style="height: 44px; width: auto; object-fit: contain;">
+            <div class="landing-logo-copy" style="display: flex; flex-direction: column; justify-content: center; line-height: 1.2;">
+                <span style="font-family: 'Space Grotesk', sans-serif; font-size: 0.98rem; font-weight: 800; color: inherit;">SHREE DAKSHA ACADEMY PU COLLEGE</span>
+                <span style="font-size: 0.64rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">RECOGNIZED BY GOVT. OF KARNATAKA &bull; BU &bull; AICTE</span>
+                <span style="font-size: 0.60rem; color: #94a3b8;">No.596, Andrahalli Main Road, Bengaluru - 560091</span>
+            </div>
         </a>
 
-        <button class="mobile-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" onclick="const nav = document.getElementById('public-navigation'); const isOpen = nav.classList.toggle('open'); this.setAttribute('aria-expanded', String(isOpen));">&#9776;<span class="sr-only">Toggle navigation</span></button>
-        
+        <button class="mobile-toggle" type="button" aria-expanded="false" aria-controls="public-navigation"
+            onclick="const nav = document.getElementById('public-navigation'); const isOpen = nav.classList.toggle('open'); this.setAttribute('aria-expanded', String(isOpen));">&#9776;<span
+                class="sr-only">Toggle navigation</span></button>
+
         <nav id="public-navigation" class="header-nav-center" aria-label="Public navigation">
             <div class="image-like-nav">
                 <div class="nav-pill-indicator"></div>
                 <a href="{{ url_for('events_list') }}" class="nav-link">Home</a>
-                <a href="{{ url_for('events_list') }}#events" class="nav-link">Event</a>
+                <a href="{{ url_for('events_list') }}#about" class="nav-link">About us</a>
+                <a href="{{ url_for('events_list') }}#events" class="nav-link">Events</a>
                 <a href="{{ url_for('events_list') }}#location" class="nav-link">Location</a>
                 <a href="{{ url_for('events_list') }}#contact" class="nav-link">Contact</a>
-                
+
                 {% if session.get('user_id') %}
-                    {% if session.get('role') == 'admin' %}
-                        <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a>
-                        <a href="{{ url_for('attendance_manager') }}" class="nav-link {% if request.path == '/admin/attendance' %}active{% endif %}">Attendance</a>
-                        <a href="{{ url_for('certificates_manager') }}" class="nav-link {% if request.path == '/admin/certificates' %}active{% endif %}">Certificate</a>
-                        <a href="{{ url_for('members_list') }}" class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a>
-                    {% elif session.get('role') == 'member' %}
-                        <a href="{{ url_for('member_dashboard') }}" class="nav-link {% if request.path == '/member/dashboard' %}active{% endif %}">Dashboard</a>
-                        <a href="{{ url_for('members_list') }}" class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a>
-                    {% endif %}
+                {% if session.get('role') == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}"
+                    class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{{ url_for('attendance_manager') }}"
+                    class="nav-link {% if request.path == '/admin/attendance' %}active{% endif %}">Attendance</a>
+                <a href="{{ url_for('certificates_manager') }}"
+                    class="nav-link {% if request.path == '/admin/certificates' %}active{% endif %}">Certificate</a>
+                <a href="{{ url_for('members_list') }}"
+                    class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a>
+                {% elif session.get('role') == 'member' %}
+                <a href="{{ url_for('member_dashboard') }}"
+                    class="nav-link {% if request.path == '/member/dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{{ url_for('members_list') }}"
+                    class="nav-link {% if request.path == '/members' %}active{% endif %}">Members</a>
+                {% endif %}
                 {% endif %}
             </div>
 
             <div class="header-actions mobile-visible">
                 {% if session.get('user_id') %}
-                    <div class="header-user-name" style="display:flex; align-items:center; gap:8px; color:#0f172a; font-weight:600; padding:10px 0;">
-                        <span>👤 {{ session.get('full_name', session.get('username')) }}</span>
-                    </div>
-                    <a href="{{ url_for('logout') }}" class="header-btn" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); width: 100%; text-align: center;">Logout</a>
+                <div class="header-user-name"
+                    style="display:flex; align-items:center; gap:8px; color:#0f172a; font-weight:600; padding:10px 0;">
+                    <span>👤 {{ session.get('full_name', session.get('username')) }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="header-btn"
+                    style="color:#ef4444; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); width: 100%; text-align: center;">Logout</a>
                 {% endif %}
             </div>
         </nav>
@@ -354,10 +624,12 @@
         <div class="header-actions">
             <a href="{{ url_for('events_list') }}#events" class="header-register-link">Register for Event</a>
             {% if session.get('user_id') %}
-                <div class="header-user-name" style="display:flex; align-items:center; gap:8px; color:#0f172a; font-weight:600; padding:0 15px; border-left:1px solid #e2e8f0; margin-left:10px;">
-                    <span>{{ session.get('full_name', session.get('username')) }}</span>
-                </div>
-                <a href="{{ url_for('logout') }}" class="header-btn" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); min-width: max-content;">Logout</a>
+            <div class="header-user-name"
+                style="display:flex; align-items:center; gap:8px; color:#0f172a; font-weight:600; padding:0 15px; border-left:1px solid #e2e8f0; margin-left:10px;">
+                <span>{{ session.get('full_name', session.get('username')) }}</span>
+            </div>
+            <a href="{{ url_for('logout') }}" class="header-btn"
+                style="color:#ef4444; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); min-width: max-content;">Logout</a>
             {% endif %}
         </div>
     </header>
@@ -376,7 +648,8 @@
                 </a>
             </div>
             <div style="font-size: 0.85rem; color: var(--text-muted);">
-                <span>EventMate Portal</span> &rsaquo; <span style="color: var(--primary); font-weight: 600;">{{
+                <span>Shree Daksha Academy Portal</span> &rsaquo; <span
+                    style="color: var(--primary); font-weight: 600;">{{
                     request.endpoint.replace('_', ' ').title() }}</span>
             </div>
         </div>
@@ -389,7 +662,8 @@
             {% for category, message in messages %}
             <div class="alert alert-{{ category }}">
                 <span>{{ message }}</span>
-                <button class="alert-close" type="button" onclick="this.parentElement.remove()" aria-label="Dismiss notification">&times;</button>
+                <button class="alert-close" type="button" onclick="this.parentElement.remove()"
+                    aria-label="Dismiss notification">&times;</button>
             </div>
             {% endfor %}
         </div>
@@ -407,7 +681,8 @@
                 <button class="alert-close" onclick="closeCertModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <img id="modalCertImage" src="{{ url_for('static', filename='favicon.svg') }}" alt="Certificate Preview">
+                <img id="modalCertImage" src="{{ url_for('static', filename='favicon.svg') }}"
+                    alt="Certificate Preview">
                 <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; justify-content: center;">
                     <a id="modalDownloadBtn" href="" download class="btn btn-primary">Download High-Res PNG</a>
                     <button type="button" class="btn btn-secondary" onclick="closeCertModal()">Close</button>
@@ -420,11 +695,12 @@
     <footer class="l-footer">
         <p>&copy; 2026 Shree Daksha Academy. All rights reserved.</p>
         <p style="margin-top: 10px;">
-            <a href="{{ url_for('events_list') }}#events" style="color:#2563eb; text-decoration:none; margin:0 8px;">Events</a>
-            <a href="{{ url_for('verify_certificate') }}" style="color:#2563eb; text-decoration:none; margin:0 8px;">Verify Certificate</a>
+            <a href="{{ url_for('events_list') }}#events"
+                style="color:#2563eb; text-decoration:none; margin:0 8px;">Events</a>
         </p>
         {% if not session.get('user_id') %}
-        <p style="margin-top: 10px;"><a href="{{ url_for('login') }}" style="color: #64748b; text-decoration: none;">Admin Login</a></p>
+        <p style="margin-top: 10px;"><a href="{{ url_for('login') }}"
+                style="color: #64748b; text-decoration: none;">Admin Login</a></p>
         {% endif %}
     </footer>
 
@@ -454,12 +730,12 @@
             if (!nav) return;
             const indicator = nav.querySelector('.nav-pill-indicator');
             const links = nav.querySelectorAll('.nav-link');
-            
+
             function moveIndicator(el) {
                 if (!el || !indicator) return;
                 const navRect = nav.getBoundingClientRect();
                 const linkRect = el.getBoundingClientRect();
-                
+
                 indicator.style.width = `${linkRect.width}px`;
                 indicator.style.transform = `translateX(${linkRect.left - navRect.left}px)`;
                 indicator.classList.add('visible');
@@ -472,7 +748,7 @@
                 const path = window.location.pathname;
                 activeLink = Array.from(links).find(l => l.getAttribute('href') === path) || links[0];
             }
-            
+
             // Give layout time to settle
             setTimeout(() => {
                 if (activeLink) moveIndicator(activeLink);
@@ -493,7 +769,7 @@
                     indicator.classList.remove('visible');
                 }
             });
-            
+
             // Update on resize
             window.addEventListener('resize', () => {
                 if (activeLink) moveIndicator(activeLink);

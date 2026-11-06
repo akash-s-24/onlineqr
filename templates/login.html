@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Sign in – EventMate{% endblock %}
+{% block title %}Sign in – Shree Daksha Academy{% endblock %}
 
 {% block content %}
 <section class="auth-page" aria-labelledby="auth-title">
     <div class="auth-intro">
-        <div class="auth-mark" aria-hidden="true">EM</div>
-        <p class="auth-eyebrow">EventMate workspace</p>
+        <div class="auth-mark" aria-hidden="true">SDA</div>
+        <p class="auth-eyebrow">Shree Daksha Academy workspace</p>
         <h1 id="auth-title">Sign in and keep every event moving.</h1>
         <p class="auth-intro-copy">Access registration records, payment verification, attendance, certificates, and team operations from one secure workspace.</p>
         <div class="auth-role-list" aria-label="Available workspace roles">
@@ -27,17 +27,17 @@
             <input type="hidden" name="action" value="login">
 
             <div class="auth-field">
-                <label for="username">Username or email</label>
-                <input type="text" id="username" name="username" placeholder="you@example.com" required autofocus autocomplete="username" spellcheck="false">
+                <label for="username">Member / Staff ID</label>
+                <input type="text" id="username" name="username" placeholder="Enter your ID (e.g. member1, admin)" required autofocus autocomplete="username" spellcheck="false">
             </div>
 
             <div class="auth-field">
                 <div class="auth-label-row">
-                    <label for="password">Password</label>
-                    <span>Keep it private</span>
+                    <label for="password">Password (optional)</label>
+                    <span>ID-only access supported</span>
                 </div>
                 <div class="auth-password-wrap">
-                    <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                    <input type="password" id="password" name="password" placeholder="Enter password (optional)" autocomplete="current-password">
                     <button class="auth-password-toggle" type="button" data-password-toggle="password" aria-label="Show password" aria-pressed="false">Show</button>
                 </div>
             </div>
