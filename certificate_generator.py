@@ -625,8 +625,8 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
 if __name__ == '__main__':
     code, path, rel = generate_certificate(
         participant_name="Student Participant",
-        event_name="Binary Brains",
-        event_date="18-Sep-2026",
+        event_name="BGMI",
+        event_date="19-Sep-2026",
         rank="1st",
         department="BCA",
         semester="Second PUC",

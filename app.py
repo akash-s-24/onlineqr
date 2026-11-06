@@ -214,16 +214,20 @@ def member_required(f):
 # ---------------------------------------------------------
 # Authentication Routes (Admin Login & Logout)
 # ---------------------------------------------------------
-@app.route('/')
+@app.route('/', methods=['GET', 'HEAD'])
 def index():
+    if request.method == 'HEAD':
+        return ('', 200)
     if session.get('role') == 'admin':
         return redirect(url_for('admin_dashboard'))
     return redirect(url_for('events_list'))
 
 
-@app.route('/healthz')
+@app.route('/healthz', methods=['GET', 'HEAD'])
 def healthz():
     """Lightweight deployment health check that verifies database reachability."""
+    if request.method == 'HEAD':
+        return ('', 200)
     try:
         query_db('SELECT 1', one=True)
     except Exception:
