@@ -3,6 +3,22 @@
    Custom Responsive CSS Design System
    ========================================================= */
 
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('../fonts/plus-jakarta-sans.woff2') format('woff2');
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('../fonts/space-grotesk.woff2') format('woff2');
+  font-weight: 500 700;
+  font-style: normal;
+  font-display: block;
+}
+
 :root {
   --primary: #2563eb;
   --primary-dark: #1d4ed8;

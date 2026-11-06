@@ -207,6 +207,39 @@
     .contact-grid { gap: 12px !important; grid-template-columns: 1fr !important; }
     .contact-card { padding: 20px 18px !important; border-radius: 16px !important; }
 
+    /* Mobile-first High-Contrast Cards & Auto-Illuminated Borders */
+    .stat-card,
+    .unified-event-card,
+    .disc-cascade-card,
+    .principal-message-card {
+        background: #0d111a !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
+        transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+    }
+    .stat-card.in-view,
+    .stat-card:active,
+    .stat-card:hover,
+    .unified-event-card.in-view,
+    .embla__slide.is-active .unified-event-card,
+    .disc-cascade-card.in-view,
+    .disc-cascade-card:active,
+    .disc-cascade-card:hover,
+    .principal-message-card.in-view {
+        border-color: rgba(96, 165, 250, 0.6) !important;
+        box-shadow: 0 14px 38px rgba(0, 0, 0, 0.85), 0 0 20px rgba(59, 130, 246, 0.22) !important;
+    }
+    .stats-container, .stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+        padding: 0 16px !important;
+    }
+    #college-info {
+        background: #0d111a !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+        box-shadow: 0 12px 34px rgba(0, 0, 0, 0.75) !important;
+    }
+
     .modal-drag-handle { width: 36px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 0 auto 16px; }
 }
 
@@ -435,11 +468,11 @@ html:not([data-theme="light"]) .modal-drag-handle,
     z-index: 10;
 }
 .hero-actions button, .hero-actions .candy-btn {
-    min-width: 130px;
-    min-height: 40px !important;
-    height: 40px !important;
-    padding: 8px 22px !important;
-    font-size: 0.84rem !important;
+    min-width: 140px;
+    min-height: 48px !important;
+    height: 48px !important;
+    padding: 10px 24px !important;
+    font-size: 0.92rem !important;
     font-weight: 700;
     border-radius: 9999px;
     cursor: pointer;
@@ -447,16 +480,16 @@ html:not([data-theme="light"]) .modal-drag-handle,
     text-align: center;
     position: relative;
     overflow: hidden;
-    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease, border-color 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .hero-explore-btn {
     position: relative;
     overflow: hidden;
-    border: 1.5px solid #3b82f6 !important;
-    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%) !important;
     color: #ffffff !important;
-    box-shadow: 0px 4px 20px -4px rgba(124, 58, 237, 0.5), inset 0px 1px 4px rgba(255, 255, 255, 0.6) !important;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0px 4px 20px rgba(37, 99, 235, 0.4), inset 0px 1px 2px rgba(255, 255, 255, 0.5) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     font-weight: 700 !important;
     letter-spacing: 0.02em !important;
 }
@@ -473,33 +506,35 @@ html:not([data-theme="light"]) .modal-drag-handle,
     pointer-events: none;
 }
 .hero-explore-btn:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%) !important;
+    background: linear-gradient(135deg, #1d4ed8 0%, #4338ca 50%, #6d28d9 100%) !important;
     border-color: #ffffff !important;
     filter: brightness(1.1) !important;
-    box-shadow: 0px 6px 28px -4px rgba(124, 58, 237, 0.65), 0 0 16px rgba(37, 99, 235, 0.5), inset 0px 1px 6px rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0px 8px 28px rgba(37, 99, 235, 0.55), inset 0px 1px 4px rgba(255, 255, 255, 0.7) !important;
     color: #ffffff !important;
-    transform: translate(-2px, -2px) !important;
+    transform: translateY(-2px) !important;
 }
 .hero-explore-btn:hover::after {
     left: 140%;
 }
 .hero-explore-btn:active {
-    transform: translate(3px, 3px) !important;
+    transform: scale(0.97) !important;
     filter: brightness(1.05) !important;
-    box-shadow: 0px 0px 0px transparent !important;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3) !important;
 }
 
 .hero-rules-btn,
 .hero-contact-btn {
-    background: rgba(15, 23, 42, 0.85) !important;
-    border: 2px solid #2563eb !important;
-    color: #ffffff !important;
-    box-shadow: 4px 4px 0px rgba(37, 99, 235, 0.5) !important;
+    background: rgba(15, 23, 42, 0.75) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+    color: #f8fafc !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
     border-radius: 9999px !important;
     font-weight: 700 !important;
     position: relative !important;
     overflow: hidden !important;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 .hero-rules-btn::after,
 .hero-contact-btn::after {
@@ -516,11 +551,11 @@ html:not([data-theme="light"]) .modal-drag-handle,
 }
 .hero-rules-btn:hover,
 .hero-contact-btn:hover {
-    background: rgba(37, 99, 235, 0.22) !important;
-    border-color: #ffffff !important;
+    background: rgba(37, 99, 235, 0.18) !important;
+    border-color: #60a5fa !important;
     color: #ffffff !important;
-    transform: translate(-2px, -2px) !important;
-    box-shadow: 6px 6px 0px #2563eb, 0 0 20px rgba(37, 99, 235, 0.55) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35) !important;
 }
 .hero-rules-btn:hover::after,
 .hero-contact-btn:hover::after {
@@ -528,8 +563,8 @@ html:not([data-theme="light"]) .modal-drag-handle,
 }
 .hero-rules-btn:active,
 .hero-contact-btn:active {
-    transform: translate(3px, 3px) !important;
-    box-shadow: 0px 0px 0px transparent !important;
+    transform: scale(0.97) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
 }
 .scroll-indicator {
     margin-top: 40px;
@@ -2237,12 +2272,12 @@ section[id], .events-section, .about-section, .map-section {
 html:not([data-theme="light"]) .hero-badge-text,
 [data-theme="dark"] .hero-badge-text { color: #f8fafc !important; white-space: nowrap !important; }
 .registration-dot {
-    width: 9px;
-    height: 9px;
-    flex: 0 0 9px;
+    width: 8px;
+    height: 8px;
+    flex: 0 0 8px;
     border-radius: 50%;
     background: #10B981 !important;
-    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35), 0 0 12px rgba(16, 185, 129, 0.9) !important;
+    box-shadow: 0 0 6px #10B981 !important;
     position: relative;
     display: inline-block;
 }
@@ -5947,7 +5982,7 @@ html[data-theme="light"] #discCascadeTitle {
         
         <a href="https://shreedakshaacademyedu.in/" target="_blank" rel="noopener noreferrer" class="institution-center-crest" title="Visit Shree Daksha Academy Official Website">
             <div class="crest-emblem-disc">
-                <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Logo">
+                <img src="{{ url_for('static', filename='images/college_logo.png') }}" alt="Shree Daksha Academy Logo">
                 <div class="crest-orbit-ring" aria-hidden="true"></div>
             </div>
             <span class="crest-institution-name">SHREE DAKSHA ACADEMY PU COLLEGE</span>
@@ -5985,10 +6020,14 @@ html[data-theme="light"] #discCascadeTitle {
         <!-- Card 2: ₹1 Lakh Prize Pool -->
         <div class="stat-card stat-card-highlight rv" style="--d: 0.2s;">
             <div class="stat-badge">PRIZE POOL</div>
-            <div class="stat-icon-wrapper trophy-icon">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            <div class="stat-icon-wrapper trophy-icon" style="background: rgba(245, 158, 11, 0.15); border: 1.5px solid rgba(245, 158, 11, 0.4);">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-4"/>
+                    <path d="M4 22h16"/>
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
                 </svg>
             </div>
             <div class="stat-value-row">
@@ -6052,7 +6091,7 @@ html[data-theme="light"] #discCascadeTitle {
         <div class="principal-message-card" style="backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 50px 32px 36px; border-radius: 24px; text-align: center; max-width: 440px; width: 100%; position: relative;">
             <!-- Official College Crest Floating Badge -->
             <div class="principal-message-logo" style="width: 125px; height: 125px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -115px auto 20px; position: relative; overflow: hidden; padding: 4px;">
-                <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy Crest" style="width: 96%; height: 96%; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.25));">
+                <img src="{{ url_for('static', filename='images/college_logo.png') }}" alt="Shree Daksha Academy Crest" style="width: 96%; height: 96%; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.25));">
             </div>
             
             <!-- Header & Designation -->
@@ -6641,7 +6680,7 @@ html[data-theme="light"] #discCascadeTitle {
         <!-- Campus Desk panel -->
         <div class="map-corner-dock campus-desk-panel">
             <div class="dock-header">
-                <img src="https://shreedakshaacademyedu.in/assests/images/backend/logo2.png" alt="Shree Daksha Academy" class="dock-logo">
+                <img src="{{ url_for('static', filename='images/college_logo.png') }}" alt="Shree Daksha Academy" class="dock-logo">
                 <div class="dock-title">
                     <h4>{{ config.COLLEGE_NAME }}</h4>
                     <p>Lingadeeranahalli, Bengaluru</p>
@@ -6649,17 +6688,17 @@ html[data-theme="light"] #discCascadeTitle {
             </div>
             
             <div class="dock-social-row">
-                <a href="https://www.instagram.com/shreedakshaacademy/" target="_blank" rel="noopener noreferrer" class="dock-icon-btn" title="Follow on Instagram" aria-label="Instagram">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram">
+                <a href="https://www.instagram.com/shreedakshaacademy/" target="_blank" rel="noopener noreferrer" class="dock-icon-btn" title="Follow on Instagram" aria-label="Instagram" style="color: #e1306c;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
                 </a>
-                <a href="https://wa.me/917892038099" target="_blank" rel="noopener noreferrer" class="dock-icon-btn" title="Connect on WhatsApp" aria-label="WhatsApp">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+                <a href="https://wa.me/917892038099" target="_blank" rel="noopener noreferrer" class="dock-icon-btn" title="Connect on WhatsApp" aria-label="WhatsApp" style="color: #25d366;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.301-.15-1.78-.879-2.056-.98-.276-.1-.477-.15-.678.15-.2.3-.778.98-.954 1.18-.176.2-.352.225-.653.075-.301-.15-1.272-.469-2.423-1.496-.896-.798-1.501-1.784-1.677-2.085-.176-.3-.019-.462.132-.612.136-.135.301-.35.452-.526.15-.175.2-.3.301-.5.1-.2.05-.375-.025-.525-.075-.15-.678-1.635-.93-2.24-.244-.589-.493-.509-.678-.519-.176-.01-.376-.01-.577-.01-.2 0-.527.075-.803.375-.276.3-1.054 1.03-1.054 2.513 0 1.482 1.079 2.913 1.23 3.113.15.2 2.124 3.243 5.145 4.549.719.311 1.28.497 1.718.636.722.23 1.378.197 1.897.12.578-.087 1.78-.727 2.031-1.43.251-.703.251-1.306.176-1.431-.076-.125-.277-.2-.578-.35zM12.04 2C6.516 2 2.028 6.488 2.028 12.012c0 1.986.58 3.842 1.583 5.41L2 22.04l4.78-1.545a9.98 9.98 0 0 0 5.26 1.517h.005c5.522 0 10.01-4.488 10.01-10.012A10.01 10.01 0 0 0 12.04 2z"/></svg>
                 </a>
-                <a href="mailto:principal@shreedakshaacademyeveningcollege.edu.in" class="dock-icon-btn" title="Send Official Email" aria-label="Email">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Email">
+                <a href="mailto:principal@shreedakshaacademyeveningcollege.edu.in" class="dock-icon-btn" title="Send Official Email" aria-label="Email" style="color: #f87171;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                 </a>
-                <a href="https://shreedakshaacademyedu.in/" target="_blank" rel="noopener noreferrer" class="dock-icon-btn" title="Visit College Portal" aria-label="Website">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Chrome_icon_%28February_2022%29.svg" alt="Website">
+                <a href="https://shreedakshaacademyedu.in/" target="_blank" rel="noopener noreferrer" class="dock-icon-btn" title="Visit College Portal" aria-label="Website" style="color: #60a5fa;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 </a>
             </div>
             
@@ -6988,7 +7027,7 @@ html[data-theme="light"] #discCascadeTitle {
                 trigger: 'mount',
                 fontSize: isMobileDevice ? 'clamp(2.8rem, 11vw, 4.4rem)' : 'clamp(3.8rem, 6.8vw, 5.8rem)',
                 fontWeight: 800,
-                fontFamily: '"Space Grotesk", sans-serif',
+                fontFamily: '"Space Grotesk", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
                 glow: !isLight
             });
         }
@@ -7001,28 +7040,28 @@ html[data-theme="light"] #discCascadeTitle {
             renderHeroParticles();
         });
         
-        // 7. Smooth IntersectionObserver Scroll Reveal Engine
+        // 7. Smooth IntersectionObserver Scroll Reveal & Card Illumination Engine
         if ('IntersectionObserver' in window) {
             const revealObserver = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
+                        entry.target.classList.add('visible', 'in-view');
                         observer.unobserve(entry.target);
                     }
                 });
-            }, { root: null, rootMargin: '0px 0px -40px 0px', threshold: 0.08 });
+            }, { root: null, rootMargin: '0px 0px -30px 0px', threshold: 0.08 });
 
-            document.querySelectorAll('.scroll-reveal').forEach(el => {
+            document.querySelectorAll('.scroll-reveal, .stat-card, .unified-event-card, .disc-cascade-card, .principal-message-card').forEach(el => {
                 const rect = el.getBoundingClientRect();
                 // If element is already in the viewport on initial load (e.g. hero elements), reveal immediately
                 if (rect.top < window.innerHeight && rect.bottom > 0) {
-                    el.classList.add('visible');
+                    el.classList.add('visible', 'in-view');
                 } else {
                     revealObserver.observe(el);
                 }
             });
         } else {
-            document.querySelectorAll('.scroll-reveal').forEach(el => el.classList.add('visible'));
+            document.querySelectorAll('.scroll-reveal, .stat-card, .unified-event-card, .disc-cascade-card, .principal-message-card').forEach(el => el.classList.add('visible', 'in-view'));
         }
 
 
