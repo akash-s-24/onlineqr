@@ -211,7 +211,9 @@ class SDATestCase(unittest.TestCase):
         # 2. Fest Highlights & Stats Section
         self.assertIn('id="stats"', data)
         self.assertIn('data-target="12"', data)
-        self.assertIn('12+ EVENTS', data)
+        self.assertIn('stat-badge-events">12+<', data)
+        self.assertNotIn('12+ EVENTS', data)
+        self.assertNotIn('+ Events', data)
         self.assertIn('data-target="1"', data)
         self.assertNotIn('General Championship', data)
         self.assertIn('Prize Pool', data)

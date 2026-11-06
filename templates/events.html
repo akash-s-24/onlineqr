@@ -1,6 +1,6 @@
 {% extends 'landing_base.html' %}
 
-{% block title %}{{ config.EVENT_TITLE }}{% endblock %}
+{% block title %}Daksha Infinitx{% endblock %}
 
 {% block extra_css %}
 /* ═══════════════════════════════════════
@@ -1709,7 +1709,7 @@ section[id], .events-section, .about-section, .map-section {
         background: #000000 !important;
     }
 
-    /* Top Bar: 12+ Events Total + 12+ Events Dropdown in Top-Right Corner */
+    /* Top Bar: 14 Events Total + 14 Events Dropdown in Top-Right Corner */
     .disc-cascade-topbar {
         position: absolute !important;
         top: 14px !important;
@@ -1739,7 +1739,7 @@ section[id], .events-section, .about-section, .map-section {
         height: 17px !important;
     }
 
-    /* Noticeable, Glowing 12+ Event Pill Button matching site aesthetic */
+    /* Noticeable, Glowing 14 Event Pill Button matching site aesthetic */
     .disc-cascade-index > button {
         background: rgba(15, 23, 42, 0.85) !important;
         border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
@@ -1779,7 +1779,7 @@ section[id], .events-section, .about-section, .map-section {
         box-shadow: 0 0 20px rgba(255, 255, 255, 0.45) !important;
     }
 
-    /* 12+ Event Dropdown Drawer (Fixed Overlay so it's never clipped) */
+    /* 14 Event Dropdown Drawer (Fixed Overlay so it's never clipped) */
     .disc-cascade-index-backdrop {
         display: none;
     }
@@ -5887,7 +5887,7 @@ html[data-theme="light"] #discCascadeTitle {
 
         <!-- Interactive Animated Main Event Title (Particle Animation) -->
         <div id="hero-particle-text" style="width: 100%; max-width: 880px; height: clamp(140px, 24vw, 220px); margin: 0 auto 16px; position: relative; z-index: 5; display: flex; align-items: center; justify-content: center;">
-            <h1 class="hero-title shimmer-headline" id="heroFallbackTitle" style="margin: 0; line-height: 1.15;">{{ config.EVENT_TITLE }}</h1>
+            <h1 class="hero-title shimmer-headline" id="heroFallbackTitle" style="margin: 0; line-height: 1.15;">Daksha Infinitx</h1>
         </div>
         
         <p class="hero-subtitle">
@@ -5964,7 +5964,7 @@ html[data-theme="light"] #discCascadeTitle {
     <div class="fest-stats-container">
         <!-- Card 1: 12+ Competitions -->
         <div class="stat-card rv" style="--d: 0.1s;">
-            <div class="stat-badge stat-badge-events">12+ EVENTS</div>
+            <div class="stat-badge stat-badge-events">12+</div>
             <div class="stat-icon-wrapper">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -5972,7 +5972,7 @@ html[data-theme="light"] #discCascadeTitle {
             </div>
             <div class="stat-value-row">
                 <b class="stat-number" data-target="12">0</b>
-                <span class="stat-plus stat-blue-accent">+ Events</span>
+                <span class="stat-plus stat-blue-accent">+</span>
             </div>
             <h3 class="stat-title">Competitions</h3>
             <p class="stat-desc">Spanning Technical, Gaming, Stage Arts, Culture, Strategy & Business arenas.</p>
@@ -5997,7 +5997,7 @@ html[data-theme="light"] #discCascadeTitle {
                 <span class="stat-unit stat-blue-accent">Lakh</span>
             </div>
             <h3 class="stat-title">Prize Pool</h3>
-            <p class="stat-desc">Direct cash awards, winner shields, and excellence citations across all 12+ competitive events.</p>
+            <p class="stat-desc">Direct cash awards, winner shields, and excellence citations across all 12+ competitions.</p>
             <a href="#events" class="stat-action-link" onclick="return scrollToSection('events', event);">
                 <span>View Event Prizes</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -6357,7 +6357,7 @@ html[data-theme="light"] #discCascadeTitle {
             </div>
             <ol class="rule-list">
                 <li>All registered contenders will receive an official, authorized Certificate of Participation issued by Shree Daksha Academy.</li>
-                <li>Winners and runners-up in each of the 12+ events are awarded trophies, merit certificates, and cash prizes from the ₹1 Lakh pool.</li>
+                <li>Winners and runners-up in each of the 12+ competitions are awarded trophies, merit certificates, and cash prizes from the ₹1 Lakh pool.</li>
                 <li>Prizes and honors will be conferred during the valedictory ceremony on campus at the conclusion of the events.</li>
                 <li>All digital certificates can be accessed directly from the official portal post-event.</li>
             </ol>
@@ -6952,7 +6952,7 @@ html[data-theme="light"] #discCascadeTitle {
 
             const isLight = document.documentElement.getAttribute('data-theme') === 'light';
             particleCleanup = window.initParticleText(particleContainer, {
-                text: {{ config.EVENT_TITLE|tojson }},
+                text: "Daksha Infinitx",
                 particleSize: isMobileDevice ? 2.8 : 3,
                 density: 3,
                 color: isLight ? '#000000' : '#ffffff',
