@@ -188,6 +188,9 @@ class SDATestCase(unittest.TestCase):
 
         # 1. Event Dates & Hero Subtitle
         self.assertIn('Daksha Infinitx', data)
+        self.assertIn('Registration Open &bull; Daksha Infinitx', data)
+        self.assertNotIn('SDA 2026-27', data)
+        self.assertNotIn('2026-27', data)
         self.assertNotIn('Annual Symposium 2026-27', data)
         self.assertIn('19th and 20th November', data)
         self.assertIn('Bengaluru', data)

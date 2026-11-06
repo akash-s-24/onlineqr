@@ -339,19 +339,19 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
             (width // 2 - 12, divider_y)
         ], fill=border_navy, outline=gold_accent, width=2)
 
-        # 6. Upper-Middle Section: Decorative Blue Rectangular Banner with Kannada Text & Academic Year: "ಸಾಂಸ್ಕೃತಿಕ 2026-27"
-        banner_w = 460
+        # 6. Upper-Middle Section: Decorative Blue Rectangular Banner with Event Title: "Daksha Infinitx"
+        banner_w = 480
         banner_h = 68
         banner_cx = width // 2
         banner_cy = 345
         draw_ribbon_banner(draw, banner_cx, banner_cy, banner_w,
                            banner_h, bg_color=(20, 48, 100), border_color=border_gold)
 
-        # Bold Kannada Text inside Banner
-        f_kannada = get_font_by_name("Nirmala.ttc", 38, index=1)
-        kannada_title = "ಸಾಂಸ್ಕೃತಿಕ 2026-27"
-        draw.text((banner_cx, banner_cy - 2), kannada_title,
-                  fill=(255, 255, 255), font=f_kannada, anchor="mm")
+        # Bold Event Title inside Banner
+        f_banner = get_font_by_name("georgiab.ttf", 36)
+        banner_title = "Daksha Infinitx"
+        draw.text((banner_cx, banner_cy - 2), banner_title,
+                  fill=(255, 255, 255), font=f_banner, anchor="mm")
 
         # 7. Prominently display: "Certificate of Achievement" in an elegant red calligraphic / serif font
         f_title = get_font_by_name("georgiab.ttf", 66)
