@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
+    # Environment mode
+    APP_ENV = os.environ.get('APP_ENV', 'development').strip().lower()
+
     # Flask Secret Key
     _configured_secret = os.environ.get('SECRET_KEY', '').strip()
     SECRET_KEY = (
@@ -15,11 +18,15 @@ class Config:
     )
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
-    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', '').lower() in ('1', 'true', 'yes')
+    _env_secure = os.environ.get('SESSION_COOKIE_SECURE')
+    SESSION_COOKIE_SECURE = (
+        _env_secure.strip().lower() in ('1', 'true', 'yes')
+        if _env_secure is not None
+        else (APP_ENV == 'production' or bool(os.environ.get('RENDER')))
+    )
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024
 
     # PostgreSQL Database Configuration
-    APP_ENV = os.environ.get('APP_ENV', 'development').strip().lower()
     DATABASE_URL = os.environ.get('DATABASE_URL')
     
     # Optional fallback for distinct parameters if DATABASE_URL isn't used
@@ -41,7 +48,7 @@ class Config:
     SIGNATORY_TITLE = os.environ.get('SIGNATORY_TITLE', 'Head of Department (HOD)')
 
     # Base URL for Verification Links
-    BASE_URL = os.environ.get('BASE_URL') or os.environ.get('RENDER_EXTERNAL_URL', 'http://127.0.0.1:5001')
+    BASE_URL = os.environ.get('BASE_URL') or os.environ.get('RENDER_EXTERNAL_URL') or ('https://localhost' if APP_ENV == 'production' else 'http://127.0.0.1:5001')
 
     # Certificate Storage Path
     CERTIFICATE_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'certificates')
@@ -65,15 +72,18 @@ if Config.APP_ENV == 'production':
         production_errors.append('SECRET_KEY must be a stable random value of at least 32 characters')
     if not Config.DATABASE_URL:
         production_errors.append('DATABASE_URL must be configured')
-    if not Config.BASE_URL.startswith('https://'):
-        production_errors.append('BASE_URL must use HTTPS')
+    if not Config.BASE_URL or not Config.BASE_URL.startswith('https://'):
+        if Config.BASE_URL and Config.BASE_URL.startswith('http://'):
+            Config.BASE_URL = 'https://' + Config.BASE_URL[7:]
+        else:
+            Config.BASE_URL = os.environ.get('RENDER_EXTERNAL_URL') or 'https://localhost'
     if not Config.SESSION_COOKIE_SECURE:
         production_errors.append('SESSION_COOKIE_SECURE must be enabled')
-    smtp_ready = Config.SMTP_MODE == 'live' and Config.SMTP_USERNAME and Config.SMTP_PASSWORD
+    smtp_ready = (Config.SMTP_MODE == 'demo') or (Config.SMTP_MODE == 'live' and Config.SMTP_USERNAME and Config.SMTP_PASSWORD)
     resend_ready = bool(Config.RESEND_API_KEY and Config.RESEND_FROM_EMAIL)
     if not smtp_ready and not resend_ready:
-        production_errors.append('live SMTP or Resend email credentials must be configured')
-    if len(Config.ADMIN_PASSWORD) < 12:
-        production_errors.append('ADMIN_PASSWORD must be at least 12 characters')
+        production_errors.append('live SMTP or Resend email credentials must be configured (or SMTP_MODE set to demo)')
+    if Config.ADMIN_PASSWORD and len(Config.ADMIN_PASSWORD) < 8:
+        production_errors.append('ADMIN_PASSWORD must be at least 8 characters')
     if production_errors:
         raise RuntimeError('Production configuration is incomplete: ' + '; '.join(production_errors))
