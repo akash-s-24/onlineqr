@@ -30,4 +30,4 @@ services:
       - key: COLLEGE_SUBTITLE
         value: Department of Computer Applications
       - key: EVENT_TITLE
-        value: SDA 2026 2027
+        value: Daksha Infinitx

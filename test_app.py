@@ -187,6 +187,8 @@ class SDATestCase(unittest.TestCase):
         data = res.data.decode('utf-8')
 
         # 1. Event Dates & Hero Subtitle
+        self.assertIn('Daksha Infinitx', data)
+        self.assertNotIn('Annual Symposium 2026-27', data)
         self.assertIn('19th and 20th November', data)
         self.assertIn('Bengaluru', data)
         self.assertIn('hero-date-highlight', data)
@@ -710,7 +712,7 @@ class SDATestCase(unittest.TestCase):
             'max_team_size': '4',
             'event_fee': '400',
             'upi_id': 'admin@upi',
-            'description': 'Battle Royale championship at Daksha fest.',
+            'description': 'Battle Royale championship at Daksha Infinitx.',
             'rules_text': 'Rule 1: Mobile only, no emulators.\nRule 2: Fair play mandatory.',
             'faculty_name': 'Prof. Rajesh Kumar',
             'faculty_phone': '9876543210',
