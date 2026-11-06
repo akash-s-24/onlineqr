@@ -16,20 +16,36 @@ POSTGRES_AVAILABLE = None
 
 def get_postgres_connection():
     """Attempt connection to PostgreSQL server."""
+    if psycopg2 is None:
+        print("[PostgreSQL Connection Error] psycopg2 is not installed or failed to import.")
+        return None
     try:
-        if Config.DATABASE_URL:
-            conn = psycopg2.connect(Config.DATABASE_URL)
+        db_url = Config.DATABASE_URL
+        if db_url:
+            db_url = db_url.strip()
+            # Normalize URL scheme
+            if db_url.startswith('postgres://'):
+                db_url = 'postgresql://' + db_url[len('postgres://'):]
+            # Ensure sslmode=require for cloud PostgreSQL (Supabase, Neon, Render)
+            if 'sslmode=' not in db_url and any(host in db_url for host in ('supabase', 'neon.tech', 'render.com', 'aws')):
+                sep = '&' if '?' in db_url else '?'
+                db_url = f"{db_url}{sep}sslmode=require"
+            conn = psycopg2.connect(db_url)
         else:
             conn = psycopg2.connect(
                 host=Config.PG_HOST,
                 user=Config.PG_USER,
                 password=Config.PG_PASSWORD,
                 database=Config.PG_DB,
-                port=Config.PG_PORT
+                port=Config.PG_PORT,
+                sslmode='require' if Config.APP_ENV == 'production' else 'prefer'
             )
         conn.autocommit = True
         return conn
-    except psycopg2.Error as err:
+    except Exception as err:
+        print(f"[PostgreSQL Connection Error] {err}")
+        if 'supabase.co' in str(Config.DATABASE_URL or ''):
+            print("[PostgreSQL Supabase Tip] Supabase 'db.xxxx.supabase.co' is IPv6 only. On Render, please use the Supabase Pooler URL ('aws-0-xxxx.pooler.supabase.com:6543') with IPv4 support and ensure your password contains no raw special characters like '@' or '#'.")
         return None
 
 def get_sqlite_connection():
@@ -56,7 +72,7 @@ def get_db():
             raise RuntimeError('DATABASE_URL is required in production.')
         pg_conn = get_postgres_connection()
         if pg_conn is None:
-            raise RuntimeError('DATABASE_URL is configured, but PostgreSQL is unavailable.')
+            raise RuntimeError('DATABASE_URL is configured, but PostgreSQL is unavailable. Check the [PostgreSQL Connection Error] log line above for the exact reason (e.g. invalid password, IPv6 hostname, or missing pooler).')
         POSTGRES_AVAILABLE = True
         DB_MODE = 'postgres'
         return pg_conn
