@@ -32,6 +32,9 @@ def get_postgres_pool():
             if 'sslmode=' not in db_url and any(host in db_url for host in ('supabase', 'neon.tech', 'render.com', 'aws')):
                 sep = '&' if '?' in db_url else '?'
                 db_url = f"{db_url}{sep}sslmode=require"
+            if 'connect_timeout=' not in db_url:
+                sep = '&' if '?' in db_url else '?'
+                db_url = f"{db_url}{sep}connect_timeout=5"
             PG_POOL = psycopg2.pool.ThreadedConnectionPool(1, 10, db_url)
         else:
             PG_POOL = psycopg2.pool.ThreadedConnectionPool(
@@ -41,11 +44,13 @@ def get_postgres_pool():
                 password=Config.PG_PASSWORD,
                 database=Config.PG_DB,
                 port=Config.PG_PORT,
+                connect_timeout=5,
                 sslmode='require' if Config.APP_ENV == 'production' else 'prefer'
             )
         return PG_POOL
     except Exception as err:
         print(f"[PostgreSQL Pool Init Error] {err}")
+        PG_POOL = None
         return None
 
 def get_postgres_connection():
@@ -71,7 +76,10 @@ def get_postgres_connection():
             if 'sslmode=' not in db_url and any(host in db_url for host in ('supabase', 'neon.tech', 'render.com', 'aws')):
                 sep = '&' if '?' in db_url else '?'
                 db_url = f"{db_url}{sep}sslmode=require"
-            conn = psycopg2.connect(db_url)
+            if 'connect_timeout=' not in db_url:
+                sep = '&' if '?' in db_url else '?'
+                db_url = f"{db_url}{sep}connect_timeout=5"
+            conn = psycopg2.connect(db_url, connect_timeout=5)
         else:
             conn = psycopg2.connect(
                 host=Config.PG_HOST,
@@ -79,6 +87,7 @@ def get_postgres_connection():
                 password=Config.PG_PASSWORD,
                 database=Config.PG_DB,
                 port=Config.PG_PORT,
+                connect_timeout=5,
                 sslmode='require' if Config.APP_ENV == 'production' else 'prefer'
             )
         conn.autocommit = True

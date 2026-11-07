@@ -1378,7 +1378,7 @@ select.f-select {
                 <div id="teamMembersList" style="margin-top: 10px;">
                     <label class="f-label" style="color: #000000;">Squad Members Roster</label>
                     <div style="background: #ffffff; border: 1.5px dashed #d4d4d8; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #52525b;">
-                        <strong>Lead Participant (Member 1):</strong> Captured automatically from the Registrant Details below.
+                        <strong>Team Lead (Member 1):</strong> Captured automatically from the Registrant Details below.
                     </div>
                     <div id="additionalMembersContainer" style="display: flex; flex-direction: column; gap: 14px;">
                         <!-- Injected dynamically by JavaScript -->
@@ -1389,8 +1389,8 @@ select.f-select {
             <!-- ── PARTICIPANT DETAILS ── -->
             <div class="f-form-row">
                 <div class="f-form-group">
-                    <label class="f-label" for="full_name">Lead Registrant Full Name *</label>
-                    <input type="text" id="full_name" name="full_name" class="f-control" placeholder="e.g. Your Full Name" required>
+                    <label class="f-label" for="full_name">Team Lead Name *</label>
+                    <input type="text" id="full_name" name="full_name" class="f-control" placeholder="e.g. Team Lead Name" required>
                 </div>
                 <div class="f-form-group">
                     <label class="f-label" for="email">Email Address *</label>
@@ -1405,13 +1405,14 @@ select.f-select {
                 </div>
                 <div class="f-form-group">
                     <label class="f-label" for="semester">Academic Year / Class *</label>
-                    <select id="semester" name="semester" class="f-control f-select">
+                    <select id="semester" name="semester" required class="f-control f-select">
+                        <option value="" disabled selected>-- Select Academic Year / Class --</option>
                         <option value="I PUC">I PUC</option>
-                        <option value="II PUC" selected>II PUC</option>
+                        <option value="II PUC">II PUC</option>
                     </select>
                     <div class="cb-wrapper" data-cb-for="semester" data-lenis-prevent>
                         <div class="cb-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
-                            <span class="cb-trigger-text">II PUC</span>
+                            <span class="cb-trigger-text placeholder">-- Select Academic Year / Class --</span>
                             <span class="cb-chevron">
                                 <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                             </span>
@@ -1502,19 +1503,11 @@ select.f-select {
                     <p style="color: #0f172a; font-weight: 800; font-size: 1.05rem; margin-bottom: 14px;">Scan UPI QR Code or Tap to Pay via UPI App</p>
                     <img id="upiQrCode" src="{{ url_for('static', filename='favicon.svg') }}" alt="UPI QR Code" style="width: 190px; height: 190px; margin: 0 auto 14px; display: block; border: 2px solid #000000; border-radius: 12px; padding: 6px; background: #ffffff;">
                     
-                    <!-- Primary Open UPI App Button -->
-                    <a id="upiPayButton" href="#" class="clean-black-submit-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 320px; margin: 0 auto 10px; text-decoration: none; padding: 12px 20px; font-size: 0.95rem; font-weight: 700; border-radius: 10px; background: #2563eb; color: #ffffff;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                    <!-- Primary Single Open UPI App Button -->
+                    <a id="upiPayButton" href="#" class="clean-black-submit-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 340px; margin: 0 auto 14px; text-decoration: none; padding: 13px 22px; font-size: 1rem; font-weight: 700; border-radius: 10px; background: #2563eb; color: #ffffff; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
                         <span>Open UPI App to Pay</span>
                     </a>
-
-                    <!-- Direct App Shortcuts -->
-                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px;">
-                        <button type="button" class="btn-upi-app" data-app="gpay" style="padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #0f172a; cursor: pointer;">Google Pay</button>
-                        <button type="button" class="btn-upi-app" data-app="phonepe" style="padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #0f172a; cursor: pointer;">PhonePe</button>
-                        <button type="button" class="btn-upi-app" data-app="paytm" style="padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #0f172a; cursor: pointer;">Paytm</button>
-                        <button type="button" class="btn-upi-app" data-app="bhim" style="padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #0f172a; cursor: pointer;">BHIM / Other</button>
-                    </div>
 
                     <!-- UPI ID & One-Click Copy -->
                     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
@@ -2194,6 +2187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         handleEventSelectionChange(eventSelect);
     }
 
+    // Primary Single UPI Button
     const upiBtn = document.getElementById('upiPayButton');
     if (upiBtn) {
         upiBtn.addEventListener('click', function(e) {
@@ -2201,13 +2195,6 @@ document.addEventListener('DOMContentLoaded', () => {
             triggerUpiPayment('generic');
         });
     }
-
-    document.querySelectorAll('.btn-upi-app').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            triggerUpiPayment(this.getAttribute('data-app'));
-        });
-    });
 
     const copyBtn = document.getElementById('copyUpiBtn');
     if (copyBtn) {
@@ -2240,12 +2227,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================================
-// Form Submission Validation
+// Form Submission Validation & High-Speed Submit Handling
 // ============================================================
 document.getElementById('eventRegistrationForm').addEventListener('submit', function(e) {
-    // Validate combobox fields
+    // Validate combobox fields: event, department, and academic year/class
     let firstInvalidCb = null;
-    ['event_id', 'department'].forEach(id => {
+    ['event_id', 'department', 'semester'].forEach(id => {
         const sel = document.getElementById(id);
         if (sel && sel.hasAttribute('required') && !sel.value) {
             const cb = getCbInstance(id);
@@ -2284,19 +2271,15 @@ document.getElementById('eventRegistrationForm').addEventListener('submit', func
         }
     }
 
-    // Immediate button progress feedback to prevent double submission
+    // Immediate button progress feedback without disabling the element (prevents mobile Safari form cancelation)
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
         submitBtn.style.pointerEvents = 'none';
-        submitBtn.style.opacity = '0.75';
+        submitBtn.style.opacity = '0.8';
         submitBtn.innerHTML = '⏳ Submitting registration, please wait...';
-        setTimeout(function() {
-            submitBtn.disabled = true;
-        }, 100);
     }
 });
 </script>
 {% endblock %}
 
-{% block gridscan_canvas %}{% endblock %}
-{% block gridscan_init %}{% endblock %}
+

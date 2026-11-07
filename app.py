@@ -93,6 +93,13 @@ def save_image_upload(upload, folder):
             if image.width > 6000 or image.height > 6000:
                 raise ValueError('Please upload an image no larger than 6000 × 6000 pixels.')
             image.verify()
+        # Normalize high-res camera captures to prevent storage and memory bottlenecks
+        with Image.open(destination) as image:
+            if image.width > 1600 or image.height > 1600:
+                image.thumbnail((1600, 1600), Image.Resampling.LANCZOS)
+                if image.mode in ('RGBA', 'P'):
+                    image = image.convert('RGB')
+                image.save(destination, 'JPEG', quality=85, optimize=True)
     except ValueError:
         if os.path.exists(destination):
             os.remove(destination)

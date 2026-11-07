@@ -814,5 +814,64 @@ class SDATestCase(unittest.TestCase):
         login_html = res_login.data.decode('utf-8')
         self.assertIn('static/images/college_logo.png?v=4', login_html)
 
+    def test_22_mobile_ux_and_registration_optimizations(self):
+        """Verify mobile address line, team lead naming, clean single UPI app button, photo pass instructions, and font consistency."""
+        res_events = self.client.get('/events')
+        events_html = res_events.data.decode('utf-8')
+
+        # 1. Header address line is present and enabled for mobile
+        self.assertIn('landing-logo-addr', events_html)
+        self.assertIn('No.596, Andrahalli Main Road', events_html)
+        self.assertNotIn('.landing-logo-addr {\n                display: none !important;', events_html)
+
+        # 2. Permanent font stack configured in Google Fonts link
+        self.assertIn('family=Plus+Jakarta+Sans:wght@400;500;600;700;800', events_html)
+        self.assertIn('family=Space+Grotesk:wght@500;600;700;800', events_html)
+        self.assertIn('family=DM+Mono:wght@400;500', events_html)
+
+        # 3. Unnecessary background scripts removed
+        self.assertNotIn('cdnjs.cloudflare.com/ajax/libs/gsap', events_html)
+        self.assertNotIn('ScrollTrigger.min.js', events_html)
+        self.assertFalse(os.path.exists('static/js/gridscan.js'), "gridscan.js should be removed")
+
+        # 4. Registration page validations
+        res_reg = self.client.get('/register')
+        reg_html = res_reg.data.decode('utf-8')
+
+        # Team Lead Name instead of Lead Registrant
+        self.assertIn('Team Lead Name *', reg_html)
+        self.assertNotIn('Lead Registrant Full Name *', reg_html)
+
+        # Academic Year / Class: no pre-selected default option
+        self.assertIn('Select Academic Year / Class', reg_html)
+        self.assertNotIn('<option value="II PUC" selected>II PUC</option>', reg_html)
+
+        # Single Open UPI App button, no separate individual app buttons
+        self.assertIn('Open UPI App to Pay', reg_html)
+        self.assertNotIn('data-app="gpay"', reg_html)
+        self.assertNotIn('data-app="phonepe"', reg_html)
+        self.assertNotIn('data-app="paytm"', reg_html)
+        self.assertNotIn('data-app="bhim"', reg_html)
+
+        # 5. Mobile pass photo / screenshot instruction on payment status
+        import time
+        ev = database.query_db("SELECT id FROM events WHERE is_group = 0 LIMIT 1", one=True)
+        ev_id = str(ev['id']) if ev else '1'
+        unique_email = f"aarav.photo_{int(time.time()*1000)}@college.edu"
+        reg_post = self.client.post('/register', data={
+            'full_name': 'Aarav Sharma',
+            'email': unique_email,
+            'phone': '9988776655',
+            'college_name': 'Shree Daksha Academy',
+            'department': 'CEBA',
+            'semester': 'I PUC',
+            'event_id': ev_id,
+            'payment_method': 'Cash'
+        }, follow_redirects=True)
+        self.assertEqual(reg_post.status_code, 200)
+        pass_html = reg_post.data.decode('utf-8')
+        self.assertIn('Take a photo or screenshot of this pass now!', pass_html)
+        self.assertIn('Send Pass to Mobile / WhatsApp', pass_html)
+
 if __name__ == '__main__':
     unittest.main()

@@ -25,6 +25,23 @@
                 <p style="color: #64748b; margin: 0;">Keep this official reference and pass handy to check in at the college desk.</p>
             </div>
         </div>
+
+        <!-- Photo/Screenshot & Mobile Instruction Banner -->
+        <div style="background: #fffbeb; border: 2px dashed #f59e0b; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 14px;">
+            <span style="font-size: 1.8rem; line-height: 1;">📸</span>
+            <div style="flex: 1;">
+                <strong style="color: #92400e; font-size: 1rem; display: block; margin-bottom: 4px;">Action Required: Take a photo or screenshot of this pass now!</strong>
+                <p style="color: #78350f; font-size: 0.88rem; line-height: 1.5; margin: 0 0 10px;">Please photograph or save a screenshot of this official QR code and pass to your mobile phone gallery right now. You must present this pass or screenshot at the college check-in desk upon campus arrival.</p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a href="https://api.whatsapp.com/send?text={{ ('Hello, here is my official Daksha Infinix Gate Pass for ' ~ registration.event_name ~ ' (ID: ' ~ registration.registration_uid ~ '). View Pass: ' ~ request.url)|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #25D366; color: #ffffff; text-decoration: none; font-weight: 700; padding: 6px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem;">
+                        📱 Send Pass to Mobile / WhatsApp
+                    </a>
+                    <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary" style="font-weight: 600; padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; background: #ffffff; border: 1px solid #cbd5e1; cursor: pointer;">
+                        🖨️ Print / Save Pass
+                    </button>
+                </div>
+            </div>
+        </div>
         <div style="display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
             <div><small style="color: #64748b;">Participant</small><br><strong>{{ registration.full_name }}</strong></div>
             <div><small style="color: #64748b;">Event</small><br><strong>{{ registration.event_name }}</strong></div>

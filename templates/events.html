@@ -3312,28 +3312,62 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     }
     }
 
-    @media (max-width: 640px) {
-    .events-cards-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 0 16px;
+    @media (max-width: 768px) {
+        .events-cards-grid {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+            padding: 0 16px !important;
+            touch-action: pan-y;
+        }
+        .event-grid-card {
+            will-change: auto !important;
+            border-radius: 18px !important;
+        }
+        .event-card-media {
+            height: 180px !important;
+        }
+        .events-grid-filters {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            justify-content: flex-start !important;
+            padding: 6px 16px 14px !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .events-grid-filters::-webkit-scrollbar {
+            display: none;
+        }
+        .filter-chip {
+            flex-shrink: 0 !important;
+            min-height: 38px;
+            touch-action: manipulation;
+        }
+        .btn-card-register,
+        .btn-card-rules,
+        .btn-card-contact {
+            min-height: 42px;
+            touch-action: manipulation;
+        }
     }
-    .event-card-media {
-    height: 175px;
-    }
-    .events-grid-filters {
-    overflow-x: auto;
-    justify-content: flex-start;
-    padding: 4px 16px 14px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    }
-    .events-grid-filters::-webkit-scrollbar {
-    display: none;
-    }
-    .filter-chip {
-    flex-shrink: 0;
-    }
+
+    /* Prevent sticky hover states on mobile touchscreens */
+    @media (hover: none) or (pointer: coarse) {
+        .event-grid-card:hover,
+        .btn-card-register:hover,
+        .btn-card-rules:hover,
+        .btn-card-contact:hover,
+        .filter-chip:hover {
+            transform: none !important;
+            filter: none !important;
+            box-shadow: none !important;
+        }
+        .btn-card-register:active,
+        .btn-card-rules:active,
+        .btn-card-contact:active,
+        .filter-chip:active {
+            transform: scale(0.96) !important;
+            opacity: 0.9 !important;
+        }
     }
 
     /* ══════════════════════════════════════════════════════════════════════
@@ -7347,7 +7381,26 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             let particleCleanup = null;
 
             function renderHeroParticles() {
-                if (!particleContainer || !window.initParticleText) return;
+                if (isMobileDevice) {
+                    if (particleCleanup) {
+                        try { particleCleanup(); } catch(e){}
+                        particleCleanup = null;
+                    }
+                    if (particleContainer) {
+                        particleContainer.style.height = 'auto';
+                        particleContainer.style.minHeight = '70px';
+                    }
+                    if (fallbackTitle) {
+                        fallbackTitle.style.display = 'block';
+                        fallbackTitle.style.opacity = '1';
+                        fallbackTitle.style.visibility = 'visible';
+                    }
+                    return;
+                }
+                if (!particleContainer || !window.initParticleText) {
+                    if (fallbackTitle) fallbackTitle.style.display = 'block';
+                    return;
+                }
                 if (typeof particleCleanup === 'function') {
                     try { particleCleanup(); } catch (e) { }
                     particleCleanup = null;
@@ -7358,18 +7411,18 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 const isLight = document.documentElement.getAttribute('data-theme') === 'light';
                 particleCleanup = window.initParticleText(particleContainer, {
                     text: "Daksha Infinix",
-                    particleSize: isMobileDevice ? 2.8 : 3,
+                    particleSize: 3,
                     density: 3,
                     color: isLight ? '#000000' : '#ffffff',
                     highlightColor: isLight ? '#2563eb' : '#ffffff',
-                    scatter: isMobileDevice ? 120 : 220,
-                    gatherDuration: isMobileDevice ? 1000 : 1400,
-                    stagger: isMobileDevice ? 150 : 250,
-                    pointerRepel: isMobileDevice ? 35 : 50,
-                    repelRadius: isMobileDevice ? 110 : 160,
-                    idleDrift: isMobileDevice ? 0.75 : 1.2,
+                    scatter: 220,
+                    gatherDuration: 1400,
+                    stagger: 250,
+                    pointerRepel: 50,
+                    repelRadius: 160,
+                    idleDrift: 1.2,
                     trigger: 'mount',
-                    fontSize: isMobileDevice ? 'clamp(2.8rem, 11vw, 4.4rem)' : 'clamp(3.8rem, 6.8vw, 5.8rem)',
+                    fontSize: 'clamp(3.8rem, 6.8vw, 5.8rem)',
                     fontWeight: 800,
                     fontFamily: '"Space Grotesk", sans-serif',
                     glow: !isLight
@@ -7434,7 +7487,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     starfield.style.width = `${rect.width}px`;
                     starfield.style.height = `${rect.height}px`;
                     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                    const count = isMobile ? 85 : Math.min(950, Math.max(480, Math.floor(rect.width * rect.height / 2400)));
+                    const count = isMobile ? 35 : Math.min(950, Math.max(480, Math.floor(rect.width * rect.height / 2400)));
                     stars.length = 0;
                     for (let i = 0; i < count; i += 1) stars.push(makeStar());
                 };
@@ -7829,10 +7882,13 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     if (!drag.moved) {
                         if (Math.abs(dy) > 6 && Math.abs(dy) >= Math.abs(dx)) {
                             drag.isVertical = true;
+                            if (stage.hasPointerCapture && stage.hasPointerCapture(event.pointerId)) {
+                                try { stage.releasePointerCapture(event.pointerId); } catch (e) { }
+                            }
                             motion.drag = null;
                             return;
                         }
-                        if (Math.abs(dx) > 6) {
+                        if (Math.abs(dx) > 10) {
                             drag.moved = true;
                             drag.x0 = event.clientX;
                             drag.pos0 = motion.a;
