@@ -84,7 +84,7 @@ Supabase provides an enterprise-grade, fully managed **PostgreSQL** instance wit
 | `SMTP_USER` | If live | `fest@gmail.com` | Gmail address. |
 | `SMTP_PASSWORD` | If live | `abcd efgh ijkl mnop` | 16-character Google App Password (not your Gmail login password). |
 | `COLLEGE_NAME` | Optional | `Shree Daksha Academy` | Branding title across headers, receipts, and certificates. |
-| `EVENT_TITLE` | Optional | `Daksha Infinitx` | Official fest/symposium title across banners, headers, particle text, and payment notes. |
+| `EVENT_TITLE` | Optional | `Daksha Infinix` | Official fest/symposium title across banners, headers, particle text, and payment notes. |
 
 ---
 

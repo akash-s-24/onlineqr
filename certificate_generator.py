@@ -339,7 +339,7 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
             (width // 2 - 12, divider_y)
         ], fill=border_navy, outline=gold_accent, width=2)
 
-        # 6. Upper-Middle Section: Decorative Blue Rectangular Banner with Event Title: "Daksha Infinitx"
+        # 6. Upper-Middle Section: Decorative Blue Rectangular Banner with Event Title: "Daksha Infinix"
         banner_w = 480
         banner_h = 68
         banner_cx = width // 2
@@ -349,7 +349,7 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
 
         # Bold Event Title inside Banner
         f_banner = get_font_by_name("georgiab.ttf", 36)
-        banner_title = "Daksha Infinitx"
+        banner_title = getattr(Config, 'EVENT_TITLE', 'Daksha Infinix')
         draw.text((banner_cx, banner_cy - 2), banner_title,
                   fill=(255, 255, 255), font=f_banner, anchor="mm")
 

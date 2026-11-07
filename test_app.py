@@ -187,8 +187,10 @@ class SDATestCase(unittest.TestCase):
         data = res.data.decode('utf-8')
 
         # 1. Event Dates & Hero Subtitle
-        self.assertTrue('Daksha Infinitx' in data or 'Daksha Infinix' in data)
-        self.assertTrue('Registration Open &bull; Daksha Infinitx' in data or 'Registration Open &bull; Daksha Infinix' in data)
+        self.assertIn('Daksha Infinix', data)
+        self.assertIn('Registration Open &bull; Daksha Infinix', data)
+        self.assertNotIn('Daksha Infinitx', data)
+        self.assertNotIn('Daksha Infinitix', data)
         self.assertNotIn('SDA 2026-27', data)
         self.assertNotIn('2026-27', data)
         self.assertNotIn('Annual Symposium 2026-27', data)
@@ -717,7 +719,7 @@ class SDATestCase(unittest.TestCase):
             'max_team_size': '4',
             'event_fee': '400',
             'upi_id': 'admin@upi',
-            'description': 'Battle Royale championship at Daksha Infinitx.',
+            'description': 'Battle Royale championship at Daksha Infinix.',
             'rules_text': 'Rule 1: Mobile only, no emulators.\nRule 2: Fair play mandatory.',
             'faculty_name': 'Prof. Rajesh Kumar',
             'faculty_phone': '9876543210',

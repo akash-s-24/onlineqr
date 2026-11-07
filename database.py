@@ -755,7 +755,7 @@ def create_tables_and_seed():
                 'event_date': '19-sep-2026',
                 'event_time': '10:00 AM',
                 'venue': 'Computer Lab 3',
-                'description': 'Battle Royale championship at Daksha Infinitx.',
+                'description': 'Battle Royale championship at Daksha Infinix.',
                 'max_participants': 100,
                 'is_group': 1,
                 'min_team_size': 4,
