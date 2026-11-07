@@ -1,5 +1,6 @@
 import time
 import os
+import gzip
 from functools import wraps
 from flask import (
     Flask, render_template, request, redirect, url_for, 
@@ -159,6 +160,34 @@ def protect_state_changing_requests():
     return None
 
 
+def _should_compress(response, request):
+    """Return True when a response should be gzip-compressed.
+
+    We compress only text payloads that are large enough to make compression
+    worthwhile. Already-encoded responses (e.g. images, gzip middleware output)
+    are skipped, and we never compress if the client did not ask for gzip.
+    """
+    if not Config.COMPRESS_RESPONSES:
+        return False
+    if response.status_code < 200 or response.status_code >= 300:
+        return False
+    if response.direct_passthrough:
+        return False
+    if response.mimetype and not response.mimetype.startswith(
+        ('text/', 'application/json', 'application/javascript', 'image/svg+xml')
+    ):
+        return False
+    if response.headers.get('Content-Encoding'):
+        return False
+    accept_encoding = request.headers.get('Accept-Encoding', '')
+    if 'gzip' not in accept_encoding.lower():
+        return False
+    try:
+        return len(response.get_data()) >= 500
+    except (TypeError, AttributeError):
+        return False
+
+
 @app.after_request
 def add_security_headers(response):
     """Add browser-side defenses to every response."""
@@ -180,8 +209,25 @@ def add_security_headers(response):
     )
     if request.is_secure:
         response.headers.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
-    if request.path.startswith(('/admin', '/member', '/login')):
+
+    # Static assets are cache-busted via ?v=... query strings, so we serve them
+    # with a long browser/edge cache lifetime. Admin/member/login pages must
+    # never be cached. Everything else falls back to the framework default.
+    if request.path.startswith('/static/'):
+        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    elif request.path.startswith(('/admin', '/member', '/login')):
         response.headers['Cache-Control'] = 'no-store'
+
+    # gzip-compress large text responses when the client supports it.
+    if _should_compress(response, request):
+        payload = response.get_data()
+        compressed = gzip.compress(payload, compresslevel=6)
+        # Only keep compression when it actually makes the payload smaller.
+        if len(compressed) < len(payload):
+            response.headers['Content-Encoding'] = 'gzip'
+            response.headers['Vary'] = 'Accept-Encoding'
+            response.set_data(compressed)
+
     return response
 
 def login_required(f):

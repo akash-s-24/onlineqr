@@ -16,14 +16,22 @@
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
     <meta name="apple-mobile-web-app-title" content="Shree Daksha Academy">
     <meta name="application-name" content="Shree Daksha Academy">
-    <!-- Google Fonts -->
+    <!-- Google Fonts (loaded lazily so they never block first paint) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
-        rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap">
+    </noscript>
+    <!-- FontAwesome (loaded lazily, never blocks first paint) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </noscript>
     <!-- Lenis Smooth Scroll -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/lenis.css') }}">
 
@@ -1485,10 +1493,12 @@
                 padding: 0 10px;
                 gap: 6px;
             }
+
             .landing-logo {
                 max-width: calc(100% - 48px) !important;
                 gap: 6px !important;
             }
+
             .landing-logo img,
             .landing-logo-img {
                 display: block !important;
@@ -1498,6 +1508,7 @@
                 max-width: 44px !important;
                 flex-shrink: 0 !important;
             }
+
             .landing-logo h1,
             .landing-logo-title {
                 font-size: 0.8rem !important;
@@ -1907,7 +1918,13 @@
             color: #52525b !important;
         }
 
-            {% block extra_css %}{% endblock %}
+            {
+            % block extra_css %
+        }
+
+            {
+            % endblock %
+        }
 
         @media (max-width: 1023px) {
 
@@ -1961,10 +1978,16 @@
                 title="Shree Daksha Academy Official Website">
                 <img src="{{ url_for('static', filename='images/college_logo.png') }}?v=4"
                     alt="Shree Daksha Academy Logo" class="landing-logo-img">
-                <div class="landing-logo-copy-box" style="display: flex; flex-direction: column; justify-content: center; line-height: 1.18;">
-                    <span class="landing-logo-title" style="font-size: 0.98rem; font-weight: 800; letter-spacing: -0.01em;">SHREE DAKSHA ACADEMY PU COLLEGE</span>
-                    <span class="landing-logo-meta" style="font-size: 0.62rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">RECOGNIZED BY GOVT. OF KARNATAKA &bull; BU &bull; AICTE</span>
-                    <span class="landing-logo-addr" style="font-size: 0.58rem; color: #64748b;">No.596, Andrahalli Main Road, Bengaluru - 560091</span>
+                <div class="landing-logo-copy-box"
+                    style="display: flex; flex-direction: column; justify-content: center; line-height: 1.18;">
+                    <span class="landing-logo-title"
+                        style="font-size: 0.98rem; font-weight: 800; letter-spacing: -0.01em;">SHREE DAKSHA ACADEMY PU
+                        COLLEGE</span>
+                    <span class="landing-logo-meta"
+                        style="font-size: 0.62rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">RECOGNIZED
+                        BY GOVT. OF KARNATAKA &bull; BU &bull; AICTE</span>
+                    <span class="landing-logo-addr" style="font-size: 0.58rem; color: #64748b;">No.596, Andrahalli Main
+                        Road, Bengaluru - 560091</span>
                 </div>
             </a>
 
@@ -1991,17 +2014,19 @@
                             onclick="return scrollToSection('contact', event);">Contact</a></li>
 
                     {% if session.get('user_id') %}
-                        {% if session.get('role') == 'admin' %}
-                        <li><a href="{{ url_for('admin_dashboard') }}"
-                                class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}"
-                                style="color: #60a5fa !important; font-weight: 700; background: rgba(37, 99, 235, 0.2); border: 1px solid rgba(96, 165, 250, 0.35);">⚡ Dashboard</a>
-                        </li>
-                        {% elif session.get('role') == 'member' %}
-                        <li><a href="{{ url_for('member_dashboard') }}"
-                                class="nav-link {% if request.path == '/member/dashboard' %}active{% endif %}"
-                                style="color: #60a5fa !important; font-weight: 700; background: rgba(37, 99, 235, 0.2); border: 1px solid rgba(96, 165, 250, 0.35);">⚡ Dashboard</a>
-                        </li>
-                        {% endif %}
+                    {% if session.get('role') == 'admin' %}
+                    <li><a href="{{ url_for('admin_dashboard') }}"
+                            class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}"
+                            style="color: #60a5fa !important; font-weight: 700; background: rgba(37, 99, 235, 0.2); border: 1px solid rgba(96, 165, 250, 0.35);">⚡
+                            Dashboard</a>
+                    </li>
+                    {% elif session.get('role') == 'member' %}
+                    <li><a href="{{ url_for('member_dashboard') }}"
+                            class="nav-link {% if request.path == '/member/dashboard' %}active{% endif %}"
+                            style="color: #60a5fa !important; font-weight: 700; background: rgba(37, 99, 235, 0.2); border: 1px solid rgba(96, 165, 250, 0.35);">⚡
+                            Dashboard</a>
+                    </li>
+                    {% endif %}
                     {% endif %}
                 </ul>
 
@@ -2048,14 +2073,20 @@
                         <span>👤 {{ session.get('full_name', session.get('username')) }}</span>
                     </div>
                     {% if session.get('role') == 'admin' %}
-                    <a href="{{ url_for('admin_dashboard') }}" class="header-btn" style="margin-bottom: 6px;">Dashboard</a>
-                    <a href="{{ url_for('qr_scanner') }}" class="header-btn" style="margin-bottom: 6px;">📱 QR Scanner</a>
-                    <a href="{{ url_for('attendance_manager') }}" class="header-btn" style="margin-bottom: 6px;">Attendance</a>
-                    <a href="{{ url_for('certificates_manager') }}" class="header-btn" style="margin-bottom: 6px;">Certificates</a>
+                    <a href="{{ url_for('admin_dashboard') }}" class="header-btn"
+                        style="margin-bottom: 6px;">Dashboard</a>
+                    <a href="{{ url_for('qr_scanner') }}" class="header-btn" style="margin-bottom: 6px;">📱 QR
+                        Scanner</a>
+                    <a href="{{ url_for('attendance_manager') }}" class="header-btn"
+                        style="margin-bottom: 6px;">Attendance</a>
+                    <a href="{{ url_for('certificates_manager') }}" class="header-btn"
+                        style="margin-bottom: 6px;">Certificates</a>
                     <a href="{{ url_for('members_list') }}" class="header-btn" style="margin-bottom: 6px;">Members</a>
                     {% elif session.get('role') == 'member' %}
-                    <a href="{{ url_for('member_dashboard') }}" class="header-btn" style="margin-bottom: 6px;">Dashboard</a>
-                    <a href="{{ url_for('qr_scanner') }}" class="header-btn" style="margin-bottom: 6px;">📱 QR Scanner</a>
+                    <a href="{{ url_for('member_dashboard') }}" class="header-btn"
+                        style="margin-bottom: 6px;">Dashboard</a>
+                    <a href="{{ url_for('qr_scanner') }}" class="header-btn" style="margin-bottom: 6px;">📱 QR
+                        Scanner</a>
                     <a href="{{ url_for('members_list') }}" class="header-btn" style="margin-bottom: 6px;">Members</a>
                     {% endif %}
                     <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
@@ -2299,7 +2330,9 @@
                         <a href="https://www.instagram.com/shreedakshaacademy/" target="_blank"
                             rel="noopener noreferrer" class="footer-social-btn" aria-label="Instagram"
                             title="Follow on Instagram">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #ec4899; flex-shrink: 0;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                                style="color: #ec4899; flex-shrink: 0;">
                                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
@@ -2307,22 +2340,33 @@
                         </a>
                         <a href="https://wa.me/917892038099" target="_blank" rel="noopener noreferrer"
                             class="footer-social-btn" aria-label="WhatsApp" title="Chat on WhatsApp">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #22c55e; flex-shrink: 0;">
-                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                                style="color: #22c55e; flex-shrink: 0;">
+                                <path
+                                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
+                                </path>
                             </svg>
                         </a>
                         <a href="https://shreedakshaacademyedu.in/" target="_blank" rel="noopener noreferrer"
                             class="footer-social-btn" aria-label="Website" title="College Official Portal">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #3b82f6; flex-shrink: 0;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                                style="color: #3b82f6; flex-shrink: 0;">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="2" y1="12" x2="22" y2="12"></line>
-                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                <path
+                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                                </path>
                             </svg>
                         </a>
                         <a href="mailto:principal@shreedakshaacademyeveningcollege.edu.in" class="footer-social-btn"
                             aria-label="Email" title="Email the college">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #ef4444; flex-shrink: 0;">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                                style="color: #ef4444; flex-shrink: 0;">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
                                 <polyline points="22,6 12,13 2,6"></polyline>
                             </svg>
                         </a>

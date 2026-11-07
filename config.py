@@ -26,6 +26,15 @@ class Config:
     )
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024
 
+    # Static assets are served with a cache-busting query string (?v=...), so
+    # they can be cached aggressively by the browser. In production, this is
+    # fine; see app.py's after_request for the per-route Cache-Control logic.
+    SEND_FILE_MAX_AGE_DEFAULT = 31536000  # 1 year in seconds
+
+    # Force compression for text responses even when not behind a proxy.
+    # The gzip middleware in app.py reads this flag.
+    COMPRESS_RESPONSES = True
+
     # PostgreSQL Database Configuration
     DATABASE_URL = os.environ.get('DATABASE_URL')
     
