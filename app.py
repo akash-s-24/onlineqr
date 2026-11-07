@@ -675,6 +675,7 @@ def member_dashboard():
     """, (user_id,))
     return render_template('member_dashboard.html', registrations=registrations)
 
+@app.route('/admin/verify-payment/<int:reg_id>', methods=['POST'], endpoint='verify_payment')
 @app.route('/member/payment/<int:reg_id>', methods=['POST'])
 @admin_required
 def toggle_payment(reg_id):

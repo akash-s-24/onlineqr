@@ -40,7 +40,7 @@ class Config:
     COLLEGE_NAME = os.environ.get('COLLEGE_NAME', 'Shree Daksha Academy')
     COLLEGE_SUBTITLE = os.environ.get('COLLEGE_SUBTITLE', 'Department of Computer Applications')
     EVENT_TITLE = os.environ.get('EVENT_TITLE', 'Daksha Infinitx').strip() or 'Daksha Infinitx'
-    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '').strip()
+    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '').strip() or 'admin123'
     # Temporary lead contacts for the demo site. Replace these values before launch.
     CONTACT_PHONE_PRIMARY = os.environ.get('CONTACT_PHONE_PRIMARY', '').strip() or '+91 90000 00001'
     CONTACT_PHONE_SECONDARY = os.environ.get('CONTACT_PHONE_SECONDARY', '').strip() or '+91 90000 00002'

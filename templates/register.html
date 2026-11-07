@@ -1105,13 +1105,17 @@ select.f-select {
 {% block content %}
 <section class="registration-section" data-lenis-prevent>
     <div class="glass-form-card" data-lenis-prevent>
-        <!-- Ghost Back Button -->
-        <div style="margin-bottom: 20px;">
+        <!-- Header Navigation & College Logo -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
             <a href="{{ url_for('events_list') }}#events" class="back-btn-ghost">
                 <span class="arrow-icon">
                     <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
                 </span>
                 Back to Events
+            </a>
+            <a href="https://shreedakshaacademyedu.in/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: inherit;">
+                <img src="{{ url_for('static', filename='images/college_logo.png') }}" alt="Shree Daksha Academy Logo" style="height: 38px; width: auto; max-width: 52px; object-fit: contain; flex-shrink: 0;">
+                <span style="font-weight: 800; font-size: 0.92rem; letter-spacing: -0.01em;">SHREE DAKSHA ACADEMY</span>
             </a>
         </div>
 
@@ -1372,7 +1376,10 @@ select.f-select {
 
                 <!-- Squad Members List -->
                 <div id="teamMembersList" style="margin-top: 10px;">
-                    <label class="f-label" style="color: #000000; font-weight: 700;">Additional Team Members</label>
+                    <label class="f-label" style="color: #000000;">Squad Members Roster</label>
+                    <div style="background: #ffffff; border: 1.5px dashed #d4d4d8; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #52525b;">
+                        <strong>Lead Participant (Member 1):</strong> Captured automatically from the Registrant Details below.
+                    </div>
                     <div id="additionalMembersContainer" style="display: flex; flex-direction: column; gap: 14px;">
                         <!-- Injected dynamically by JavaScript -->
                     </div>
@@ -1382,8 +1389,8 @@ select.f-select {
             <!-- ── PARTICIPANT DETAILS ── -->
             <div class="f-form-row">
                 <div class="f-form-group">
-                    <label class="f-label" for="full_name">Team Lead Name *</label>
-                    <input type="text" id="full_name" name="full_name" class="f-control" placeholder="Enter Team Lead Name" required>
+                    <label class="f-label" for="full_name">Lead Registrant Full Name *</label>
+                    <input type="text" id="full_name" name="full_name" class="f-control" placeholder="e.g. Your Full Name" required>
                 </div>
                 <div class="f-form-group">
                     <label class="f-label" for="email">Email Address *</label>
@@ -1398,14 +1405,13 @@ select.f-select {
                 </div>
                 <div class="f-form-group">
                     <label class="f-label" for="semester">Academic Year / Class *</label>
-                    <select id="semester" name="semester" required class="f-control f-select">
-                        <option value="" disabled selected>-- Select Academic Year / Class --</option>
+                    <select id="semester" name="semester" class="f-control f-select">
                         <option value="I PUC">I PUC</option>
-                        <option value="II PUC">II PUC</option>
+                        <option value="II PUC" selected>II PUC</option>
                     </select>
                     <div class="cb-wrapper" data-cb-for="semester" data-lenis-prevent>
                         <div class="cb-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
-                            <span class="cb-trigger-text">-- Select Academic Year / Class --</span>
+                            <span class="cb-trigger-text">II PUC</span>
                             <span class="cb-chevron">
                                 <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                             </span>
@@ -1492,21 +1498,29 @@ select.f-select {
                 </div>
 
                 <!-- Online UPI Payment Details -->
-                <div id="upiPaymentDetails" style="display: none; text-align: center; margin-top: 20px; padding: 24px 20px; background: #ffffff; border: 2px solid #2563eb; border-radius: 16px; box-shadow: 0 6px 20px rgba(37, 99, 235, 0.12);">
-                    <p style="color: #0f172a; font-weight: 800; font-size: 1.05rem; margin-bottom: 12px;">Scan UPI QR Code to Complete Payment</p>
-                    <img id="upiQrCode" src="{{ url_for('static', filename='images/college_logo.png') }}" alt="UPI QR Code" style="width: 190px; height: 190px; margin: 0 auto 14px; display: block; border: 2px solid #e2e8f0; border-radius: 12px; padding: 8px; background: #ffffff; object-fit: contain;">
+                <div id="upiPaymentDetails" style="display: none; text-align: center; margin-top: 20px; padding: 24px; background: #ffffff; border: 2px solid #2563eb; border-radius: 14px; box-shadow: 0 4px 16px rgba(37, 99, 235, 0.1);">
+                    <p style="color: #0f172a; font-weight: 800; font-size: 1.05rem; margin-bottom: 14px;">Scan UPI QR Code or Tap to Pay via UPI App</p>
+                    <img id="upiQrCode" src="{{ url_for('static', filename='favicon.svg') }}" alt="UPI QR Code" style="width: 190px; height: 190px; margin: 0 auto 14px; display: block; border: 2px solid #000000; border-radius: 12px; padding: 6px; background: #ffffff;">
                     
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 18px;">
-                        <button type="button" id="upiPayButton" class="clean-black-submit-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 320px; margin: 0 auto; padding: 12px 24px; font-size: 0.95rem; font-weight: 700; border-radius: 12px; min-height: 48px;" onclick="triggerUpiPayment(event)">
-                            <span>⚡ Open UPI App to Pay</span>
-                        </button>
-                        
-                        <div style="display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; font-size: 0.92rem; color: #0f172a; margin-top: 4px;">
-                            <span><strong>UPI ID:</strong> <span id="displayUpiId" style="font-family: monospace; font-weight: 700; background: #f4f4f5; padding: 4px 10px; border-radius: 6px; border: 1px solid #d4d4d8;">demopay@ybl</span></span>
-                            <button type="button" onclick="copyUpiId()" style="background: #2563eb; color: #ffffff; border: none; padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                                <span>📋 Copy</span>
-                            </button>
-                        </div>
+                    <!-- Primary Open UPI App Button -->
+                    <a id="upiPayButton" href="#" class="clean-black-submit-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 320px; margin: 0 auto 10px; text-decoration: none; padding: 12px 20px; font-size: 0.95rem; font-weight: 700; border-radius: 10px; background: #2563eb; color: #ffffff;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                        <span>Open UPI App to Pay</span>
+                    </a>
+
+                    <!-- Direct App Shortcuts -->
+                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px;">
+                        <button type="button" class="btn-upi-app" data-app="gpay" style="padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #0f172a; cursor: pointer;">Google Pay</button>
+                        <button type="button" class="btn-upi-app" data-app="phonepe" style="padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #0f172a; cursor: pointer;">PhonePe</button>
+                        <button type="button" class="btn-upi-app" data-app="paytm" style="padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #0f172a; cursor: pointer;">Paytm</button>
+                        <button type="button" class="btn-upi-app" data-app="bhim" style="padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #0f172a; cursor: pointer;">BHIM / Other</button>
+                    </div>
+
+                    <!-- UPI ID & One-Click Copy -->
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+                        <span style="font-size: 0.9rem; color: #475569;"><strong>UPI ID:</strong></span>
+                        <code id="displayUpiId" style="font-family: monospace; font-weight: 700; background: #f4f4f5; padding: 4px 10px; border-radius: 6px; border: 1px solid #d4d4d8; color: #0f172a;">demopay@ybl</code>
+                        <button type="button" id="copyUpiBtn" style="padding: 5px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; border: 1.5px solid #2563eb; background: #eff6ff; color: #2563eb; cursor: pointer; transition: all 0.2s ease;">📋 Copy ID</button>
                     </div>
 
                     <div class="f-form-group" style="text-align: left; max-width: 440px; margin: 0 auto 18px;">
@@ -2006,7 +2020,7 @@ function handleEventSelectionChange(selectElement) {
         }
         if (upiPayButton) {
             const upiPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(eventName)}&am=${encodeURIComponent(eventFee.toFixed(2))}&cu=INR&tn=${encodeURIComponent(`Event registration ${eventId}`)}`;
-            upiPayButton.setAttribute('data-upi-payload', upiPayload);
+            upiPayButton.href = upiPayload;
             upiPayButton.style.display = 'inline-flex';
         }
         
@@ -2015,7 +2029,7 @@ function handleEventSelectionChange(selectElement) {
     } else {
         if (paymentSection) paymentSection.style.display = 'none';
         if (upiPayButton) {
-            upiPayButton.removeAttribute('data-upi-payload');
+            upiPayButton.href = '#';
             upiPayButton.style.display = 'none';
         }
         if (payOnlineRadio) payOnlineRadio.required = false;
@@ -2069,8 +2083,8 @@ function renderTeamMemberInputs() {
         row.className = 'f-form-group';
         row.style.marginBottom = '0';
         row.innerHTML = `
-            <label class="f-label" for="member_${i}_name">Participant #${i} Name *</label>
-            <input type="text" id="member_${i}_name" name="member_${i}_name" class="f-control" placeholder="Enter Member #${i} Name" required>
+            <label class="f-label" for="member_${i}_name">Participant #${i} Full Name *</label>
+            <input type="text" id="member_${i}_name" name="member_${i}_name" class="f-control" placeholder="Enter Member #${i} Full Name" required>
         `;
         container.appendChild(row);
     }
@@ -2097,6 +2111,8 @@ function togglePaymentMethod() {
     if (payOnline && payOnline.checked) {
         if (onlineCard) onlineCard.classList.add('active');
         if (upiSection) upiSection.style.display = 'block';
+        const upiPayBtn = document.getElementById('upiPayButton');
+        if (upiPayBtn) upiPayBtn.style.display = 'inline-flex';
         if (offlineSection) offlineSection.style.display = 'none';
         if (utrInput) utrInput.required = true;
         if (screenshotInput) screenshotInput.required = true;
@@ -2140,28 +2156,96 @@ function handleDepartmentChange(selectElement) {
 }
 
 // ============================================================
-// On Load — sync pre-selected event
+// UPI Payment App Launcher & Copy Handler
+// ============================================================
+function triggerUpiPayment(appType) {
+    const eventSelect = document.getElementById('event_id');
+    if (!eventSelect || !eventSelect.value) {
+        alert('Please select an event first.');
+        return;
+    }
+    const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+    const upiId = selectedOption ? (selectedOption.getAttribute('data-upi-id') || 'demopay@ybl') : 'demopay@ybl';
+    const eventName = selectedOption ? (selectedOption.getAttribute('data-event-name') || selectedOption.textContent.trim()) : 'Fest Event';
+    const eventFee = selectedOption ? parseFloat(selectedOption.getAttribute('data-event-fee') || '0') : 0;
+    const eventId = eventSelect.value;
+
+    const basePayload = `pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(eventName)}&am=${encodeURIComponent(eventFee.toFixed(2))}&cu=INR&tn=${encodeURIComponent('Daksha Fest ' + eventId)}`;
+
+    let targetUrl = `upi://pay?${basePayload}`;
+    if (appType === 'gpay') {
+        targetUrl = `tez://upi/pay?${basePayload}`;
+    } else if (appType === 'phonepe') {
+        targetUrl = `phonepe://pay?${basePayload}`;
+    } else if (appType === 'paytm') {
+        targetUrl = `paytmmp://pay?${basePayload}`;
+    }
+
+    // Direct browser navigation to trigger the mobile UPI intent
+    window.location.href = targetUrl;
+}
+
+// ============================================================
+// On Load — sync pre-selected event & wire UPI actions
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
     const eventSelect = document.getElementById('event_id');
     if (eventSelect && eventSelect.value) {
         handleEventSelectionChange(eventSelect);
     }
+
+    const upiBtn = document.getElementById('upiPayButton');
+    if (upiBtn) {
+        upiBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            triggerUpiPayment('generic');
+        });
+    }
+
+    document.querySelectorAll('.btn-upi-app').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            triggerUpiPayment(this.getAttribute('data-app'));
+        });
+    });
+
+    const copyBtn = document.getElementById('copyUpiBtn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function() {
+            const upiIdSpan = document.getElementById('displayUpiId');
+            const upiText = (upiIdSpan ? upiIdSpan.textContent : '').trim();
+            if (upiText) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(upiText).then(() => {
+                        const originalText = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '✓ Copied!';
+                        copyBtn.style.background = '#dcfce7';
+                        copyBtn.style.color = '#15803d';
+                        copyBtn.style.borderColor = '#86efac';
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalText;
+                            copyBtn.style.background = '#eff6ff';
+                            copyBtn.style.color = '#2563eb';
+                            copyBtn.style.borderColor = '#2563eb';
+                        }, 2000);
+                    }).catch(() => {
+                        prompt('Copy your UPI ID:', upiText);
+                    });
+                } else {
+                    prompt('Copy your UPI ID:', upiText);
+                }
+            }
+        });
+    }
 });
 
 // ============================================================
 // Form Submission Validation
 // ============================================================
-let isRegistrationSubmitting = false;
 document.getElementById('eventRegistrationForm').addEventListener('submit', function(e) {
-    if (isRegistrationSubmitting) {
-        e.preventDefault();
-        return false;
-    }
-
     // Validate combobox fields
     let firstInvalidCb = null;
-    ['event_id', 'department', 'semester'].forEach(id => {
+    ['event_id', 'department'].forEach(id => {
         const sel = document.getElementById(id);
         if (sel && sel.hasAttribute('required') && !sel.value) {
             const cb = getCbInstance(id);
@@ -2200,48 +2284,17 @@ document.getElementById('eventRegistrationForm').addEventListener('submit', func
         }
     }
 
-    // Lock submission and provide immediate progress feedback without disabling the native button
-    isRegistrationSubmitting = true;
+    // Immediate button progress feedback to prevent double submission
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
         submitBtn.style.pointerEvents = 'none';
-        submitBtn.style.opacity = '0.85';
+        submitBtn.style.opacity = '0.75';
         submitBtn.innerHTML = '⏳ Submitting registration, please wait...';
+        setTimeout(function() {
+            submitBtn.disabled = true;
+        }, 100);
     }
 });
-
-// Dedicated UPI App Launcher (Prevents reload and directly triggers UPI apps)
-function triggerUpiPayment(e) {
-    if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-    const btn = document.getElementById('upiPayButton');
-    let payload = btn ? btn.getAttribute('data-upi-payload') : null;
-    if (!payload) {
-        const eventSelect = document.getElementById('event_id');
-        const selectedOption = eventSelect ? eventSelect.options[eventSelect.selectedIndex] : null;
-        const upiId = (selectedOption && selectedOption.getAttribute('data-upi-id')) || 'demopay@ybl';
-        const eventName = (selectedOption && selectedOption.getAttribute('data-event-name')) || 'College Fest';
-        const eventFee = parseFloat((selectedOption && selectedOption.getAttribute('data-event-fee')) || '400');
-        payload = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(eventName)}&am=${encodeURIComponent(eventFee.toFixed(2))}&cu=INR&tn=${encodeURIComponent('Daksha Infinitx')}`;
-    }
-    window.location.href = payload;
-}
-
-function copyUpiId() {
-    const el = document.getElementById('displayUpiId');
-    const text = el ? el.innerText.trim() : 'demopay@ybl';
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function() {
-            alert('UPI ID copied to clipboard: ' + text);
-        }).catch(function() {
-            prompt('Copy UPI ID:', text);
-        });
-    } else {
-        prompt('Copy UPI ID:', text);
-    }
-}
 </script>
 {% endblock %}
 
