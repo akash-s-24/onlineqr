@@ -769,5 +769,48 @@ class SDATestCase(unittest.TestCase):
         res_bad = bad_client.post('/login', data={'username': 'nonexistent_user_999'}, follow_redirects=True)
         self.assertIn(b'Invalid ID or credentials', res_bad.data)
 
+    def test_21_official_college_logo_and_favicons(self):
+        """Verify authentic college logo and cross-platform favicon assets, routes, and mobile styling"""
+        # 1. Verify root icon and manifest endpoints
+        for endpoint, mime in [
+            ('/favicon.ico', 'image/vnd.microsoft.icon'),
+            ('/apple-touch-icon.png', 'image/png'),
+            ('/apple-touch-icon-precomposed.png', 'image/png'),
+            ('/site.webmanifest', 'application/manifest+json')
+        ]:
+            res = self.client.get(endpoint)
+            self.assertEqual(res.status_code, 200, f"Route {endpoint} failed")
+            self.assertEqual(res.content_type, mime, f"Route {endpoint} has wrong mime")
+            self.assertGreater(len(res.data), 0, f"Route {endpoint} returned empty body")
+
+        # 2. Verify favicon links in HTML head of /events
+        res_events = self.client.get('/events')
+        events_html = res_events.data.decode('utf-8')
+        self.assertIn('static/favicon-32x32.png', events_html)
+        self.assertIn('static/favicon-16x16.png', events_html)
+        self.assertIn('static/apple-touch-icon.png', events_html)
+        self.assertIn('static/favicon.png', events_html)
+        self.assertIn('static/favicon.svg', events_html)
+        self.assertIn('static/favicon.ico', events_html)
+
+        # 3. Verify official college logo image reference with cache-busting
+        self.assertIn('static/images/college_logo.png?v=4', events_html)
+        self.assertNotIn('https://shreedakshaacademyedu.in/assests/images/backend/logo2.png', events_html)
+
+        # 4. Verify mobile view CSS includes explicit visibility for logo
+        self.assertIn('display: block !important;', events_html)
+        self.assertIn('visibility: visible !important;', events_html)
+        self.assertIn('opacity: 1 !important;', events_html)
+
+        # 5. Verify /register page has official college logo
+        res_reg = self.client.get('/register')
+        reg_html = res_reg.data.decode('utf-8')
+        self.assertIn('static/images/college_logo.png?v=4', reg_html)
+
+        # 6. Verify /login page has official college logo
+        res_login = self.client.get('/login')
+        login_html = res_login.data.decode('utf-8')
+        self.assertIn('static/images/college_logo.png?v=4', login_html)
+
 if __name__ == '__main__':
     unittest.main()

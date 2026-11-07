@@ -556,6 +556,28 @@ def service_worker():
     response.headers['Cache-Control'] = 'no-cache'
     return response
 
+@app.route('/favicon.ico')
+def favicon():
+    """Serve the authentic college crest favicon."""
+    response = send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    response.headers['Cache-Control'] = 'public, max-age=86400'
+    return response
+
+@app.route('/apple-touch-icon.png')
+@app.route('/apple-touch-icon-precomposed.png')
+def apple_touch_icon():
+    """Serve the authentic college crest apple touch icon."""
+    response = send_from_directory(os.path.join(app.root_path, 'static'), 'apple-touch-icon.png', mimetype='image/png')
+    response.headers['Cache-Control'] = 'public, max-age=86400'
+    return response
+
+@app.route('/site.webmanifest')
+def site_webmanifest():
+    """Serve the web app manifest."""
+    response = send_from_directory(os.path.join(app.root_path, 'static'), 'site.webmanifest', mimetype='application/manifest+json')
+    response.headers['Cache-Control'] = 'public, max-age=86400'
+    return response
+
 @app.route('/payment-status/<registration_uid>')
 def payment_status(registration_uid):
     """Show a limited, shareable payment-status record."""

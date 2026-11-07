@@ -2369,8 +2369,10 @@ html:not([data-theme="light"]) .hero-badge-text,
     .institution-logo-divider-section { padding: 40px 16px 16px !important; }
     .logo-sideline-container { gap: 14px !important; }
     .crest-emblem-disc { width: 120px !important; height: 120px !important; padding: 3px !important; background: transparent !important; }
+    .crest-emblem-disc img { display: block !important; visibility: visible !important; opacity: 1 !important; width: 96% !important; height: 96% !important; object-fit: contain !important; }
     .crest-institution-name { font-size: 1.05rem !important; }
     .principal-message-logo { width: 110px !important; height: 110px !important; margin: -100px auto 16px !important; }
+    .principal-message-logo img { display: block !important; visibility: visible !important; opacity: 1 !important; width: 96% !important; height: 96% !important; object-fit: contain !important; }
 }
 
 /* ── Principal's Message & Sidelines ── */
@@ -5947,7 +5949,7 @@ html[data-theme="light"] #discCascadeTitle {
         
         <a href="https://shreedakshaacademyedu.in/" target="_blank" rel="noopener noreferrer" class="institution-center-crest" title="Visit Shree Daksha Academy Official Website">
             <div class="crest-emblem-disc">
-                <img src="{{ url_for('static', filename='images/college_logo.png') }}" alt="Shree Daksha Academy Logo">
+                <img src="{{ url_for('static', filename='images/college_logo.png') }}?v=4" alt="Shree Daksha Academy Logo">
                 <div class="crest-orbit-ring" aria-hidden="true"></div>
             </div>
             <span class="crest-institution-name">SHREE DAKSHA ACADEMY PU COLLEGE</span>
@@ -6052,7 +6054,7 @@ html[data-theme="light"] #discCascadeTitle {
         <div class="principal-message-card" style="backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 50px 32px 36px; border-radius: 24px; text-align: center; max-width: 440px; width: 100%; position: relative;">
             <!-- Official College Crest Floating Badge -->
             <div class="principal-message-logo" style="width: 125px; height: 125px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -115px auto 20px; position: relative; overflow: hidden; padding: 4px;">
-                <img src="{{ url_for('static', filename='images/college_logo.png') }}" alt="Shree Daksha Academy Crest" style="width: 96%; height: 96%; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.25));">
+                <img src="{{ url_for('static', filename='images/college_logo.png') }}?v=4" alt="Shree Daksha Academy Crest" style="width: 96%; height: 96%; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.25));">
             </div>
             
             <!-- Header & Designation -->
@@ -6641,7 +6643,7 @@ html[data-theme="light"] #discCascadeTitle {
         <!-- Campus Desk panel -->
         <div class="map-corner-dock campus-desk-panel">
             <div class="dock-header">
-                <img src="{{ url_for('static', filename='images/college_logo.png') }}" alt="Shree Daksha Academy" class="dock-logo">
+                <img src="{{ url_for('static', filename='images/college_logo.png') }}?v=4" alt="Shree Daksha Academy" class="dock-logo">
                 <div class="dock-title">
                     <h4>{{ config.COLLEGE_NAME }}</h4>
                     <p>Lingadeeranahalli, Bengaluru</p>

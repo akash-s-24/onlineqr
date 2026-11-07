@@ -6,7 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Shree Daksha Academy – College Event Management System{% endblock %}</title>
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <!-- Official College Favicons & Apple Touch Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}?v=4">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}?v=4">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='favicon.png') }}?v=4">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}?v=4">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}?v=4">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}?v=4">
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+    <meta name="apple-mobile-web-app-title" content="Shree Daksha Academy">
+    <meta name="application-name" content="Shree Daksha Academy">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -550,7 +559,7 @@
     <!-- Dedicated Minimalist Header for Admin Login Page -->
     <header class="landing-header auth-clean-header" style="box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; padding: 12px clamp(16px, 4vw, 32px); min-height: 70px; background: rgba(255, 255, 255, 0.98); border-bottom: 1px solid #e2e8f0;">
         <a href="https://shreedakshaacademyedu.in/" target="_blank" class="landing-logo" style="display: flex; align-items: center; gap: 14px; text-decoration: none;">
-            <img src="{{ url_for('static', filename='images/college_logo.png') }}" alt="Shree Daksha Academy Logo"
+            <img src="{{ url_for('static', filename='images/college_logo.png') }}?v=4" alt="Shree Daksha Academy Logo"
                 style="height: 48px; width: auto; object-fit: contain;">
             <div class="landing-logo-copy" style="display: flex; flex-direction: column;">
                 <span style="font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 800; color: #0f172a; line-height: 1.2;">SHREE DAKSHA ACADEMY PU COLLEGE</span>
@@ -568,7 +577,7 @@
     <!-- Public event header -->
     <header class="landing-header" style="box-sizing: border-box;">
         <a href="https://shreedakshaacademyedu.in/" target="_blank" class="landing-logo" style="text-decoration: none; gap: 12px;">
-            <img src="{{ url_for('static', filename='images/college_logo.png') }}" alt="Shree Daksha Academy Logo"
+            <img src="{{ url_for('static', filename='images/college_logo.png') }}?v=4" alt="Shree Daksha Academy Logo"
                 style="height: 44px; width: auto; object-fit: contain;">
             <div class="landing-logo-copy" style="display: flex; flex-direction: column; justify-content: center; line-height: 1.2;">
                 <span style="font-family: 'Space Grotesk', sans-serif; font-size: 0.98rem; font-weight: 800; color: inherit;">SHREE DAKSHA ACADEMY PU COLLEGE</span>
