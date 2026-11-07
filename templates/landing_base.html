@@ -16,22 +16,12 @@
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
     <meta name="apple-mobile-web-app-title" content="Shree Daksha Academy">
     <meta name="application-name" content="Shree Daksha Academy">
-    <!-- Google Fonts (loaded lazily so they never block first paint) -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
-        rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript>
-        <link rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap">
-    </noscript>
-    <!-- FontAwesome (loaded lazily, never blocks first paint) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        media="print" onload="this.media='all'">
-    <noscript>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    </noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Lenis Smooth Scroll -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/lenis.css') }}">
 
@@ -2498,20 +2488,33 @@
         };
 
         // --- 1. First-Time Loading Screen ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const loader = document.getElementById('loader');
-            if (loader) {
-                if (sessionStorage.getItem('site_visited') || navigator.webdriver || window.location.hash || window.location.search.includes('jump=')) {
-                    loader.style.display = 'none';
-                } else {
-                    setTimeout(() => {
-                        loader.style.opacity = '0';
-                        setTimeout(() => { loader.style.display = 'none'; }, 400);
-                        sessionStorage.setItem('site_visited', 'true');
-                    }, 1200);
+        (function initLoader() {
+            function hideLoader() {
+                const loader = document.getElementById('loader');
+                if (loader && loader.style.display !== 'none') {
+                    loader.style.opacity = '0';
+                    setTimeout(() => { if (loader) loader.style.display = 'none'; }, 250);
+                    try { sessionStorage.setItem('site_visited', 'true'); } catch (e) { }
                 }
             }
-        });
+
+            let visited = false;
+            try { visited = Boolean(sessionStorage.getItem('site_visited')); } catch (e) { }
+
+            if (visited || navigator.webdriver || window.location.hash || window.location.search.includes('jump=')) {
+                const l = document.getElementById('loader');
+                if (l) l.style.display = 'none';
+                return;
+            }
+
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                setTimeout(hideLoader, 200);
+            } else {
+                document.addEventListener('DOMContentLoaded', () => setTimeout(hideLoader, 150));
+                window.addEventListener('load', hideLoader);
+                setTimeout(hideLoader, 700); // Safety guarantee against hanging black screen
+            }
+        })();
 
         // GridScan Background disabled to eliminate backend grid lines
         {% block gridscan_init %}
