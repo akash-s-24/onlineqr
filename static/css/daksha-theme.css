@@ -338,3 +338,12 @@ body :where(*):not(img):not(svg):not(canvas):not(iframe) { background-image: non
 :root[data-theme] .event-grid-card[data-palette-category="cultural"] { background: var(--blush-block) !important; }
 :root[data-theme] .event-grid-card[data-palette-category="arts"] { background: var(--mint-block) !important; }
 :root[data-theme] .event-grid-card[data-palette-category] { background-image: none !important; box-shadow: none !important; }
+
+:root[data-theme] .header-nav-center.open,
+:root[data-theme] .mobile-menu-panel,
+:root[data-theme] .header-nav-center { background-color: var(--surface) !important; background-image: none !important; color: var(--text) !important; }
+:root[data-theme] .header-nav-center .nav-pill-indicator { background: var(--secondary-hover-bg) !important; }
+:root[data-theme] .header-nav-center .nav-link.active { background: var(--secondary-hover-bg) !important; color: var(--link) !important; }
+:root[data-theme] #headerRegisterBtn,
+:root[data-theme] .header-cta-classic { background: var(--primary) !important; background-image: none !important; color: var(--on-primary) !important; border-color: var(--primary) !important; box-shadow: none !important; }
+:root[data-theme] .mobile-theme-switch-btn { background: var(--toggle-bg) !important; color: var(--text) !important; border-color: var(--border-soft) !important; }
