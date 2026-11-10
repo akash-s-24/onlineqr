@@ -3,6 +3,7 @@ import json
 import os
 import time
 from unittest.mock import patch
+import app as app_module
 from app import app
 import database
 from config import Config
@@ -1049,6 +1050,17 @@ class SDATestCase(unittest.TestCase):
         finally:
             database._DB_INITIALIZED = initialized_before
             database.execute_db("DELETE FROM events WHERE event_name = %s", (fixture_name,))
+
+    def test_public_events_deduplicate_pubg_and_bgmi_aliases(self):
+        rows = [
+            {'id': 7, 'event_name': 'Pubg'},
+            {'id': 8, 'event_name': 'Free Fire'},
+            {'id': 32, 'event_name': 'BGMI'},
+        ]
+        with patch('app.query_db', return_value=rows):
+            events = app_module.get_public_events()
+
+        self.assertEqual([event['event_name'] for event in events], ['Pubg', 'Free Fire'])
 
     def test_public_verify_page_does_not_depend_on_sample_certificate_lookup(self):
         def query_without_legacy_sample_column(query, *args, **kwargs):

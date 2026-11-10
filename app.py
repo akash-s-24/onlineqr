@@ -837,9 +837,24 @@ def toggle_payment(reg_id):
 # ---------------------------------------------------------
 # Event Management Routes
 # ---------------------------------------------------------
+def get_public_events():
+    """Return public events without duplicate legacy PUBG/BGMI entries."""
+    events = query_db("SELECT * FROM events ORDER BY id ASC")
+    public_events = []
+    seen = set()
+    for event in events:
+        normalized_name = re.sub(r'[^a-z0-9]+', '', (event.get('event_name') or '').lower())
+        identity = 'bgmi' if normalized_name in ('bgmi', 'pubg') else normalized_name
+        if identity in seen:
+            continue
+        seen.add(identity)
+        public_events.append(event)
+    return public_events
+
+
 @app.route('/events')
 def events_list():
-    events = query_db("SELECT * FROM events ORDER BY id ASC")
+    events = get_public_events()
     showcase_section = query_db(
         "SELECT * FROM event_showcase_sections WHERE section_key = %s",
         ('main-events',), one=True
@@ -1089,7 +1104,7 @@ def delete_event(event_id):
 # ---------------------------------------------------------
 @app.route('/register', methods=['GET', 'POST'])
 def register_participant():
-    events = query_db("SELECT * FROM events ORDER BY id ASC")
+    events = get_public_events()
     selected_event_id = request.args.get('event_id', '')
 
     user_info = None
