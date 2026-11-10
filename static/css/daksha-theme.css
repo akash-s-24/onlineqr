@@ -293,3 +293,28 @@ body::before, body::after { background-image: none !important; }
 :where(.hero-section, .hero-content, .events-section, .section-container, .map-section, .about-section, .rules-section, .procedure-section, .faq-section, .contact-section, .events-view-panel, .events-grid-panel, .event-details-panel, .selected-event-card, .event-grid-card, .rule-card, .procedure-track-card, .faq-item, .contact-card, .form-card, .glass-form-card, .clean-form-card, .registration-form, .payment-card, .admin-card, .workspace-card, .dash-panel, .panel) { background-image: none !important; }
 :where(.hero-section, .events-section, .section-container, .map-section, .about-section, .rules-section, .procedure-section, .faq-section, .contact-section, .events-view-panel, .events-grid-panel) { background-color: var(--bg) !important; color: var(--text) !important; }
 :where(.rule-card, .procedure-track-card, .faq-item, .contact-card, .form-card, .glass-form-card, .clean-form-card, .registration-form, .payment-card, .admin-card, .workspace-card, .dash-panel, .panel) { background-color: var(--surface) !important; color: var(--text) !important; box-shadow: none !important; border-color: var(--border-soft) !important; }
+
+/* Remove the old neon and gradient skin at the shared theme boundary. */
+body :where(*):not(img):not(svg):not(canvas):not(iframe) {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  backdrop-filter: none !important;
+}
+body :where(*):not(img):not(svg):not(canvas):not(iframe) { background-image: none !important; }
+.shimmer-headline, .hero-title, #heroFallbackTitle {
+  background: transparent !important;
+  background-image: none !important;
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+  color: var(--text) !important;
+  -webkit-text-fill-color: var(--text) !important;
+  animation: none !important;
+}
+.hero-actions .hero-explore-btn, .hero-actions button:first-child, .hero-cta {
+  background: var(--primary) !important;
+  background-image: none !important;
+  color: var(--on-primary) !important;
+  border-color: var(--primary) !important;
+}
+.hero-actions button:not(:first-child) { background: var(--surface) !important; color: var(--text) !important; border-color: var(--border) !important; }
+[class*="gradient"], [class*="glow"] { box-shadow: none !important; text-shadow: none !important; }
