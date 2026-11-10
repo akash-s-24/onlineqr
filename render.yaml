@@ -15,6 +15,8 @@ services:
         value: "True"
       - key: SMTP_MODE
         value: demo
+      - key: PAYMENT_MODE
+        value: demo
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL

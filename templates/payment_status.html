@@ -5,12 +5,12 @@
 {% block content %}
 <section class="page-section" style="max-width: 760px; margin: 0 auto; padding-top: 2rem;">
     <!-- Large Success Confirmation Banner -->
-    <div class="alert alert-success" style="padding: 1.25rem 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; background: #ecfdf5; border: 1.5px solid #10b981; color: #065f46; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);">
+    <div class="alert {% if registration.payment_status == 'paid' %}alert-success{% else %}alert-warning{% endif %}" style="padding: 1.25rem 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; background: {% if registration.payment_status == 'paid' %}#ecfdf5{% else %}#fffbeb{% endif %}; border: 1.5px solid {% if registration.payment_status == 'paid' %}#10b981{% else %}#f59e0b{% endif %}; color: {% if registration.payment_status == 'paid' %}#065f46{% else %}#92400e{% endif %}; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
         <div style="display: flex; align-items: center; gap: 14px;">
             <span style="font-size: 2.2rem; line-height: 1;">🎉</span>
             <div>
-                <h2 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: #047857; letter-spacing: -0.01em;">Successfully registered!</h2>
-                <p style="margin: 3px 0 0; font-size: 0.95rem; color: #065f46;">Your registration for <strong>{{ registration.event_name }}</strong> is confirmed. Reference: <strong style="font-family: monospace; letter-spacing: 0.05em; background: rgba(4,120,87,0.12); padding: 2px 8px; border-radius: 4px;">{{ registration.registration_uid }}</strong></p>
+                <h2 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: {% if registration.payment_status == 'paid' %}#047857{% else %}#92400e{% endif %}; letter-spacing: -0.01em;">{% if registration.payment_status == 'paid' %}Registration confirmed{% else %}Registration received{% endif %}</h2>
+                <p style="margin: 3px 0 0; font-size: 0.95rem; color: {% if registration.payment_status == 'paid' %}#065f46{% else %}#78350f{% endif %};">Your registration for <strong>{{ registration.event_name }}</strong> has reference: <strong style="font-family: monospace; letter-spacing: 0.05em; background: rgba(4,120,87,0.12); padding: 2px 8px; border-radius: 4px;">{{ registration.registration_uid }}</strong>{% if registration.payment_status == 'pending' %}. Payment is not confirmed until the college verifies it.{% elif registration.payment_status == 'pay_on_site' %}. Pay at the campus desk before check-in.{% endif %}</p>
             </div>
         </div>
         <a href="{{ url_for('events_list') }}" class="btn btn-primary" style="padding: 0.65rem 1.25rem; font-weight: 600; text-decoration: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
@@ -21,7 +21,7 @@
     <div class="table-card" style="padding: 2rem; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
         <div class="page-header" style="margin-bottom: 1.5rem;">
             <div class="page-title">
-                <h1 style="font-size: 1.6rem; margin-bottom: 4px;">Official Gate Pass & Details</h1>
+                <h1 style="font-size: 1.6rem; margin-bottom: 4px;">Registration Pass & Details</h1>
                 <p style="color: #64748b; margin: 0;">Keep this official reference and pass handy to check in at the college desk.</p>
             </div>
         </div>
@@ -55,8 +55,8 @@
                 <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR Ticket Pass for {{ registration.registration_uid }}" style="width: 180px; height: 180px; display: block;" />
             </div>
             <div>
-                <strong style="font-size: 0.95rem; color: #0f172a;">Official Gate Pass QR</strong>
-                <p style="margin: 4px 0 0; font-size: 0.8rem; color: #64748b;">Present this QR code at the desk for instant check-in</p>
+                <strong style="font-size: 0.95rem; color: #0f172a;">Registration Pass QR</strong>
+                <p style="margin: 4px 0 0; font-size: 0.8rem; color: #64748b;">{% if registration.payment_status == 'paid' %}Present this QR code at the desk for check-in.{% else %}Present this QR at the desk to complete payment verification and check-in.{% endif %}</p>
                 <div id="swOfflineBadge" style="margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #059669; font-weight: 600;">
                     <span>⚡ Available Offline</span>
                 </div>
@@ -77,6 +77,9 @@
                 <strong>Payment submitted for verification</strong><br>
                 The college will verify the UTR against its bank records before confirming payment.
             </div>
+            {% if config.PAYMENT_MODE == 'demo' %}
+            <p role="note"><strong>Demo mode:</strong> this submission is for preview only. No payment was confirmed or settled; do not send real money using the test details.</p>
+            {% endif %}
             <p><strong>Submitted payment ID / UTR:</strong> <code>{{ registration.utr_number }}</code></p>
             {% if registration.payment_proof %}
             <p><strong>Payment screenshot attached:</strong> <a href="{{ url_for('static', filename='uploads/payment_proofs/' + registration.payment_proof) }}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">View Uploaded Screenshot ↗</a></p>

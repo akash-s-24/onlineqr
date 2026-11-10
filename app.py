@@ -326,13 +326,11 @@ def login():
             flash('Administrator password configuration is required before sign-in is enabled.', 'danger')
             return render_template('login.html'), 503
 
-        is_authenticated = False
-        if user:
-            if password:
-                is_authenticated = check_password_hash(user['password_hash'], password)
-            else:
-                # ID-only login: valid staff/member ID grants access without password requirement
-                is_authenticated = True
+        is_authenticated = bool(
+            user
+            and password
+            and check_password_hash(user['password_hash'], password)
+        )
 
         if is_authenticated:
             clear_login_failures(client_key)
@@ -1438,15 +1436,10 @@ def verify_certificate():
             one=True
         )
 
-    sample = query_db(
-        "SELECT certificate_code FROM certificates ORDER BY id ASC LIMIT 1",
-        one=True
-    )
     return render_template(
         'verify_certificate.html',
         search_id=search_id,
-        certificate_info=certificate_info,
-        sample_code=sample['certificate_code'] if sample else None
+        certificate_info=certificate_info
     )
 
 @app.route('/admin/certificates')

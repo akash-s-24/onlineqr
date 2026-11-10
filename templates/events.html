@@ -5887,10 +5887,10 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
             <!-- Event Timing & Countdown Module -->
             <div class="hero-countdown-block" id="heroCountdownBlock" aria-label="Daksha Infinix timing and countdown">
-                <p class="hero-date-line"><span class="hero-starts-badge" style="display:inline-block; margin-right:4px; font-weight:700; color:#60a5fa; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.04em;">Starts in</span> <span class="hero-date-highlight">19th and 20th November</span> &bull; <span
+                <p class="hero-date-line"><span class="hero-starts-badge" style="display:inline-block; margin-right:4px; font-weight:700; color:#60a5fa; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.04em;">Starts in</span> <span class="hero-date-highlight">26th and 27th November</span> &bull; <span
                         class="hero-date-highlight">Bangalore</span></p>
 
-                <div class="hero-timer-capsule" id="symposiumCountdown" aria-label="Countdown to 19th November 2026">
+                <div class="hero-timer-capsule" id="symposiumCountdown" aria-label="Countdown to 26th November 2026">
                     <div class="timer-digits-strip" id="timerDigitsStrip">
                         <div class="timer-unit">
                             <span class="timer-val" id="cdDays">00</span>
@@ -6034,7 +6034,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     <b class="stat-number" data-target="2">0</b>
                     <span class="stat-unit stat-blue-accent">Days</span>
                 </div>
-                <h3 class="stat-title">19th &amp; 20th Nov</h3>
+                <h3 class="stat-title">26th &amp; 27th Nov</h3>
                 <p class="stat-desc">Two action-packed days of competitive brilliance and cultural festivity in
                     Bengaluru.</p>
                 <a href="#events" class="stat-action-link" onclick="return scrollToSection('events', event);">
@@ -6358,7 +6358,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             <div class="events-cards-grid" id="eventsCardsGrid">
                 {% for ev in events[:14] %}
                 {% set ev_lower = (ev.event_name or '')|lower %}
-                {% set cat_key = 'gaming' if ('bgmi' in ev_lower or 'free fire' in ev_lower) else ('technical' if ('tech' in ev_lower or 'shield' in ev_lower) else ('cultural' if ('dance' in ev_lower or 'beatbox' in ev_lower or 'acting' in ev_lower or 'ramp' in ev_lower) else 'arts')) %}
+                {% set cat_key = 'gaming' if ('bgmi' in ev_lower or 'pubg' in ev_lower or 'free fire' in ev_lower) else ('technical' if ('tech' in ev_lower or 'shield' in ev_lower) else ('cultural' if ('dance' in ev_lower or 'beatbox' in ev_lower or 'acting' in ev_lower or 'ramp' in ev_lower) else 'arts')) %}
                 {% set cat_label = 'Gaming' if cat_key == 'gaming' else ('Technical & Strategy' if cat_key == 'technical' else ('Cultural & Performance' if cat_key == 'cultural' else 'Arts & Media')) %}
                 {% set rim_class = 'card-rim-emerald' if cat_key == 'gaming' else ('card-rim-silver' if cat_key ==
                 'technical' else 'card-rim-indigo') %}
@@ -6601,18 +6601,23 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     <div class="step-item">
                         <div class="step-badge">3</div>
                         <div class="step-content">
-                            <h4>Scan Official UPI QR & Pay</h4>
-                            <p>Scan the symposium's official UPI QR code with GPay, PhonePe, Paytm, or BHIM. Pay the
-                                exact fee and copy your 12-digit UTR / UPI Reference Number.</p>
+                            <h4>{% if config.PAYMENT_MODE == 'demo' %}Try Demo UPI Payment{% else %}Scan Official UPI QR &amp; Pay{% endif %}</h4>
+                            {% if config.PAYMENT_MODE == 'demo' %}
+                            <p>Demo mode is active. The displayed UPI details are test placeholders: do not send real
+                                money. Use a sample transaction reference and screenshot to preview the registration flow.</p>
+                            {% else %}
+                            <p>Scan the configured symposium UPI QR code, then enter the transaction reference and upload
+                                the transfer screenshot. Online submissions remain pending until organizers verify them.</p>
+                            {% endif %}
                         </div>
                     </div>
 
                     <div class="step-item">
                         <div class="step-badge">4</div>
                         <div class="step-content">
-                            <h4>Instant Digital E-Pass with QR</h4>
-                            <p>Enter the UTR into the form. Upon submission, you instantly receive your digital entry
-                                confirmation with a scannable verification QR code.</p>
+                            <h4>Registration Pass with QR</h4>
+                            <p>After submission, you receive a registration reference and scannable pass. Online payments
+                                remain unconfirmed until an organizer verifies them; a demo submission does not transfer money.</p>
                         </div>
                     </div>
                 </div>
@@ -6761,9 +6766,9 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>You can pay via any UPI app (GPay, PhonePe, Paytm, BHIM) by scanning the official QR code shown
-                        during online registration, or pay at the campus registration desk on event day in cash or via
-                        counter UPI. Enter the 12-digit UTR reference ID to validate your digital pass.</p>
+                    <p>You can submit an online UPI reference and payment screenshot, or choose cash at the campus
+                        registration desk. Online submissions stay pending until organizers verify payment. Demo mode
+                        uses test details only; do not send real money.</p>
                 </div>
             </details>
 
@@ -6863,9 +6868,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>You can contact Faculty Coordinator Prof. R. Narayana Swamy at {{ config.CONTACT_PHONE_PRIMARY }}
-                        or Student Coordinator Akash S. at {{ config.CONTACT_PHONE_SECONDARY }}, or open the "Details"
-                        popup on any event card for individual coordinator phone numbers.</p>
+                    <p>For event-specific questions, open the "Details" button on an event card or message the official
+                        symposium desk on WhatsApp. Individual coordinator numbers will appear here once confirmed.</p>
                 </div>
             </details>
         </div>
@@ -6961,6 +6965,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <span class="contact-role-badge">Faculty Coordinator</span>
                 <h3>Prof. R. Narayana Swamy</h3>
                 <p>Primary Symposium Desk</p>
+                {% if config.CONTACT_PHONE_PRIMARY %}
                 <a href="tel:{{ config.CONTACT_PHONE_PRIMARY|replace(' ', '') }}" class="streamlined-call-link"
                     aria-label="Call Faculty Coordinator">
                     <svg class="phone-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -6970,6 +6975,11 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </svg>
                     <span>Call {{ config.CONTACT_PHONE_PRIMARY }}</span>
                 </a>
+                {% else %}
+                <a href="https://wa.me/917892038099?text=Hello%2C%20I%20have%20a%20question%20for%20the%20faculty%20coordinator." target="_blank" rel="noopener noreferrer" class="streamlined-call-link" aria-label="Message the official symposium desk on WhatsApp">
+                    <span>Message official desk on WhatsApp</span>
+                </a>
+                {% endif %}
             </div>
 
             <!-- Student Coordinator -->
@@ -6977,6 +6987,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <span class="contact-role-badge">Student Coordinator</span>
                 <h3>Akash S.</h3>
                 <p>Student Operations Desk</p>
+                {% if config.CONTACT_PHONE_SECONDARY %}
                 <a href="tel:{{ config.CONTACT_PHONE_SECONDARY|replace(' ', '') }}" class="streamlined-call-link"
                     aria-label="Call Student Coordinator">
                     <svg class="phone-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -6986,6 +6997,11 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </svg>
                     <span>Call {{ config.CONTACT_PHONE_SECONDARY }}</span>
                 </a>
+                {% else %}
+                <a href="https://wa.me/917892038099?text=Hello%2C%20I%20have%20a%20question%20for%20the%20student%20coordinator." target="_blank" rel="noopener noreferrer" class="streamlined-call-link" aria-label="Message the official symposium desk on WhatsApp">
+                    <span>Message official desk on WhatsApp</span>
+                </a>
+                {% endif %}
             </div>
         </div>
     </section>
@@ -7179,7 +7195,12 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             }
 
             if (!html) {
-                html = '<p style="color: #94a3b8; text-align: center; padding: 20px 0;">Contact info not yet added. Please check back later.</p>';
+                const message = encodeURIComponent('Hello, I have a question about ' + eventName + '.');
+                html = '<div class="contact-coord-card" style="text-align:center;">';
+                html += '<p class="contact-coord-title">Official Symposium Desk</p>';
+                html += '<p style="margin:0 0 12px;color:#94a3b8;">Message the general desk for event-specific help.</p>';
+                html += '<a href="https://wa.me/917892038099?text=' + message + '" target="_blank" rel="noopener noreferrer" class="contact-coord-phone">Message on WhatsApp</a>';
+                html += '</div>';
             }
 
             content.innerHTML = html;
@@ -8187,7 +8208,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             })();
             // ── Symposium Countdown Timer & "Fest is Live" Status ──
             (function initCountdown() {
-                const targetDate = new Date('2026-11-19T09:00:00+05:30').getTime();
+                const targetDate = new Date('2026-11-26T09:00:00+05:30').getTime();
                 const capsule = document.getElementById('symposiumCountdown');
                 const elDays = document.getElementById('cdDays');
                 const elHours = document.getElementById('cdHours');

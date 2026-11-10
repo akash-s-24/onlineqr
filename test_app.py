@@ -2,6 +2,7 @@ import unittest
 import json
 import os
 import time
+from unittest.mock import patch
 from app import app
 import database
 from config import Config
@@ -26,8 +27,8 @@ class SDATestCase(unittest.TestCase):
         self.assertIn(b'BGMI', response.data)
         self.assertIn(b'Free Fire', response.data)
         self.assertIn(b'Pencil Sketch', response.data)
-        self.assertIn(b'18-sep-2026', response.data)
-        self.assertIn(b'19-sep-2026', response.data)
+        self.assertIn(b'26-nov-2026', response.data)
+        self.assertNotIn(b'18-sep-2026', response.data)
 
     def test_03_login_page_renders(self):
         """Test login page renders properly and securely"""
@@ -38,7 +39,9 @@ class SDATestCase(unittest.TestCase):
 
     def test_04_admin_authentication(self):
         """Test admin login flow with admin account"""
-        password = Config.ADMIN_PASSWORD or 'admin123'
+        if not Config.ADMIN_PASSWORD:
+            self.skipTest('Set ADMIN_PASSWORD to seed a test administrator.')
+        password = Config.ADMIN_PASSWORD
         response = self.client.post('/login', data={
             'username': 'admin',
             'password': password
@@ -143,7 +146,9 @@ class SDATestCase(unittest.TestCase):
 
     def test_07_certificate_email_dispatch_flow(self):
         """Test certificate email dispatch in Safe Demo Mode"""
-        password = Config.ADMIN_PASSWORD or 'admin123'
+        if not Config.ADMIN_PASSWORD:
+            self.skipTest('Set ADMIN_PASSWORD to seed a test administrator.')
+        password = Config.ADMIN_PASSWORD
         # Login as admin
         self.client.post('/login', data={
             'username': 'admin',
@@ -165,7 +170,9 @@ class SDATestCase(unittest.TestCase):
 
     def test_08_admin1_and_admin2_access(self):
         """Test admin1 and admin2 access and formatting as admin SDA1 and admin SDA2"""
-        password = Config.ADMIN_PASSWORD or 'admin123'
+        if not Config.ADMIN_PASSWORD:
+            self.skipTest('Set ADMIN_PASSWORD to seed test administrators.')
+        password = Config.ADMIN_PASSWORD
         # admin1 test
         client1 = self.app.test_client()
         r1 = client1.post('/login', data={'username': 'admin1', 'password': password}, follow_redirects=True)
@@ -194,7 +201,7 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('SDA 2026-27', data)
         self.assertNotIn('2026-27', data)
         self.assertNotIn('Annual Symposium 2026-27', data)
-        self.assertIn('19th and 20th November', data)
+        self.assertIn('26th and 27th November', data)
         self.assertTrue('Bengaluru' in data or 'Bangalore' in data)
         self.assertIn('hero-date-highlight', data)
         self.assertNotIn('November 19th', data)
@@ -349,7 +356,9 @@ class SDATestCase(unittest.TestCase):
 
     def test_12_csv_exports_and_offline_pass_service_worker(self):
         """Test non-colliding CSV export routes, service worker, and ticket pass QR code"""
-        password = Config.ADMIN_PASSWORD or 'admin123'
+        if not Config.ADMIN_PASSWORD:
+            self.skipTest('Set ADMIN_PASSWORD to access admin export routes.')
+        password = Config.ADMIN_PASSWORD
         self.client.post('/login', data={'username': 'admin', 'password': password}, follow_redirects=True)
 
         # 1. Test /admin/export/csv (status-filtered export)
@@ -377,7 +386,7 @@ class SDATestCase(unittest.TestCase):
             uid = reg['registration_uid']
             res_pass = self.client.get(f'/payment-status/{uid}')
             self.assertEqual(res_pass.status_code, 200)
-            self.assertIn(b'Official Gate Pass QR', res_pass.data)
+            self.assertIn(b'Registration Pass QR', res_pass.data)
             self.assertIn(b'navigator.serviceWorker.register', res_pass.data)
 
     def test_13_cash_registration_and_gate_pass(self):
@@ -707,10 +716,12 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('Event Customization &amp; Rules Configuration Hub', dash_html)
 
         # 5. Check event editing POST updates rules, faculty and student coordinator info
-        edit_post_res = self.client.post('/admin/events/edit/2', data={
+        bgmi_event = database.query_db("SELECT id FROM events WHERE event_name = 'BGMI'", one=True)
+        self.assertIsNotNone(bgmi_event)
+        edit_post_res = self.client.post(f"/admin/events/edit/{bgmi_event['id']}", data={
             'event_name': 'BGMI',
             'event_type': 'Gaming',
-            'event_date': '19-sep-2026',
+            'event_date': '26-nov-2026',
             'event_time': '10:00 AM',
             'venue': 'Computer Lab 3',
             'max_participants': '100',
@@ -729,7 +740,7 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(edit_post_res.status_code, 200)
 
         # Verify updated values in database
-        ev = database.query_db("SELECT * FROM events WHERE id = 2", one=True)
+        ev = database.query_db("SELECT * FROM events WHERE event_name = 'BGMI'", one=True)
         self.assertEqual(ev['faculty_name'], 'Prof. Rajesh Kumar')
         self.assertEqual(ev['student_name'], 'Akash S')
         self.assertIn('Rule 1', ev['rules_text'])
@@ -740,8 +751,8 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('140', att_html)
         self.assertIn('Awaiting Check-in', att_html)
 
-    def test_20_id_only_login_and_navigation_verification(self):
-        """Verify no login elements appear on public pages, and /login supports ID-only sign-in"""
+    def test_20_password_required_login_and_navigation_verification(self):
+        """Verify public navigation and enforce passwords for staff sign-in."""
         # 1. No login element on public events page or registration page
         res_events = self.client.get('/events')
         events_html = res_events.data.decode('utf-8')
@@ -752,19 +763,27 @@ class SDATestCase(unittest.TestCase):
         res_login = self.client.get('/login')
         login_html = res_login.data.decode('utf-8')
         self.assertIn('Member / Staff ID', login_html)
-        self.assertIn('ID-only access supported', login_html)
+        self.assertIn('Password *', login_html)
+        self.assertNotIn('ID-only access supported', login_html)
 
-        # 3. ID-only member login (no password required)
+        # 3. Member ID without a password is rejected.
         member_client = self.app.test_client()
         res_member = member_client.post('/login', data={'username': 'member1'}, follow_redirects=True)
         self.assertEqual(res_member.status_code, 200)
-        self.assertIn(b'Member workspace', res_member.data)
+        self.assertIn(b'Invalid ID or credentials', res_member.data)
 
-        # 4. ID-only admin login (no password required)
+        # 4. Admin ID without a password is rejected.
         admin_client = self.app.test_client()
         res_admin = admin_client.post('/login', data={'username': 'admin'}, follow_redirects=True)
         self.assertEqual(res_admin.status_code, 200)
-        self.assertIn(b'Event operations', res_admin.data)
+        self.assertIn(b'Invalid ID or credentials', res_admin.data)
+
+        if Config.ADMIN_PASSWORD:
+            valid_admin = self.app.test_client().post('/login', data={
+                'username': 'admin', 'password': Config.ADMIN_PASSWORD
+            }, follow_redirects=True)
+            self.assertEqual(valid_admin.status_code, 200)
+            self.assertIn(b'Event operations', valid_admin.data)
 
         # 5. Invalid ID rejected
         bad_client = self.app.test_client()
@@ -968,6 +987,89 @@ class SDATestCase(unittest.TestCase):
         mono_ev = database.query_db("SELECT * FROM events WHERE event_name = 'Mono Acting'", one=True)
         self.assertIsNotNone(mono_ev)
         self.assertIn('Mythology Characters', mono_ev['rules_text'])
+
+    def test_staff_login_rejects_missing_password(self):
+        admin_user = {
+            'id': 1,
+            'username': 'admin',
+            'email': 'admin@example.test',
+            'full_name': 'Test Admin',
+            'role': 'admin',
+            'password_hash': 'unused-for-empty-password-test',
+        }
+        with patch('app.query_db', return_value=admin_user):
+            response = self.client.post('/login', data={'username': 'admin', 'password': ''})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Invalid ID or credentials', response.data)
+        self.assertNotIn(b'Event operations', response.data)
+
+    def test_staff_login_form_marks_password_required(self):
+        response = self.client.get('/login')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Password *', response.data)
+        self.assertNotIn(b'ID-only access supported', response.data)
+
+    def test_sqlite_initial_seed_persists_official_events(self):
+        if database.DB_MODE != 'sqlite':
+            self.skipTest('This regression covers the SQLite fallback only.')
+
+        result = database.query_db("SELECT COUNT(*) AS count FROM events", one=True)
+
+        self.assertEqual(result['count'], 14)
+
+    def test_official_events_use_confirmed_november_date(self):
+        if database.DB_MODE != 'sqlite':
+            self.skipTest('This regression checks the isolated SQLite seed.')
+
+        dates = database.query_db("SELECT DISTINCT event_date FROM events")
+
+        self.assertEqual(dates, [{'event_date': '26-nov-2026'}])
+
+    def test_public_verify_page_does_not_depend_on_sample_certificate_lookup(self):
+        def query_without_legacy_sample_column(query, *args, **kwargs):
+            if 'ORDER BY id ASC' in query:
+                raise RuntimeError('Legacy certificates table has no sortable id column')
+            return None
+
+        with patch('app.query_db', side_effect=query_without_legacy_sample_column):
+            response = self.client.get('/verify')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Public Certificate Verification', response.data)
+
+    def test_pending_payment_pass_is_not_called_confirmed(self):
+        pending_registration = {
+            'registration_uid': 'REG-TEST12345',
+            'payment_status': 'pending',
+            'amount_paid': 0,
+            'payment_method': 'Online',
+            'utr_number': 'DEMO123456',
+            'payment_proof': None,
+            'payment_verified_at': None,
+            'receipt_delivery_status': 'not_sent',
+            'full_name': 'Test Participant',
+            'event_name': 'Test Event',
+            'event_fee': 400,
+        }
+        with patch('app.query_db', return_value=pending_registration):
+            response = self.client.get('/payment-status/REG-TEST12345')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Registration received', response.data)
+        self.assertIn(b'not confirmed until', response.data.lower())
+        self.assertNotIn(b'Successfully registered!', response.data)
+
+    def test_demo_upi_is_clearly_marked_as_test_only(self):
+        if Config.PAYMENT_MODE != 'demo':
+            self.skipTest('This regression covers demo payment messaging.')
+
+        response = self.client.get('/register?event_id=1')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Demo only', response.data)
+        self.assertIn(b'do not send real money', response.data.lower())
 
 if __name__ == '__main__':
     unittest.main()

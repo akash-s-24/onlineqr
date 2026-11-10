@@ -1471,7 +1471,7 @@ select.f-select {
                             <input type="radio" name="payment_method" value="Online" id="payOnlineRadio" onchange="togglePaymentMethod()" style="accent-color: #2563eb; width: 18px; height: 18px;">
                             <div>
                                 <span style="display: block; font-weight: 800; font-size: 0.95rem;">⚡ Pay Online (UPI / QR)</span>
-                                <span style="display: block; font-size: 0.78rem; opacity: 0.85;">Pay via UPI and upload transaction screenshot.</span>
+                                <span style="display: block; font-size: 0.78rem; opacity: 0.85;">{% if config.PAYMENT_MODE == 'demo' %}Demo only — do not send real money.{% else %}Pay via UPI and upload the transaction screenshot.{% endif %}</span>
                             </div>
                         </label>
                         <label class="payment-method-card" id="payOfflineCard">
@@ -1486,7 +1486,10 @@ select.f-select {
 
                 <!-- Online UPI Payment Details -->
                 <div id="upiPaymentDetails" style="display: none; text-align: center; margin-top: 20px; padding: 24px; background: #ffffff; border: 2px solid #2563eb; border-radius: 14px; box-shadow: 0 4px 16px rgba(37, 99, 235, 0.1);">
-                    <p style="color: #0f172a; font-weight: 800; font-size: 1.05rem; margin-bottom: 14px;">Scan UPI QR Code or Tap to Pay via UPI App</p>
+                    <p style="color: #0f172a; font-weight: 800; font-size: 1.05rem; margin-bottom: 14px;">{% if config.PAYMENT_MODE == 'demo' %}Demo UPI — Test Flow Only{% else %}Scan UPI QR Code or Tap to Pay via UPI App{% endif %}</p>
+                    {% if config.PAYMENT_MODE == 'demo' %}
+                    <p role="note" style="max-width: 480px; margin: 0 auto 14px; color: #92400e; font-weight: 700;">Demo payment details are placeholders. Do not transfer real money; online submissions are not payment confirmation.</p>
+                    {% endif %}
                     <img id="upiQrCode" src="{{ url_for('static', filename='favicon.svg') }}" alt="UPI QR Code" style="width: 190px; height: 190px; margin: 0 auto 14px; display: block; border: 2px solid #000000; border-radius: 12px; padding: 6px; background: #ffffff;">
                     
                     <!-- Primary Single Open UPI App Button -->
@@ -1497,15 +1500,15 @@ select.f-select {
 
                     <!-- UPI ID & One-Click Copy -->
                     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
-                        <span style="font-size: 0.9rem; color: #475569;"><strong>UPI ID:</strong></span>
+                        <span style="font-size: 0.9rem; color: #475569;"><strong>{% if config.PAYMENT_MODE == 'demo' %}Demo UPI ID (test only):{% else %}UPI ID:{% endif %}</strong></span>
                         <code id="displayUpiId" style="font-family: monospace; font-weight: 700; background: #f4f4f5; padding: 4px 10px; border-radius: 6px; border: 1px solid #d4d4d8; color: #0f172a;">demopay@ybl</code>
                         <button type="button" id="copyUpiBtn" style="padding: 5px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; border: 1.5px solid #2563eb; background: #eff6ff; color: #2563eb; cursor: pointer; transition: all 0.2s ease;">📋 Copy ID</button>
                     </div>
 
                     <div class="f-form-group" style="text-align: left; max-width: 440px; margin: 0 auto 18px;">
-                        <label class="f-label" for="utr_number">UPI UTR / Reference ID *</label>
-                        <input type="text" id="utr_number" name="utr_number" class="f-control" placeholder="e.g. 12-digit UPI UTR" pattern="[A-Za-z0-9][A-Za-z0-9._/-]{5,63}" maxlength="64" autocapitalize="characters" title="Please enter a valid UPI transaction reference (6-64 characters)">
-                        <span class="f-hint">After payment, enter transaction reference ID above.</span>
+                        <label class="f-label" for="utr_number">{% if config.PAYMENT_MODE == 'demo' %}Demo transaction reference *{% else %}UPI transaction reference *{% endif %}</label>
+                        <input type="text" id="utr_number" name="utr_number" class="f-control" placeholder="Enter a 6–64 character reference" pattern="[A-Za-z0-9][A-Za-z0-9._/-]{5,63}" maxlength="64" autocapitalize="characters" title="Enter a transaction reference with 6 to 64 letters, numbers, or separators">
+                        <span class="f-hint">{% if config.PAYMENT_MODE == 'demo' %}Use a sample value to preview this flow; do not send money.{% else %}Enter the reference shown in your payment app.{% endif %}</span>
                     </div>
 
                     <div class="f-form-group" style="text-align: left; max-width: 440px; margin: 0 auto;">
@@ -1522,7 +1525,7 @@ select.f-select {
                         <div>
                             <p style="font-size: 1rem; color: #15803d; font-weight: 800; margin: 0 0 6px;">Pay at College Registration Desk</p>
                             <p style="font-size: 0.9rem; color: #334155; line-height: 1.5; margin: 0;">
-                                You have selected <strong>Pay on Spot (Cash Desk)</strong>. Settle your payment at your college desk upon campus arrival on 19th/20th Nov.
+                                You have selected <strong>Pay on Spot (Cash Desk)</strong>. Settle your payment at your college desk upon campus arrival on 26th/27th Nov.
                             </p>
                             <p style="font-size: 0.85rem; color: #64748b; line-height: 1.5; margin: 8px 0 0;">
                                 You will receive your official digital Gate Pass QR upon submission to present at the desk.

@@ -49,10 +49,10 @@ class Config:
     COLLEGE_NAME = os.environ.get('COLLEGE_NAME', 'Shree Daksha Academy')
     COLLEGE_SUBTITLE = os.environ.get('COLLEGE_SUBTITLE', 'Department of Computer Applications')
     EVENT_TITLE = os.environ.get('EVENT_TITLE', 'Daksha Infinix').strip() or 'Daksha Infinix'
-    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '').strip() or 'admin123'
-    # Temporary lead contacts for the demo site. Replace these values before launch.
-    CONTACT_PHONE_PRIMARY = os.environ.get('CONTACT_PHONE_PRIMARY', '').strip() or '+91 90000 00001'
-    CONTACT_PHONE_SECONDARY = os.environ.get('CONTACT_PHONE_SECONDARY', '').strip() or '+91 90000 00002'
+    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '').strip()
+    PAYMENT_MODE = os.environ.get('PAYMENT_MODE', 'demo').strip().lower() or 'demo'
+    CONTACT_PHONE_PRIMARY = os.environ.get('CONTACT_PHONE_PRIMARY', '').strip()
+    CONTACT_PHONE_SECONDARY = os.environ.get('CONTACT_PHONE_SECONDARY', '').strip()
     SIGNATORY_NAME = os.environ.get('SIGNATORY_NAME', 'Naveen Reddy')
     SIGNATORY_TITLE = os.environ.get('SIGNATORY_TITLE', 'Head of Department (HOD)')
 
@@ -92,7 +92,11 @@ if Config.APP_ENV == 'production':
     resend_ready = bool(Config.RESEND_API_KEY and Config.RESEND_FROM_EMAIL)
     if not smtp_ready and not resend_ready:
         production_errors.append('live SMTP or Resend email credentials must be configured (or SMTP_MODE set to demo)')
-    if Config.ADMIN_PASSWORD and len(Config.ADMIN_PASSWORD) < 8:
+    if not Config.ADMIN_PASSWORD:
+        production_errors.append('ADMIN_PASSWORD must be configured before production sign-in is enabled')
+    elif len(Config.ADMIN_PASSWORD) < 8:
         production_errors.append('ADMIN_PASSWORD must be at least 8 characters')
+    if Config.PAYMENT_MODE not in ('demo', 'live'):
+        production_errors.append('PAYMENT_MODE must be either demo or live')
     if production_errors:
         raise RuntimeError('Production configuration is incomplete: ' + '; '.join(production_errors))

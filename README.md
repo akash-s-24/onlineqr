@@ -20,10 +20,7 @@ Built using **Python (Flask)**, **PostgreSQL** (with an automatic SQLite fallbac
 3. **Event Management (CRUD)**:
    - Create, edit, view, and delete symposium events.
    - Pre-loaded with college tech events:
-     - **CodeCraft** (Hackathon & Coding Sprint) &bull; *18-Sep-2026*
-     - **CodeStorm** (Bug Debugging & DSA) &bull; *19-Sep-2026*
-     - **CodeVerse** (Web & App Development Challenge) &bull; *19-Sep-2026*
-     - **ByteBattle** (Speed Coding Duel) &bull; *20-Sep-2026*
+     - Official event cards currently use **26-Nov-2026**; Daksha Infinix runs **26–27 Nov 2026**.
 
 4. **Participant Registration & Duplicate Prevention**:
    - Clean registration form capturing Participant Name, Email, Phone, College, Department, Semester, and Event selection.
@@ -42,7 +39,7 @@ Built using **Python (Flask)**, **PostgreSQL** (with an automatic SQLite fallbac
      - College Name & Department Branding
      - Event Name (**CodeCraft**, **CodeStorm**, **CodeVerse**, **ByteBattle**)
      - Participant Name
-     - Event Dates (18-Sep-2026, 19-Sep-2026, 20-Sep-2026)
+     - Event Date (26-Nov-2026)
      - Unique Certificate ID (e.g. `EM-2026-CC-8742`)
      - Official Gold Seal Emblem & Authorized Signatures
    - Single-click bulk generator for all verified attendees.
