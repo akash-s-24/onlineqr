@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#F1F7F5" id="themeColorMeta">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Shree Daksha Academy – College Event Management System{% endblock %}</title>
     <!-- Official College Favicons & Apple Touch Icons -->
@@ -19,7 +20,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Lenis Smooth Scroll -->
@@ -31,12 +32,13 @@
     <script>
         (function () {
             try {
-                var theme = localStorage.getItem('sda_theme') || 'dark';
+                var theme = localStorage.getItem('dx-theme') || localStorage.getItem('sda_theme') || 'light';
                 document.documentElement.setAttribute('data-theme', theme);
                 document.documentElement.classList.toggle('dark', theme === 'dark');
+                var meta = document.getElementById('themeColorMeta'); if (meta) meta.setAttribute('content', theme === 'dark' ? '#0B1A1C' : '#F1F7F5');
             } catch (e) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.documentElement.classList.remove('dark');
             }
         })();
     </script>
@@ -1925,7 +1927,8 @@
             }
         }
     </style>
-</head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261110_v1">
+ </head>
 
 <body
     class="{% if session.get('role') in ('admin', 'member') %}authenticated-view{% endif %} {% block body_class %}{% endblock %}">
@@ -2664,7 +2667,7 @@
             const ARC_RADIUS = 115;
             const QUARTER_TURN = Math.PI / 2;
             const KEYFRAME_STEPS = 30;
-            const DURATION = 1400; // ms
+            const DURATION = 180; // brief theme color transition
             const SKY_EASING = 'cubic-bezier(0.65, 0, 0.35, 1)';
             const PAGE_FADE_STYLE_ID = 'sun-moon-theme-fade';
             const PAGE_FADE_PROPERTIES = 'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke';
@@ -2768,6 +2771,8 @@
                 const mText = document.querySelector('.theme-mode-text-mobile');
                 if (mText) mText.textContent = isLight ? 'Switch to Dark Theme' : 'Switch to Bright Theme';
                 const dBtn = document.getElementById('themeToggleBtn');
+                const mBtn = document.getElementById('themeToggleBtnMobile');
+                if (mBtn) mBtn.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to bright theme');
                 if (dBtn) {
                     dBtn.setAttribute('title', isLight ? 'Switch to Dark Theme' : 'Switch to Bright Theme');
                     dBtn.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
@@ -2775,7 +2780,7 @@
             }
 
             window.toggleSiteTheme = function () {
-                const current = document.documentElement.getAttribute('data-theme') || 'dark';
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
                 const next = (current === 'light') ? 'dark' : 'light';
 
                 // Play celestial celestial arc swap
@@ -2792,7 +2797,10 @@
                 document.documentElement.classList.toggle('dark', next === 'dark');
 
                 try {
+                    localStorage.setItem('dx-theme', next);
                     localStorage.setItem('sda_theme', next);
+                    const themeMeta = document.getElementById('themeColorMeta');
+                    if (themeMeta) themeMeta.setAttribute('content', next === 'dark' ? '#0B1A1C' : '#F1F7F5');
                 } catch (e) { }
 
                 updateThemeLabels(next);
@@ -2800,7 +2808,10 @@
             };
 
             document.addEventListener('DOMContentLoaded', () => {
-                const current = document.documentElement.getAttribute('data-theme') || 'dark';
+                const initialTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const themeMeta = document.getElementById('themeColorMeta');
+                if (themeMeta) themeMeta.setAttribute('content', initialTheme === 'dark' ? '#0B1A1C' : '#F1F7F5');
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
                 updateThemeLabels(current);
             });
         })();

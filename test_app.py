@@ -28,7 +28,7 @@ class SDATestCase(unittest.TestCase):
         self.assertIn(b'BGMI', response.data)
         self.assertIn(b'Free Fire', response.data)
         self.assertIn(b'Pencil Sketch', response.data)
-        self.assertIn(b'26-nov-2026', response.data)
+        self.assertIn(b'26 November 2026', response.data)
         self.assertNotIn(b'18-sep-2026', response.data)
 
     def test_03_login_page_renders(self):
@@ -134,16 +134,8 @@ class SDATestCase(unittest.TestCase):
         cert_code = cert['certificate_code']
         self.assertTrue(os.path.exists(cert['file_path']))
 
-        # 4. Public certificate verification via unique code
-        verify_res = self.client.get(f'/verify?id={cert_code}')
-        self.assertEqual(verify_res.status_code, 200)
-        self.assertIn(b'OFFICIALLY VERIFIED', verify_res.data)
-        self.assertIn(cert_code.encode(), verify_res.data)
-
-        # 5. Invalid certificate verification check
-        invalid_res = self.client.get('/verify?id=INVALID-CODE-999')
-        self.assertEqual(invalid_res.status_code, 200)
-        self.assertIn(b'Certificate Not Found', invalid_res.data)
+        # Certificate issuance remains available; the public verifier is removed.
+        self.assertEqual(self.client.get('/verify').status_code, 404)
 
     def test_07_certificate_email_dispatch_flow(self):
         """Test certificate email dispatch in Safe Demo Mode"""
@@ -250,7 +242,7 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('Frequently Asked Questions', data)
         self.assertIn('Who is eligible to participate', data)
         self.assertIn('Can students from different colleges form a combined team', data)
-        self.assertIn('Will participants receive verified certificates', data)
+        self.assertIn('Will participants receive a certificate?', data)
 
     def test_10_header_ordering_and_theme_switch(self):
         """Verify the exact 9-item header navigation sequence and dark/bright theme switcher"""
@@ -845,9 +837,8 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('.landing-logo-addr {\n                display: none !important;', events_html)
 
         # 2. Permanent font stack configured in Google Fonts link
-        self.assertIn('family=Plus+Jakarta+Sans:wght@400;500;600;700;800', events_html)
-        self.assertIn('family=Space+Grotesk:wght@500;600;700;800', events_html)
-        self.assertIn('family=DM+Mono:wght@400;500', events_html)
+        self.assertIn('family=DM+Sans:wght@400;500;600;700;800', events_html)
+        self.assertIn('family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700', events_html)
 
         # 3. Unnecessary background scripts removed
         self.assertNotIn('cdnjs.cloudflare.com/ajax/libs/gsap', events_html)
@@ -1062,17 +1053,20 @@ class SDATestCase(unittest.TestCase):
 
         self.assertEqual([event['event_name'] for event in events], ['Pubg', 'Free Fire'])
 
-    def test_public_verify_page_does_not_depend_on_sample_certificate_lookup(self):
-        def query_without_legacy_sample_column(query, *args, **kwargs):
-            if 'ORDER BY id ASC' in query:
-                raise RuntimeError('Legacy certificates table has no sortable id column')
-            return None
+    def test_public_certificate_verification_route_is_removed(self):
+        self.assertEqual(self.client.get('/verify').status_code, 404)
 
-        with patch('app.query_db', side_effect=query_without_legacy_sample_column):
-            response = self.client.get('/verify')
+    def test_contact_cards_show_demo_phone_numbers_as_call_links(self):
+        with patch.object(Config, 'CONTACT_PHONE_PRIMARY', '+91 90000 00001'), \
+             patch.object(Config, 'CONTACT_PHONE_SECONDARY', '+91 90000 00002'):
+            response = self.client.get('/events')
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Public Certificate Verification', response.data)
+        self.assertIn(b'tel:+919000000001', response.data)
+        self.assertIn(b'tel:+919000000002', response.data)
+        self.assertIn(b'+91 90000 00001', response.data)
+        self.assertIn(b'+91 90000 00002', response.data)
+        self.assertNotIn(b'Message official desk on WhatsApp', response.data)
 
     def test_pending_payment_pass_is_not_called_confirmed(self):
         pending_registration = {

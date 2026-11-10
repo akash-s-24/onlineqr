@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#F1F7F5" id="themeColorMeta">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Shree Daksha Academy – College Event Management System{% endblock %}</title>
     <!-- Official College Favicons & Apple Touch Icons -->
@@ -16,10 +17,11 @@
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
     <meta name="apple-mobile-web-app-title" content="Shree Daksha Academy">
     <meta name="application-name" content="Shree Daksha Academy">
+    <script>(function(){try{var t=localStorage.getItem('dx-theme')||localStorage.getItem('sda_theme')||'light';document.documentElement.setAttribute('data-theme',t);document.documentElement.classList.toggle('dark',t==='dark');var m=document.getElementById('themeColorMeta');if(m)m.setAttribute('content',t==='dark'?'#0B1A1C':'#F1F7F5')}catch(e){document.documentElement.setAttribute('data-theme','light')}})();</script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap"
         rel="stylesheet">
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -504,9 +506,12 @@
             margin-top: auto;
         }
     </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261110_v1">
+    <script>window.toggleBaseTheme=function(){var t=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";document.documentElement.setAttribute("data-theme",t);document.documentElement.classList.toggle("dark",t==="dark");try{localStorage.setItem("dx-theme",t);localStorage.setItem("sda_theme",t)}catch(e){}var m=document.getElementById("themeColorMeta");if(m)m.setAttribute("content",t==="dark"?"#0B1A1C":"#F1F7F5");var b=document.getElementById("baseThemeToggle");if(b)b.setAttribute("aria-label",t==="dark"?"Switch to bright theme":"Switch to dark theme")};document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("baseThemeToggle");if(b)b.setAttribute("aria-label",document.documentElement.getAttribute("data-theme")==="dark"?"Switch to bright theme":"Switch to dark theme")});</script>
 </head>
 
 <body class="light-theme">
+    <button type="button" id="baseThemeToggle" class="base-theme-toggle" onclick="toggleBaseTheme()" aria-label="Switch to dark theme">◐ Theme</button>
 
     {% if session.get('user_id') %}
     <!-- Authenticated workspace header: compact, role-aware, and independent from the public event header. -->

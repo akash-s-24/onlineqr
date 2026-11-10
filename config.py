@@ -51,8 +51,8 @@ class Config:
     EVENT_TITLE = os.environ.get('EVENT_TITLE', 'Daksha Infinix').strip() or 'Daksha Infinix'
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '').strip()
     PAYMENT_MODE = os.environ.get('PAYMENT_MODE', 'demo').strip().lower() or 'demo'
-    CONTACT_PHONE_PRIMARY = os.environ.get('CONTACT_PHONE_PRIMARY', '').strip()
-    CONTACT_PHONE_SECONDARY = os.environ.get('CONTACT_PHONE_SECONDARY', '').strip()
+    CONTACT_PHONE_PRIMARY = os.environ.get('CONTACT_PHONE_PRIMARY', '').strip() or '+91 90000 00001'
+    CONTACT_PHONE_SECONDARY = os.environ.get('CONTACT_PHONE_SECONDARY', '').strip() or '+91 90000 00002'
     SIGNATORY_NAME = os.environ.get('SIGNATORY_NAME', 'Naveen Reddy')
     SIGNATORY_TITLE = os.environ.get('SIGNATORY_TITLE', 'Head of Department (HOD)')
 

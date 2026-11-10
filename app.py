@@ -1430,33 +1430,6 @@ def delete_attendance_record(registration_id):
 # Certificate Hub & Automatic Generation
 # ---------------------------------------------------------
 
-@app.route('/verify')
-def verify_certificate():
-    """Publicly verify a certificate without exposing private participant data."""
-    search_id = request.args.get('id', '').strip().upper()
-    certificate_info = None
-    if search_id:
-        certificate_info = query_db(
-            """
-            SELECT c.certificate_code, c.issue_date,
-                   p.full_name, p.college_name, p.department,
-                   e.event_name, e.event_date
-            FROM certificates c
-            JOIN registrations r ON c.registration_id = r.id
-            JOIN participants p ON c.participant_id = p.id
-            JOIN events e ON c.event_id = e.id
-            WHERE c.certificate_code = %s
-            """,
-            (search_id,),
-            one=True
-        )
-
-    return render_template(
-        'verify_certificate.html',
-        search_id=search_id,
-        certificate_info=certificate_info
-    )
-
 @app.route('/admin/certificates')
 @admin_required
 def certificates_manager():
@@ -1848,7 +1821,7 @@ def toggle_smtp_mode():
     return redirect(url_for('certificates_manager'))
 
 # ---------------------------------------------------------
-# Certificate Verification & Downloads
+# Certificate Downloads
 # ---------------------------------------------------------
 
 @app.route('/certificates/<path:filename>')

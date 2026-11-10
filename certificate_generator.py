@@ -5,7 +5,6 @@ import math
 import uuid
 import random
 from PIL import Image, ImageDraw, ImageFont
-import qrcode
 from config import Config
 
 

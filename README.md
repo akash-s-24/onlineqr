@@ -49,10 +49,6 @@ Built using **Python (Flask)**, **PostgreSQL** (with an automatic SQLite fallbac
    - Sends the certificate as an attachment directly to the participant's registered email.
    - Includes fallback demo mode if SMTP credentials are not yet configured.
 
-9. **Public Certificate Verification Portal (`/verify`)**:
-   - Anyone can enter a Certificate ID or scan the QR code to verify participant authenticity.
-   - Displays official validity badge and student/event credentials.
-
 ---
 
 ## 🛠️ Technology Stack
@@ -76,7 +72,7 @@ EventMate/
 ├── app.py                      # Flask application main routes & server entry
 ├── config.py                   # Centralized configuration (PostgreSQL/SQLite, SMTP/Resend, College info)
 ├── database.py                 # Database connector, parameterized query runner & seeder
-├── certificate_generator.py    # Pillow-based high-res Certificate & QR code generator
+├── certificate_generator.py    # Pillow-based high-res certificate generator
 ├── mailer.py                   # SMTP email dispatcher with certificate attachment
 ├── database.py                 # Schema creation + seed data (run automatically at startup)
 ├── requirements.txt            # Python dependencies
@@ -95,7 +91,6 @@ EventMate/
 │   ├── edit_participant.html   # Participant edit form
 │   ├── attendance.html         # Interactive attendance tracking sheet
 │   ├── certificates.html       # Certificate management hub & bulk generator
-│   ├── verify_certificate.html # Public certificate verification portal
 │   └── my_events.html          # Student pass & certificate dashboard
 │
 ├── static/

@@ -6264,7 +6264,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         </div>
                         <div class="disc-cascade-meta-row">
                             <dt>When</dt>
-                            <dd id="discCascadeWhen">{{ events[0].event_date if events else 'Registration open' }} · {{
+                            <dd id="discCascadeWhen">26 November 2026 · {{
                                 events[0].event_time if events else 'Details inside' }}</dd>
                         </div>
                         <div class="disc-cascade-meta-row">
@@ -6280,7 +6280,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         data-title="{{ ev.event_name|e }}"
                         data-format="{{ 'Group event' if ev.is_group else 'Solo event' }}"
                         data-fee="{% if ev.event_fee and ev.event_fee > 0 %}₹ {{ ev.event_fee }}{% else %}Free entry{% endif %}"
-                        data-venue="{{ ev.venue|e }}" data-date="{{ ev.event_date|e }}"
+                        data-venue="{{ ev.venue|e }}" data-date="26 Nov 2026"
+                        data-palette-category="{{ 'gaming' if ('bgmi' in ev.event_name|lower or 'pubg' in ev.event_name|lower or 'free fire' in ev.event_name|lower) else ('technical' if ('tech' in ev.event_name|lower or 'shield' in ev.event_name|lower) else ('cultural' if ('dance' in ev.event_name|lower or 'beatbox' in ev.event_name|lower or 'acting' in ev.event_name|lower or 'ramp' in ev.event_name|lower) else 'arts')) }}"
                         data-time="{{ ev.event_time|e }}"
                         data-description="{{ (ev.description or 'Bring your best idea and make the stage yours.')|e }}"
                         data-rules="{{ ev.rules_text|default('', true)|e }}"
@@ -6363,7 +6364,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 {% set rim_class = 'card-rim-emerald' if cat_key == 'gaming' else ('card-rim-silver' if cat_key ==
                 'technical' else 'card-rim-indigo') %}
                 <article class="event-grid-card {{ rim_class }} {% if loop.first %}event-featured-anchor{% endif %}"
-                    data-category="{{ cat_key }}" data-event-id="{{ ev.id }}" style="--card-index: {{ loop.index0 }};">
+                    data-category="{{ cat_key }}" data-palette-category="{{ cat_key }}" data-event-id="{{ ev.id }}" style="--card-index: {{ loop.index0 }};">
                     <div class="event-card-media">
                         {% if ev.banner_image %}
                         <img src="{{ url_for('static', filename='images/' ~ ev.banner_image) }}"
@@ -6406,7 +6407,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                                     <line x1="8" y1="2" x2="8" y2="6"></line>
                                     <line x1="3" y1="10" x2="21" y2="10"></line>
                                 </svg>
-                                <span>{{ ev.event_date if ev.event_date else 'Registration open' }}{% if ev.event_time
+                                <span>26 November 2026{% if ev.event_time
                                     %} · {{ ev.event_time }}{% endif %}</span>
                             </div>
                             <div class="event-detail-item">
@@ -6807,7 +6808,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
             <details class="faq-item">
                 <summary class="faq-question">
-                    <span>Will participants receive verified certificates?</span>
+                    <span>Will participants receive a certificate?</span>
                     <span class="faq-chevron" aria-hidden="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -6816,9 +6817,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>Yes. Every verified attendee receives an official, high-resolution digital Certificate of
-                        Participation powered by our Daksha Infinix platform, complete with a live cryptographic
-                        verification QR code that anyone can verify online at <code>/verify</code>. Winners also receive
+                    <p>Yes. Every eligible attendee receives an official, high-resolution digital Certificate of
+                        Participation powered by our Daksha Infinix platform. Winners also receive
                         physical trophies, cash prizes, and merit certificates.</p>
                 </div>
             </details>
@@ -6965,21 +6965,16 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <span class="contact-role-badge">Faculty Coordinator</span>
                 <h3>Prof. R. Narayana Swamy</h3>
                 <p>Primary Symposium Desk</p>
-                {% if config.CONTACT_PHONE_PRIMARY %}
-                <a href="tel:{{ config.CONTACT_PHONE_PRIMARY|replace(' ', '') }}" class="streamlined-call-link"
-                    aria-label="Call Faculty Coordinator">
-                    <svg class="phone-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path
-                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                    </svg>
-                    <span>Call {{ config.CONTACT_PHONE_PRIMARY }}</span>
-                </a>
-                {% else %}
-                <a href="https://wa.me/917892038099?text=Hello%2C%20I%20have%20a%20question%20for%20the%20faculty%20coordinator." target="_blank" rel="noopener noreferrer" class="streamlined-call-link" aria-label="Message the official symposium desk on WhatsApp">
-                    <span>Message official desk on WhatsApp</span>
-                </a>
-                {% endif %}
+                <div class="coordinator-phone-list" aria-label="Faculty coordinator phone number">
+                    <a href="tel:{{ config.CONTACT_PHONE_PRIMARY|replace(' ', '') }}" class="streamlined-call-link"
+                        aria-label="Call Faculty Coordinator at {{ config.CONTACT_PHONE_PRIMARY }}">
+                        <svg class="phone-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                        </svg>
+                        <span>{{ config.CONTACT_PHONE_PRIMARY }}</span>
+                    </a>
+                </div>
             </div>
 
             <!-- Student Coordinator -->
@@ -6987,21 +6982,16 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <span class="contact-role-badge">Student Coordinator</span>
                 <h3>Akash S.</h3>
                 <p>Student Operations Desk</p>
-                {% if config.CONTACT_PHONE_SECONDARY %}
-                <a href="tel:{{ config.CONTACT_PHONE_SECONDARY|replace(' ', '') }}" class="streamlined-call-link"
-                    aria-label="Call Student Coordinator">
-                    <svg class="phone-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path
-                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                    </svg>
-                    <span>Call {{ config.CONTACT_PHONE_SECONDARY }}</span>
-                </a>
-                {% else %}
-                <a href="https://wa.me/917892038099?text=Hello%2C%20I%20have%20a%20question%20for%20the%20student%20coordinator." target="_blank" rel="noopener noreferrer" class="streamlined-call-link" aria-label="Message the official symposium desk on WhatsApp">
-                    <span>Message official desk on WhatsApp</span>
-                </a>
-                {% endif %}
+                <div class="coordinator-phone-list" aria-label="Student coordinator phone number">
+                    <a href="tel:{{ config.CONTACT_PHONE_SECONDARY|replace(' ', '') }}" class="streamlined-call-link"
+                        aria-label="Call Student Coordinator at {{ config.CONTACT_PHONE_SECONDARY }}">
+                        <svg class="phone-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                        </svg>
+                        <span>{{ config.CONTACT_PHONE_SECONDARY }}</span>
+                    </a>
+                </div>
             </div>
         </div>
     </section>
@@ -7512,6 +7502,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 function updateDetails(fromUser = false) {
                     const data = activeData();
                     setText('discCascadeTitle', data.title);
+                    const detailPanel = document.querySelector('.disc-cascade-head');
+                    if (detailPanel) detailPanel.dataset.paletteCategory = data.paletteCategory || 'arts';
                     setText('discCascadeFormat', data.format);
                     setText('discCascadeFee', data.fee);
                     setText('discCascadeFeeBadge', `ENTRY · ${data.fee || 'Free entry'}`);
@@ -7979,13 +7971,14 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     });
                 });
 
-                // Handle URL anchor #grid or default to CD carousel view
+                // Keep the user's explicit choice; otherwise start in grid on phones and carousel on larger screens.
                 const hash = window.location.hash;
-                if (hash === '#grid') {
-                    setView('grid', false);
-                } else {
-                    setView('carousel', false);
-                }
+                let savedView = '';
+                try { savedView = sessionStorage.getItem('preferred_events_view') || ''; } catch (e) {}
+                if (hash === '#grid') setView('grid', false);
+                else if (hash === '#carousel') setView('carousel', false);
+                else if (savedView === 'grid' || savedView === 'carousel') setView(savedView, false);
+                else setView(window.matchMedia('(max-width: 768px)').matches ? 'grid' : 'carousel', false);
             })();
 
             // 12. Events Grid System: Category Filtering & Card Modals
