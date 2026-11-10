@@ -318,3 +318,23 @@ body :where(*):not(img):not(svg):not(canvas):not(iframe) { background-image: non
 }
 .hero-actions button:not(:first-child) { background: var(--surface) !important; color: var(--text) !important; border-color: var(--border) !important; }
 [class*="gradient"], [class*="glow"] { box-shadow: none !important; text-shadow: none !important; }
+
+:root[data-theme="light"] body, :root[data-theme="light"] html { background-color: var(--bg) !important; }
+:root[data-theme="dark"] body, :root[data-theme="dark"] html { background-color: var(--bg) !important; }
+:root[data-theme] .hero-actions .hero-explore-btn.liquid-btn,
+:root[data-theme] .hero-actions button:first-child {
+  background: var(--primary) !important;
+  background-image: none !important;
+  background-color: var(--primary) !important;
+  color: var(--on-primary) !important;
+  -webkit-text-fill-color: var(--on-primary) !important;
+  border-color: var(--primary) !important;
+  box-shadow: none !important;
+}
+:root[data-theme] .hero-actions .hero-explore-btn.liquid-btn::before,
+:root[data-theme] .hero-actions .hero-explore-btn.liquid-btn::after { background: transparent !important; box-shadow: none !important; }
+:root[data-theme] .event-grid-card[data-palette-category="gaming"] { background: var(--sky-block) !important; }
+:root[data-theme] .event-grid-card[data-palette-category="technical"] { background: var(--butter-block) !important; }
+:root[data-theme] .event-grid-card[data-palette-category="cultural"] { background: var(--blush-block) !important; }
+:root[data-theme] .event-grid-card[data-palette-category="arts"] { background: var(--mint-block) !important; }
+:root[data-theme] .event-grid-card[data-palette-category] { background-image: none !important; box-shadow: none !important; }
