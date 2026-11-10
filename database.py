@@ -1107,15 +1107,17 @@ def create_tables_and_seed():
                     )
                 )
 
-            # Carry forward only the confirmed schedule correction. Restrict
-            # this migration to the old seed dates so future admin edits stick.
-            run_exec(
-                """
-                UPDATE events SET event_date = %s
-                WHERE event_name = %s AND LOWER(event_date) IN (%s, %s)
-                """,
-                ('26-nov-2026', existing_name, '18-sep-2026', '19-sep-2026')
-            )
+
+        # Carry forward only the confirmed schedule correction. Apply it to
+        # every legacy event row (including duplicate PUBG/BGMI aliases), but
+        # leave any dates an admin has already changed outside September alone.
+        run_exec(
+            """
+            UPDATE events SET event_date = %s
+            WHERE LOWER(TRIM(event_date)) IN (%s, %s, %s)
+            """,
+            ('26-nov-2026', '18-sep-2026', '19-sep-2026', '20-sep-2026')
+        )
 
         # The original fixture phone values are not verified organizer
         # contacts. Remove only those exact defaults; admin-entered numbers

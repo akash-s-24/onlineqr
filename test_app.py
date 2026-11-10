@@ -1027,6 +1027,29 @@ class SDATestCase(unittest.TestCase):
 
         self.assertEqual(dates, [{'event_date': '26-nov-2026'}])
 
+    def test_seed_migrates_all_legacy_event_dates(self):
+        if database.DB_MODE != 'sqlite':
+            self.skipTest('This regression checks the isolated SQLite seed.')
+
+        fixture_name = 'Legacy Schedule Migration Fixture'
+        database.execute_db(
+            """INSERT INTO events (event_name, event_type, event_date, event_time, venue)
+               VALUES (%s, %s, %s, %s, %s)""",
+            (fixture_name, 'Test', '19-sep-2026', '10:00 AM', 'Test Venue')
+        )
+        initialized_before = database._DB_INITIALIZED
+        try:
+            database._DB_INITIALIZED = False
+            database.create_tables_and_seed()
+            migrated = database.query_db(
+                "SELECT event_date FROM events WHERE event_name = %s",
+                (fixture_name,), one=True
+            )
+            self.assertEqual(migrated['event_date'], '26-nov-2026')
+        finally:
+            database._DB_INITIALIZED = initialized_before
+            database.execute_db("DELETE FROM events WHERE event_name = %s", (fixture_name,))
+
     def test_public_verify_page_does_not_depend_on_sample_certificate_lookup(self):
         def query_without_legacy_sample_column(query, *args, **kwargs):
             if 'ORDER BY id ASC' in query:
