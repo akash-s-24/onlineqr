@@ -114,6 +114,8 @@
     invertedEl.style.setProperty('--liquid-clip', `url(#${clipPathId})`);
     invertedEl.style.setProperty('clip-path', `url(#${clipPathId})`);
     invertedEl.style.setProperty('-webkit-clip-path', `url(#${clipPathId})`);
+    invertedEl.style.opacity = '0';
+    invertedEl.style.visibility = 'hidden';
     btn.style.removeProperty('-webkit-clip-path');
     btn.style.removeProperty('clip-path');
 
@@ -184,6 +186,7 @@
     blob.setAttribute('cy', '0');
     blob.setAttribute('rx', '0');
     blob.setAttribute('ry', '0');
+    blob.style.display = 'none';
     svg.appendChild(blob);
 
     const ripple = document.createElementNS(SVG_NS, 'circle');
@@ -270,6 +273,16 @@
     function renderShape() {
       const { width, height } = getDimensions();
       if (width <= 0 || height <= 0) return;
+
+      if (state.radius <= 0.05 && state.ringPhase === 0) {
+        blob.style.display = 'none';
+        invertedEl.style.opacity = '0';
+        invertedEl.style.visibility = 'hidden';
+      } else {
+        blob.style.display = 'block';
+        invertedEl.style.opacity = '1';
+        invertedEl.style.visibility = 'visible';
+      }
 
       const axisScale = Math.sqrt(state.stretch);
       const rx = state.radius * axisScale;
@@ -646,7 +659,11 @@
       if ((elem.closest && elem.closest('.celestial-theme-toggle')) || elem.hasAttribute('data-no-liquid')) {
         return;
       }
-      initLiquidButton(elem);
+      try {
+        initLiquidButton(elem);
+      } catch (err) {
+        console.warn('Liquid button init fallback for element:', elem, err);
+      }
     });
   }
 

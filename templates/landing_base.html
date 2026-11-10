@@ -25,7 +25,7 @@
     <!-- Lenis Smooth Scroll -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/lenis.css') }}">
     <!-- High-Craft Liquid Fluid Buttons -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-button.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-button.css') }}?v=20261110_v8">
 
     <!-- Theme Initializer (Anti-Flicker & shadcn sync) -->
     <script>
@@ -56,7 +56,8 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            overflow-x: clip;
+            max-width: 100vw;
+            overflow-x: hidden !important;
             background-color: #08090C !important;
             color: #f8fafc;
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -1227,13 +1228,20 @@
             .landing-header {
                 height: 68px;
                 z-index: 1004;
+                width: 100% !important;
+                max-width: 100vw !important;
+                overflow-x: clip !important;
+                box-sizing: border-box !important;
             }
 
             .header-inner {
-                padding: 0 16px;
+                padding: 0 14px;
                 justify-content: space-between;
                 align-items: center;
-                gap: 10px;
+                gap: 8px;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
             }
 
             .landing-logo {
@@ -1242,7 +1250,7 @@
                 flex: 0 1 auto !important;
                 min-width: 0 !important;
                 max-width: calc(100% - 56px) !important;
-                gap: 10px !important;
+                gap: 8px !important;
             }
 
             .landing-logo img,
@@ -1250,9 +1258,9 @@
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-                height: 42px !important;
+                height: 40px !important;
                 width: auto !important;
-                max-width: 56px !important;
+                max-width: 48px !important;
                 object-fit: contain !important;
                 flex-shrink: 0 !important;
                 filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4)) !important;
@@ -1263,6 +1271,8 @@
                 flex-direction: column !important;
                 justify-content: center !important;
                 min-width: 0 !important;
+                flex: 1 1 auto !important;
+                max-width: calc(100vw - 120px) !important;
                 overflow: hidden !important;
             }
 
@@ -1304,6 +1314,8 @@
                 min-width: 44px;
                 min-height: 44px;
                 touch-action: manipulation;
+                flex-shrink: 0 !important;
+                margin-left: auto !important;
             }
 
             .header-nav-center {
@@ -1327,10 +1339,13 @@
                 transition: transform .26s cubic-bezier(.16, 1, .3, 1);
                 will-change: transform;
                 z-index: 1003;
+                display: none !important;
             }
 
             .header-nav-center.open {
+                display: flex !important;
                 transform: translateX(0);
+                pointer-events: auto;
             }
 
             .image-like-nav,
@@ -2855,7 +2870,7 @@
     </script>
 
     <!-- Liquid Button Engine -->
-    <script src="{{ url_for('static', filename='js/liquid-button.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/liquid-button.js') }}?v=20261110_v8"></script>
 
     {% block extra_js %}{% endblock %}
 </body>

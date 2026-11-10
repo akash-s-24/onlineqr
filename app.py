@@ -221,7 +221,10 @@ def add_security_headers(response):
     # with a long browser/edge cache lifetime. Admin/member/login pages must
     # never be cached. Everything else falls back to the framework default.
     if request.path.startswith('/static/'):
-        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        if request.args.get('v'):
+            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        else:
+            response.headers['Cache-Control'] = 'public, max-age=120, must-revalidate'
         # Allow gzip buffering of static text assets (Flask streams these via
         # passthrough, which bypasses compression). Removing passthrough makes
         # the small text/CSS/JS files below compressible, so a mobile browser
