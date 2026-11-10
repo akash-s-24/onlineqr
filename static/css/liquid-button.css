@@ -1,0 +1,353 @@
+/**
+ * Liquid Button Animation Styles
+ * Fluid ink simulation with SVG turbulence displacement, spring physics & color-inverted text clipping.
+ */
+
+:root {
+  --liquid-blue: #2563eb;
+  --liquid-blue-dark: #1d4ed8;
+  --liquid-blue-light: #3b82f6;
+  --liquid-blue-glow: rgba(37, 99, 235, 0.45);
+  --liquid-blue-subtle: rgba(37, 99, 235, 0.15);
+}
+
+/* Base Liquid Button Container */
+.liquid-btn,
+[data-liquid-button] {
+  --liquid-fill: #2563eb;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: #3b82f6;
+
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.16s ease;
+  border: 1.5px solid var(--liquid-border);
+  background: transparent;
+  color: var(--liquid-text);
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.liquid-btn::before,
+.liquid-btn::after,
+[data-liquid-button]::before,
+[data-liquid-button]::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Hover & Active Feedback */
+.liquid-btn:hover,
+[data-liquid-button]:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 24px -10px var(--liquid-blue-glow);
+}
+
+.liquid-btn.is-pressed,
+.liquid-btn:active,
+[data-liquid-button].is-pressed,
+[data-liquid-button]:active {
+  transform: scale(0.97) translateY(0);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition-duration: 0.08s;
+}
+
+.liquid-btn:focus-visible,
+[data-liquid-button]:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 3px;
+}
+
+.liquid-btn:disabled,
+.liquid-btn[disabled],
+[data-liquid-button]:disabled,
+[data-liquid-button][disabled] {
+  pointer-events: none;
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Background Fluid SVG layer */
+.liquid-btn-svg {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Content Container (Normal View) */
+.liquid-btn-content {
+  pointer-events: none;
+  position: relative;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--liquid-text);
+  transition: transform 0.1s ease-out;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.liquid-btn.is-pressed .liquid-btn-content,
+[data-liquid-button].is-pressed .liquid-btn-content {
+  transform: scale(0.98);
+}
+
+/* Inverted Layer (Clipped View by Liquid Blob) */
+.liquid-btn-inverted {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: inherit;
+  color: var(--liquid-active-text);
+  transition: transform 0.1s ease-out;
+  clip-path: var(--liquid-clip);
+  -webkit-clip-path: var(--liquid-clip);
+  box-sizing: border-box;
+}
+
+.liquid-btn.is-pressed .liquid-btn-inverted,
+[data-liquid-button].is-pressed .liquid-btn-inverted {
+  transform: scale(0.98);
+}
+
+/* Pseudo element text rendering to avoid duplicate DOM accessibility nodes */
+.liquid-btn-inverted [data-liquid-text]::before {
+  content: attr(data-liquid-text);
+  display: inline;
+}
+
+/* ═══════════════════════════════════════
+   PRESET THEMES & VARIANTS
+   ═══════════════════════════════════════ */
+
+/* 1. Solid Primary Blue (Default vibrant electric button) */
+.liquid-btn-primary,
+.btn-luxe-primary.liquid-btn {
+  --liquid-fill: #1d4ed8;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: #3b82f6;
+  background: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px -2px rgba(37, 99, 235, 0.4);
+}
+
+.liquid-btn-primary:hover,
+.btn-luxe-primary.liquid-btn:hover {
+  border-color: #60a5fa !important;
+  box-shadow: 0 8px 24px -2px rgba(37, 99, 235, 0.6);
+}
+
+/* 2. Dark Monochrome with Blue Fluid (Midnight Dark) */
+.liquid-btn-dark,
+.liquid-btn-outline {
+  --liquid-fill: #2563eb;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: rgba(59, 130, 246, 0.55);
+  background: rgba(10, 15, 29, 0.75) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff !important;
+}
+
+.liquid-btn-dark:hover,
+.liquid-btn-outline:hover {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 8px 24px -4px rgba(37, 99, 235, 0.45);
+}
+
+/* 3. Ghost / Subtle with Blue Flood */
+.liquid-btn-ghost {
+  --liquid-fill: #2563eb;
+  --liquid-text: #93c5fd;
+  --liquid-active-text: #ffffff;
+  --liquid-border: rgba(59, 130, 246, 0.35);
+  background: transparent !important;
+  color: #93c5fd !important;
+}
+
+.liquid-btn-ghost:hover {
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* 4. White Theme Adaptations */
+[data-theme="light"] .liquid-btn-outline {
+  --liquid-fill: #2563eb;
+  --liquid-text: #1d4ed8;
+  --liquid-active-text: #ffffff;
+  --liquid-border: #2563eb;
+  background: #ffffff !important;
+  color: #1d4ed8 !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
+[data-theme="light"] .liquid-btn-primary {
+  --liquid-fill: #1e40af;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: #1d4ed8;
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* ═══════════════════════════════════════
+   SITE-SPECIFIC COMPONENT OVERRIDES
+   ═══════════════════════════════════════ */
+
+/* Header Register Button */
+.header-cta-classic.liquid-btn {
+  --liquid-fill: #1d4ed8;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: #3b82f6;
+  background: #2563eb !important;
+  border-radius: 9999px !important;
+  padding: 8px 20px !important;
+  min-height: 40px !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+}
+
+/* Hero Section Buttons */
+.hero-explore-btn.liquid-btn {
+  --liquid-fill: #1d4ed8;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: #3b82f6;
+  background: #2563eb !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 4px 20px -2px rgba(37, 99, 235, 0.5) !important;
+}
+
+.hero-rules-btn.liquid-btn,
+.hero-contact-btn.liquid-btn {
+  --liquid-fill: #2563eb;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: rgba(59, 130, 246, 0.45);
+  background: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 9999px !important;
+}
+
+/* Disc Cascade Register Button */
+.disc-cascade-register-btn.liquid-btn,
+#discCascadeRegister.liquid-btn {
+  --liquid-fill: #1d4ed8;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: #3b82f6;
+  background: #2563eb !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4) !important;
+}
+
+/* Event Cards Register Button */
+.btn-card-register.liquid-btn {
+  --liquid-fill: #1d4ed8;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: #2563eb;
+  background: #2563eb !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 3px 12px rgba(37, 99, 235, 0.3) !important;
+}
+
+/* Event Cards Rules & Contact Buttons */
+.btn-card-rules.liquid-btn,
+.btn-card-contact.liquid-btn {
+  --liquid-fill: #2563eb;
+  --liquid-text: #cbd5e1;
+  --liquid-active-text: #ffffff;
+  --liquid-border: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 9999px !important;
+}
+
+/* Registration Form Buttons */
+.clean-black-submit-btn.liquid-btn,
+#submitBtn.liquid-btn {
+  --liquid-fill: #1d4ed8;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: #3b82f6;
+  background: #2563eb !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35) !important;
+}
+
+#upiPayButton.liquid-btn {
+  --liquid-fill: #1d4ed8;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: #3b82f6;
+  background: #2563eb !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35) !important;
+}
+
+#copyUpiBtn.liquid-btn {
+  --liquid-fill: #2563eb;
+  --liquid-text: #2563eb;
+  --liquid-active-text: #ffffff;
+  --liquid-border: #2563eb;
+  background: #eff6ff !important;
+  border-radius: 8px !important;
+}
+
+/* Track Banner Register Buttons */
+.track-btn-primary.liquid-btn {
+  --liquid-fill: #1d4ed8;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: #3b82f6;
+  background: #2563eb !important;
+  border-radius: 9999px !important;
+}
+
+.track-btn-secondary.liquid-btn {
+  --liquid-fill: #2563eb;
+  --liquid-text: #ffffff;
+  --liquid-active-text: #ffffff;
+  --liquid-border: rgba(59, 130, 246, 0.45);
+  background: rgba(15, 23, 42, 0.6) !important;
+  border-radius: 9999px !important;
+}
+
+/* Smooth Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .liquid-btn,
+  [data-liquid-button] {
+    transition: none !important;
+  }
+}

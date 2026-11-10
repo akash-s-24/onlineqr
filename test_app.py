@@ -873,5 +873,39 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('Take a photo or screenshot of this pass now!', pass_html)
         self.assertIn('Send Pass to Mobile / WhatsApp', pass_html)
 
+    def test_23_liquid_button_integration(self):
+        """Verify liquid fluid button engine, styles, assets, and template integration across site."""
+        # 1. Assets exist and serve 200
+        res_css = self.client.get('/static/css/liquid-button.css')
+        self.assertEqual(res_css.status_code, 200)
+        css_text = res_css.data.decode('utf-8')
+        self.assertIn('.liquid-btn', css_text)
+        self.assertIn('--liquid-fill', css_text)
+        self.assertIn('--liquid-active-text', css_text)
+        self.assertIn('.liquid-btn-inverted', css_text)
+
+        res_js = self.client.get('/static/js/liquid-button.js')
+        self.assertEqual(res_js.status_code, 200)
+        js_text = res_js.data.decode('utf-8')
+        self.assertIn('feTurbulence', js_text)
+        self.assertIn('feDisplacementMap', js_text)
+        self.assertIn('initLiquidButton', js_text)
+        self.assertIn('cloneInvertedContent', js_text)
+
+        # 2. Template inclusion in events and register
+        res_events = self.client.get('/events')
+        events_html = res_events.data.decode('utf-8')
+        self.assertIn('liquid-button.css', events_html)
+        self.assertIn('liquid-button.js', events_html)
+
+        res_reg = self.client.get('/register')
+        reg_html = res_reg.data.decode('utf-8')
+        self.assertIn('liquid-button.css', reg_html)
+        self.assertIn('liquid-button.js', reg_html)
+
+        # 3. Suppress old hectic button animations
+        self.assertNotIn('.clean-black-submit-btn::after {\n    content: \'\';', reg_html)
+        self.assertNotIn('.hero-explore-btn::after {\ncontent: \'\';', events_html)
+
 if __name__ == '__main__':
     unittest.main()

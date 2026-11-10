@@ -758,7 +758,9 @@ select.f-select {
 
 /* Primary registration action button — Candy Button Style (Important Action) */
 .clean-black-submit-btn {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     padding: 16px 28px;
     text-align: center;
@@ -768,13 +770,12 @@ select.f-select {
     font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif !important;
     font-size: 1.05rem !important;
     font-weight: 700 !important;
-    letter-spacing: 0.02em !important;
+    letter-spacing: 0.01em !important;
     border-radius: 14px !important;
-    border: 1px solid #54A1FD !important;
-    background: radial-gradient(95% 60% at 50% 75%, #005FD6 0%, #209BFF 100%) !important;
-    box-shadow: 0px 4px 48px -12px #1187FF, inset 0px 1px 8px -4px #FFFFFF !important;
+    border: 1.5px solid #3b82f6 !important;
+    background: #2563eb !important;
+    box-shadow: 0px 4px 20px -2px rgba(37, 99, 235, 0.45) !important;
     cursor: pointer !important;
-    transition: all 0.2s ease-out !important;
     margin-top: 24px;
     min-height: 52px;
     text-decoration: none;
@@ -782,23 +783,8 @@ select.f-select {
     touch-action: manipulation;
 }
 .clean-black-submit-btn::after {
-    content: '';
-    position: absolute;
-    top: 1px;
-    right: 10%;
-    width: 60%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-    pointer-events: none;
-}
-.clean-black-submit-btn:hover {
-    filter: brightness(1.15) !important;
-    box-shadow: 0px 6px 54px -10px #1187FF, inset 0px 1px 8px -2px #FFFFFF !important;
-    color: #ffffff !important;
-}
-.clean-black-submit-btn:active {
-    transform: scale(0.96) rotate(1deg) !important;
-    filter: brightness(1.05) !important;
+    display: none !important;
+    content: none !important;
 }
 
 

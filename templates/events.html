@@ -484,86 +484,34 @@ transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s 
 position: relative;
 overflow: hidden;
 border: 1.5px solid #3b82f6 !important;
-background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
+background: #2563eb !important;
 color: #ffffff !important;
-box-shadow: 0px 4px 20px -4px rgba(124, 58, 237, 0.5), inset 0px 1px 4px rgba(255, 255, 255, 0.6) !important;
-transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+box-shadow: 0px 4px 18px rgba(37, 99, 235, 0.45) !important;
 font-weight: 700 !important;
-letter-spacing: 0.02em !important;
+letter-spacing: 0.01em !important;
 }
 .hero-explore-btn::after {
-content: '';
-position: absolute;
-top: 0;
-left: -130%;
-width: 100%;
-height: 100%;
-background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.25) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(59,
-130, 246, 0.25) 75%, transparent 100%);
-transform: skewX(-20deg);
-transition: left 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-pointer-events: none;
-}
-.hero-explore-btn:hover {
-background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%) !important;
-border-color: #ffffff !important;
-filter: brightness(1.1) !important;
-box-shadow: 0px 6px 28px -4px rgba(124, 58, 237, 0.65), 0 0 16px rgba(37, 99, 235, 0.5), inset 0px 1px 6px rgba(255,
-255, 255, 0.8) !important;
-color: #ffffff !important;
-transform: translate(-2px, -2px) !important;
-}
-.hero-explore-btn:hover::after {
-left: 140%;
-}
-.hero-explore-btn:active {
-transform: translate(3px, 3px) !important;
-filter: brightness(1.05) !important;
-box-shadow: 0px 0px 0px transparent !important;
+display: none !important;
+content: none !important;
 }
 
 .hero-rules-btn,
 .hero-contact-btn {
-background: rgba(15, 23, 42, 0.85) !important;
-border: 2px solid #2563eb !important;
+background: rgba(15, 23, 42, 0.75) !important;
+backdrop-filter: blur(12px) !important;
+-webkit-backdrop-filter: blur(12px) !important;
+border: 1.5px solid rgba(59, 130, 246, 0.45) !important;
 color: #ffffff !important;
-box-shadow: 4px 4px 0px rgba(37, 99, 235, 0.5) !important;
+box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
 border-radius: 9999px !important;
 font-weight: 700 !important;
 position: relative !important;
 overflow: hidden !important;
-transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 .hero-rules-btn::after,
 .hero-contact-btn::after {
-content: '';
-position: absolute;
-top: 0;
-left: -130%;
-width: 100%;
-height: 100%;
-background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.25) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(59,
-130, 246, 0.25) 75%, transparent 100%);
-transform: skewX(-20deg);
-transition: left 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-pointer-events: none;
-}
-.hero-rules-btn:hover,
-.hero-contact-btn:hover {
-background: rgba(37, 99, 235, 0.22) !important;
-border-color: #ffffff !important;
-color: #ffffff !important;
-transform: translate(-2px, -2px) !important;
-box-shadow: 6px 6px 0px #2563eb, 0 0 20px rgba(37, 99, 235, 0.55) !important;
-}
-.hero-rules-btn:hover::after,
-.hero-contact-btn:hover::after {
-left: 140%;
-}
-.hero-rules-btn:active,
-.hero-contact-btn:active {
-transform: translate(3px, 3px) !important;
-box-shadow: 0px 0px 0px transparent !important;
+display: none !important;
+content: none !important;
 }
 .scroll-indicator {
 margin-top: 40px;
@@ -1699,49 +1647,20 @@ display: inline-flex;
 align-items: center;
 justify-content: center;
 border: 1.5px solid #3b82f6 !important;
-background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
+background: #2563eb !important;
 color: #ffffff !important;
 padding: 10px 18px;
 font: 700 11px 'DM Mono', monospace;
 letter-spacing: 0.04em;
 text-decoration: none;
 text-transform: uppercase;
-border-radius: 10px;
-box-shadow: 0px 4px 20px -4px rgba(124, 58, 237, 0.45), inset 0px 1px 4px rgba(255, 255, 255, 0.5) !important;
-transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+border-radius: 9999px;
+box-shadow: 0px 4px 16px rgba(37, 99, 235, 0.4) !important;
 }
 .disc-cascade-register::after,
 #discCascadeRegister::after {
-content: '';
-position: absolute;
-top: 0;
-left: -130%;
-width: 100%;
-height: 100%;
-background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.25) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(59,
-130, 246, 0.25) 75%, transparent 100%);
-transform: skewX(-20deg);
-transition: left 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-pointer-events: none;
-}
-.disc-cascade-register:hover,
-#discCascadeRegister:hover {
-background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%) !important;
-border-color: #ffffff !important;
-filter: brightness(1.08) !important;
-box-shadow: 0px 6px 28px -4px rgba(124, 58, 237, 0.65), 0 0 16px rgba(37, 99, 235, 0.5), inset 0px 1px 6px rgba(255,
-255, 255, 0.7) !important;
-color: #ffffff !important;
-transform: translate(-2px, -2px) !important;
-}
-.disc-cascade-register:hover::after,
-#discCascadeRegister:hover::after {
-left: 140%;
-}
-.disc-cascade-register:active,
-#discCascadeRegister:active {
-transform: translate(3px, 3px) !important;
-box-shadow: 0px 0px 0px transparent !important;
+display: none !important;
+content: none !important;
 }
 /* ═══════════════════════════════════════════
 DISC CASCADE RESPONSIVE & MOBILE REDESIGN
@@ -3218,38 +3137,11 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     }
 
     .btn-card-rules::after,
-    .btn-card-contact::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -130%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.25) 25%, rgba(255, 255, 255, 0.85) 50%,
-    rgba(59, 130, 246, 0.25) 75%, transparent 100%);
-    transform: skewX(-20deg);
-    transition: left 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
-    }
-
-    .btn-card-rules:hover,
-    .btn-card-contact:hover {
-    background: rgba(37, 99, 235, 0.22);
-    color: #ffffff;
-    border-color: #ffffff;
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0px #2563eb, 0 0 16px rgba(37, 99, 235, 0.55);
-    }
-
-    .btn-card-rules:hover::after,
-    .btn-card-contact:hover::after {
-    left: 140%;
-    }
-
-    .btn-card-rules:active,
-    .btn-card-contact:active {
-    transform: translate(3px, 3px);
-    box-shadow: 0px 0px 0px transparent;
+    .btn-card-rules::after,
+    .btn-card-contact::after,
+    .btn-card-register::after {
+    display: none !important;
+    content: none !important;
     }
 
     .btn-card-register {
@@ -3259,49 +3151,18 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     justify-content: center;
     position: relative;
     overflow: hidden;
-    background: radial-gradient(95% 60% at 50% 75%, #005FD6 0%, #209BFF 100%) !important;
+    background: #2563eb !important;
     color: #ffffff !important;
-    border: 1.5px solid #54A1FD !important;
-    border-radius: 9px;
+    border: 1.5px solid #3b82f6 !important;
+    border-radius: 9999px;
     padding: 8px 14px;
     font-family: 'Space Grotesk', sans-serif;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.02em;
     text-decoration: none;
-    box-shadow: 0px 4px 28px -8px #1187FF, inset 0px 1px 6px -2px #FFFFFF !important;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0px 3px 12px rgba(37, 99, 235, 0.35) !important;
     white-space: nowrap;
-    }
-
-    .btn-card-register::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -130%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.25) 25%, rgba(255, 255, 255, 0.85) 50%,
-    rgba(59, 130, 246, 0.25) 75%, transparent 100%);
-    transform: skewX(-20deg);
-    transition: left 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
-    }
-
-    .btn-card-register:hover {
-    border-color: #ffffff !important;
-    filter: brightness(1.15) !important;
-    box-shadow: 0px 6px 36px -6px #1187FF, 0 0 16px rgba(59, 130, 246, 0.55), inset 0px 1px 6px -1px #FFFFFF !important;
-    color: #ffffff !important;
-    }
-
-    .btn-card-register:hover::after {
-    left: 140%;
-    }
-
-    .btn-card-register:active {
-    transform: scale(0.95) rotate(1deg) !important;
-    filter: brightness(1.05) !important;
     }
 
     /* Media Queries for Grid Layout */

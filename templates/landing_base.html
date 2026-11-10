@@ -24,6 +24,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Lenis Smooth Scroll -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/lenis.css') }}">
+    <!-- High-Craft Liquid Fluid Buttons -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-button.css') }}">
 
     <!-- Theme Initializer (Anti-Flicker & shadcn sync) -->
     <script>
@@ -506,35 +508,8 @@
 
         .header-cta-pill::after,
         .header-cta-classic::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -130%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.25) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(59, 130, 246, 0.25) 75%, transparent 100%);
-            transform: skewX(-20deg);
-            transition: left 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-            pointer-events: none;
-        }
-
-        .header-cta-pill:hover,
-        .header-cta-classic:hover {
-            background: #2563eb;
-            border-color: #ffffff !important;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
-            color: #ffffff !important;
-        }
-
-        .header-cta-pill:hover::after,
-        .header-cta-classic:hover::after {
-            left: 140%;
-        }
-
-        .header-cta-pill:active,
-        .header-cta-classic:active {
-            transform: scale(0.97);
+            display: none !important;
+            content: none !important;
         }
 
         .header-user-name {
@@ -2878,6 +2853,9 @@
             document.addEventListener('DOMContentLoaded', updateScrollProgress);
         })();
     </script>
+
+    <!-- Liquid Button Engine -->
+    <script src="{{ url_for('static', filename='js/liquid-button.js') }}"></script>
 
     {% block extra_js %}{% endblock %}
 </body>
