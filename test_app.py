@@ -913,13 +913,15 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         html = res.data.decode('utf-8')
 
-        # 1. Top Hero action buttons
+        # 1. Top Hero action buttons and countdown
+        self.assertIn('Starts in', html)
         self.assertIn('Explore Events', html)
         self.assertIn('Rules &amp; Guidelines', html)
         self.assertIn('Contact Organizers', html)
         self.assertIn('hero-explore-btn', html)
         self.assertIn('hero-rules-btn', html)
         self.assertIn('hero-contact-btn', html)
+        self.assertIn('Register for Event', html)
 
         # 2. Disc cascade action buttons
         self.assertIn('Register for this event ↗', html)
