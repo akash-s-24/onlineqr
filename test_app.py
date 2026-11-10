@@ -907,5 +907,65 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('.clean-black-submit-btn::after {\n    content: \'\';', reg_html)
         self.assertNotIn('.hero-explore-btn::after {\ncontent: \'\';', events_html)
 
+    def test_24_restored_buttons_and_liquid_physics_visibility(self):
+        """Verify all essential hero, disc cascade, and procedure buttons are present, visible, and have non-clipping liquid styles."""
+        res = self.client.get('/events')
+        self.assertEqual(res.status_code, 200)
+        html = res.data.decode('utf-8')
+
+        # 1. Top Hero action buttons
+        self.assertIn('Explore Events', html)
+        self.assertIn('Rules &amp; Guidelines', html)
+        self.assertIn('Contact Organizers', html)
+        self.assertIn('hero-explore-btn', html)
+        self.assertIn('hero-rules-btn', html)
+        self.assertIn('hero-contact-btn', html)
+
+        # 2. Disc cascade action buttons
+        self.assertIn('Register for this event ↗', html)
+        self.assertIn('id="discCascadeRegister"', html)
+        self.assertIn('id="discCascadeRules"', html)
+        self.assertIn('id="discCascadeCall"', html)
+
+        # 3. Registration procedure buttons
+        self.assertIn('Register Online Now', html)
+        self.assertIn('View Campus Desk Location', html)
+        self.assertIn('track-btn-primary', html)
+        self.assertIn('track-btn-secondary', html)
+
+        # 4. Liquid button CSS integrity (no transparent wipeout on base container)
+        res_css = self.client.get('/static/css/liquid-button.css')
+        css_text = res_css.data.decode('utf-8')
+        self.assertNotIn('border: 1.5px solid var(--liquid-border);\n  background: transparent;', css_text)
+        self.assertIn('clip-path: none !important;', css_text)
+        self.assertIn('.hero-explore-btn.liquid-btn', css_text)
+
+        # 5. Liquid button JS integrity (no webkit-clip-path set on root button)
+        res_js = self.client.get('/static/js/liquid-button.js')
+        js_text = res_js.data.decode('utf-8')
+        self.assertNotIn("btn.style.setProperty('-webkit-clip-path'", js_text)
+        self.assertIn("invertedEl.style.setProperty('clip-path'", js_text)
+
+        # 6. Verify 14 authentic official event names and rules integrity
+        official_names = [
+            'BGMI', 'Free Fire', 'Pencil Sketch', 'Get the Shield',
+            'Photography', 'Content Creator', 'Solo Dance', 'Group Dance',
+            'Beat Boxing', 'Face Painting', 'Tech Quiz', 'Mad Adds',
+            'Mono Acting', 'Ramp Walk'
+        ]
+        for name in official_names:
+            self.assertIn(name, html)
+
+        # 7. Check Free Fire has clean squad battle royale rules without Kannada text
+        ff_ev = database.query_db("SELECT * FROM events WHERE event_name = 'Free Fire'", one=True)
+        self.assertIsNotNone(ff_ev)
+        self.assertIn('Mobile devices only', ff_ev['rules_text'])
+        self.assertNotIn('Kannada', ff_ev['rules_text'])
+
+        # 8. Check Mono Acting has its own theme and solo format
+        mono_ev = database.query_db("SELECT * FROM events WHERE event_name = 'Mono Acting'", one=True)
+        self.assertIsNotNone(mono_ev)
+        self.assertIn('Mythology Characters', mono_ev['rules_text'])
+
 if __name__ == '__main__':
     unittest.main()

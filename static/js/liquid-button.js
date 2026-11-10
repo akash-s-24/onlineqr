@@ -36,7 +36,7 @@
   function cloneInvertedContent(source, dest) {
     const fragment = document.createDocumentFragment();
     source.childNodes.forEach((node) => {
-      const clone = node.cloneNode(true);
+      const clone = node.cloneNode ? node.cloneNode(true) : (node.data ? document.createTextNode(node.data) : node);
       if (clone.nodeType === 1) {
         clone.removeAttribute('id');
         if (clone.querySelectorAll) {
@@ -111,7 +111,11 @@
     }
 
     btn.style.setProperty('--liquid-clip', `url(#${clipPathId})`);
-    btn.style.setProperty('-webkit-clip-path', `url(#${clipPathId})`);
+    invertedEl.style.setProperty('--liquid-clip', `url(#${clipPathId})`);
+    invertedEl.style.setProperty('clip-path', `url(#${clipPathId})`);
+    invertedEl.style.setProperty('-webkit-clip-path', `url(#${clipPathId})`);
+    btn.style.removeProperty('-webkit-clip-path');
+    btn.style.removeProperty('clip-path');
 
     // Synchronize inverted content
     const syncInverted = () => cloneInvertedContent(contentEl, invertedEl);
@@ -619,6 +623,8 @@
     '.hero-rules-btn',
     '.hero-contact-btn',
     '#discCascadeRegister',
+    '#discCascadeRules',
+    '#discCascadeCall',
     '#discCascadeIndexButton',
     '.btn-card-register',
     '.btn-card-rules',

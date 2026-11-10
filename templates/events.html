@@ -5902,10 +5902,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                 </button>
-                <button onclick="scrollToSection('rules', event)" class="candy-btn hero-rules-btn">Rules &amp;
-                    Guidelines</button>
-                <button onclick="scrollToSection('contact', event)" class="candy-btn hero-contact-btn">Contact
-                    Organizers</button>
+                <button onclick="scrollToSection('rules', event)" class="candy-btn hero-rules-btn">Rules &amp; Guidelines</button>
+                <button onclick="scrollToSection('contact', event)" class="candy-btn hero-contact-btn">Contact Organizers</button>
             </div>
 
             <div class="scroll-indicator" onclick="scrollToSection('stats', event)" aria-label="Scroll down">
@@ -6306,8 +6304,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     <button type="button" id="discCascadeRules" class="disc-cascade-rules">Rules</button>
                     <button type="button" id="discCascadeCall" class="disc-cascade-call">Contact</button>
                     <a id="discCascadeRegister" class="disc-cascade-register"
-                        href="{{ url_for('register_participant') }}{% if events %}?event_id={{ events[0].id }}{% endif %}">Register
-                        for this event ↗</a>
+                        href="{{ url_for('register_participant') }}{% if events %}?event_id={{ events[0].id }}{% endif %}">Register for this event ↗</a>
                 </div>
                 <div class="disc-cascade-controls">
                     <button type="button" id="discCascadePrev" aria-label="Previous event">←</button>
@@ -6339,10 +6336,9 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             <!-- 14 Cards Grid with Bento Spotlight Anchor -->
             <div class="events-cards-grid" id="eventsCardsGrid">
                 {% for ev in events[:14] %}
-                {% set cat_key = 'gaming' if ev.id in [2, 7] else ('technical' if ev.id in [11, 18] else ('cultural' if
-                ev.id in [14, 15, 16, 20, 22] else 'arts')) %}
-                {% set cat_label = 'Gaming' if ev.id in [2, 7] else ('Technical & Strategy' if ev.id in [11, 18] else
-                ('Cultural & Performance' if ev.id in [14, 15, 16, 20, 22] else 'Arts & Media')) %}
+                {% set ev_lower = (ev.event_name or '')|lower %}
+                {% set cat_key = 'gaming' if ('bgmi' in ev_lower or 'free fire' in ev_lower) else ('technical' if ('tech' in ev_lower or 'shield' in ev_lower) else ('cultural' if ('dance' in ev_lower or 'beatbox' in ev_lower or 'acting' in ev_lower or 'ramp' in ev_lower) else 'arts')) %}
+                {% set cat_label = 'Gaming' if cat_key == 'gaming' else ('Technical & Strategy' if cat_key == 'technical' else ('Cultural & Performance' if cat_key == 'cultural' else 'Arts & Media')) %}
                 {% set rim_class = 'card-rim-emerald' if cat_key == 'gaming' else ('card-rim-silver' if cat_key ==
                 'technical' else 'card-rim-indigo') %}
                 <article class="event-grid-card {{ rim_class }} {% if loop.first %}event-featured-anchor{% endif %}"
@@ -7094,12 +7090,18 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 "Judging considers message clarity, creativity, humor, and teamwork."
             ],
             "Mono Acting": [
-                "Each participant receives the announced performance time limit.",
+                "Each participant receives the announced performance time limit (3 + 1 min).",
+                "Theme: Mythology Characters or Social Themes (acting in Kannada or English language).",
                 "The act must be prepared and performed by one participant.",
                 "Judging considers character, voice, expression, body language, and storytelling.",
-                "Unsafe or discriminatory content is not permitted."
+                "Unsafe, vulgar, or discriminatory content is strictly prohibited."
             ]
         };
+        // Normalized event alias mappings
+        eventRules["Beatboxing"] = eventRules["Beat Boxing"];
+        eventRules["Monoacting"] = eventRules["Mono Acting"];
+        eventRules["Mad Ads"] = eventRules["Mad Adds"];
+        eventRules["Rampwalk"] = eventRules["Ramp Walk"];
 
         function openRulesModal(eventName, rulesFromDb) {
             document.getElementById('rulesModalTitle').innerText = eventName + " - Rules";
