@@ -1277,8 +1277,8 @@ def participants_list():
         event_names_expr = "string_agg(e.event_name, ', ')"
         team_names_expr = "string_agg(COALESCE(r.team_name, ''), ', ')"
     else:
-        event_names_expr = "GROUP_CONCAT(e.event_name SEPARATOR ', ')"
-        team_names_expr = "GROUP_CONCAT(COALESCE(r.team_name, '') SEPARATOR ', ')"
+        event_names_expr = "GROUP_CONCAT(e.event_name, ', ')"
+        team_names_expr = "GROUP_CONCAT(COALESCE(r.team_name, ''), ', ')"
 
     participants = query_db(f"""
         SELECT p.*,

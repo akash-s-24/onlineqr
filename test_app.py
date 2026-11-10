@@ -1100,5 +1100,16 @@ class SDATestCase(unittest.TestCase):
         self.assertIn(b'Demo only', response.data)
         self.assertIn(b'do not send real money', response.data.lower())
 
+    def test_admin_participants_list_renders_on_sqlite(self):
+        """Verify /admin/participants executes valid SQLite GROUP_CONCAT syntax without syntax error."""
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = 14
+            sess['username'] = 'admin'
+            sess['role'] = 'admin'
+
+        response = self.client.get('/admin/participants')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Participants Management', response.data)
+
 if __name__ == '__main__':
     unittest.main()
