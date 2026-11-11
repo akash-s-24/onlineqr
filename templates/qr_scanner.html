@@ -276,30 +276,38 @@
         const proofCont = document.getElementById('resProofContainer');
         const proofLink = document.getElementById('resProofLink');
         if (r.payment_proof) {
-            proofLink.href = `/static/uploads/payment_proofs/${r.payment_proof}`;
+            proofLink.href = `/payment-proofs/${encodeURIComponent(r.payment_proof.split('/').pop())}`;
             proofCont.style.display = 'block';
         } else {
             proofCont.style.display = 'none';
         }
 
-        // Payment Status Display
+        // Payment Status Display (SEC-03: use textContent instead of innerHTML for untrusted fields)
         const pEl = document.getElementById('resPayment');
+        pEl.textContent = '';
+        const statusSpan = document.createElement('span');
         const collectCashBtn = document.getElementById('collectCashBtn');
         const markPresentBtn = document.getElementById('markPresentBtn');
         const isCashPending = (r.payment_status === 'pay_on_site' || r.payment_status === 'unpaid');
 
         if (r.payment_status === 'paid') {
-            pEl.innerHTML = `<span style="color: #059669;">✔ Paid (${r.payment_method || 'Online'})</span>`;
+            statusSpan.style.color = '#059669';
+            statusSpan.textContent = `✔ Paid (${r.payment_method || 'Online'})`;
+            pEl.appendChild(statusSpan);
             collectCashBtn.style.display = 'none';
             markPresentBtn.style.display = 'block';
             markPresentBtn.innerText = '✅ Mark Present (Checked-in)';
         } else if (isCashPending) {
-            pEl.innerHTML = `<span style="color: #d97706;">💵 Pay on Spot (Cash Due: ₹${fee})</span>`;
+            statusSpan.style.color = '#d97706';
+            statusSpan.textContent = `💵 Pay on Spot (Cash Due: ₹${fee})`;
+            pEl.appendChild(statusSpan);
             document.getElementById('cashCollectAmount').innerText = fee;
             collectCashBtn.style.display = 'block';
             markPresentBtn.style.display = 'none';
         } else if (r.payment_status === 'pending') {
-            pEl.innerHTML = `<span style="color: #2563eb;">⏳ Online Submitted (UTR: ${r.utr_number || 'N/A'})</span>`;
+            statusSpan.style.color = '#2563eb';
+            statusSpan.textContent = `⏳ Online Submitted (UTR: ${r.utr_number || 'N/A'})`;
+            pEl.appendChild(statusSpan);
             collectCashBtn.style.display = 'none';
             markPresentBtn.style.display = 'block';
             markPresentBtn.innerText = '✅ Verify & Mark Present';

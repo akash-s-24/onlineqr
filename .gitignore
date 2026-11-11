@@ -50,4 +50,12 @@ node_modules/
 dist/
 .agents/
 skills-lock.json
+.superpowers/
+
+# Security & Debug artifacts
+.flask_secret
+temp.html
+*.log
+payment_proofs/*
+!payment_proofs/.gitkeep
 

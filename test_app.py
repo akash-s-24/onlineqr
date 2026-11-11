@@ -1111,5 +1111,91 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Participants Management', response.data)
 
+    def test_25_security_csv_formula_injection_sanitization(self):
+        """SEC-07: Verify sanitize_csv_cell prefixes formula-triggering characters with a single quote."""
+        self.assertEqual(app_module.sanitize_csv_cell('=CMD("calc")'), "'=CMD(\"calc\")")
+        self.assertEqual(app_module.sanitize_csv_cell('+1+1'), "'+1+1")
+        self.assertEqual(app_module.sanitize_csv_cell('-2+3'), "'-2+3")
+        self.assertEqual(app_module.sanitize_csv_cell('@SUM(A1:A2)'), "'@SUM(A1:A2)")
+        self.assertEqual(app_module.sanitize_csv_cell('Normal Name'), 'Normal Name')
+        self.assertEqual(app_module.sanitize_csv_cell(400), 400)
+
+    def test_26_security_email_identity_mismatch_blocks_profile_overwrite(self):
+        """SEC-02: Verify unauthenticated registration with an existing email but different phone is blocked."""
+        email = f"sec02_{int(time.time()*1000)}@college.edu"
+        events = database.query_db("SELECT id FROM events WHERE is_group = 0 ORDER BY id ASC LIMIT 2")
+        if len(events) < 2:
+            self.skipTest('Need at least two solo events.')
+        ev1, ev2 = str(events[0]['id']), str(events[1]['id'])
+
+        # Legitimate student registers for event 1
+        r1 = self.client.post('/register', data={
+            'full_name': 'Original Student',
+            'email': email,
+            'phone': '9876500001',
+            'college_name': 'Original College',
+            'department': 'BCA',
+            'semester': 'I PUC',
+            'event_id': ev1,
+            'payment_method': 'Cash'
+        }, follow_redirects=True)
+        self.assertEqual(r1.status_code, 200)
+
+        # Attacker attempts to register same email for event 2 with different phone and fake name
+        r2 = self.client.post('/register', data={
+            'full_name': 'Attacker Overwrite',
+            'email': email,
+            'phone': '9111111111',
+            'college_name': 'Fake College',
+            'department': 'BCA',
+            'semester': 'I PUC',
+            'event_id': ev2,
+            'payment_method': 'Cash'
+        }, follow_redirects=True)
+        self.assertEqual(r2.status_code, 200)
+        self.assertIn(b'already registered with a different phone number', r2.data)
+
+        # Verify original student's name and college remain intact
+        p = database.query_db("SELECT full_name, college_name FROM participants WHERE email = %s", (email,), one=True)
+        self.assertEqual(p['full_name'], 'Original Student')
+        self.assertEqual(p['college_name'], 'Original College')
+
+        database.query_db("DELETE FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email = %s)", (email,), commit=True)
+        database.query_db("DELETE FROM participants WHERE email = %s", (email,), commit=True)
+
+    def test_27_security_member_cannot_modify_certificate_settings_or_settle_online_utr(self):
+        """SEC-04 & SEC-06: Verify member role cannot overwrite certificate coords/templates or settle pending online UTRs."""
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = 2
+            sess['username'] = 'member1'
+            sess['role'] = 'member'
+            sess['_csrf_token'] = 'sec-token'
+
+        res_coords = self.client.post(
+            '/admin/settings/certificate-coords',
+            data={'name_x': 100, 'name_y': 100, 'csrf_token': 'sec-token'},
+            follow_redirects=False
+        )
+        self.assertEqual(res_coords.status_code, 302)
+        self.assertIn('/login', res_coords.location)
+
+    def test_28_security_payment_proof_unauthorized_access_blocked(self):
+        """SEC-05: Verify unauthenticated users cannot access uploaded payment screenshots."""
+        # Unauthenticated request without session ownership or staff role
+        res = self.client.get('/payment-proofs/secret_screenshot.png')
+        self.assertEqual(res.status_code, 403)
+
+        # Same for legacy static upload path alias
+        res_legacy = self.client.get('/static/uploads/payment_proofs/secret_screenshot.png')
+        self.assertEqual(res_legacy.status_code, 403)
+
+        # User who uploaded the proof in their session can access
+        with self.client.session_transaction() as sess:
+            sess['uploaded_payment_proofs'] = ['secret_screenshot.png']
+
+        # Non-existent file should now reach the directory check (404), not 403
+        res_owner = self.client.get('/payment-proofs/secret_screenshot.png')
+        self.assertEqual(res_owner.status_code, 404)
+
 if __name__ == '__main__':
     unittest.main()

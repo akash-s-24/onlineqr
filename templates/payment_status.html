@@ -81,8 +81,10 @@
             <p role="note"><strong>Demo mode:</strong> this submission is for preview only. No payment was confirmed or settled; do not send real money using the test details.</p>
             {% endif %}
             <p><strong>Submitted payment ID / UTR:</strong> <code>{{ registration.utr_number }}</code></p>
-            {% if registration.payment_proof %}
-            <p><strong>Payment screenshot attached:</strong> <a href="{{ url_for('static', filename='uploads/payment_proofs/' + registration.payment_proof) }}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">View Uploaded Screenshot ↗</a></p>
+            {% if registration.payment_proof and can_view_proof %}
+            <p><strong>Payment screenshot attached:</strong> <a href="{{ url_for('serve_payment_proof', filename=registration.payment_proof) }}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">View Uploaded Screenshot ↗</a></p>
+            {% elif registration.payment_proof %}
+            <p><strong>Payment screenshot attached:</strong> <span style="color: #059669; font-weight: 600;">✔ Received (Protected for verification)</span></p>
             {% endif %}
         {% elif registration.payment_status == 'pay_on_site' %}
             <div class="alert alert-warning" style="padding:1.15rem; border-radius:8px; border-left: 4px solid #f59e0b;">

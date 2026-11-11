@@ -1,4 +1,5 @@
 import os
+import re
 import datetime
 import smtplib
 import base64
@@ -24,6 +25,12 @@ PLACEHOLDER_PASSWORDS = {
     'changeme',
     'xxxx xxxx xxxx xxxx'
 }
+
+
+def _sanitize_header_value(value):
+    """Strip CR/LF characters to prevent SMTP header injection."""
+    return re.sub(r'[\r\n]+', ' ', str(value or '')).strip()
+
 
 def is_demo_mode():
     """
@@ -66,6 +73,7 @@ def is_demo_mode():
 
     return False, "Live SMTP credentials detected"
 
+
 def get_smtp_info():
     """
     Returns current SMTP configuration status for the UI.
@@ -98,8 +106,8 @@ def _send_via_resend(recipient_email, subject, html_content, attachments=None):
 
     payload = {
         'from': sender,
-        'to': [recipient_email],
-        'subject': subject,
+        'to': [_sanitize_header_value(recipient_email)],
+        'subject': _sanitize_header_value(subject),
         'html': html_content,
     }
     if attachments:
@@ -124,6 +132,7 @@ def _send_via_resend(recipient_email, subject, html_content, attachments=None):
         print(f'[Resend Connection Error] {error}')
         return False, 'Resend could not be reached; retry delivery later.'
 
+
 def send_certificate_email(recipient_email, participant_name, event_name, certificate_path, certificate_code, attachment_bytes=None, attachment_filename=None):
     """
     Send an email with the attached Certificate of Participation.
@@ -133,34 +142,44 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
     load_dotenv(override=True)
     is_demo, demo_reason = is_demo_mode()
 
+    clean_recipient = _sanitize_header_value(recipient_email)
+
     # If in Demo Mode, execute Safe Simulation
     if is_demo:
         print("=" * 60)
         print("[SMTP Safe Demo Mode] Certificate Email Simulated")
         print("=" * 60)
-        print(f" - Recipient Email : {recipient_email}")
+        print(f" - Recipient Email : {clean_recipient}")
         print(f" - Participant Name: {participant_name}")
         print(f" - Event Name      : {event_name}")
         print(f" - Certificate ID  : {certificate_code}")
         print(f" - Attachment File : {certificate_path}")
         print(f" - Reason for Demo : {demo_reason}")
         print("=" * 60)
-        return True, f"Certificate successfully dispatched to {recipient_email}! [Safe Demo Mode: Simulated delivery]"
+        return True, f"Certificate successfully dispatched to {clean_recipient}! [Safe Demo Mode: Simulated delivery]"
 
     # Live Mode - Attempt real Gmail SMTP delivery
     smtp_server = os.environ.get('SMTP_SERVER', Config.SMTP_SERVER)
     smtp_port = int(os.environ.get('SMTP_PORT', Config.SMTP_PORT))
     smtp_username = os.environ.get('SMTP_USERNAME', '').strip()
     smtp_password = os.environ.get('SMTP_PASSWORD', '').strip()
-    smtp_sender = os.environ.get('SMTP_SENDER_EMAIL', smtp_username or 'info@shreedakshaacademyedu.in').strip()
+    smtp_sender = _sanitize_header_value(os.environ.get('SMTP_SENDER_EMAIL', smtp_username or 'info@shreedakshaacademyedu.in'))
     use_ssl = os.environ.get('SMTP_USE_SSL', 'False').lower() in ('true', '1', 't')
     use_tls = os.environ.get('SMTP_USE_TLS', 'True').lower() in ('true', '1', 't')
 
     try:
+        # SEC-03: Escape all dynamic strings before interpolating into HTML email body and sanitize headers
+        safe_college_name = escape(str(Config.COLLEGE_NAME))
+        safe_college_subtitle = escape(str(Config.COLLEGE_SUBTITLE))
+        safe_participant_name = escape(str(participant_name))
+        safe_event_name = escape(str(event_name))
+        subject_event_name = _sanitize_header_value(event_name)
+        subject_line = f"Congratulations! Your Certificate of Participation for {subject_event_name} - Shree Daksha Academy"
+
         msg = MIMEMultipart('alternative')
-        msg['From'] = f"{Config.COLLEGE_NAME} <{smtp_sender}>"
-        msg['To'] = recipient_email
-        msg['Subject'] = f"Congratulations! Your Certificate of Participation for {event_name} - Shree Daksha Academy"
+        msg['From'] = f"{_sanitize_header_value(Config.COLLEGE_NAME)} <{smtp_sender}>"
+        msg['To'] = clean_recipient
+        msg['Subject'] = subject_line
 
         html_content = f"""
         <!DOCTYPE html>
@@ -183,12 +202,12 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
         <body>
             <div class="email-container">
                 <div class="header">
-                    <h1>{Config.COLLEGE_NAME}</h1>
-                    <p>{Config.COLLEGE_SUBTITLE}</p>
+                    <h1>{safe_college_name}</h1>
+                    <p>{safe_college_subtitle}</p>
                 </div>
                 <div class="content">
-                    <h2>Hello {participant_name},</h2>
-                    <p>Thank you for attending <strong>{event_name}</strong>!</p>
+                    <h2>Hello {safe_participant_name},</h2>
+                    <p>Thank you for attending <strong>{safe_event_name}</strong>!</p>
                     
                     <div class="highlight-box">
                         <p style="margin: 0 0 8px 0;"><strong>Status:</strong> Verified</p>
@@ -197,7 +216,7 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
                 </div>
                 <div class="footer">
                     <p>This is an automated notification from Shree Daksha Academy Event Management System.</p>
-                    <p>&copy; 2026 {Config.COLLEGE_NAME}. All rights reserved.</p>
+                    <p>&copy; 2026 {safe_college_name}. All rights reserved.</p>
                 </div>
             </div>
         </body>
@@ -205,14 +224,16 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
         """
         msg.attach(MIMEText(html_content, 'html'))
 
+        safe_attach_name = re.sub(r'[^A-Za-z0-9._-]+', '_', str(attachment_filename or '')) if attachment_filename else None
+
         # Attach Certificate File if exists
-        if attachment_bytes and attachment_filename:
+        if attachment_bytes and safe_attach_name:
             part = MIMEBase("application", "octet-stream")
             part.set_payload(attachment_bytes)
             encoders.encode_base64(part)
             part.add_header(
                 "Content-Disposition",
-                f"attachment; filename={attachment_filename}"
+                f"attachment; filename={safe_attach_name}"
             )
             msg.attach(part)
         elif certificate_path and os.path.exists(certificate_path):
@@ -227,9 +248,9 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
             msg.attach(part)
 
         resend_attachments = []
-        if attachment_bytes and attachment_filename:
+        if attachment_bytes and safe_attach_name:
             resend_attachments.append({
-                'filename': attachment_filename,
+                'filename': safe_attach_name,
                 'content': base64.b64encode(attachment_bytes).decode('ascii'),
             })
         elif certificate_path and os.path.exists(certificate_path):
@@ -240,8 +261,8 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
                 })
 
         resend_result = _send_via_resend(
-            recipient_email,
-            f"Congratulations! Your Certificate of Participation for {event_name} - Shree Daksha Academy",
+            clean_recipient,
+            subject_line,
             html_content,
             resend_attachments,
         )
@@ -249,7 +270,6 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
             return resend_result
 
         # Dispatch via SMTP
-        # Robust SSL/TLS handling based on port and user preference
         if smtp_port == 465 or (use_ssl and smtp_port != 587):
             server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=20)
             server.ehlo()
@@ -264,7 +284,7 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
         server.send_message(msg)
         server.quit()
 
-        return True, f"Certificate successfully emailed to {recipient_email} via Gmail SMTP!"
+        return True, f"Certificate successfully emailed to {clean_recipient} via Gmail SMTP!"
 
     except smtplib.SMTPAuthenticationError as auth_err:
         print(f"[SMTP Auth Error] {auth_err}")
@@ -274,6 +294,7 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
         print(f"[SMTP Connection Error] {e}")
         return False, 'SMTP delivery failed; the certificate remains queued for retry.'
 
+
 def send_receipt_email(recipient_email, participant_name, event_name, payment_method, amount_paid, utr_number=None):
     """
     Send an email receipt for event registration payment.
@@ -281,37 +302,39 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
     load_dotenv(override=True)
     is_demo, demo_reason = is_demo_mode()
 
+    clean_recipient = _sanitize_header_value(recipient_email)
+
     if is_demo:
         print("=" * 60)
         print("[SMTP Safe Demo Mode] Receipt Email Simulated")
         print("=" * 60)
-        print(f" - Recipient Email : {recipient_email}")
+        print(f" - Recipient Email : {clean_recipient}")
         print(f" - Participant Name: {participant_name}")
         print(f" - Event Name      : {event_name}")
         print(f" - Amount Paid     : ₹{amount_paid}")
         print(f" - Payment Method  : {payment_method}")
         print(f" - UTR Number      : {utr_number or 'N/A'}")
         print("=" * 60)
-        return True, f"Receipt successfully dispatched to {recipient_email}! [Safe Demo Mode]"
+        return True, f"Receipt successfully dispatched to {clean_recipient}! [Safe Demo Mode]"
 
     smtp_server = os.environ.get('SMTP_SERVER', Config.SMTP_SERVER)
     smtp_port = int(os.environ.get('SMTP_PORT', Config.SMTP_PORT))
     smtp_username = os.environ.get('SMTP_USERNAME', '').strip()
     smtp_password = os.environ.get('SMTP_PASSWORD', '').strip()
-    smtp_sender = os.environ.get('SMTP_SENDER_EMAIL', smtp_username or 'info@shreedakshaacademyedu.in').strip()
+    smtp_sender = _sanitize_header_value(os.environ.get('SMTP_SENDER_EMAIL', smtp_username or 'info@shreedakshaacademyedu.in'))
     use_ssl = os.environ.get('SMTP_USE_SSL', 'False').lower() in ('true', '1', 't')
     use_tls = os.environ.get('SMTP_USE_TLS', 'True').lower() in ('true', '1', 't')
 
     try:
         msg = MIMEMultipart('alternative')
-        msg['From'] = f"{Config.COLLEGE_NAME} <{smtp_sender}>"
-        msg['To'] = recipient_email
+        msg['From'] = f"{_sanitize_header_value(Config.COLLEGE_NAME)} <{smtp_sender}>"
+        msg['To'] = clean_recipient
         safe_event_name = escape(str(event_name))
         safe_participant_name = escape(str(participant_name))
         safe_payment_method = escape(str(payment_method))
         safe_utr_number = escape(str(utr_number)) if utr_number else ''
         safe_college_name = escape(str(Config.COLLEGE_NAME))
-        subject_event_name = str(event_name).replace('\n', ' ').replace('\r', ' ')
+        subject_event_name = _sanitize_header_value(event_name)
         msg['Subject'] = f"Payment Receipt: Registration Confirmed for {subject_event_name}"
 
         payment_details = f"<strong>Payment Mode:</strong> {safe_payment_method}"
@@ -345,7 +368,7 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
                     <p>Your payment for <strong>{safe_event_name}</strong> has been successfully received and confirmed!</p>
                     
                     <div class="highlight-box">
-                        <p style="margin: 0 0 8px 0; font-size: 1.1em;"><strong>Amount Paid:</strong> ₹{amount_paid}</p>
+                        <p style="margin: 0 0 8px 0; font-size: 1.1em;"><strong>Amount Paid:</strong> ₹{escape(str(amount_paid))}</p>
                         <p style="margin: 0 0 8px 0;">{payment_details}</p>
                         <p style="margin: 0;"><strong>Status:</strong> Confirmed ✅</p>
                     </div>
@@ -363,7 +386,7 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
         msg.attach(MIMEText(html_content, 'html'))
 
         resend_result = _send_via_resend(
-            recipient_email,
+            clean_recipient,
             f"Payment Receipt: Registration Confirmed for {subject_event_name}",
             html_content,
         )
@@ -384,11 +407,11 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
         server.send_message(msg)
         server.quit()
 
-        return True, f"Receipt successfully emailed to {recipient_email}!"
+        return True, f"Receipt successfully emailed to {clean_recipient}!"
 
     except smtplib.SMTPAuthenticationError as auth_err:
         print(f"[SMTP Auth Error] {auth_err}. Falling back smoothly to Safe Demo Mode.")
-        return False, f"SMTP authentication failed for {recipient_email}."
+        return False, f"SMTP authentication failed for {clean_recipient}."
 
     except Exception as e:
         print(f"[SMTP Connection Error] {e}.")

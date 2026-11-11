@@ -6,4 +6,4 @@ import sys
 def DNA(length):
     return ''.join(random.choice('CGTA') for _ in xrange(length))
 
-print DNA(int(sys.argv[1]))
+print(DNA(int(sys.argv[1])))

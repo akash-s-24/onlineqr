@@ -670,10 +670,12 @@ def generate_team_certificates_zip(team_members_str, event_name, event_date, col
                     pdf_buffer, format='PDF', resolution=100.0)
                 pdf_bytes = pdf_buffer.getvalue()
 
-                # Add to ZIP
-                safe_name = member.replace(" ", "_")
+                # Add to ZIP with strict path-traversal and filename sanitization (SEC-03)
+                import re
+                safe_name = re.sub(r'[^A-Za-z0-9._-]+', '_', member).strip('._') or f"Member_{idx+1}"
+                safe_ev = re.sub(r'[^A-Za-z0-9._-]+', '_', str(event_name or 'Event')).strip('._') or "Event"
                 zip_file.writestr(
-                    f"{safe_name}_{event_name}_Certificate.pdf", pdf_bytes)
+                    f"{safe_name}_{safe_ev}_Certificate.pdf", pdf_bytes)
 
                 # Optionally delete the temporary PNG to save space, but we might want to keep the leader's PNG
                 # We'll just leave it since the user's disk has space and it might be used.

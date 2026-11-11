@@ -265,11 +265,14 @@
                             </form>
 
                             <!-- Send WA Cert Button -->
-                            {% set wa_msg = "Hello " ~ row.full_name ~ ",\n\nThank you for attending " ~ row.event_name
-                            ~ ".\nStatus: Verified\nIssue Date: " ~ (row.sent_at[:10] if row.sent_at else "Today") %}
-                            <a href="https://wa.me/91{{ row.phone|replace(' ', '')|replace('+91', '') }}?text={{ wa_msg | urlencode }}"
+                            {% if row.phone %}
+                            {% set clean_phone = (row.phone|string)|replace(' ', '')|replace('+91', '') %}
+                            {% set wa_msg = "Hello " ~ row.full_name ~ ",\n\nCongratulations on completing " ~ row.event_name
+                            ~ "! Your official Certificate of Participation is now available to download." %}
+                            <a href="https://wa.me/91{{ clean_phone }}?text={{ wa_msg | urlencode }}"
                                 target="_blank" class="candy-btn candy-btn-success"
                                 style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">📱 WA</a>
+                            {% endif %}
                             {% else %}
                             {% if row.att_status == 'present' %}
                             <form method="POST"

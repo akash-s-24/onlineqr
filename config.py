@@ -4,17 +4,39 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+def _load_or_create_dev_secret():
+    """Persist a local development secret key so multi-worker Gunicorn processes share the same key."""
+    secret_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), '.flask_secret')
+    try:
+        if os.path.exists(secret_file):
+            with open(secret_file, 'r', encoding='utf-8') as f:
+                val = f.read().strip()
+                if len(val) >= 32:
+                    return val
+        val = secrets.token_urlsafe(48)
+        with open(secret_file, 'w', encoding='utf-8') as f:
+            f.write(val)
+        try:
+            os.chmod(secret_file, 0o600)
+        except OSError:
+            pass
+        return val
+    except OSError:
+        return secrets.token_urlsafe(48)
+
+
 class Config:
     # Environment mode
     APP_ENV = os.environ.get('APP_ENV', 'development').strip().lower()
 
-    # Flask Secret Key
+    # Flask Secret Key (SEC-08: stable across workers in all environments)
     _configured_secret = os.environ.get('SECRET_KEY', '').strip()
     SECRET_KEY = (
         _configured_secret
         if len(_configured_secret) >= 32
         and not _configured_secret.lower().startswith(('change-me', 'eventmate-'))
-        else secrets.token_urlsafe(48)
+        else _load_or_create_dev_secret()
     )
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
@@ -37,7 +59,7 @@ class Config:
 
     # PostgreSQL Database Configuration
     DATABASE_URL = os.environ.get('DATABASE_URL')
-    
+
     # Optional fallback for distinct parameters if DATABASE_URL isn't used
     PG_HOST = os.environ.get('PG_HOST', 'localhost')
     PG_USER = os.environ.get('PG_USER', 'postgres')
@@ -45,12 +67,14 @@ class Config:
     PG_DB = os.environ.get('PG_DB', 'eventmate_db')
     PG_PORT = int(os.environ.get('PG_PORT', 5432))
 
-    # Academy / College Branding
+    # Academy / College Branding & Role Credentials (SEC-01 & SEC-14)
     COLLEGE_NAME = os.environ.get('COLLEGE_NAME', 'Shree Daksha Academy')
     COLLEGE_SUBTITLE = os.environ.get('COLLEGE_SUBTITLE', 'Department of Computer Applications')
     EVENT_TITLE = os.environ.get('EVENT_TITLE', 'Daksha Infinix').strip() or 'Daksha Infinix'
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '').strip()
+    MEMBER_PASSWORD = os.environ.get('MEMBER_PASSWORD', '').strip()
     PAYMENT_MODE = os.environ.get('PAYMENT_MODE', 'demo').strip().lower() or 'demo'
+    DEFAULT_UPI_ID = os.environ.get('DEFAULT_UPI_ID', 'admin@upi').strip() or 'admin@upi'
     CONTACT_PHONE_PRIMARY = os.environ.get('CONTACT_PHONE_PRIMARY', '').strip() or '+91 90000 00001'
     CONTACT_PHONE_SECONDARY = os.environ.get('CONTACT_PHONE_SECONDARY', '').strip() or '+91 90000 00002'
     SIGNATORY_NAME = os.environ.get('SIGNATORY_NAME', 'Naveen Reddy')
@@ -96,7 +120,11 @@ if Config.APP_ENV == 'production':
         production_errors.append('ADMIN_PASSWORD must be configured before production sign-in is enabled')
     elif len(Config.ADMIN_PASSWORD) < 8:
         production_errors.append('ADMIN_PASSWORD must be at least 8 characters')
+    if Config.MEMBER_PASSWORD and len(Config.MEMBER_PASSWORD) < 8:
+        production_errors.append('MEMBER_PASSWORD must be at least 8 characters when set')
     if Config.PAYMENT_MODE not in ('demo', 'live'):
         production_errors.append('PAYMENT_MODE must be either demo or live')
+    if Config.PAYMENT_MODE == 'live' and Config.DEFAULT_UPI_ID.lower() in ('admin@upi', 'test@upi'):
+        print('[Config Warning] DEFAULT_UPI_ID is still set to a placeholder while PAYMENT_MODE=live; set DEFAULT_UPI_ID in Render Environment Variables.')
     if production_errors:
         raise RuntimeError('Production configuration is incomplete: ' + '; '.join(production_errors))

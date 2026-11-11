@@ -23,6 +23,10 @@ services:
         sync: false
       - key: ADMIN_PASSWORD
         sync: false
+      - key: MEMBER_PASSWORD
+        sync: false
+      - key: DEFAULT_UPI_ID
+        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM_EMAIL

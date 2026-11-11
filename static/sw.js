@@ -33,7 +33,33 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // Network-first for payment status ticket passes, caching successful responses for offline gate access
+  // SEC-12: Clear cached passes on logout and never intercept authenticated or API endpoints
+  if (url.pathname === '/logout') {
+    caches.open(CACHE_NAME).then((cache) => {
+      cache.keys().then((requests) => {
+        requests.forEach((req) => {
+          if (new URL(req.url).pathname.startsWith('/payment-status/')) {
+            cache.delete(req);
+          }
+        });
+      });
+    });
+    return;
+  }
+
+  if (
+    url.pathname.startsWith('/admin') ||
+    url.pathname.startsWith('/member') ||
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/login') ||
+    url.pathname.startsWith('/scanner') ||
+    url.pathname.startsWith('/payment-proofs/') ||
+    url.pathname.startsWith('/static/uploads/payment_proofs/')
+  ) {
+    return;
+  }
+
+  // Network-first for payment status ticket passes, caching only the latest 3 passes for offline gate access
   if (url.pathname.startsWith('/payment-status/')) {
     event.respondWith(
       fetch(request)
@@ -78,10 +104,4 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
-  // Standard fetch for all other requests
-  event.respondWith(
-    fetch(request).catch(() => caches.match(request))
-  );
 });
-

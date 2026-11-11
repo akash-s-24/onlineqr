@@ -20,7 +20,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Lenis Smooth Scroll -->
@@ -32,13 +32,13 @@
     <script>
         (function () {
             try {
-                var theme = localStorage.getItem('dx-theme') || localStorage.getItem('sda_theme') || 'light';
+                var theme = localStorage.getItem('dx-theme') || localStorage.getItem('sda_theme') || 'dark';
                 document.documentElement.setAttribute('data-theme', theme);
                 document.documentElement.classList.toggle('dark', theme === 'dark');
-                var meta = document.getElementById('themeColorMeta'); if (meta) meta.setAttribute('content', theme === 'dark' ? '#0B1A1C' : '#F1F7F5');
+                var meta = document.getElementById('themeColorMeta'); if (meta) meta.setAttribute('content', theme === 'dark' ? '#0B0F19' : '#FAFAFA');
             } catch (e) {
-                document.documentElement.setAttribute('data-theme', 'light');
-                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.documentElement.classList.add('dark');
             }
         })();
     </script>
@@ -2266,6 +2266,13 @@
                         </svg>
                         Contact
                     </a>
+                    <a href="{{ url_for('events_list') }}#rules">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                        Rules & Regulations
+                    </a>
                 </div>
 
                 <!-- Column 3: Official Contact -->
@@ -2780,7 +2787,7 @@
             }
 
             window.toggleSiteTheme = function () {
-                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                const current = document.documentElement.getAttribute('data-theme') || 'dark';
                 const next = (current === 'light') ? 'dark' : 'light';
 
                 // Play celestial celestial arc swap
@@ -2800,7 +2807,7 @@
                     localStorage.setItem('dx-theme', next);
                     localStorage.setItem('sda_theme', next);
                     const themeMeta = document.getElementById('themeColorMeta');
-                    if (themeMeta) themeMeta.setAttribute('content', next === 'dark' ? '#0B1A1C' : '#F1F7F5');
+                    if (themeMeta) themeMeta.setAttribute('content', next === 'dark' ? '#0B0F19' : '#FAFAFA');
                 } catch (e) { }
 
                 updateThemeLabels(next);
@@ -2808,10 +2815,10 @@
             };
 
             document.addEventListener('DOMContentLoaded', () => {
-                const initialTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const initialTheme = document.documentElement.getAttribute('data-theme') || 'dark';
                 const themeMeta = document.getElementById('themeColorMeta');
-                if (themeMeta) themeMeta.setAttribute('content', initialTheme === 'dark' ? '#0B1A1C' : '#F1F7F5');
-                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                if (themeMeta) themeMeta.setAttribute('content', initialTheme === 'dark' ? '#0B0F19' : '#FAFAFA');
+                const current = document.documentElement.getAttribute('data-theme') || 'dark';
                 updateThemeLabels(current);
             });
         })();

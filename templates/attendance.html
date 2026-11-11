@@ -9,11 +9,14 @@
         <p>Mark attendee presence, manage squad participation, and remove registrations</p>
     </div>
     <div class="page-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <button type="button" class="candy-btn candy-btn-secondary" onclick="window.history.back()" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">
+        <button type="button" class="candy-btn candy-btn-secondary" onclick="window.history.back()"
+            style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">
             <span style="font-size: 1.1rem;">&larr;</span> Previous
         </button>
-        <a href="{{ url_for('admin_dashboard') }}" class="candy-btn" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">&larr; Back to Dashboard</a>
-        <a href="{{ url_for('certificates_manager') }}" class="candy-btn candy-btn-success" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">Proceed to Certificate Generation &rarr;</a>
+        <a href="{{ url_for('admin_dashboard') }}" class="candy-btn"
+            style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">&larr; Back to Dashboard</a>
+        <a href="{{ url_for('certificates_manager') }}" class="candy-btn candy-btn-success"
+            style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">Proceed to Certificate Generation &rarr;</a>
     </div>
 </div>
 
@@ -70,13 +73,14 @@
             <select id="eventFilterSelect" class="form-control" style="width: auto; min-width: 220px;">
                 <option value="">All Events</option>
                 {% for ev in events %}
-                    <option value="{{ ev.event_name }}" {% if selected_event and selected_event == ev.event_name %}selected{% endif %}>
-                        {{ ev.event_name }} {% if ev.is_group %}(👥 Group){% endif %} – {{ ev.event_date }}
-                    </option>
+                <option value="{{ ev.event_name }}" {% if selected_event and selected_event==ev.event_name %}selected{%
+                    endif %}>
+                    {{ ev.event_name }} {% if ev.is_group %}(👥 Group){% endif %} – {{ ev.event_date }}
+                </option>
                 {% endfor %}
             </select>
         </div>
-        
+
     </div>
 
     <div class="table-responsive">
@@ -106,52 +110,71 @@
                     <td>
                         <span class="badge badge-primary">{{ row.event_name }}</span>
                         {% if row.is_group or row.team_name %}
-                            <div style="margin-top: 4px;">
-                                <span class="badge badge-info" style="font-size: 0.72rem;">👥 Group ({{ row.team_size }} Participants)</span>
-                                <div style="font-size: 0.82rem; font-weight: 700; color: #1e40af; margin-top: 2px;">
-                                    Team: {{ row.team_name if row.team_name else 'Squad' }}
-                                </div>
-                                {% if row.team_members %}
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); max-width: 240px; line-height: 1.3;" title="{{ row.team_members }}">
-                                        <strong>Members:</strong> {{ row.team_members }}
-                                    </div>
-                                {% endif %}
+                        <div style="margin-top: 4px;">
+                            <span class="badge badge-info" style="font-size: 0.72rem;">👥 Group ({{ row.team_size }}
+                                Participants)</span>
+                            <div style="font-size: 0.82rem; font-weight: 700; color: #1e40af; margin-top: 2px;">
+                                Team: {{ row.team_name if row.team_name else 'Squad' }}
                             </div>
+                            {% if row.team_members %}
+                            <div style="font-size: 0.75rem; color: var(--text-muted); max-width: 240px; line-height: 1.3;"
+                                title="{{ row.team_members }}">
+                                <strong>Members:</strong> {{ row.team_members }}
+                            </div>
+                            {% endif %}
+                        </div>
                         {% else %}
-                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">👤 Individual Participant</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">👤 Individual
+                            Participant</div>
                         {% endif %}
-                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">{{ row.event_date }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">{{ row.event_date }}
+                        </div>
                     </td>
                     <td>
                         {% if row.att_status == 'present' %}
-                            <span class="badge badge-success attendance-badge">PRESENT</span>
+                        <span class="badge badge-success attendance-badge">PRESENT</span>
                         {% elif row.att_status == 'absent' %}
-                            <span class="badge badge-danger attendance-badge">ABSENT</span>
+                        <span class="badge badge-danger attendance-badge">ABSENT</span>
                         {% else %}
-                            <span class="badge badge-secondary attendance-badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">AWAITING CHECK-IN</span>
+                        <span class="badge badge-secondary attendance-badge"
+                            style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">AWAITING
+                            CHECK-IN</span>
                         {% endif %}
                     </td>
                     <td style="text-align: right;">
                         <div style="display: inline-flex; gap: 0.4rem; align-items: center; justify-content: flex-end;">
                             {% if row.att_status == 'present' %}
-                                <button type="button" class="candy-btn candy-btn-warning" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;" onclick="toggleAttendance({{ row.registration_id }}, 'present', this)">Mark Absent</button>
+                            <button type="button" class="candy-btn candy-btn-warning"
+                                style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;"
+                                onclick="toggleAttendance({{ row.registration_id }}, 'present', this)">Mark
+                                Absent</button>
                             {% else %}
-                                <button type="button" class="candy-btn candy-btn-success" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;" onclick="toggleAttendance({{ row.registration_id }}, 'absent', this)">Mark Present</button>
+                            <button type="button" class="candy-btn candy-btn-success"
+                                style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;"
+                                onclick="toggleAttendance({{ row.registration_id }}, 'absent', this)">Mark
+                                Present</button>
                             {% endif %}
-                            <button type="button" class="candy-btn candy-btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 6px;" onclick="deleteAttendanceRow({{ row.registration_id }}, '{{ row.full_name }}', this)" title="Delete registration record">🗑️</button>
+                            <button type="button" class="candy-btn candy-btn-danger"
+                                style="padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 6px;"
+                                onclick="deleteAttendanceRow({{ row.registration_id }}, '{{ row.full_name }}', this)"
+                                title="Delete registration record">🗑️</button>
                         </div>
                     </td>
                 </tr>
                 {% else %}
                 <tr id="emptyRow">
                     <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 4rem 1rem;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 1rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                            style="opacity: 0.5; margin-bottom: 1rem;">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
                             <line x1="9" y1="15" x2="15" y2="15"></line>
                         </svg>
-                        <h4 style="margin: 0; color: var(--secondary); font-size: 1.1rem; font-weight: 600;">No Records Found</h4>
-                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem;">There are no registrations to display for this event.</p>
+                        <h4 style="margin: 0; color: var(--secondary); font-size: 1.1rem; font-weight: 600;">No Records
+                            Found</h4>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem;">There are no registrations to display for this
+                            event.</p>
                     </td>
                 </tr>
                 {% endfor %}
@@ -161,76 +184,76 @@
 </div>
 
 <script>
-async function deleteAttendanceRow(regId, participantName, btnElement) {
-    if (!confirm(`Are you sure you want to delete the attendance and registration record for "${participantName}"?\n\nThis will remove the participant from the attendance sheet and cancel their registration.`)) {
-        return;
-    }
+    async function deleteAttendanceRow(regId, participantName, btnElement) {
+        if (!confirm(`Are you sure you want to delete the attendance and registration record for "${participantName}"?\n\nThis will remove the participant from the attendance sheet and cancel their registration.`)) {
+            return;
+        }
 
-    btnElement.disabled = true;
-    const originalContent = btnElement.innerHTML;
-    btnElement.innerHTML = '⏳ Deleting...';
+        btnElement.disabled = true;
+        const originalContent = btnElement.innerHTML;
+        btnElement.innerHTML = '⏳ Deleting...';
 
-    try {
-        const response = await fetch(`/admin/attendance/delete/${regId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        try {
+            const response = await fetch(`/admin/attendance/delete/${regId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                }
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                const row = document.getElementById(`attRow_${regId}`);
+                if (row) {
+                    // Check if the deleted row was present or absent
+                    const badge = row.querySelector('.attendance-badge');
+                    const wasPresent = badge && badge.innerText.includes('PRESENT');
+
+                    row.style.transition = 'all 0.4s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(20px)';
+                    setTimeout(() => {
+                        row.remove();
+                        // Update counters
+                        const totalEl = document.getElementById('statTotalCount');
+                        const presEl = document.getElementById('statPresentCount');
+                        const absEl = document.getElementById('statAbsentCount');
+
+                        if (totalEl) totalEl.innerText = Math.max(0, parseInt(totalEl.innerText, 10) - 1);
+                        if (wasPresent && presEl) presEl.innerText = Math.max(0, parseInt(presEl.innerText, 10) - 1);
+                        if (!wasPresent && absEl) absEl.innerText = Math.max(0, parseInt(absEl.innerText, 10) - 1);
+
+                        // Re-index remaining rows
+                        document.querySelectorAll('#attendanceTable tbody tr:not(#emptyRow)').forEach((tr, idx) => {
+                            const idxCell = tr.querySelector('.row-index');
+                            if (idxCell) idxCell.innerText = idx + 1;
+                        });
+                    }, 400);
+                }
+                showToast(data.message || 'Registration deleted successfully', 'info');
+            } else {
+                showToast(data.error || 'Failed to delete record', 'danger');
+                btnElement.disabled = false;
+                btnElement.innerHTML = originalContent;
             }
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            const row = document.getElementById(`attRow_${regId}`);
-            if (row) {
-                // Check if the deleted row was present or absent
-                const badge = row.querySelector('.attendance-badge');
-                const wasPresent = badge && badge.innerText.includes('PRESENT');
-
-                row.style.transition = 'all 0.4s ease';
-                row.style.opacity = '0';
-                row.style.transform = 'translateX(20px)';
-                setTimeout(() => {
-                    row.remove();
-                    // Update counters
-                    const totalEl = document.getElementById('statTotalCount');
-                    const presEl = document.getElementById('statPresentCount');
-                    const absEl = document.getElementById('statAbsentCount');
-
-                    if (totalEl) totalEl.innerText = Math.max(0, parseInt(totalEl.innerText, 10) - 1);
-                    if (wasPresent && presEl) presEl.innerText = Math.max(0, parseInt(presEl.innerText, 10) - 1);
-                    if (!wasPresent && absEl) absEl.innerText = Math.max(0, parseInt(absEl.innerText, 10) - 1);
-
-                    // Re-index remaining rows
-                    document.querySelectorAll('#attendanceTable tbody tr:not(#emptyRow)').forEach((tr, idx) => {
-                        const idxCell = tr.querySelector('.row-index');
-                        if (idxCell) idxCell.innerText = idx + 1;
-                    });
-                }, 400);
-            }
-            showToast(data.message || 'Registration deleted successfully', 'info');
-        } else {
-            showToast(data.error || 'Failed to delete record', 'danger');
+        } catch (err) {
+            showToast('Network error while deleting record', 'danger');
             btnElement.disabled = false;
             btnElement.innerHTML = originalContent;
         }
-    } catch (err) {
-        showToast('Network error while deleting record', 'danger');
-        btnElement.disabled = false;
-        btnElement.innerHTML = originalContent;
     }
-}
 </script>
 <script>
-document.addEventListener('click', (event) => {
-    const deleteButton = event.target.closest('.delete-attendance-btn');
-    if (!deleteButton) return;
-    deleteAttendanceRow(
-        deleteButton.dataset.registrationId,
-        deleteButton.dataset.participantName,
-        deleteButton
-    );
-});
+    document.addEventListener('click', (event) => {
+        const deleteButton = event.target.closest('.delete-attendance-btn');
+        if (!deleteButton) return;
+        deleteAttendanceRow(
+            deleteButton.dataset.registrationId,
+            deleteButton.dataset.participantName,
+            deleteButton
+        );
+    });
 </script>
 {% endblock %}

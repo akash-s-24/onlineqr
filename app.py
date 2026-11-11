@@ -32,7 +32,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 # Configure upload folders
 UPLOAD_FOLDER_QR = os.path.join(app.root_path, 'static', 'uploads', 'qr_codes')
 UPLOAD_FOLDER_BANNERS = os.path.join(app.root_path, 'static', 'images')
-UPLOAD_FOLDER_PAYMENTS = os.path.join(app.root_path, 'static', 'uploads', 'payment_proofs')
+UPLOAD_FOLDER_PAYMENTS = os.path.join(app.root_path, 'payment_proofs')
 os.makedirs(UPLOAD_FOLDER_QR, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER_BANNERS, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER_PAYMENTS, exist_ok=True)
@@ -45,27 +45,71 @@ app.config['ALLOWED_IMAGE_EXTENSIONS'] = {'jpg', 'jpeg', 'png', 'webp', 'gif'}
 # overwhelming the login endpoint without changing normal authentication flows.
 LOGIN_THROTTLE = {}
 LOGIN_MAX_ATTEMPTS = 5
+LOGIN_IP_MAX_ATTEMPTS = 25
 LOGIN_WINDOW_SECONDS = 300
+LOGIN_MAX_TRACKED_KEYS = 2000
 
 
-def login_is_throttled(client_key):
+def _prune_login_throttle(now):
+    if len(LOGIN_THROTTLE) <= LOGIN_MAX_TRACKED_KEYS:
+        return
+    expired_keys = [
+        k for k, stamps in LOGIN_THROTTLE.items()
+        if not stamps or (now - stamps[-1]) >= LOGIN_WINDOW_SECONDS
+    ]
+    for k in expired_keys:
+        LOGIN_THROTTLE.pop(k, None)
+    if len(LOGIN_THROTTLE) > LOGIN_MAX_TRACKED_KEYS:
+        oldest_key = next(iter(LOGIN_THROTTLE))
+        LOGIN_THROTTLE.pop(oldest_key, None)
+
+
+def login_is_throttled(client_key, identifier=''):
     now = time.time()
-    attempts = [stamp for stamp in LOGIN_THROTTLE.get(client_key, [])
-                if now - stamp < LOGIN_WINDOW_SECONDS]
-    LOGIN_THROTTLE[client_key] = attempts
-    return len(attempts) >= LOGIN_MAX_ATTEMPTS
+    _prune_login_throttle(now)
+    user_key = f"{client_key}:{(identifier or '').strip().lower()}"
+    user_attempts = [stamp for stamp in LOGIN_THROTTLE.get(user_key, [])
+                     if now - stamp < LOGIN_WINDOW_SECONDS]
+    if user_attempts:
+        LOGIN_THROTTLE[user_key] = user_attempts
+    else:
+        LOGIN_THROTTLE.pop(user_key, None)
+
+    ip_key = f"ip:{client_key}"
+    ip_attempts = [stamp for stamp in LOGIN_THROTTLE.get(ip_key, [])
+                   if now - stamp < LOGIN_WINDOW_SECONDS]
+    if ip_attempts:
+        LOGIN_THROTTLE[ip_key] = ip_attempts
+    else:
+        LOGIN_THROTTLE.pop(ip_key, None)
+
+    return len(user_attempts) >= LOGIN_MAX_ATTEMPTS or len(ip_attempts) >= LOGIN_IP_MAX_ATTEMPTS
 
 
-def record_login_failure(client_key):
+def record_login_failure(client_key, identifier=''):
     now = time.time()
-    attempts = [stamp for stamp in LOGIN_THROTTLE.get(client_key, [])
-                if now - stamp < LOGIN_WINDOW_SECONDS]
-    attempts.append(now)
-    LOGIN_THROTTLE[client_key] = attempts
+    _prune_login_throttle(now)
+    for key in (f"{client_key}:{(identifier or '').strip().lower()}", f"ip:{client_key}"):
+        attempts = [stamp for stamp in LOGIN_THROTTLE.get(key, [])
+                    if now - stamp < LOGIN_WINDOW_SECONDS]
+        attempts.append(now)
+        LOGIN_THROTTLE[key] = attempts
 
 
-def clear_login_failures(client_key):
-    LOGIN_THROTTLE.pop(client_key, None)
+def clear_login_failures(client_key, identifier=''):
+    LOGIN_THROTTLE.pop(f"{client_key}:{(identifier or '').strip().lower()}", None)
+
+
+def sanitize_csv_cell(value):
+    """Neutralize spreadsheet formula injection payloads (=, +, -, @, tab, CR) in exported CSV cells (SEC-07)."""
+    if value is None:
+        return ''
+    if isinstance(value, (int, float)):
+        return value
+    text = str(value)
+    if text.lstrip().startswith(('=', '+', '-', '@')) or text.startswith(('\t', '\r')):
+        return f"'{text}"
+    return text
 
 def safe_int(value, default=0):
     try:
@@ -307,12 +351,12 @@ def login():
 
     if request.method == 'POST':
         client_key = request.remote_addr or 'unknown-client'
-        if login_is_throttled(client_key):
-            flash('Too many unsuccessful attempts. Please try again in a few minutes.', 'warning')
-            return render_template('login.html'), 429
-
         identifier = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
+
+        if login_is_throttled(client_key, identifier):
+            flash('Too many unsuccessful attempts. Please try again in a few minutes.', 'warning')
+            return render_template('login.html'), 429
 
         user = query_db(
             "SELECT * FROM users WHERE username = %s OR email = %s",
@@ -322,7 +366,11 @@ def login():
         if not user and identifier.isdigit():
             user = query_db("SELECT * FROM users WHERE id = %s", (int(identifier),), one=True)
 
-        if user and user.get('role') in ('admin', 'member') and not Config.ADMIN_PASSWORD and not app.config.get('TESTING') and password:
+        required_role_pwd = (
+            Config.ADMIN_PASSWORD if (user and user.get('role') == 'admin')
+            else (getattr(Config, 'MEMBER_PASSWORD', '') or Config.ADMIN_PASSWORD)
+        )
+        if user and user.get('role') in ('admin', 'member') and not required_role_pwd and not app.config.get('TESTING') and password:
             flash('Administrator password configuration is required before sign-in is enabled.', 'danger')
             return render_template('login.html'), 503
 
@@ -333,7 +381,7 @@ def login():
         )
 
         if is_authenticated:
-            clear_login_failures(client_key)
+            clear_login_failures(client_key, identifier)
             # Rotate the signed session contents after authentication to avoid
             # carrying pre-login session state into the authenticated session.
             session.clear()
@@ -348,7 +396,7 @@ def login():
             else:
                 return redirect(url_for('member_dashboard'))
         else:
-            record_login_failure(client_key)
+            record_login_failure(client_key, identifier)
             flash('Invalid ID or credentials. Please check and try again.', 'danger')
 
     return render_template('login.html')
@@ -670,7 +718,35 @@ def payment_status(registration_uid):
     except Exception:
         pass
 
-    return render_template('payment_status.html', registration=registration, qr_b64=qr_b64)
+    is_staff = session.get('role') in ('admin', 'member')
+    owns_pass = registration_uid in session.get('recent_registration_uids', [])
+    can_view_proof = bool(is_staff or owns_pass)
+    return render_template('payment_status.html', registration=registration, qr_b64=qr_b64, can_view_proof=can_view_proof)
+
+
+@app.route('/payment-proofs/<path:filename>')
+@app.route('/static/uploads/payment_proofs/<path:filename>')
+def serve_payment_proof(filename):
+    """Serve uploaded UPI payment screenshots only to authorized staff or the active registrant session (SEC-05)."""
+    safe_name = secure_filename(os.path.basename(filename))
+    if not safe_name or safe_name != os.path.basename(filename):
+        abort(404)
+
+    is_staff = session.get('role') in ('admin', 'member')
+    owns_proof = safe_name in session.get('uploaded_payment_proofs', [])
+    if not is_staff and not owns_proof:
+        abort(403)
+
+    primary_dir = app.config['UPLOAD_FOLDER_PAYMENTS']
+    legacy_dir = os.path.join(app.root_path, 'static', 'uploads', 'payment_proofs')
+    if os.path.exists(os.path.join(primary_dir, safe_name)):
+        response = send_from_directory(primary_dir, safe_name, as_attachment=False)
+    elif os.path.exists(os.path.join(legacy_dir, safe_name)):
+        response = send_from_directory(legacy_dir, safe_name, as_attachment=False)
+    else:
+        abort(404)
+    response.headers['Cache-Control'] = 'private, no-store'
+    return response
 
 @app.route('/admin/export/csv')
 @admin_required
@@ -712,13 +788,13 @@ def export_csv():
     for row in records:
         cert_status = row['has_certificate']
         pay_str = f"{row['payment_status'].upper()} ({row['payment_method']})"
-        writer.writerow([
+        writer.writerow([sanitize_csv_cell(c) for c in [
             row['registration_uid'],
             row['full_name'], row['registration_date'], row['team_name'] or 'N/A',
             row['college_name'], row['phone'], row['email'], row['team_size'],
             pay_str, row['amount_paid'], cert_status,
             row['att_status'].upper(), row['approval_status'].upper()
-        ])
+        ]])
     
     response = Response(output.getvalue(), content_type='text/csv')
     response.headers["Content-Disposition"] = f"attachment; filename=participants_{status_filter}.csv"
@@ -1241,9 +1317,18 @@ def register_participant():
         )
 
         if not registration['ok']:
+            if payment_proof:
+                proof_cleanup = os.path.join(app.config['UPLOAD_FOLDER_PAYMENTS'], payment_proof)
+                if os.path.exists(proof_cleanup):
+                    try:
+                        os.remove(proof_cleanup)
+                    except OSError:
+                        pass
             reason = registration['reason']
             if reason == 'duplicate_registration':
                 flash('You are already registered for this event. Duplicate registration was prevented.', 'warning')
+            elif reason == 'email_identity_mismatch':
+                flash('This email address is already registered with a different phone number. Please use your registered phone number or contact the help desk.', 'danger')
             elif reason == 'duplicate_utr':
                 flash('This UPI transaction reference has already been submitted.', 'warning')
             elif reason == 'capacity_reached':
@@ -1251,6 +1336,15 @@ def register_participant():
             else:
                 flash('The selected event is no longer available. Please refresh and try again.', 'danger')
             return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
+
+        # Record session ownership so the registrant can view their own uploaded proof on the pass page (SEC-05)
+        recent_uids = list(session.get('recent_registration_uids', []))[-9:]
+        recent_uids.append(registration['registration_uid'])
+        session['recent_registration_uids'] = recent_uids
+        if payment_proof:
+            recent_proofs = list(session.get('uploaded_payment_proofs', []))[-9:]
+            recent_proofs.append(payment_proof)
+            session['uploaded_payment_proofs'] = recent_proofs
 
         team_info_msg = f" (Team: {team_name} with {team_size} members)" if is_group_event and team_name else ""
         if payment_status == 'pay_on_site':
@@ -1463,7 +1557,7 @@ def certificates_manager():
     return render_template('certificates.html', cert_list=cert_list, events=events, smtp_info=smtp_info, coords=coords)
 
 @app.route('/admin/settings/certificate-coords', methods=['POST'])
-@login_required
+@admin_required
 def save_certificate_coords():
     coords = {
         'name_x': request.form.get('name_x', type=int) or 1240,
@@ -1491,32 +1585,40 @@ def save_certificate_coords():
     return redirect(url_for('certificates_manager'))
 
 @app.route('/admin/settings/certificate-template', methods=['POST'])
-@login_required
+@admin_required
 def upload_certificate_template():
     if 'template_image' not in request.files:
         flash('No image file part', 'error')
         return redirect(url_for('certificates_manager'))
-    
+
     file = request.files['template_image']
-    if file.filename == '':
+    if not file or file.filename == '':
         flash('No selected file', 'error')
         return redirect(url_for('certificates_manager'))
-        
-    if file:
-        upload_dir = os.path.join(app.root_path, 'static', 'uploads')
-        os.makedirs(upload_dir, exist_ok=True)
-        # Always save as certificate_template.png to overwrite
-        file_path = os.path.join(upload_dir, 'certificate_template.png')
-        
-        try:
-            # We convert to PNG in case it's a JPEG or other format
-            from PIL import Image
-            img = Image.open(file)
-            img.save(file_path, 'PNG')
-            flash('Certificate template uploaded successfully!', 'success')
-        except Exception as e:
-            flash(f'Failed to process template image: {e}', 'error')
-            
+
+    original_name = secure_filename(file.filename)
+    extension = os.path.splitext(original_name)[1].lower().lstrip('.')
+    if not original_name or extension not in {'png', 'jpg', 'jpeg', 'webp'}:
+        flash('Please upload a valid PNG, JPG, JPEG, or WEBP certificate template.', 'danger')
+        return redirect(url_for('certificates_manager'))
+
+    upload_dir = os.path.join(app.root_path, 'static', 'uploads')
+    os.makedirs(upload_dir, exist_ok=True)
+    file_path = os.path.join(upload_dir, 'certificate_template.png')
+
+    try:
+        with Image.open(file.stream) as probe:
+            if probe.width > 6000 or probe.height > 6000:
+                flash('Template image dimensions must not exceed 6000 × 6000 pixels.', 'danger')
+                return redirect(url_for('certificates_manager'))
+            probe.verify()
+        file.stream.seek(0)
+        with Image.open(file.stream) as img:
+            img.convert('RGB').save(file_path, 'PNG', optimize=True)
+        flash('Certificate template uploaded successfully!', 'success')
+    except (UnidentifiedImageError, OSError, ValueError) as e:
+        flash(f'Failed to process template image: {e}', 'error')
+
     return redirect(url_for('certificates_manager'))
 
 @app.route('/admin/certificates/generate/<int:reg_id>', methods=['POST'])
@@ -1583,7 +1685,9 @@ def generate_bulk_certificates():
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
         JOIN events e ON r.event_id = e.id
+        JOIN attendance a ON a.registration_id = r.id AND a.status = 'present'
         LEFT JOIN certificates c ON c.registration_id = r.id
+        WHERE r.status = 'approved'
     """)
 
     count = 0
@@ -1892,7 +1996,7 @@ def export_registrations_csv():
     
     if records:
         for row in records:
-            writer.writerow([
+            writer.writerow([sanitize_csv_cell(c) for c in [
                 row.get('registration_uid', ''),
                 row.get('full_name', ''),
                 row.get('email', ''),
@@ -1904,7 +2008,7 @@ def export_registrations_csv():
                 row.get('amount_paid', ''),
                 row.get('registration_date', ''),
                 row.get('utr_number', '')
-            ])
+            ]])
         
     return Response(
         output.getvalue(),
@@ -2063,7 +2167,7 @@ def export_selected_registrations():
 
     if records:
         for row in records:
-            writer.writerow([
+            writer.writerow([sanitize_csv_cell(c) for c in [
                 row.get('registration_uid', ''),
                 row.get('full_name', ''),
                 row.get('email', ''),
@@ -2075,7 +2179,7 @@ def export_selected_registrations():
                 row.get('amount_paid', ''),
                 row.get('registration_date', ''),
                 row.get('utr_number', '')
-            ])
+            ]])
 
     return Response(
         output.getvalue(),
@@ -2128,8 +2232,6 @@ def api_chat():
     elif 'qr' in message or 'ticket' in message:
         reply = "Once registered, you will receive a QR Code. Keep it safe! Our volunteers will scan it when you arrive to mark your attendance."
         
-    # Add a slight delay to simulate "thinking"
-    time.sleep(1.2)
     return jsonify({'status': 'success', 'reply': reply})
 
 @app.route('/scanner')
@@ -2227,19 +2329,45 @@ def api_mark_attended():
                 )
                 receipt_warning = f'Payment recorded, but receipt delivery failed: {receipt_msg}'
     elif reg['payment_status'] == 'pending':
-        # On-spot verification of pending online registration by member/admin
-        execute_db(
+        # SEC-06: Only administrators may settle pending Online/UTR payments without cash collection
+        if session.get('role') != 'admin':
+            return jsonify({
+                'status': 'error',
+                'message': 'Online UTR payment is still pending administrator verification. Ask an admin to verify the UTR or collect cash on spot.'
+            }), 403
+        claimed = execute_db(
             """
             UPDATE registrations
             SET payment_status = 'paid',
                 amount_paid = %s,
                 payment_verified_at = CURRENT_TIMESTAMP,
                 payment_verified_by = %s,
-                status = 'approved'
-            WHERE id = %s
+                status = 'approved',
+                receipt_delivery_status = 'pending'
+            WHERE id = %s AND COALESCE(payment_status, 'unpaid') <> 'paid'
             """,
             (fee, user_id, reg_id)
         )
+        if claimed == 1:
+            receipt_ok, receipt_msg = send_receipt_email(
+                recipient_email=reg['email'],
+                participant_name=reg['full_name'],
+                event_name=reg['event_name'],
+                payment_method=reg.get('payment_method') or 'Online',
+                amount_paid=fee,
+                utr_number=reg.get('utr_number')
+            )
+            if receipt_ok:
+                execute_db(
+                    "UPDATE registrations SET receipt_sent_at = CURRENT_TIMESTAMP, receipt_delivery_status = 'sent' WHERE id = %s",
+                    (reg_id,)
+                )
+            else:
+                execute_db(
+                    "UPDATE registrations SET receipt_delivery_status = 'failed' WHERE id = %s",
+                    (reg_id,)
+                )
+                receipt_warning = f'Payment recorded, but receipt delivery failed: {receipt_msg}'
         
     # Check attendance
     att = query_db("SELECT id FROM attendance WHERE registration_id = %s", (reg_id,), one=True)

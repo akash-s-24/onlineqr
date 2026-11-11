@@ -54,18 +54,27 @@ def get_postgres_pool():
         return None
 
 def get_postgres_connection():
-    """Attempt connection to PostgreSQL server using the pool or fresh connection."""
+    """Attempt connection to PostgreSQL server using the pool or fresh connection with pre-ping validation."""
     pool = get_postgres_pool()
     if pool:
-        try:
-            conn = pool.getconn()
-            if conn and not conn.closed:
-                conn.autocommit = True
-                return conn
-            elif conn:
-                pool.putconn(conn, close=True)
-        except Exception:
-            pass
+        for _ in range(3):
+            conn = None
+            try:
+                conn = pool.getconn()
+                if conn and not conn.closed:
+                    conn.autocommit = True
+                    # Pre-ping to evict stale connections dropped by Supabase Supavisor after idle periods
+                    with conn.cursor() as probe_cur:
+                        probe_cur.execute("SELECT 1")
+                    return conn
+                elif conn:
+                    pool.putconn(conn, close=True)
+            except Exception:
+                if conn is not None:
+                    try:
+                        pool.putconn(conn, close=True)
+                    except Exception:
+                        pass
     # Fallback to direct connection if pool fails
     try:
         db_url = Config.DATABASE_URL
@@ -111,9 +120,11 @@ def release_db_connection(conn):
     else:
         if PG_POOL and not PG_POOL.closed:
             try:
-                if not conn.closed:
+                if getattr(conn, 'closed', 1) != 0:
+                    PG_POOL.putconn(conn, close=True)
+                else:
                     conn.autocommit = True
-                PG_POOL.putconn(conn)
+                    PG_POOL.putconn(conn)
             except Exception:
                 try:
                     conn.close()
@@ -270,7 +281,7 @@ def create_registration(*, full_name, email, phone, college_name, department,
             conn.rollback()
             return {'ok': False, 'reason': 'invalid_event'}
 
-        execute("SELECT id FROM participants WHERE email = %s", (email,))
+        execute("SELECT id, full_name, phone, college_name FROM participants WHERE email = %s", (email,))
         participant = cursor.fetchone()
         if participant:
             participant_id = participant['id']
@@ -281,17 +292,26 @@ def create_registration(*, full_name, email, phone, college_name, department,
             if cursor.fetchone():
                 conn.rollback()
                 return {'ok': False, 'reason': 'duplicate_registration'}
-            execute(
-                """
-                UPDATE participants
-                SET full_name = %s, phone = %s, college_name = %s,
-                    department = %s, semester = %s,
-                    user_id = COALESCE(%s, user_id)
-                WHERE id = %s
-                """,
-                (full_name, phone, college_name, department, semester,
-                 registered_by, participant_id)
-            )
+
+            # SEC-02: Prevent unauthenticated callers from overwriting an existing participant's identity
+            existing_phone_digits = re.sub(r'\D', '', str(participant['phone'] or ''))
+            submitted_phone_digits = re.sub(r'\D', '', str(phone or ''))
+            if not registered_by and existing_phone_digits and existing_phone_digits != submitted_phone_digits:
+                conn.rollback()
+                return {'ok': False, 'reason': 'email_identity_mismatch'}
+
+            if registered_by:
+                execute(
+                    """
+                    UPDATE participants
+                    SET full_name = %s, phone = %s, college_name = %s,
+                        department = %s, semester = %s,
+                        user_id = COALESCE(%s, user_id)
+                    WHERE id = %s
+                    """,
+                    (full_name, phone, college_name, department, semester,
+                     registered_by, participant_id)
+                )
         else:
             if is_sqlite:
                 execute(
@@ -716,28 +736,30 @@ def create_tables_and_seed():
 
         normalize_legacy_banner_filenames(cursor=cursor, is_sqlite=is_sqlite)
 
-        # Seed admin and team users only when an administrator explicitly supplies a password.
+        # Seed admin and team users with distinct role passwords (SEC-01).
         if Config.ADMIN_PASSWORD:
             admin_pass = generate_password_hash(Config.ADMIN_PASSWORD)
+            member_raw_pass = getattr(Config, 'MEMBER_PASSWORD', '') or Config.ADMIN_PASSWORD
+            member_pass = generate_password_hash(member_raw_pass)
             users_to_seed = [
-                ('admin', 'admin@shreedakshaacademyedu.in', 'admin', 'admin'),
-                ('admin1', 'admin1@shreedakshaacademyedu.in', 'admin', 'admin SDA1'),
-                ('admin2', 'admin2@shreedakshaacademyedu.in', 'admin', 'admin SDA2')
+                ('admin', 'admin@shreedakshaacademyedu.in', 'admin', 'admin', admin_pass),
+                ('admin1', 'admin1@shreedakshaacademyedu.in', 'admin', 'admin SDA1', admin_pass),
+                ('admin2', 'admin2@shreedakshaacademyedu.in', 'admin', 'admin SDA2', admin_pass)
             ]
             for i in range(1, 11):
-                users_to_seed.append((f'member{i}', f'member{i}@shreedakshaacademyedu.in', 'member', f'Team Member {i}'))
+                users_to_seed.append((f'member{i}', f'member{i}@shreedakshaacademyedu.in', 'member', f'Team Member {i}', member_pass))
 
-            for un, em, role, fn in users_to_seed:
+            for un, em, role, fn, pwd_hash in users_to_seed:
                 existing = run_query("SELECT id FROM users WHERE username = %s", (un,), one=True)
                 if not existing:
                     run_exec(
                         "INSERT INTO users (username, email, password_hash, role, full_name) VALUES (%s, %s, %s, %s, %s)",
-                        (un, em, admin_pass, role, fn)
+                        (un, em, pwd_hash, role, fn)
                     )
                 else:
                     run_exec(
                         "UPDATE users SET password_hash = %s, role = %s, full_name = %s, email = %s WHERE username = %s",
-                        (admin_pass, role, fn, em, un)
+                        (pwd_hash, role, fn, em, un)
                     )
             print("[DB Seed] Synced configured admin and team member accounts")
         else:
@@ -752,9 +774,19 @@ def create_tables_and_seed():
             else:
                 run_exec("DELETE FROM users WHERE username = 'varshitha'")
 
-        # Purge legacy symposium placeholder events if present
-        legacy_old_names = ('Binary Brains', 'Digital Dynamos', 'CodeCraft', 'CodeStorm', 'CodeVerse', 'ByteBattle')
-        run_exec("DELETE FROM events WHERE event_name IN (%s, %s, %s, %s, %s, %s)", legacy_old_names)
+        # Purge legacy symposium and outdated placeholder events if present
+        legacy_old_names = (
+            'Binary Brains', 'Digital Dynamos', 'CodeCraft', 'CodeStorm', 'CodeVerse', 'ByteBattle',
+            'Valorant', 'Code Sprint', 'Hackathon / Strategy', 'Hackathon',
+            'Solo Singing', 'Group Singing', 'Fashion Show',
+            'Spot Photography', 'Reel Making', 'Short Film'
+        )
+        legacy_placeholders = ', '.join(['%s'] * len(legacy_old_names))
+        run_exec(
+            f"DELETE FROM events WHERE event_name IN ({legacy_placeholders}) "
+            f"AND id NOT IN (SELECT DISTINCT event_id FROM registrations WHERE event_id IS NOT NULL)",
+            legacy_old_names
+        )
 
         # 14 Official local events
         official_events = [
@@ -771,13 +803,13 @@ def create_tables_and_seed():
                 'max_team_size': 4,
                 'banner_image': '89e73e3fb00545329bed5ddb69478ea6.webp',
                 'event_fee': 400,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': 'uploads/qr_codes/c8d1eeb6e2fd420fad37edd0c7bb0baa.jpeg',
                 'rules_text': 'Rule 1: Squad format (4 players per team). Mobile only, no emulators.\nRule 2: Fair play mandatory. Room ID and password will be shared 15 minutes before match start.\nRule 3: Any third-party plugins, hacks, cheats, or exploit abuse will lead to immediate disqualification.\nRule 4: The judges and organizers decision will be final and binding.',
                 'faculty_name': 'Prof. Rajesh Kumar',
                 'faculty_phone': '9876543210',
                 'student_name': 'Akash S',
-                'student_phone': '8050774071',
+                'student_phone': '9000000001',
             },
             {
                 'event_name': 'Free Fire',
@@ -792,7 +824,7 @@ def create_tables_and_seed():
                 'max_team_size': 4,
                 'banner_image': 'freefire.jpeg',
                 'event_fee': 400,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': 'uploads/qr_codes/f09529478c554e5d91ed22023082dca2.jpeg',
                 'rules_text': 'Rule 1: Squad format (4 players per team). Mobile devices only. No emulators or external triggers allowed.\nRule 2: Players must belong to an affiliated institution and use their registered in-game IDs.\nRule 3: Room ID and password will be shared 15 minutes before match start.\nRule 4: Any third-party mods, hacks, scripts, or exploit abuse results in immediate forfeiture.\nRule 5: Organizers decisions on point calculation and match results are final.',
                 'faculty_name': 'a',
@@ -813,7 +845,7 @@ def create_tables_and_seed():
                 'max_team_size': 1,
                 'banner_image': 'pencilesketch.jpeg',
                 'event_fee': 100,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': 'uploads/qr_codes/5c07f555d6444d5398d7b33273b42147.jpeg',
                 'rules_text': 'Theme: Dreams of Tomorrow, A World I Wish to See, Beauty and Beast, Nature and Humanity\r\n\r\nSketch sheets will be provided.\r\n\r\nParticipants must carry all necessary materials (pencils, erasers, shading tools).\r\n\r\nArtwork must be based on the given theme.\r\n\r\nTime limit is strictly 90 minutes.\r\n\r\nCopying, tracing, mobile phones or similar aids will lead to disqualification.\r\n\r\nThe judges decision will be final and binding.',
                 'faculty_name': 'cdc',
@@ -834,7 +866,7 @@ def create_tables_and_seed():
                 'max_team_size': 2,
                 'banner_image': 'get_the_shield.jpeg',
                 'event_fee': 200,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': 'uploads/qr_codes/2c106876e1e14a049e4bda3ab316a82b.jpeg',
                 'rules_text': 'Team format: 2 participants per team.\r\n\r\nFollow contest format and multi-stage instructions announced by organizers.\r\n\r\nOutside assistance and disruptive conduct are strictly prohibited.\r\n\r\nThe judges decision will be final and binding.',
                 'faculty_name': 'a',
@@ -855,7 +887,7 @@ def create_tables_and_seed():
                 'max_team_size': 1,
                 'banner_image': 'Photography.jpeg',
                 'event_fee': 100,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Solo participation. Bring your own mobile phone or camera and accessories.\r\n\r\nPictures must be clicked during the competition period within the institution campus.\r\n\r\nBasic color adjustments and cropping are allowed; heavy manipulation, editing, or AI generation is strictly prohibited.\r\n\r\nAll submitted work must be original with EXIF data intact.\r\n\r\nJudging considers composition, storytelling, timing, and technical quality.\r\n\r\nThe judges decision will be final and binding.',
                 'faculty_name': 'cdc',
@@ -876,7 +908,7 @@ def create_tables_and_seed():
                 'max_team_size': 1,
                 'banner_image': 'contentcreator.jpeg',
                 'event_fee': 100,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Theme: Create an engaging 30-90 second reel or short video based on the campus fest energy.\r\n\r\nParticipants must carry all required equipment (camera, mobile phone, tripod, laptop, etc.).\r\n\r\nContent must be original and created during the event window.\r\n\r\nRoyalty-free music and assets are permitted; copyright infringement is prohibited.\r\n\r\nContent must be respectful and suitable for a college audience.\r\n\r\nJudging considers originality, clarity, production quality, and audience impact.\r\n\r\nThe judges decision will be final and binding.',
                 'faculty_name': 'cdc',
@@ -897,7 +929,7 @@ def create_tables_and_seed():
                 'max_team_size': 1,
                 'banner_image': 'solo_dance.jpeg',
                 'event_fee': 100,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Time Limit: 3 + 1 min\r\n\r\nParticipants must submit audio tracks in advance to the sound desk.\r\n\r\nAny dance style is permitted (Classical, Folk, Contemporary, Western, Bollywood).\r\n\r\nVulgarity in costume, song lyrics, or dance movements is strictly prohibited.\r\n\r\nJudging is based on choreography, rhythm, technique, facial expression, and stage presence.\r\n\r\nThe judges decision will be final and binding.',
                 'faculty_name': 'cdc',
@@ -918,7 +950,7 @@ def create_tables_and_seed():
                 'max_team_size': 8,
                 'banner_image': 'Group_Dance.jpeg',
                 'event_fee': 500,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Time Limit: 4 + 1 min\r\n\r\nTeam size: 6 to 8 members. All group members must belong to an affiliated institution.\r\n\r\nAudio tracks must be submitted in MP3 format before the event.\r\n\r\nProps are allowed with prior notification to organizers.\r\n\r\nVulgarity in costume or choreography is strictly prohibited.\r\n\r\nJudging criteria include synchronisation, choreography, costumes, energy, and overall impact.\r\n\r\nThe judges decision will be final and binding.',
                 'faculty_name': 'cdc',
@@ -939,7 +971,7 @@ def create_tables_and_seed():
                 'max_team_size': 1,
                 'banner_image': 'beatboxing.jpeg',
                 'event_fee': 150,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Time limit/Format: Round 1: 1 min, Round 2: 1 vs 1 face-off, 2 min each.\r\n\r\nAll sounds must be created live with mouth and microphone. No instruments, backing tracks, or loopers.\r\n\r\nNo profanity, offensive gestures, or personal attacks.\r\n\r\nScoring is based on clarity, complexity, musicality, rhythm, and stage presence.\r\n\r\nThe judges decision will be final and binding.',
                 'faculty_name': 'a',
@@ -960,7 +992,7 @@ def create_tables_and_seed():
                 'max_team_size': 2,
                 'banner_image': 'facepanting.jpeg',
                 'event_fee': 100,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Team of 2 (one artist and one model). Time limit: 60 minutes.\r\n\r\nTheme: Indian Folk and Tribal Art, Under the Sea, Wild and Wonderful\r\n\r\nBring all essential materials. Use skin-safe, non-toxic, and hypoallergenic face paints.\r\n\r\nNo permanent markers, industrial paints, chemicals, or harmful substances.\r\n\r\nThe model must remain comfortable throughout.\r\n\r\nThe judges decision will be final and binding.',
                 'faculty_name': 'a',
@@ -981,7 +1013,7 @@ def create_tables_and_seed():
                 'max_team_size': 2,
                 'banner_image': 'Tech_Quiz.jpeg',
                 'event_fee': 200,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Team of 2 participants.\r\n\r\nQuiz covers computing fundamentals, tech innovation, logic puzzles, and digital trends.\r\n\r\nMobile phones, internet access, and outside assistance are strictly prohibited.\r\n\r\nTies will be resolved through a rapid-fire tie-breaker.\r\n\r\nThe judges decision will be final and binding.',
                 'faculty_name': 'a',
@@ -1002,7 +1034,7 @@ def create_tables_and_seed():
                 'max_team_size': 8,
                 'banner_image': 'mad_adds.jpeg',
                 'event_fee': 500,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Time Limit/Format: 3 + 1 min\r\n\r\nTeam size: 4 to 8 members.\r\n\r\nTeams may use dialogue, acting, music, dance and comedy.\r\n\r\nAdvertisement should clearly promote the assigned product (real or fictional).\r\n\r\nNo offensive personal comments, brand defamation, vulgar, political, or religious content.\r\n\r\nUnsafe props are prohibited.\r\n\r\nThe judges decision will be final and binding.',
                 'faculty_name': 'a',
@@ -1023,7 +1055,7 @@ def create_tables_and_seed():
                 'max_team_size': 1,
                 'banner_image': 'monoacting.jpeg',
                 'event_fee': 100,
-                'upi_id': 'admin@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Theme: Mythology Characters or Social Themes (acting in Kannada or English language)\r\n\r\nTime limit: 3 + 1 min\r\n\r\nPerformance should be an original act or well-prepared portrayal.\r\n\r\nPerform individually without support of other actors.\r\n\r\nVulgar or inappropriate language/content is prohibited.\r\n\r\nBackground music or sound effects may be used if arranged in advance.\r\n\r\nThe judges decision will be final and binding.',
                 'faculty_name': 'cdc',
@@ -1044,7 +1076,7 @@ def create_tables_and_seed():
                 'max_team_size': 8,
                 'banner_image': '47a83de9ff4c4712b65dd41197a65d40.jpeg',
                 'event_fee': 500,
-                'upi_id': 'test@upi',
+                'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Theme: Marine Life, Celestial Dreams, Seasons of Style\r\n\r\nTeam size: 6 to 8 members. Time limit: 6 + 2 minutes.\r\n\r\nCostumes and movements should be decent, creative, and appropriate.\r\n\r\nCoordination and presentation based on creativity and overall performance.\r\n\r\nNo dangerous props; safe props may be used.\r\n\r\nVulgar or inappropriate songs, movements or costumes are strictly prohibited.\r\n\r\nThe judges decision will be final and binding.',
                 'faculty_name': 'a',
@@ -1097,12 +1129,12 @@ def create_tables_and_seed():
                 run_exec(
                     """
                     UPDATE events SET
-                        event_type = %s, is_group = %s, min_team_size = %s, max_team_size = %s,
+                        event_name = %s, event_type = %s, is_group = %s, min_team_size = %s, max_team_size = %s,
                         event_fee = %s, description = %s, rules_text = %s
                     WHERE event_name = %s
                     """,
                     (
-                        ev['event_type'], ev['is_group'], ev['min_team_size'], ev['max_team_size'],
+                        ev['event_name'], ev['event_type'], ev['is_group'], ev['min_team_size'], ev['max_team_size'],
                         ev['event_fee'], ev['description'], ev['rules_text'], existing_name
                     )
                 )

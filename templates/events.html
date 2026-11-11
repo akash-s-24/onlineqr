@@ -245,28 +245,28 @@ max-width: 92% !important; }
 .modal-drag-handle { width: 36px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 0 auto 16px; }
 }
 
-/* ── Fully Pitch Black Theme (Dark Mode Default) ── */
+/* ── Sovereign Onyx Theme (Dark Mode Default) ── */
 :root:not([data-theme="light"]),
 [data-theme="dark"] {
---sda-bg-page: #000000;
+--sda-bg-page: #0B0F19;
 --sda-text-page: #ffffff;
 }
 
 html:not([data-theme="light"]),
 [data-theme="dark"] {
-background: #000000 !important;
+background: #0B0F19 !important;
 color: #ffffff !important;
 }
 html:not([data-theme="light"]) body,
 [data-theme="dark"] body {
-background: #000000 !important;
+background: #0B0F19 !important;
 color: #ffffff !important;
 }
 html:not([data-theme="light"]) #loader,
-[data-theme="dark"] #loader { background:#000000 !important; }
+[data-theme="dark"] #loader { background:#0B0F19 !important; }
 html:not([data-theme="light"]) .landing-header,
-[data-theme="dark"] .landing-header { background:#000000 !important; border-bottom-color:rgba(255,255,255,.1)
-!important; box-shadow:0 1px 14px rgba(0,0,0,.8) !important; }
+[data-theme="dark"] .landing-header { background:rgba(11, 15, 25, 0.95) !important; border-bottom-color:rgba(255,255,255,.08)
+!important; box-shadow:0 1px 14px rgba(0,0,0,.6) !important; }
 html:not([data-theme="light"]) .landing-logo h1,
 html:not([data-theme="light"]) .mobile-toggle,
 html:not([data-theme="light"]) .image-like-nav .nav-link,
@@ -276,17 +276,17 @@ html:not([data-theme="light"]) .header-user-name,
 [data-theme="dark"] .image-like-nav .nav-link,
 [data-theme="dark"] .header-user-name { color:#ffffff !important; }
 html:not([data-theme="light"]) .header-nav-center,
-[data-theme="dark"] .header-nav-center { background:#000000 !important; }
+[data-theme="dark"] .header-nav-center { background:#0B0F19 !important; }
 html:not([data-theme="light"]) .image-like-nav .nav-link:hover,
 html:not([data-theme="light"]) .image-like-nav .nav-link:active,
 [data-theme="dark"] .image-like-nav .nav-link:hover,
-[data-theme="dark"] .image-like-nav .nav-link:active { background:rgba(255,255,255,.1) !important; color:#ffffff
+[data-theme="dark"] .image-like-nav .nav-link:active { background:rgba(255,255,255,.08) !important; color:#ffffff
 !important; }
 html:not([data-theme="light"]) .header-cta-classic,
-[data-theme="dark"] .header-cta-classic { color:#ffffff !important; background:#2563eb !important; border-color:#3b82f6
-!important; }
+[data-theme="dark"] .header-cta-classic { color:#0A0D14 !important; background:#F59E0B !important; border-color:#F59E0B
+!important; font-weight:700 !important; }
 html:not([data-theme="light"]) .hero-wrapper,
-[data-theme="dark"] .hero-wrapper { background:#000000 !important; }
+[data-theme="dark"] .hero-wrapper { background:#0B0F19 !important; }
 html:not([data-theme="light"]) .hero-title,
 html:not([data-theme="light"]) #heroFallbackTitle,
 [data-theme="dark"] .hero-title,
@@ -296,13 +296,19 @@ html:not([data-theme="light"]) .hero-subtitle,
 html:not([data-theme="light"]) .hero-badge-pill,
 [data-theme="dark"] .hero-badge-pill { background:rgba(255,255,255,0.06) !important; border-color:rgba(255,255,255,0.15)
 !important; color:#ffffff !important; }
+html:not([data-theme="light"]) .hero-actions .hero-explore-btn,
+[data-theme="dark"] .hero-actions .hero-explore-btn { background:#F59E0B !important; color:#0A0D14 !important; font-weight:800 !important; border-color:#F59E0B !important; }
 html:not([data-theme="light"]) .hero-actions button:nth-child(2),
 html:not([data-theme="light"]) .hero-actions button:nth-child(3),
+html:not([data-theme="light"]) .hero-actions .hero-rules-btn,
+html:not([data-theme="light"]) .hero-actions .hero-contact-btn,
 [data-theme="dark"] .hero-actions button:nth-child(2),
-[data-theme="dark"] .hero-actions button:nth-child(3) { color:#ffffff !important; border-color:rgba(255,255,255,0.4)
-!important; background:rgba(255,255,255,0.06) !important; }
+[data-theme="dark"] .hero-actions button:nth-child(3),
+[data-theme="dark"] .hero-actions .hero-rules-btn,
+[data-theme="dark"] .hero-actions .hero-contact-btn { color:#ffffff !important; border-color:#334155
+!important; background:#1E293B !important; }
 html:not([data-theme="light"]) .about-section,
-[data-theme="dark"] .about-section { background:#000000 !important; color:#ffffff !important; }
+[data-theme="dark"] .about-section { background:#0B0F19 !important; color:#ffffff !important; }
 html:not([data-theme="light"]) .section-title,
 html:not([data-theme="light"]) .about-section h2,
 html:not([data-theme="light"]) .about-section h3,
@@ -4457,18 +4463,19 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     font-weight: 500 !important;
     }
 
-    /* Hero Action Buttons — Royal Midnight Navy & Pure Monochrome */
+    /* Hero Action Buttons — Collegiate Royal & Pure Monochrome */
     [data-theme="light"] .hero-actions button:nth-child(1),
     [data-theme="light"] .hero-explore-btn {
-    border: 1px solid rgba(37, 99, 235, 0.35) !important;
-    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
-    box-shadow: 0px 4px 20px -4px rgba(124, 58, 237, 0.4), inset 0px 1px 4px #FFFFFF !important;
+    border: 1.5px solid #1D4ED8 !important;
+    background: #1D4ED8 !important;
+    box-shadow: 0px 4px 16px -2px rgba(29, 78, 216, 0.35) !important;
     color: #ffffff !important;
     font-weight: 700 !important;
     }
     [data-theme="light"] .hero-explore-btn:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%) !important;
-    box-shadow: 0px 6px 28px -4px rgba(124, 58, 237, 0.55), inset 0px 1px 6px #FFFFFF !important;
+    background: #1E40AF !important;
+    border-color: #1E40AF !important;
+    box-shadow: 0px 6px 20px -2px rgba(29, 78, 216, 0.45) !important;
     color: #ffffff !important;
     }
 
@@ -7168,32 +7175,62 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
         function openContactModal(eventName, facultyName, facultyPhone, studentName, studentPhone) {
             document.getElementById('contactModalTitle').innerText = 'Contact Call Desk';
             const content = document.getElementById('contactModalContent');
-            let html = '';
+            content.textContent = '';
+
+            function appendPhoneCard(roleTitle, rawPhone) {
+                const card = document.createElement('div');
+                card.className = 'contact-coord-card';
+                const titleP = document.createElement('p');
+                titleP.className = 'contact-coord-title';
+                titleP.textContent = roleTitle;
+                card.appendChild(titleP);
+
+                const phoneP = document.createElement('p');
+                phoneP.style.margin = '0';
+                const link = document.createElement('a');
+                const dialDigits = String(rawPhone).replace(/[^0-9+]/g, '');
+                link.href = 'tel:' + dialDigits;
+                link.className = 'contact-coord-phone';
+                link.textContent = '📱 ' + rawPhone;
+                phoneP.appendChild(link);
+                card.appendChild(phoneP);
+                content.appendChild(card);
+            }
 
             if (facultyPhone) {
-                html += '<div class="contact-coord-card">';
-                html += '<p class="contact-coord-title">Faculty Coordinator</p>';
-                if (facultyPhone) html += '<p style="margin: 0;"><a href="tel:' + facultyPhone + '" class="contact-coord-phone">📱 ' + facultyPhone + '</a></p>';
-                html += '</div>';
+                appendPhoneCard('Faculty Coordinator', facultyPhone);
             }
-
             if (studentPhone) {
-                html += '<div class="contact-coord-card">';
-                html += '<p class="contact-coord-title">Student Coordinator</p>';
-                if (studentPhone) html += '<p style="margin: 0;"><a href="tel:' + studentPhone + '" class="contact-coord-phone">📱 ' + studentPhone + '</a></p>';
-                html += '</div>';
+                appendPhoneCard('Student Coordinator', studentPhone);
             }
 
-            if (!html) {
+            if (!facultyPhone && !studentPhone) {
                 const message = encodeURIComponent('Hello, I have a question about ' + eventName + '.');
-                html = '<div class="contact-coord-card" style="text-align:center;">';
-                html += '<p class="contact-coord-title">Official Symposium Desk</p>';
-                html += '<p style="margin:0 0 12px;color:#94a3b8;">Message the general desk for event-specific help.</p>';
-                html += '<a href="https://wa.me/917892038099?text=' + message + '" target="_blank" rel="noopener noreferrer" class="contact-coord-phone">Message on WhatsApp</a>';
-                html += '</div>';
+                const card = document.createElement('div');
+                card.className = 'contact-coord-card';
+                card.style.textAlign = 'center';
+
+                const titleP = document.createElement('p');
+                titleP.className = 'contact-coord-title';
+                titleP.textContent = 'Official Symposium Desk';
+                card.appendChild(titleP);
+
+                const descP = document.createElement('p');
+                descP.style.cssText = 'margin:0 0 12px;color:#94a3b8;';
+                descP.textContent = 'Message the general desk for event-specific help.';
+                card.appendChild(descP);
+
+                const waLink = document.createElement('a');
+                waLink.href = 'https://wa.me/917892038099?text=' + message;
+                waLink.target = '_blank';
+                waLink.rel = 'noopener noreferrer';
+                waLink.className = 'contact-coord-phone';
+                waLink.textContent = 'Message on WhatsApp';
+                card.appendChild(waLink);
+
+                content.appendChild(card);
             }
 
-            content.innerHTML = html;
             const modal = document.getElementById('contactModal');
             modal.style.display = 'flex';
             modal.classList.add('active');
