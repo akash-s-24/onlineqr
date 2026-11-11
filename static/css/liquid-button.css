@@ -4,11 +4,11 @@
  */
 
 :root {
-  --liquid-blue: #2563eb;
-  --liquid-blue-dark: #1d4ed8;
-  --liquid-blue-light: #3b82f6;
-  --liquid-blue-glow: rgba(37, 99, 235, 0.45);
-  --liquid-blue-subtle: rgba(37, 99, 235, 0.15);
+  --liquid-blue: var(--color-primary, #0066FF);
+  --liquid-blue-dark: var(--color-primary-hover, #0052CC);
+  --liquid-blue-light: var(--color-primary, #0066FF);
+  --liquid-blue-glow: rgba(0, 102, 255, 0.45);
+  --liquid-blue-subtle: rgba(0, 102, 255, 0.15);
 }
 
 /* Base Liquid Button Container */
@@ -162,13 +162,13 @@
 /* 1. Solid Primary Blue (Default vibrant electric button) */
 .liquid-btn-primary,
 .btn-luxe-primary.liquid-btn {
-  --liquid-fill: #1d4ed8;
+  --liquid-fill: var(--color-primary-hover, #0052CC);
   --liquid-text: #ffffff;
   --liquid-active-text: #ffffff;
-  --liquid-border: #3b82f6;
-  background: #2563eb !important;
+  --liquid-border: var(--color-primary, #0066FF);
+  background: var(--color-primary, #0066FF) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 16px -2px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 4px 16px -2px rgba(0, 102, 255, 0.4);
 }
 
 .liquid-btn-primary:hover,
@@ -213,21 +213,21 @@
 
 /* 4. White Theme Adaptations */
 [data-theme="light"] .liquid-btn-outline {
-  --liquid-fill: #2563eb;
-  --liquid-text: #1d4ed8;
+  --liquid-fill: var(--color-primary, #0066FF);
+  --liquid-text: var(--color-primary, #0066FF);
   --liquid-active-text: #ffffff;
-  --liquid-border: #2563eb;
-  background: #ffffff !important;
-  color: #1d4ed8 !important;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+  --liquid-border: var(--color-primary, #0066FF);
+  background: var(--color-surface, #ffffff) !important;
+  color: var(--color-primary, #0066FF) !important;
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.12);
 }
 
 [data-theme="light"] .liquid-btn-primary {
-  --liquid-fill: #1e40af;
+  --liquid-fill: var(--color-primary-hover, #0052CC);
   --liquid-text: #ffffff;
   --liquid-active-text: #ffffff;
-  --liquid-border: #1d4ed8;
-  background: #2563eb !important;
+  --liquid-border: var(--color-primary, #0066FF);
+  background: var(--color-primary, #0066FF) !important;
   color: #ffffff !important;
 }
 

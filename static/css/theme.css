@@ -1,0 +1,474 @@
+/**
+ * EventMate / Shree Daksha Academy Design System
+ * Theme Tokens & Component Styles
+ * Color-Palette: Futuristic, Creative, Premium
+ * Supports: Bright-Mode (default) & Dark-Mode
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ═══════════════════════════════════════════════
+     BRIGHT-MODE CORE TOKENS (User Specified)
+     ═══════════════════════════════════════════════ */
+  --color-primary: #0066FF;              /* Vivid Blue: Main actions, links */
+  --color-primary-hover: #0052CC;        /* Primary darkened 10% on hover */
+  --color-primary-active: #004099;       /* Primary active */
+  --color-secondary: #FF7A00;            /* Warm Orange: Secondary actions, hover */
+  --color-secondary-hover: #CC6600;      /* Secondary hover */
+  --color-secondary-active: #B35A00;     /* Secondary active */
+  --color-accent: #E91E63;               /* Deep Pink: Highlights, call-outs, focus rings */
+  --color-accent-highlight: rgba(233, 30, 99, 0.15); /* Paragraph highlight */
+  --color-bg: #F5F5F5;                   /* Soft Gray: Page background */
+  --color-surface: #FFFFFF;              /* Pure White: Cards, modals, inputs */
+  --color-surface-hover: #FAFAFA;
+  --color-text-primary: #212121;         /* Dark Gray: Main body copy */
+  --color-text-secondary: #555555;       /* Medium Gray: Sub-text, captions */
+  --color-border: #E0E0E0;               /* Light Border: Input outlines, separators */
+  --color-border-hover: #CCCCCC;
+  --color-success: #28A745;              /* Green: Success messages */
+  --color-warning: #FFC107;              /* Amber: Warning messages */
+  --color-error: #DC3545;                /* Red: Error messages */
+  --color-disabled-bg: #E0E0E0;
+  --color-disabled-text: #A0A0A0;
+
+  /* State & Typography Modifiers */
+  --color-link-hover: #0052CC;
+  --color-link-visited: #FF7A00;
+  --heading-shadow: none;
+  --alert-text-color: #212121;
+
+  /* Backward Compatibility Aliases for style.css / daksha-theme.css */
+  --primary: var(--color-primary);
+  --primary-dark: var(--color-primary-hover);
+  --primary-light: rgba(0, 102, 255, 0.12);
+  --primary-gradient: linear-gradient(135deg, #0052CC 0%, #0066FF 100%);
+  --secondary: var(--color-secondary);
+  --accent: var(--color-accent);
+  --bg: var(--color-bg);
+  --bg-main: var(--color-bg);
+  --bg-alt: #EBEBEB;
+  --surface: var(--color-surface);
+  --surface-2: #FAFAFA;
+  --surface-3: #EFEFEF;
+  --bg-card: var(--color-surface);
+  --bg-card-hover: var(--color-surface-hover);
+  --text: var(--color-text-primary);
+  --text-main: var(--color-text-primary);
+  --text-2: var(--color-text-secondary);
+  --text-3: #757575;
+  --text-muted: var(--color-text-secondary);
+  --border: var(--color-border);
+  --border-color: var(--color-border);
+  --border-soft: var(--color-border);
+  --border-focus: var(--color-accent);
+  --success: var(--color-success);
+  --success-light: rgba(40, 167, 69, 0.12);
+  --warning: var(--color-warning);
+  --danger: var(--color-error);
+  --danger-light: rgba(220, 53, 69, 0.12);
+  --error: var(--color-error);
+  --focus: var(--color-accent);
+  --input-bg: var(--color-surface);
+  --toggle-bg: var(--color-surface);
+  --footer: #1A1A1A;
+  --footer-text: #BDBDBD;
+  --footer-heading: #FFFFFF;
+  --footer-link: #4D94FF;
+  --footer-muted: #757575;
+}
+
+[data-theme="dark"],
+.dark {
+  color-scheme: dark;
+
+  /* ═══════════════════════════════════════════════
+     DARK-MODE CORE TOKENS (User Specified)
+     ═══════════════════════════════════════════════ */
+  --color-primary: #0A84FF;              /* Electric Blue: Main actions, links */
+  --color-primary-hover: #0066CC;        /* Primary hover (darkened 10%) */
+  --color-primary-active: #0055AA;       /* Primary active */
+  --color-secondary: #FF9500;            /* Vivid Orange: Secondary buttons, hover */
+  --color-secondary-hover: #E68A00;      /* Secondary hover */
+  --color-secondary-active: #CC7A00;     /* Secondary active */
+  --color-accent: #FF2D55;               /* Vivid Pink: Highlights, call-outs, focus rings */
+  --color-accent-highlight: rgba(255, 45, 85, 0.15); /* Paragraph highlight */
+  --color-bg: #121212;                   /* Deep Charcoal: Page background */
+  --color-surface: #1E1E1E;              /* Dark Surface: Cards, modals, inputs */
+  --color-surface-hover: #262626;
+  --color-text-primary: #E0E0E0;         /* Light Gray: Main body copy */
+  --color-text-secondary: #A0A0A0;       /* Muted Gray: Sub-text, captions */
+  --color-border: #333333;               /* Dark Border: Input outlines, separators */
+  --color-border-hover: #444444;
+  --color-success: #34C759;              /* Green: Success messages */
+  --color-warning: #FFCC00;              /* Amber: Warning messages */
+  --color-error: #FF3B30;                /* Red: Error messages */
+  --color-disabled-bg: #444444;
+  --color-disabled-text: #777777;
+
+  /* State & Typography Modifiers */
+  --color-link-hover: #0066CC;
+  --color-link-visited: #FF9500;
+  --heading-shadow: 0 0 2px #000000;
+  --alert-text-color: #FFFFFF;
+
+  /* Backward Compatibility Aliases for style.css / daksha-theme.css */
+  --primary: var(--color-primary);
+  --primary-dark: var(--color-primary-hover);
+  --primary-light: rgba(10, 132, 255, 0.15);
+  --primary-gradient: linear-gradient(135deg, #0066CC 0%, #0A84FF 100%);
+  --secondary: var(--color-secondary);
+  --accent: var(--color-accent);
+  --bg: var(--color-bg);
+  --bg-main: var(--color-bg);
+  --bg-alt: #181818;
+  --surface: var(--color-surface);
+  --surface-2: #242424;
+  --surface-3: #2A2A2A;
+  --bg-card: var(--color-surface);
+  --bg-card-hover: var(--color-surface-hover);
+  --text: var(--color-text-primary);
+  --text-main: var(--color-text-primary);
+  --text-2: var(--color-text-secondary);
+  --text-3: #888888;
+  --text-muted: var(--color-text-secondary);
+  --border: var(--color-border);
+  --border-color: var(--color-border);
+  --border-soft: var(--color-border);
+  --border-focus: var(--color-accent);
+  --success: var(--color-success);
+  --success-light: rgba(52, 199, 89, 0.15);
+  --warning: var(--color-warning);
+  --danger: var(--color-error);
+  --danger-light: rgba(255, 59, 48, 0.15);
+  --error: var(--color-error);
+  --focus: var(--color-accent);
+  --input-bg: var(--color-surface);
+  --toggle-bg: var(--color-surface);
+  --footer: #0D0D0D;
+  --footer-text: #A0A0A0;
+  --footer-heading: #E0E0E0;
+  --footer-link: #0A84FF;
+  --footer-muted: #666666;
+}
+
+/* ═══════════════════════════════════════════════
+   GLOBAL BASE STYLES
+   ═══════════════════════════════════════════════ */
+html {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ═══════════════════════════════════════════════
+   3.2 TEXT & HEADINGS
+   ═══════════════════════════════════════════════ */
+h1, h2, h3, h4,
+.heading-1, .heading-2, .heading-3, .heading-4 {
+  color: var(--color-text-primary);
+  font-weight: 700;
+  text-shadow: var(--heading-shadow);
+  line-height: 1.25;
+}
+
+h1, .heading-1 { font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 800; }
+h2, .heading-2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; }
+h3, .heading-3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); font-weight: 700; }
+h4, .heading-4 { font-size: 1.15rem; font-weight: 700; }
+
+.subheading,
+.sub-heading,
+.section-subtitle {
+  color: var(--color-text-secondary);
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+p {
+  color: var(--color-text-primary);
+}
+
+.text-highlight,
+mark,
+p .highlight {
+  background: var(--color-accent-highlight);
+  color: inherit;
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+}
+
+/* ═══════════════════════════════════════════════
+   3.3 LINKS
+   ═══════════════════════════════════════════════ */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-link-hover);
+  text-decoration: underline;
+}
+
+a:visited:not(.btn):not(.nav-link):not(.dashboard-btn):not([class*="btn"]) {
+  color: var(--color-link-visited);
+}
+
+/* ═══════════════════════════════════════════════
+   3.1 BUTTONS (Component Classes)
+   ═══════════════════════════════════════════════ */
+.btn-primary,
+.btn.primary,
+.button-primary {
+  background: var(--color-primary);
+  color: #FFFFFF !important;
+  border: 1px solid var(--color-primary);
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  text-decoration: none;
+}
+
+.btn-primary:hover,
+.btn.primary:hover,
+.button-primary:hover {
+  background: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: #FFFFFF !important;
+  text-decoration: none;
+}
+
+.btn-primary:active,
+.btn.primary:active,
+.button-primary:active {
+  background: var(--color-primary-active) !important;
+  border-color: var(--color-primary-active) !important;
+  color: #FFFFFF !important;
+}
+
+.btn-secondary,
+.btn.secondary,
+.button-secondary {
+  background: var(--color-secondary);
+  color: #FFFFFF !important;
+  border: 1px solid var(--color-secondary);
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  text-decoration: none;
+}
+
+.btn-secondary:hover,
+.btn.secondary:hover,
+.button-secondary:hover {
+  background: var(--color-secondary-hover) !important;
+  border-color: var(--color-secondary-hover) !important;
+  color: #FFFFFF !important;
+  text-decoration: none;
+}
+
+.btn-secondary:active,
+.btn.secondary:active,
+.button-secondary:active {
+  background: var(--color-secondary-active) !important;
+  border-color: var(--color-secondary-active) !important;
+  color: #FFFFFF !important;
+}
+
+.btn:disabled,
+.btn[disabled],
+.btn-primary:disabled,
+.btn-secondary:disabled,
+button:disabled,
+input[type="submit"]:disabled {
+  background: var(--color-disabled-bg) !important;
+  color: var(--color-disabled-text) !important;
+  border-color: var(--color-disabled-bg) !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ═══════════════════════════════════════════════
+   3.4 FORM ELEMENTS
+   ═══════════════════════════════════════════════ */
+input,
+select,
+textarea,
+.form-control,
+.f-control {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-secondary) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.form-control:focus,
+.f-control:focus {
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 4px var(--color-accent) !important;
+  outline: none !important;
+}
+
+/* ═══════════════════════════════════════════════
+   3.5 ALERTS & NOTIFICATIONS
+   ═══════════════════════════════════════════════ */
+.alert,
+.dashboard-alert {
+  padding: 0.9rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.alert-success {
+  background: var(--color-success) !important;
+  color: var(--alert-text-color) !important;
+  border: 1px solid var(--color-success) !important;
+}
+
+.alert-warning {
+  background: var(--color-warning) !important;
+  color: var(--alert-text-color) !important;
+  border: 1px solid var(--color-warning) !important;
+}
+
+.alert-danger,
+.alert-error {
+  background: var(--color-error) !important;
+  color: var(--alert-text-color) !important;
+  border: 1px solid var(--color-error) !important;
+}
+
+/* ═══════════════════════════════════════════════
+   CARDS & SURFACES
+   ═══════════════════════════════════════════════ */
+.card,
+.stat-card,
+.table-card,
+.form-card,
+.modal-content,
+.dash-panel,
+.event-card,
+.auth-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+/* ═══════════════════════════════════════════════
+   WORKSPACE & COMPONENT SPECIFICS
+   ═══════════════════════════════════════════════ */
+.workspace-header {
+  background: var(--color-surface) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+.workspace-brand,
+.workspace-brand-copy strong,
+.workspace-user-copy strong {
+  color: var(--color-text-primary) !important;
+}
+
+.workspace-brand-copy small,
+.workspace-user-copy small {
+  color: var(--color-text-secondary) !important;
+}
+
+.workspace-nav a {
+  color: var(--color-text-secondary) !important;
+}
+
+.workspace-nav a:hover {
+  color: var(--color-primary) !important;
+  background: var(--color-bg) !important;
+}
+
+.workspace-nav a.active {
+  color: var(--color-primary) !important;
+  background: var(--color-bg) !important;
+}
+
+.workspace-nav a.active::after {
+  background: var(--color-primary) !important;
+}
+
+.workspace-avatar {
+  background: var(--color-bg) !important;
+  color: var(--color-primary) !important;
+}
+
+.workspace-logout {
+  border-color: var(--color-error) !important;
+  color: var(--color-error) !important;
+  background: transparent !important;
+}
+
+.table-header {
+  background: var(--color-surface) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+.table-title {
+  color: var(--color-text-primary) !important;
+}
+
+table.custom-table th {
+  background: var(--color-bg) !important;
+  color: var(--color-text-secondary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+table.custom-table td {
+  border-bottom: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+table.custom-table tbody tr:hover {
+  background: var(--color-surface-hover) !important;
+}
+
+.search-input-group input {
+  background: var(--color-surface) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+.search-input-group input:focus {
+  border-color: var(--color-accent) !important;
+}
+
+.l-footer {
+  background: var(--color-surface) !important;
+  border-top: 1px solid var(--color-border) !important;
+  color: var(--color-text-secondary) !important;
+}
+
+/* ═══════════════════════════════════════════════
+   ACCESSIBILITY & FOCUS VISIBLE (>= 3mm glow)
+   ═══════════════════════════════════════════════ */
+:focus-visible {
+  outline: 2px solid var(--color-accent) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 6px var(--color-accent) !important;
+}

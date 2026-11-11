@@ -1206,5 +1206,74 @@ class SDATestCase(unittest.TestCase):
         res_owner = self.client.get('/payment-proofs/secret_screenshot.png')
         self.assertEqual(res_owner.status_code, 404)
 
+    def test_29_theme_color_palette_tokens_and_integrity(self):
+        """Verify the user-specified dual-mode color palette tokens, component classes, and template links."""
+        # 1. Fetch theme.css directly
+        res = self.client.get('/static/css/theme.css')
+        self.assertEqual(res.status_code, 200)
+        theme_css = res.data.decode('utf-8')
+
+        # 2. Check Bright-Mode core tokens
+        self.assertIn('--color-primary: #0066FF;', theme_css)
+        self.assertIn('--color-secondary: #FF7A00;', theme_css)
+        self.assertIn('--color-accent: #E91E63;', theme_css)
+        self.assertIn('--color-bg: #F5F5F5;', theme_css)
+        self.assertIn('--color-surface: #FFFFFF;', theme_css)
+        self.assertIn('--color-text-primary: #212121;', theme_css)
+        self.assertIn('--color-text-secondary: #555555;', theme_css)
+        self.assertIn('--color-border: #E0E0E0;', theme_css)
+        self.assertIn('--color-success: #28A745;', theme_css)
+        self.assertIn('--color-warning: #FFC107;', theme_css)
+        self.assertIn('--color-error: #DC3545;', theme_css)
+
+        # 3. Check Dark-Mode core tokens
+        self.assertIn('--color-primary: #0A84FF;', theme_css)
+        self.assertIn('--color-secondary: #FF9500;', theme_css)
+        self.assertIn('--color-accent: #FF2D55;', theme_css)
+        self.assertIn('--color-bg: #121212;', theme_css)
+        self.assertIn('--color-surface: #1E1E1E;', theme_css)
+        self.assertIn('--color-text-primary: #E0E0E0;', theme_css)
+        self.assertIn('--color-text-secondary: #A0A0A0;', theme_css)
+        self.assertIn('--color-border: #333333;', theme_css)
+        self.assertIn('--color-success: #34C759;', theme_css)
+        self.assertIn('--color-warning: #FFCC00;', theme_css)
+        self.assertIn('--color-error: #FF3B30;', theme_css)
+
+        # 4. Check Component-level button states & tokens
+        self.assertIn('.btn-primary', theme_css)
+        self.assertIn('.btn-secondary', theme_css)
+        self.assertIn('--color-primary-hover: #0052CC;', theme_css)
+        self.assertIn('--color-primary-active: #004099;', theme_css)
+        self.assertIn('--color-primary-hover: #0066CC;', theme_css)
+        self.assertIn('--color-primary-active: #0055AA;', theme_css)
+        self.assertIn('--color-secondary-hover: #CC6600;', theme_css)
+        self.assertIn('--color-secondary-active: #B35A00;', theme_css)
+        self.assertIn('--color-secondary-hover: #E68A00;', theme_css)
+        self.assertIn('--color-secondary-active: #CC7A00;', theme_css)
+
+        # 5. Check Typography & Form classes
+        self.assertIn('.subheading', theme_css)
+        self.assertIn('.text-highlight', theme_css)
+        self.assertIn(':focus-visible', theme_css)
+
+        # 6. Verify main style.css imports theme.css
+        res_style = self.client.get('/static/css/style.css')
+        self.assertEqual(res_style.status_code, 200)
+        style_css = res_style.data.decode('utf-8')
+        self.assertIn("theme.css", style_css)
+
+        # 7. Verify templates reference theme.css and correct theme color meta
+        res_events = self.client.get('/events')
+        self.assertEqual(res_events.status_code, 200)
+        events_html = res_events.data.decode('utf-8')
+        self.assertIn('theme.css', events_html)
+        self.assertIn('themeColorMeta', events_html)
+
+        res_login = self.client.get('/login')
+        self.assertEqual(res_login.status_code, 200)
+        login_html = res_login.data.decode('utf-8')
+        self.assertIn('theme.css', login_html)
+        self.assertIn('themeColorMeta', login_html)
+
 if __name__ == '__main__':
     unittest.main()

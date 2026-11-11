@@ -1,17 +1,19 @@
+@import url('theme.css');
+
 :root {
-    --dash-ink: #172033;
-    --dash-muted: #667085;
-    --dash-line: #e6e9ef;
-    --dash-surface: #ffffff;
-    --dash-canvas: #f5f7fb;
-    --dash-blue: #2563eb;
-    --dash-blue-dark: #1d4ed8;
-    --dash-blue-soft: #edf3ff;
-    --dash-green: #15803d;
-    --dash-amber: #a16207;
-    --dash-red: #b42318;
+    --dash-ink: var(--color-text-primary, #212121);
+    --dash-muted: var(--color-text-secondary, #555555);
+    --dash-line: var(--color-border, #E0E0E0);
+    --dash-surface: var(--color-surface, #FFFFFF);
+    --dash-canvas: var(--color-bg, #F5F5F5);
+    --dash-blue: var(--color-primary, #0066FF);
+    --dash-blue-dark: var(--color-primary-hover, #0052CC);
+    --dash-blue-soft: rgba(0, 102, 255, 0.1);
+    --dash-green: var(--color-success, #28A745);
+    --dash-amber: var(--color-warning, #FFC107);
+    --dash-red: var(--color-error, #DC3545);
     --dash-radius: 13px;
-    --dash-focus: 0 0 0 3px rgba(37, 99, 235, .18);
+    --dash-focus: 0 0 0 3px rgba(233, 30, 99, .25);
 }
 
 .sr-only {
@@ -78,7 +80,7 @@
     padding: 0 14px;
     border: 1px solid var(--dash-line);
     border-radius: 9px;
-    background: #fff;
+    background: var(--dash-surface);
     color: var(--dash-ink);
     font-size: .83rem;
     font-weight: 750;
@@ -157,7 +159,7 @@
     bottom: 5px;
     left: 0;
     width: 0;
-    background: #ffffff;
+    background: var(--dash-surface);
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
     transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1), width 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
@@ -268,7 +270,7 @@
 }
 
 .dash-modal-box {
-    background: #ffffff;
+    background: var(--dash-surface);
     width: 100%;
     max-width: 540px;
     border-radius: 16px;
@@ -632,7 +634,7 @@
     border: 1px solid #d8dee9;
     border-radius: 8px;
     color: var(--dash-ink);
-    background: #fff;
+    background: var(--dash-surface);
     font: inherit;
     font-size: .82rem;
 }

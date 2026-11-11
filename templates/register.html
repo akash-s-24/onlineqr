@@ -12,9 +12,9 @@
 /* 1. Complete Page Canvas (Pure White in Light, Jet Black in Dark) */
 html:has(body.registration-page),
 body.registration-page {
-    background-color: #ffffff !important;
-    background: #ffffff !important;
-    color: #000000 !important;
+    background-color: var(--color-bg, #F5F5F5) !important;
+    background: var(--color-bg, #F5F5F5) !important;
+    color: var(--color-text-primary, #212121) !important;
 }
 
 body.registration-page canvas {
@@ -33,7 +33,7 @@ body.registration-page .scroll-content {
 }
 
 body.registration-page .registration-section {
-    background: #FBFBFC !important;
+    background: var(--color-bg, #F5F5F5) !important;
     padding: 36px 20px 60px;
     min-height: 100svh;
     display: flex;
@@ -44,8 +44,8 @@ body.registration-page .registration-section {
 /* 2. Professional Polished Form Card */
 .glass-form-card,
 .clean-form-card {
-    background: #ffffff !important;
-    border: 1.5px solid #e4e4e7 !important;
+    background: var(--color-surface, #FFFFFF) !important;
+    border: 1.5px solid var(--color-border, #E0E0E0) !important;
     border-radius: 20px !important;
     padding: 44px 40px !important;
     width: 100%;
@@ -794,34 +794,34 @@ select.f-select {
    ═══════════════════════════════════════════════════════════════ */
 [data-theme="dark"] html:has(body.registration-page),
 [data-theme="dark"] body.registration-page {
-    background-color: #08090C !important;
-    background: #08090C !important;
-    color: #F8FAFC !important;
+    background-color: var(--color-bg, #121212) !important;
+    background: var(--color-bg, #121212) !important;
+    color: var(--color-text-primary, #E0E0E0) !important;
 }
 [data-theme="dark"] body.registration-page .registration-section {
-    background: #08090C !important;
+    background: var(--color-bg, #121212) !important;
 }
 [data-theme="dark"] .glass-form-card,
 [data-theme="dark"] .clean-form-card {
-    background: #11131B !important;
-    border-color: rgba(245, 208, 97, 0.16) !important;
+    background: var(--color-surface, #1E1E1E) !important;
+    border-color: var(--color-border, #333333) !important;
     box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.75) !important;
 }
 [data-theme="dark"] .back-btn-ghost {
-    background: #18181b !important;
-    border-color: #27272a !important;
-    color: #ffffff !important;
+    background: var(--color-surface, #1E1E1E) !important;
+    border-color: var(--color-border, #333333) !important;
+    color: var(--color-text-primary, #E0E0E0) !important;
 }
 [data-theme="dark"] .back-btn-ghost:hover {
-    background: #ffffff !important;
-    color: #000000 !important;
-    border-color: #ffffff !important;
+    background: var(--color-primary, #0A84FF) !important;
+    color: #ffffff !important;
+    border-color: var(--color-primary, #0A84FF) !important;
 }
 [data-theme="dark"] .form-title {
-    color: #ffffff !important;
+    color: var(--color-text-primary, #E0E0E0) !important;
 }
 [data-theme="dark"] .form-subtitle {
-    color: #a1a1aa !important;
+    color: var(--color-text-secondary, #A0A0A0) !important;
 }
 [data-theme="dark"] .help-guide-card {
     background: #18181b !important;
