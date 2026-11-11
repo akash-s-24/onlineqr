@@ -883,6 +883,8 @@ class SDATestCase(unittest.TestCase):
         pass_html = reg_post.data.decode('utf-8')
         self.assertIn('Take a photo or screenshot of this pass now!', pass_html)
         self.assertIn('Send Pass to Mobile / WhatsApp', pass_html)
+        database.query_db("DELETE FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email = %s)", (unique_email,), commit=True)
+        database.query_db("DELETE FROM participants WHERE email = %s", (unique_email,), commit=True)
 
     def test_23_liquid_button_integration(self):
         """Verify liquid fluid button engine, styles, assets, and template integration across site."""
@@ -1123,9 +1125,16 @@ class SDATestCase(unittest.TestCase):
     def test_26_security_email_identity_mismatch_blocks_profile_overwrite(self):
         """SEC-02: Verify unauthenticated registration with an existing email but different phone is blocked."""
         email = f"sec02_{int(time.time()*1000)}@college.edu"
-        events = database.query_db("SELECT id FROM events WHERE is_group = 0 ORDER BY id ASC LIMIT 2")
+        events = database.query_db("""
+            SELECT e.id
+            FROM events e
+            LEFT JOIN (SELECT event_id, COUNT(*) as cnt FROM registrations GROUP BY event_id) r ON e.id = r.event_id
+            WHERE e.is_group = 0 AND (e.max_participants IS NULL OR COALESCE(r.cnt, 0) < e.max_participants)
+            ORDER BY e.id ASC
+            LIMIT 2
+        """)
         if len(events) < 2:
-            self.skipTest('Need at least two solo events.')
+            self.skipTest('Need at least two solo events with open capacity.')
         ev1, ev2 = str(events[0]['id']), str(events[1]['id'])
 
         # Legitimate student registers for event 1
