@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#F5F5F5" id="themeColorMeta">
+    <meta name="theme-color" content="#FFFFFF" id="themeColorMeta">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Shree Daksha Academy – College Event Management System{% endblock %}</title>
     <!-- Official College Favicons & Apple Touch Icons -->
@@ -23,8 +23,6 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Lenis Smooth Scroll -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/lenis.css') }}">
     <!-- Futuristic Color-Palette Design System -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}?v=20261111_v1">
     <!-- High-Craft Liquid Fluid Buttons -->
@@ -34,13 +32,14 @@
     <script>
         (function () {
             try {
-                var theme = localStorage.getItem('dx-theme') || localStorage.getItem('sda_theme') || 'dark';
+                var savedTheme = localStorage.getItem('dx-theme') || localStorage.getItem('sda_theme');
+                var theme = savedTheme === 'dark' ? 'dark' : 'light';
                 document.documentElement.setAttribute('data-theme', theme);
                 document.documentElement.classList.toggle('dark', theme === 'dark');
-                var meta = document.getElementById('themeColorMeta'); if (meta) meta.setAttribute('content', theme === 'dark' ? '#121212' : '#F5F5F5');
+                var meta = document.getElementById('themeColorMeta'); if (meta) meta.setAttribute('content', theme === 'dark' ? '#080808' : '#FFFFFF');
             } catch (e) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.documentElement.classList.remove('dark');
             }
         })();
     </script>
@@ -151,34 +150,6 @@
         [data-theme="light"] .scroll-progress-bar {
             background: linear-gradient(90deg, #1E3A8A 0%, #2563EB 50%, #0f172a 100%) !important;
             box-shadow: 0 0 10px rgba(37, 99, 235, 0.4) !important;
-        }
-
-        /* Kinetic Shimmer Text Class */
-        .shimmer-headline {
-            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 35%, #ffffff 65%, #94a3b8 100%);
-            background-size: 250% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: textShimmerSweep 7s ease-in-out infinite;
-        }
-
-        [data-theme="light"] .shimmer-headline {
-            background: linear-gradient(135deg, #0A0B0E 0%, #1E3A8A 40%, #0A0B0E 75%, #334155 100%) !important;
-            background-size: 250% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        @keyframes textShimmerSweep {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
         }
 
         /* Tactile Rotating Border Beam */
@@ -638,82 +609,12 @@
             width: auto;
         }
 
-        /* ═══ POP BUTTON ═══ */
-        .pop-btn {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.88rem !important;
-            color: #ffffff !important;
-            padding: 0.8rem 1.25rem !important;
-            border-radius: 0.6rem !important;
-            background-color: #3b82f6 !important;
-            border: 2px solid #1e3a8a !important;
-            transition: all 150ms cubic-bezier(0, 0, 0.58, 1) !important;
-            box-shadow: 0 6px 0 -1px #60a5fa, 0 6px 0 0 #1e3a8a, 0 12px 0 0 #dbeafe !important;
-            text-decoration: none !important;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 12px;
-            min-height: 48px;
+        .candy-btn, .pop-btn {
+            position: relative; display: inline-flex; align-items: center; justify-content: center;
+            min-height: 48px; padding: 0.7rem 1.4rem; font: 650 0.95rem/1.35 'DM Sans', sans-serif;
+            text-align: center; text-decoration: none; cursor: pointer; touch-action: manipulation;
         }
-
-        .pop-btn:hover {
-            background-color: #2563eb !important;
-            transform: translateY(2px) !important;
-            box-shadow: 0 4px 0 -1px #60a5fa, 0 4px 0 0 #1e3a8a, 0 8px 0 0 #dbeafe !important;
-        }
-
-        .pop-btn:active {
-            background-color: #1d4ed8 !important;
-            transform: translateY(6px) !important;
-            box-shadow: 0 0 0 -1px #60a5fa, 0 0 0 0 #1e3a8a, 0 0 0 0 #dbeafe !important;
-        }
-
-        /* ═══ CANDY BUTTON ═══ */
-        .candy-btn {
-            position: relative;
-            display: inline-block;
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            letter-spacing: 0.02em;
-            padding: 0.7rem 1.75rem;
-            border-radius: 0.75rem;
-            cursor: pointer;
-            transition: all 200ms ease-out;
-            border: 1px solid #3b82f6;
-            background: radial-gradient(95% 60% at 50% 75%, #1e40af 0%, #1e3a8a 100%);
-            box-shadow: 0px 4px 48px -12px rgba(30, 58, 138, 0.8), inset 0px 1px 8px -4px rgba(255, 255, 255, 0.4);
-            text-decoration: none;
-            text-align: center;
-            overflow: hidden;
-            min-height: 48px;
-        }
-
-        .candy-btn::after {
-            content: '';
-            position: absolute;
-            top: 1px;
-            right: 10%;
-            width: 60%;
-            height: 1px;
-            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
-            pointer-events: none;
-        }
-
-        .candy-btn:hover {
-            filter: brightness(1.1);
-        }
-
-        .candy-btn:active {
-            transform: scale(0.96);
-        }
-
+        .candy-btn::after, .pop-btn::after { content: none !important; display: none !important; }
 
         /* ═══ SCROLL CONTENT ═══ */
         .scroll-content {
@@ -1525,112 +1426,6 @@
             }
         }
 
-        /* ═══════════════════════════════════════════
-           CELESTIAL SUN-MOON THEME TOGGLE (SHADCN PATTERN)
-           ═══════════════════════════════════════════ */
-        .celestial-theme-toggle {
-            position: relative;
-            isolation: isolate;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            width: 40px;
-            height: 40px;
-            min-width: 40px;
-            min-height: 40px;
-            padding: 0;
-            border-radius: 9999px;
-            border: 1px solid rgba(255, 255, 255, 0.22);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.15);
-            cursor: pointer;
-            background: #090f2a;
-            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            flex-shrink: 0;
-        }
-
-        .celestial-theme-toggle:hover {
-            transform: scale(1.06);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 255, 255, 0.45);
-        }
-
-        .celestial-theme-toggle:focus-visible {
-            outline: 2px solid #3b82f6;
-            outline-offset: 2px;
-        }
-
-        /* Celestial Sky Layers */
-        .celestial-sky {
-            pointer-events: none;
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            border-radius: 9999px;
-            transition: opacity 0.5s cubic-bezier(0.65, 0, 0.35, 1);
-        }
-
-        .celestial-sky-night {
-            background: linear-gradient(180deg, #090f2a 0%, #16204b 60%, #2a2f66 100%);
-            opacity: 1;
-        }
-
-        .celestial-sky-day {
-            background: linear-gradient(180deg, #4ea8ff 0%, #9fd3ff 60%, #e3f3ff 100%);
-            opacity: 0;
-        }
-
-        /* Starfield with twinkling */
-        .celestial-star {
-            position: absolute;
-            border-radius: 9999px;
-            background-color: #ffffff;
-            opacity: 0.6;
-            animation: celestialStarTwinkle var(--twinkle-dur, 2.4s) ease-in-out infinite;
-            animation-delay: var(--twinkle-del, 0s);
-        }
-
-        @keyframes celestialStarTwinkle {
-
-            0%,
-            100% {
-                opacity: 0.25;
-                transform: scale(0.85);
-            }
-
-            50% {
-                opacity: 1;
-                transform: scale(1.15);
-            }
-        }
-
-        /* Celestial Bodies (Moon & Sun) */
-        .celestial-body {
-            pointer-events: none;
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2;
-        }
-
-        .celestial-body-moon {
-            color: #fde68a;
-            filter: drop-shadow(0 0 8px rgba(252, 211, 77, 0.65));
-            transform: none;
-            opacity: 1;
-        }
-
-        .celestial-body-sun {
-            color: #fb923c;
-            filter: drop-shadow(0 0 10px rgba(251, 146, 60, 0.75));
-            transform: translate(115%, 115%);
-            opacity: 0;
-        }
-
         /* Mobile Button Wrapper */
         .mobile-theme-switch-btn {
             width: 100%;
@@ -1653,13 +1448,6 @@
 
         .mobile-theme-switch-btn:hover {
             background: rgba(255, 255, 255, 0.12);
-        }
-
-        .celestial-inline-orb {
-            width: 32px !important;
-            height: 32px !important;
-            min-width: 32px !important;
-            min-height: 32px !important;
         }
 
         /* ═══════════════════════════════════════════
@@ -1776,11 +1564,6 @@
                 color: #000000 !important;
             }
 
-            [data-theme="light"] .theme-mode-text-mobile {
-                color: #000000 !important;
-                font-weight: 600 !important;
-            }
-
             [data-theme="light"] .header-user-name,
             [data-theme="light"] .header-user-name span {
                 color: #000000 !important;
@@ -1802,36 +1585,6 @@
 
         [data-theme="light"] .nav-scrim {
             background: rgba(0, 0, 0, 0.45) !important;
-        }
-
-        /* Light Theme Overrides for Celestial Components */
-        [data-theme="light"] .celestial-sky-night {
-            opacity: 0;
-        }
-
-        [data-theme="light"] .celestial-sky-day {
-            opacity: 1;
-        }
-
-        [data-theme="light"] .celestial-body-moon {
-            transform: translate(-115%, 115%);
-            opacity: 0;
-        }
-
-        [data-theme="light"] .celestial-body-sun {
-            transform: none;
-            opacity: 1;
-        }
-
-        [data-theme="light"] .celestial-theme-toggle {
-            background: #4ea8ff;
-            border-color: rgba(14, 165, 233, 0.4);
-            box-shadow: 0 2px 10px rgba(14, 165, 233, 0.22), inset 0 1px 2px rgba(255, 255, 255, 0.8);
-        }
-
-        [data-theme="light"] .celestial-theme-toggle:hover {
-            border-color: rgba(14, 165, 233, 0.7);
-            box-shadow: 0 4px 16px rgba(14, 165, 233, 0.35);
         }
 
         [data-theme="light"] .mobile-theme-switch-btn {
@@ -1929,7 +1682,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261110_v4">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261113_v7">
  </head>
 
 <body
@@ -1967,47 +1720,37 @@
                 <div class="landing-logo-copy-box"
                     style="display: flex; flex-direction: column; justify-content: center; line-height: 1.18;">
                     <span class="landing-logo-title"
-                        style="font-size: 0.98rem; font-weight: 800; letter-spacing: -0.01em;">SHREE DAKSHA ACADEMY PU COLLEGE</span>
+                        style="font-size: 0.98rem; font-weight: 800; letter-spacing: -0.01em;">SHREE DAKSHA ACADEMY</span>
                     <span class="landing-logo-meta"
-                        style="font-size: 0.62rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">RECOGNIZED BY GOVT. OF KARNATAKA &bull; BU &bull; AICTE</span>
+                        style="font-size: 0.62rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">Affiliated to Bengaluru University and approved by AICTE.</span>
                     <span class="landing-logo-addr" style="font-size: 0.58rem; color: #64748b;">No.596, Andrahalli Main Road, Bengaluru - 560091</span>
+                    <span class="landing-logo-programmes">Degree Programmes: BCA · MCA</span>
                 </div>
             </a>
 
             <nav class="header-nav-center" id="headerNavCenter">
                 <!-- Standard Navigation -->
                 <ul class="image-like-nav" id="mainBreadcrumb">
-                    <li><a href="{{ url_for('events_list') }}#hero" class="nav-link active" data-section="hero"
-                            onclick="return scrollToSection('hero', event);">Home</a></li>
-                    <li><a href="{{ url_for('events_list') }}#stats" class="nav-link" data-section="stats"
-                            onclick="return scrollToSection('stats', event);">Highlights</a></li>
-                    <li><a href="{{ url_for('events_list') }}#about" class="nav-link" data-section="about"
-                            onclick="return scrollToSection('about', event);">About us</a></li>
-                    <li><a href="{{ url_for('events_list') }}#events" class="nav-link" data-section="events"
-                            onclick="return scrollToSection('events', event);">Event</a></li>
-                    <li><a href="{{ url_for('events_list') }}#rules" class="nav-link" data-section="rules"
-                            onclick="return scrollToSection('rules', event);">Rules</a></li>
-                    <li><a href="{{ url_for('events_list') }}#registration" class="nav-link" data-section="registration"
-                            onclick="return scrollToSection('registration', event);">Procedures</a></li>
-                    <li><a href="{{ url_for('events_list') }}#faq" class="nav-link" data-section="faq"
-                            onclick="return scrollToSection('faq', event);">FAQ</a></li>
-                    <li><a href="{{ url_for('events_list') }}#location" class="nav-link" data-section="location"
-                            onclick="return scrollToSection('location', event);">Map</a></li>
-                    <li><a href="{{ url_for('events_list') }}#contact" class="nav-link" data-section="contact"
-                            onclick="return scrollToSection('contact', event);">Contact</a></li>
+                    <li><a href="{{ url_for('events_list') }}#hero" class="nav-link active" data-section="hero">Home</a></li>
+                    <li><a href="{{ url_for('events_list') }}#stats" class="nav-link" data-section="stats">Highlights</a></li>
+                    <li><a href="{{ url_for('events_list') }}#about" class="nav-link" data-section="about">About us</a></li>
+                    <li><a href="{{ url_for('events_list') }}#events" class="nav-link" data-section="events">Event</a></li>
+                    <li><a href="{{ url_for('events_list') }}#rules" class="nav-link" data-section="rules">Rules</a></li>
+                    <li><a href="{{ url_for('events_list') }}#registration" class="nav-link" data-section="registration">Procedures</a></li>
+                    <li><a href="{{ url_for('events_list') }}#faq" class="nav-link" data-section="faq">FAQ</a></li>
+                    <li><a href="{{ url_for('events_list') }}#location" class="nav-link" data-section="location">Map</a></li>
+                    <li><a href="{{ url_for('events_list') }}#contact" class="nav-link" data-section="contact">Contact</a></li>
 
                     {% if session.get('user_id') %}
                     {% if session.get('role') == 'admin' %}
                     <li><a href="{{ url_for('admin_dashboard') }}"
                             class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}"
-                            style="color: #60a5fa !important; font-weight: 700; background: rgba(37, 99, 235, 0.2); border: 1px solid rgba(96, 165, 250, 0.35);">⚡
-                            Dashboard</a>
+                            style="color: #60a5fa !important; font-weight: 700; background: rgba(37, 99, 235, 0.2); border: 1px solid rgba(96, 165, 250, 0.35);">Dashboard</a>
                     </li>
                     {% elif session.get('role') == 'member' %}
                     <li><a href="{{ url_for('member_dashboard') }}"
                             class="nav-link {% if request.path == '/member/dashboard' %}active{% endif %}"
-                            style="color: #60a5fa !important; font-weight: 700; background: rgba(37, 99, 235, 0.2); border: 1px solid rgba(96, 165, 250, 0.35);">⚡
-                            Dashboard</a>
+                            style="color: #60a5fa !important; font-weight: 700; background: rgba(37, 99, 235, 0.2); border: 1px solid rgba(96, 165, 250, 0.35);">Dashboard</a>
                     </li>
                     {% endif %}
                     {% endif %}
@@ -2015,51 +1758,20 @@
 
                 <div class="header-actions mobile-visible">
                     <button type="button" class="mobile-theme-switch-btn" id="themeToggleBtnMobile"
-                        onclick="toggleSiteTheme()" aria-label="Toggle Bright or Dark theme">
-                        <span class="celestial-theme-toggle celestial-inline-orb" aria-hidden="true">
-                            <span class="celestial-sky celestial-sky-night">
-                                <span class="celestial-star"
-                                    style="left:24%; top:22%; width:2.8px; height:2.8px; --twinkle-dur:2.1s; --twinkle-del:0s;"></span>
-                                <span class="celestial-star"
-                                    style="left:66%; top:16%; width:2px; height:2px; --twinkle-dur:2.6s; --twinkle-del:-0.5s;"></span>
-                                <span class="celestial-star"
-                                    style="left:80%; top:42%; width:3.2px; height:3.2px; --twinkle-dur:1.9s; --twinkle-del:-1.0s;"></span>
-                                <span class="celestial-star"
-                                    style="left:38%; top:58%; width:2px; height:2px; --twinkle-dur:2.9s; --twinkle-del:-1.5s;"></span>
-                                <span class="celestial-star"
-                                    style="left:58%; top:74%; width:2.4px; height:2.4px; --twinkle-dur:2.3s; --twinkle-del:-2.0s;"></span>
-                                <span class="celestial-star"
-                                    style="left:14%; top:72%; width:2px; height:2px; --twinkle-dur:2.5s; --twinkle-del:-2.5s;"></span>
-                            </span>
-                            <span class="celestial-sky celestial-sky-day"></span>
-                            <span class="celestial-body celestial-body-moon">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-                                </svg>
-                            </span>
-                            <span class="celestial-body celestial-body-sun">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="4" />
-                                    <path
-                                        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-                                </svg>
-                            </span>
-                        </span>
-                        <span class="theme-mode-text-mobile">Switch to Bright Theme</span>
+                        onclick="toggleSiteTheme(event)" aria-label="Choose appearance" aria-haspopup="dialog"
+                        aria-controls="appearancePanel" aria-expanded="false">
+                        <svg class="appearance-mobile-mark" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17"/></svg>
+                        <span>Appearance</span>
                     </button>
                     {% if session.get('user_id') %}
                     <div class="header-user-name"
                         style="display:flex; align-items:center; gap:8px; color:#e2e8f0; font-weight:600; padding:12px 0;">
-                        <span>👤 {{ session.get('full_name', session.get('username')) }}</span>
+                        <span>{{ session.get('full_name', session.get('username')) }}</span>
                     </div>
                     {% if session.get('role') == 'admin' %}
                     <a href="{{ url_for('admin_dashboard') }}" class="header-btn"
                         style="margin-bottom: 6px;">Dashboard</a>
-                    <a href="{{ url_for('qr_scanner') }}" class="header-btn" style="margin-bottom: 6px;">📱 QR
-                        Scanner</a>
+                    <a href="{{ url_for('qr_scanner') }}" class="header-btn" style="margin-bottom: 6px;">QR Scanner</a>
                     <a href="{{ url_for('attendance_manager') }}" class="header-btn"
                         style="margin-bottom: 6px;">Attendance</a>
                     <a href="{{ url_for('certificates_manager') }}" class="header-btn"
@@ -2068,14 +1780,13 @@
                     {% elif session.get('role') == 'member' %}
                     <a href="{{ url_for('member_dashboard') }}" class="header-btn"
                         style="margin-bottom: 6px;">Dashboard</a>
-                    <a href="{{ url_for('qr_scanner') }}" class="header-btn" style="margin-bottom: 6px;">📱 QR
-                        Scanner</a>
+                    <a href="{{ url_for('qr_scanner') }}" class="header-btn" style="margin-bottom: 6px;">QR Scanner</a>
                     <a href="{{ url_for('members_list') }}" class="header-btn" style="margin-bottom: 6px;">Members</a>
                     {% endif %}
                     <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
                     {% else %}
                     <a href="#events" class="header-cta-classic"
-                        onclick="window.closeMobileNav && window.closeMobileNav(); return scrollToSection('events', event);"
+                        onclick="window.closeMobileNav && window.closeMobileNav();"
                         style="margin-top:16px; width:100%;">
                         <span>Register for Event &rarr;</span>
                     </a>
@@ -2084,37 +1795,10 @@
             </nav>
 
             <div class="header-actions desktop-actions">
-                <button type="button" class="celestial-theme-toggle" id="themeToggleBtn" onclick="toggleSiteTheme()"
-                    aria-label="Toggle Bright or Dark theme" title="Switch between Dark and Bright theme">
-                    <span class="celestial-sky celestial-sky-night" aria-hidden="true">
-                        <span class="celestial-star"
-                            style="left:24%; top:22%; width:3.2px; height:3.2px; --twinkle-dur:2.1s; --twinkle-del:0s;"></span>
-                        <span class="celestial-star"
-                            style="left:66%; top:16%; width:2.4px; height:2.4px; --twinkle-dur:2.6s; --twinkle-del:-0.53s;"></span>
-                        <span class="celestial-star"
-                            style="left:80%; top:42%; width:3.6px; height:3.6px; --twinkle-dur:1.9s; --twinkle-del:-1.06s;"></span>
-                        <span class="celestial-star"
-                            style="left:38%; top:58%; width:2.2px; height:2.2px; --twinkle-dur:2.9s; --twinkle-del:-1.59s;"></span>
-                        <span class="celestial-star"
-                            style="left:58%; top:74%; width:2.8px; height:2.8px; --twinkle-dur:2.3s; --twinkle-del:-2.12s;"></span>
-                        <span class="celestial-star"
-                            style="left:14%; top:72%; width:2.4px; height:2.4px; --twinkle-dur:2.5s; --twinkle-del:-2.65s;"></span>
-                    </span>
-                    <span class="celestial-sky celestial-sky-day" aria-hidden="true"></span>
-                    <span class="celestial-body celestial-body-moon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-                        </svg>
-                    </span>
-                    <span class="celestial-body celestial-body-sun" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="4" />
-                            <path
-                                d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-                        </svg>
-                    </span>
+                <button type="button" class="appearance-trigger-icon" id="themeToggleBtn"
+                    onclick="toggleSiteTheme(event)" aria-label="Choose appearance" aria-haspopup="dialog"
+                    aria-controls="appearancePanel" aria-expanded="false" title="Choose appearance">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17"/></svg>
                 </button>
                 {% if session.get('user_id') %}
                 <div class="header-user-name"
@@ -2124,8 +1808,7 @@
                 <a href="{{ url_for('logout') }}" class="header-btn logout-btn"
                     style="min-width: max-content;">Logout</a>
                 {% else %}
-                <a href="#events" class="header-cta-classic" id="headerRegisterBtn"
-                    onclick="return scrollToSection('events', event);">
+                <a href="#events" class="header-cta-classic" id="headerRegisterBtn">
                     <span>Register for Event</span>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
@@ -2147,6 +1830,26 @@
             </button>
         </div>
     </header>
+    <section class="appearance-panel" id="appearancePanel" role="dialog" aria-label="Choose appearance" hidden>
+        <div class="appearance-panel-heading">
+            <div><h2>Choose your palette</h2>
+                <p>Set the campus mood for this device.</p></div>
+            <button type="button" class="appearance-close" aria-label="Close appearance panel"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m5 5 10 10M15 5 5 15"/></svg></button>
+        </div>
+        <div class="appearance-options" role="group" aria-label="Color themes">
+            <button type="button" class="appearance-choice" data-theme-choice="light" aria-pressed="false">
+                <span class="appearance-choice-top"><strong>Daylight</strong><span>Light</span></span>
+                <span class="appearance-preview appearance-preview-light" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="appearance-choice-note">Clear, calm, and open</span>
+            </button>
+            <button type="button" class="appearance-choice" data-theme-choice="dark" aria-pressed="false">
+                <span class="appearance-choice-top"><strong>After hours</strong><span>Dark</span></span>
+                <span class="appearance-preview appearance-preview-dark" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="appearance-choice-note">Layered forest charcoal with soft contrast</span>
+            </button>
+        </div>
+        <p class="appearance-saved-note">Your choice is saved on this device.</p>
+    </section>
     {% endif %}
 
     <!-- Flash Messages (if any) -->
@@ -2191,14 +1894,14 @@
                 <!-- Column 2: Quick Links -->
                 <div class="footer-col">
                     <h4>Quick Navigation</h4>
-                    <a href="#hero" onclick="return scrollToSection('hero', event);">
+                    <a href="#hero">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                         </svg>
                         Home
                     </a>
-                    <a href="#stats" onclick="return scrollToSection('stats', event);">
+                    <a href="#stats">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polygon
@@ -2206,7 +1909,7 @@
                         </svg>
                         Highlights
                     </a>
-                    <a href="#about" onclick="return scrollToSection('about', event);">
+                    <a href="#about">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10" />
@@ -2215,7 +1918,7 @@
                         </svg>
                         About us
                     </a>
-                    <a href="#events" onclick="return scrollToSection('events', event);">
+                    <a href="#events">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
@@ -2225,7 +1928,7 @@
                         </svg>
                         Event
                     </a>
-                    <a href="#rules" onclick="return scrollToSection('rules', event);">
+                    <a href="#rules">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10" />
@@ -2233,7 +1936,7 @@
                         </svg>
                         Rules
                     </a>
-                    <a href="#registration" onclick="return scrollToSection('registration', event);">
+                    <a href="#registration">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -2241,7 +1944,7 @@
                         </svg>
                         Procedures
                     </a>
-                    <a href="#faq" onclick="return scrollToSection('faq', event);">
+                    <a href="#faq">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10" />
@@ -2250,7 +1953,7 @@
                         </svg>
                         FAQ
                     </a>
-                    <a href="#location" onclick="return scrollToSection('location', event);">
+                    <a href="#location">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
@@ -2258,7 +1961,7 @@
                         </svg>
                         Map
                     </a>
-                    <a href="#contact" onclick="return scrollToSection('contact', event);">
+                    <a href="#contact">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -2304,7 +2007,7 @@
                         <span class="footer-contact-icon">📍</span>
                         <div class="footer-contact-address">
                             <span class="footer-contact-label">Campus Address</span>
-                            No 596, Andrahalli Main Rd, Lingadeeranahalli, Bengaluru 560091
+                            No 596, Andrahalli Main Rd, Lingadeeranahalli, Bengaluru 560091<br>Degree Programmes: BCA · MCA
                         </div>
                     </div>
                 </div>
@@ -2364,7 +2067,7 @@
             <div class="footer-bottom">
                 <div>&copy; 2026 Shree Daksha Academy. All rights reserved.</div>
                 <div style="display: flex; gap: 20px; align-items: center;">
-                    <a href="#hero" class="footer-back-to-top" onclick="return scrollToSection('hero', event);">Back to
+                    <a href="#hero" class="footer-back-to-top">Back to
                         Top &uarr;</a>
                 </div>
             </div>
@@ -2373,8 +2076,6 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{{ url_for('static', filename='js/particletext.js') }}"></script>
-
     <script>
         // --- Mobile Nav Toggle & Click Handling ---
         (function () {
@@ -2431,56 +2132,54 @@
         let isNavAutoScrolling = false;
         let navScrollTimer = null;
 
-        // Universal Smooth Scroll Helper
-        window.scrollToSection = function (targetId, evt) {
-            if (evt) {
-                if (typeof evt.preventDefault === 'function') evt.preventDefault();
-            }
-            if (window.closeMobileNav) window.closeMobileNav();
+        // Programmatic controls use native browser scrolling; fragment links stay native.
+        window.initScrollReveal = function (selector, options) {
+            const targets = Array.from(document.querySelectorAll(selector || '.scroll-reveal'));
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!targets.length || reduceMotion || !('IntersectionObserver' in window)) return null;
 
+            const settings = options || {};
+            const rootMargin = settings.rootMargin || '0px 0px -8% 0px';
+            const observer = new IntersectionObserver((entries, currentObserver) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('shared-reveal-visible');
+                    currentObserver.unobserve(entry.target);
+                });
+            }, { root: null, rootMargin, threshold: settings.threshold || 0.08 });
+
+            targets.forEach((target, index) => {
+                target.classList.add('shared-reveal-pending');
+                target.style.setProperty('--shared-reveal-delay', `${Math.min(index, 3) * 70}ms`);
+                const bounds = target.getBoundingClientRect();
+                if (bounds.top < window.innerHeight && bounds.bottom > 0) {
+                    target.classList.add('shared-reveal-visible');
+                } else {
+                    observer.observe(target);
+                }
+            });
+
+            return observer;
+        };
+
+        window.scrollToSection = function (targetId, evt) {
+            if (evt && typeof evt.preventDefault === 'function') evt.preventDefault();
+            if (window.closeMobileNav) window.closeMobileNav();
             isNavAutoScrolling = true;
             clearTimeout(navScrollTimer);
             navScrollTimer = setTimeout(() => { isNavAutoScrolling = false; }, 900);
 
             const sectionKey = (targetId === 'hero' || targetId === 'top') ? 'hero' : targetId;
-            if (typeof window.setActiveBreadcrumb === 'function') {
-                window.setActiveBreadcrumb(sectionKey);
-            }
-
+            if (typeof window.setActiveBreadcrumb === 'function') window.setActiveBreadcrumb(sectionKey);
+            const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
             if (targetId === 'hero' || targetId === 'top') {
-                if (window.lenis && typeof window.lenis.scrollTo === 'function') {
-                    try { window.lenis.scrollTo(0, { duration: 0.9 }); } catch (e) { }
-                }
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.scrollTo({ top: 0, behavior });
                 try { window.history.replaceState(null, '', window.location.pathname); } catch (e) { }
                 return false;
             }
-
             const target = document.getElementById(targetId);
             if (target) {
-                const header = document.querySelector('.landing-header');
-                const headerHeight = header ? header.offsetHeight : 68;
-                let scrolledWithLenis = false;
-
-                if (window.lenis && typeof window.lenis.scrollTo === 'function') {
-                    try {
-                        window.lenis.scrollTo(target, { offset: -headerHeight, duration: 1.0 });
-                        scrolledWithLenis = true;
-                    } catch (e) {
-                        scrolledWithLenis = false;
-                    }
-                }
-
-                if (!scrolledWithLenis) {
-                    const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
-                    const elementPosition = target.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + scrollY - headerHeight;
-                    try {
-                        window.scrollTo({ top: Math.max(0, offsetPosition), behavior: 'smooth' });
-                    } catch (err) {
-                        target.scrollIntoView({ behavior: 'smooth' });
-                    }
-                }
+                target.scrollIntoView({ behavior, block: 'start' });
                 try { window.history.replaceState(null, '', '#' + targetId); } catch (e) { }
             } else {
                 window.location.href = '{{ url_for("events_list") }}' + '#' + targetId;
@@ -2669,65 +2368,12 @@
             });
         })();
 
-        // --- 6. Universal Color Theme Switching Engine (Celestial Arc Sun-Moon Toggle) ---
+        // --- Shared appearance selection and theme persistence ---
         (function () {
-            const MOON = { side: -1, spin: 25 };
-            const SUN = { side: 1, spin: 120 };
-            const ARC_RADIUS = 115;
-            const QUARTER_TURN = Math.PI / 2;
-            const KEYFRAME_STEPS = 30;
-            const DURATION = 180; // brief theme color transition
-            const SKY_EASING = 'cubic-bezier(0.65, 0, 0.35, 1)';
-            const PAGE_FADE_STYLE_ID = 'sun-moon-theme-fade';
+            const DURATION = 180;
+            const PAGE_FADE_STYLE_ID = 'appearance-theme-fade';
             const PAGE_FADE_PROPERTIES = 'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke';
             let pageFadeCleanup = null;
-
-            function arcPoint(side, angle) {
-                return {
-                    x: side * ARC_RADIUS * Math.sin(angle),
-                    y: ARC_RADIUS * (1 - Math.cos(angle))
-                };
-            }
-            function easeInCubic(t) { return t * t * t; }
-            function easeOutBack(t) {
-                const overshoot = 1.4;
-                return 1 + (overshoot + 1) * Math.pow(t - 1, 3) + overshoot * Math.pow(t - 1, 2);
-            }
-            function settingKeyframes(side, spin) {
-                const frames = [];
-                for (let i = 0; i <= KEYFRAME_STEPS; i++) {
-                    const t = i / KEYFRAME_STEPS;
-                    const travelled = easeInCubic(t);
-                    const pt = arcPoint(side, travelled * QUARTER_TURN);
-                    frames.push({
-                        offset: t,
-                        transform: `translate(${pt.x}%, ${pt.y}%) rotate(${side * spin * travelled}deg)`,
-                        opacity: t < 0.55 ? 1 : (1 - t) / 0.45
-                    });
-                }
-                return frames;
-            }
-            function risingKeyframes(side, spin) {
-                const frames = [];
-                for (let i = 0; i <= KEYFRAME_STEPS; i++) {
-                    const t = i / KEYFRAME_STEPS;
-                    const remaining = 1 - easeOutBack(t);
-                    const pt = arcPoint(side, remaining * QUARTER_TURN);
-                    frames.push({
-                        offset: t,
-                        transform: `translate(${pt.x}%, ${pt.y}%) rotate(${side * spin * remaining}deg) scale(${1 - 0.28 * remaining})`,
-                        opacity: Math.min(1, t / 0.3)
-                    });
-                }
-                return frames;
-            }
-
-            const KEYFRAMES = {
-                moonSets: settingKeyframes(MOON.side, MOON.spin),
-                moonRises: risingKeyframes(MOON.side, MOON.spin),
-                sunSets: settingKeyframes(SUN.side, SUN.spin),
-                sunRises: risingKeyframes(SUN.side, SUN.spin)
-            };
 
             function prefersReducedMotion() {
                 return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2749,54 +2395,21 @@
                 }, duration + 100);
             }
 
-            function animateCelestialToggle(toggleEl, nextTheme, duration) {
-                if (!toggleEl || prefersReducedMotion() || typeof toggleEl.animate !== 'function') return;
-                const moon = toggleEl.querySelector('.celestial-body-moon');
-                const sun = toggleEl.querySelector('.celestial-body-sun');
-                const nightSky = toggleEl.querySelector('.celestial-sky-night');
-                const daySky = toggleEl.querySelector('.celestial-sky-day');
-                if (!moon || !sun) return;
-
-                const toLight = (nextTheme === 'light');
-                const settingAnim = (toLight ? moon : sun).animate(toLight ? KEYFRAMES.moonSets : KEYFRAMES.sunSets, {
-                    duration: duration * 0.65,
-                    fill: 'both'
+            function updateThemeLabels() {
+                ['themeToggleBtn', 'themeToggleBtnMobile'].forEach(id => {
+                    const trigger = document.getElementById(id);
+                    if (trigger) {
+                        trigger.setAttribute('aria-label', 'Choose appearance');
+                        trigger.setAttribute('title', 'Choose appearance');
+                    }
                 });
-                const risingAnim = (toLight ? sun : moon).animate(toLight ? KEYFRAMES.sunRises : KEYFRAMES.moonRises, {
-                    duration: duration * 0.64,
-                    delay: duration * 0.36,
-                    fill: 'both'
-                });
-
-                if (nightSky && daySky) {
-                    const skyOpts = { duration: duration, easing: SKY_EASING, fill: 'both' };
-                    nightSky.animate([{ opacity: toLight ? 1 : 0 }, { opacity: toLight ? 0 : 1 }], skyOpts);
-                    daySky.animate([{ opacity: toLight ? 0 : 1 }, { opacity: toLight ? 1 : 0 }], skyOpts);
-                }
             }
 
-            function updateThemeLabels(theme) {
-                const isLight = (theme === 'light');
-                const mText = document.querySelector('.theme-mode-text-mobile');
-                if (mText) mText.textContent = isLight ? 'Switch to Dark Theme' : 'Switch to Bright Theme';
-                const dBtn = document.getElementById('themeToggleBtn');
-                const mBtn = document.getElementById('themeToggleBtnMobile');
-                if (mBtn) mBtn.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to bright theme');
-                if (dBtn) {
-                    dBtn.setAttribute('title', isLight ? 'Switch to Dark Theme' : 'Switch to Bright Theme');
-                    dBtn.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
-                }
-            }
-
-            window.toggleSiteTheme = function () {
-                const current = document.documentElement.getAttribute('data-theme') || 'dark';
-                const next = (current === 'light') ? 'dark' : 'light';
-
-                // Play celestial celestial arc swap
-                const toggles = document.querySelectorAll('.celestial-theme-toggle');
-                toggles.forEach(toggleEl => {
-                    animateCelestialToggle(toggleEl, next, DURATION);
-                });
+            window.setSiteTheme = function (theme) {
+                if (theme !== 'light' && theme !== 'dark') return false;
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                const next = theme;
+                if (current === next) return true;
 
                 // Apply smooth page-wide cross-fade
                 applyPageFade(DURATION);
@@ -2809,72 +2422,69 @@
                     localStorage.setItem('dx-theme', next);
                     localStorage.setItem('sda_theme', next);
                     const themeMeta = document.getElementById('themeColorMeta');
-                    if (themeMeta) themeMeta.setAttribute('content', next === 'dark' ? '#121212' : '#F5F5F5');
+                    if (themeMeta) themeMeta.setAttribute('content', next === 'dark' ? '#080808' : '#FFFFFF');
                 } catch (e) { }
 
                 updateThemeLabels(next);
+                document.querySelectorAll('[data-theme-choice]').forEach(choice => {
+                    choice.setAttribute('aria-pressed', String(choice.dataset.themeChoice === next));
+                });
                 window.dispatchEvent(new CustomEvent('sda-theme-changed', { detail: { theme: next } }));
+                return true;
+            };
+            window.toggleSiteTheme = function (event) {
+                const panel = document.getElementById('appearancePanel');
+                if (!panel) return;
+                const opening = panel.hidden;
+                panel.hidden = !opening;
+                document.querySelectorAll('#themeToggleBtn, #themeToggleBtnMobile').forEach(trigger => {
+                    trigger.setAttribute('aria-expanded', String(opening));
+                });
+                if (opening) {
+                    if (event && event.currentTarget) panel.dataset.openerId = event.currentTarget.id;
+                    const current = document.documentElement.getAttribute('data-theme') || 'light';
+                    const selected = panel.querySelector(`[data-theme-choice="${current}"]`);
+                    if (selected) selected.focus();
+                } else if (event && event.currentTarget) {
+                    event.currentTarget.focus();
+                }
             };
 
             document.addEventListener('DOMContentLoaded', () => {
                 const initialTheme = document.documentElement.getAttribute('data-theme') || 'dark';
                 const themeMeta = document.getElementById('themeColorMeta');
-                if (themeMeta) themeMeta.setAttribute('content', initialTheme === 'dark' ? '#121212' : '#F5F5F5');
+                if (themeMeta) themeMeta.setAttribute('content', initialTheme === 'dark' ? '#080808' : '#FFFFFF');
                 const current = document.documentElement.getAttribute('data-theme') || 'dark';
                 updateThemeLabels(current);
+                const panel = document.getElementById('appearancePanel');
+                const closePanel = (returnFocus = true) => {
+                    if (!panel || panel.hidden) return;
+                    panel.hidden = true;
+                    document.querySelectorAll('#themeToggleBtn, #themeToggleBtnMobile').forEach(trigger => {
+                        trigger.setAttribute('aria-expanded', 'false');
+                    });
+                    if (returnFocus) document.getElementById(panel.dataset.openerId || 'themeToggleBtn')?.focus();
+                };
+                document.querySelectorAll('[data-theme-choice]').forEach(choice => {
+                    choice.setAttribute('aria-pressed', String(choice.dataset.themeChoice === current));
+                    choice.addEventListener('click', () => {
+                        window.setSiteTheme(choice.dataset.themeChoice);
+                        closePanel(true);
+                    });
+                });
+                panel?.querySelector('.appearance-close')?.addEventListener('click', () => closePanel(true));
+                document.addEventListener('pointerdown', event => {
+                    if (panel && !panel.hidden && !panel.contains(event.target) &&
+                        !event.target.closest('#themeToggleBtn, #themeToggleBtnMobile')) closePanel(false);
+                });
+                document.addEventListener('keydown', event => {
+                    if (event.key === 'Escape' && panel && !panel.hidden) closePanel(true);
+                });
             });
         })();
     </script>
 
-    <!-- Lenis Smooth Scroll Engine -->
-    <script src="{{ url_for('static', filename='js/lenis.min.js') }}"></script>
     <script>
-        (function () {
-            if (typeof Lenis !== 'undefined') {
-                const isTouchMobile = ('ontouchstart' in window && window.innerWidth <= 1024) || (window.innerWidth <= 768);
-
-                if (!isTouchMobile) {
-                    const lenis = new Lenis({
-                        duration: 1.0,
-                        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                        orientation: 'vertical',
-                        gestureOrientation: 'vertical',
-                        smoothWheel: true,
-                        wheelMultiplier: 1.0,
-                        syncTouch: false,
-                        touchMultiplier: 1.0,
-                        infinite: false
-                    });
-
-                    function raf(time) {
-                        lenis.raf(time);
-                        requestAnimationFrame(raf);
-                    }
-                    requestAnimationFrame(raf);
-                    lenis.on('scroll', () => {
-                        window.dispatchEvent(new CustomEvent('site-scroll'));
-                    });
-                    window.lenis = lenis;
-                } else {
-                    // Mobile & touch screens: rely on hardware-accelerated native momentum scrolling
-                    window.lenis = null;
-                }
-
-                // Seamless anchor navigation routed through universal scrollToSection
-                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                    if (anchor.getAttribute('onclick')) return;
-                    anchor.addEventListener('click', function (e) {
-                        const hash = this.getAttribute('href');
-                        if (hash && hash.length > 1) {
-                            const targetId = hash.replace(/^#/, '');
-                            if (typeof window.scrollToSection === 'function') {
-                                window.scrollToSection(targetId, e);
-                            }
-                        }
-                    });
-                });
-            }
-        })();
         // Reading depth scroll progress bar
         (function () {
             function updateScrollProgress() {
@@ -2890,7 +2500,7 @@
     </script>
 
     <!-- Liquid Button Engine -->
-    <script src="{{ url_for('static', filename='js/liquid-button.js') }}?v=20261110_v8"></script>
+    <script src="{{ url_for('static', filename='js/liquid-button.js') }}?v=20261113_v7"></script>
 
     {% block extra_js %}{% endblock %}
 </body>

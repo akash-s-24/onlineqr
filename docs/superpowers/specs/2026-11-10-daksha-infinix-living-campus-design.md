@@ -2,14 +2,14 @@
 
 ## Intent
 
-Replace the current inconsistent, effect-heavy visual system with one professional responsive system across public event pages, registration, and authenticated workspaces. Make event information and registration easy to scan, give light and dark modes distinct layered color identities, and remove the moving space/starfield and particle headline. Keep existing product facts, routes, and workflows.
+Replace the current inconsistent, effect-heavy visual system with one professional responsive system across public event pages, registration, and authenticated workspaces. Make event information and registration easy to scan, give light and dark modes distinct monochrome layered identities, and remove the moving space/starfield and particle headline. Keep existing product facts, routes, and workflows.
 
 ## Goals
 
 - Give every route a coherent header, type scale, spacing rhythm, surface palette, and control language.
-- Use a multi-hue dark environment that feels like a contemporary campus at night, not a single black fill or a space-flight view.
+- Use a layered black/charcoal dark environment with grayscale depth and no space-flight or starfield treatment.
 - Retain the 3D CD carousel exactly as it currently behaves and looks. Recolor only its surrounding stage/background to fit the selected theme.
-- Remove ordinary button pop, press, liquid, and mechanical-keyboard effects. Use clear static button shapes with color-only hover and strong keyboard focus.
+- Use a restrained theme-aware candy-style surface and brief mechanical press only for event-card Rules and Contact controls inside the Events grid. Keep Contact Us controls and all other buttons unchanged.
 - Replace the current theme toggle with an attractive, accessible appearance panel showing the two modes and their palette previews.
 - Keep the site responsive, performant, and usable when reduced motion is enabled.
 
@@ -24,30 +24,23 @@ Replace the current inconsistent, effect-heavy visual system with one profession
 ## Anti-goals
 
 - No backward-moving stars, space-flight simulation, particle headline, neon glow, or black-only dark background.
-- No button bounce, fake keyboard key, compression, ripple, or liquid-fill animation on regular actions.
+- Avoid changing button animations outside the Events section; its Rules and Contact actions use a short mechanical press without a bounce, ripple, liquid fill, or keyboard-key appearance.
 - No hidden-by-default content that depends on scroll animation to become readable.
 - No generic rounded-card grid for every section; use varied editorial section structures and a deliberate reading rhythm.
 
-## Approaches considered
+## Approaches considered (initial exploration)
 
 1. **A — Festival Field Guide:** Warm ivory, evergreen, rust, and brass; a campus-program/editorial layout. It is welcoming and distinctive but makes the intended multi-color dark atmosphere less immediate.
-2. **B — Living Campus (selected):** Mineral mist and deep ocean/blue-green, with jade and restrained coral. The dark mode gains layered teal, cyan, and muted coral ambient color; the light mode stays clean and readable. This was selected by the user from the two visual mockups because it gives the theme depth without retaining the space visual.
-3. **Hybrid palettes:** Use A's light palette with B's dark palette. This is viable but weakens the identity across modes; the user selected B as a complete system.
+2. **B — Living Campus (initial selection):** Mineral mist and deep ocean/blue-green, with jade and restrained coral. This was the initial direction before the user updated the palette to monochrome.
+3. **Hybrid palettes:** Use A's light palette with B's dark palette. This is viable but weakens the identity across modes.
 
-## Approved direction
+## Initial approved direction (superseded)
 
-**Living Campus.** Use the user's selected B mockup as visual reference: [generated direction board](/Users/akash/.codex/generated_images/01a1c591-0382-7a41-a39c-4681fa16dfe0/exec-a67e46d6-ec61-4d75-a9d8-63265a688695.png). Its campus image is illustrative only and must not be presented as a verified photograph of the actual campus.
+**Living Campus.** The initial selected B mockup was used as a reference: [generated direction board](/Users/akash/.codex/generated_images/01a1c591-0382-7a41-a39c-4681fa16dfe0/exec-a67e46d6-ec61-4d75-a9d8-63265a688695.png). Its campus image is illustrative only and must not be presented as a verified photograph of the actual campus.
 
-### Color and appearance
+### Color and appearance (initial direction, superseded)
 
-- Light surfaces: mineral mist `#F2F6F8`, white `#FFFFFF`, pale blue-green `#E2EDF1`.
-- Light text: deep blue ink `#172C40`, secondary slate `#516779`.
-- Light actions: deep teal `#176E6A`, coral `#D36A50`; muted blue-green for supporting accents.
-- Dark base: ocean ink `#101E2C`; raised surface `#192A3A`; secondary surface `#213849`.
-- Dark text: warm white `#F2F4EF`; secondary `#B4C2C8`.
-- Dark accents: jade/cyan for primary actions and a subdued coral signal.
-- The dark background uses a deep ocean base plus overlapping low-opacity cyan, jade, and coral color fields. Animate the color field slowly (roughly 30–45 seconds), without stars or particles. Keep the underlying surface color visible, pause or simplify off-screen, and use a static layered version for reduced-motion preference.
-- Category colors remain distinct but controlled; check text/background pairs for WCAG AA.
+The original multicolor Living Campus proposal is historical context only. The current palette is specified in the user direction update below.
 
 ### Layout and content hierarchy
 
@@ -62,7 +55,7 @@ Replace the current inconsistent, effect-heavy visual system with one profession
 - Delete the starfield and particle-text animation paths from the public hero.
 - Use native scrolling and anchor behavior; no scroll hijack. Reveal only selected sections with a brief opacity/8–12px translate when they enter view, with content visible by default and a reduced-motion fallback.
 - Keep the slow ambient dark color-field motion independent of the CD carousel.
-- Ordinary buttons have no transform or animated shadow on hover/press. Hover is a subtle color change; click is immediate; focus gets a clear 2–3px theme-colored outline. Do not apply these rules to carousel discs.
+- Only Rules and Contact actions in the Events section use the restrained theme-aware candy surface and mechanical press. Contact Us, other buttons, and carousel controls remain unchanged. Keep a clear keyboard focus outline on the redesigned controls.
 - Preserve the carousel's current motion and interaction exactly.
 
 ### Appearance panel
@@ -81,3 +74,14 @@ Replace the current inconsistent, effect-heavy visual system with one profession
 ## Approval
 
 This design is a proposal for review. Implementation starts after the user approves this document.
+
+
+## User Direction Update — 2026-11-13
+
+This update supersedes the Living Campus color direction above. Use a monochrome white theme and a layered black theme throughout the website. The dark theme may use subtle grayscale gradients for depth; remove the teal, blue, coral, and starfield colors. Update the appearance panel to show monochrome theme previews.
+
+Give only the event-grid Rules and Contact buttons a polished theme-aware candy surface and short mechanical press animation. Keep Contact Us and every other button unchanged. Preserve the CD carousel controls and animation. Remove the outdated suffix from all institution labels; use “Affiliated to Bengaluru University and approved by AICTE” and show “Degree Programmes: BCA · MCA.”
+
+## Active User Direction
+
+Use a white theme and a black theme with subtle layered depth. Apply the theme-aware mechanical candy press only to the Events-section Rules and Contact controls. Do not change Contact Us buttons or other buttons. Preserve the CD carousel, including its controls and motion; only its surrounding/background colors may follow the theme. Use “Affiliated to Bengaluru University and approved by AICTE.” under the college name, remove the outdated college suffix, and show “Degree Programmes: BCA · MCA” in the address/affiliation layout.

@@ -31,7 +31,7 @@ No distinct market position is confirmed. Preserve the product's connected event
 - Public event information, category filters, rules, schedule details, registration, payment instructions, registration passes, FAQs, campus directions, and coordinator contacts.
 - Admin and member workflows cover event management, participant and registration records, payment review, attendance, and certificate issuance/downloads.
 - Keep the existing 3D CD carousel, its disc treatment, controls, and motion intact. Its surrounding stage/background may adopt the approved theme colors.
-- Remove the starfield/space-flight background and particle-text headline. Remove press/pop/mechanical-keyboard/liquid animation from ordinary buttons while preserving their actions and accessible focus states.
+- Remove the starfield/space-flight background and particle-text headline. Use a white theme and a black theme with layered background depth. Give only the Events-section Rules and Contact controls a restrained, theme-aware mechanical candy press. Leave Contact Us and every other button unchanged, and preserve the CD carousel controls and motion.
 - Preserve the Flask routes, form fields, business rules, existing event facts, and demo payment behavior. This work changes visual structure and presentation only.
 - Existing brand assets, names, event content, and supplied institutional information are the available evidence. Do not invent event claims or imagery.
 

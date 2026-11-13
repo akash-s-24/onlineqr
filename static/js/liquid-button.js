@@ -74,6 +74,7 @@
 
   function initLiquidButton(btn, options) {
     if (!btn || btn.hasAttribute('data-liquid-initialized')) return btn;
+    if (btn.matches && btn.matches('#events .btn-card-rules, #events .btn-card-contact')) return btn;
     btn.setAttribute('data-liquid-initialized', 'true');
     btn.setAttribute('data-liquid-button', 'true');
     if (!btn.classList.contains('liquid-btn')) {
@@ -655,6 +656,9 @@
     if (!scope.querySelectorAll) return;
     const targets = scope.querySelectorAll(BUTTON_SELECTORS);
     targets.forEach((elem) => {
+      // Keep legacy effects everywhere except the Events-grid Rules/Contact controls.
+      if (elem.matches && elem.matches('#events .btn-card-rules, #events .btn-card-contact')) return;
+
       // Exclude small icon toggles or explicitly opted-out elements
       if ((elem.closest && elem.closest('.celestial-theme-toggle')) || elem.hasAttribute('data-no-liquid')) {
         return;

@@ -1,7 +1,6 @@
 // Shree Daksha Academy Service Worker - Offline Ticket Pass Cache
 const CACHE_NAME = 'sda-ticket-pass-v1';
 const STATIC_ASSETS = [
-  '/static/css/lenis.css',
   '/static/favicon.svg'
 ];
 

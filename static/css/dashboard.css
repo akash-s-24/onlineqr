@@ -1,5 +1,3 @@
-@import url('theme.css');
-
 :root {
     --dash-ink: var(--color-text-primary, #212121);
     --dash-muted: var(--color-text-secondary, #555555);
@@ -8,12 +6,12 @@
     --dash-canvas: var(--color-bg, #F5F5F5);
     --dash-blue: var(--color-primary, #0066FF);
     --dash-blue-dark: var(--color-primary-hover, #0052CC);
-    --dash-blue-soft: rgba(0, 102, 255, 0.1);
+    --dash-blue-soft: var(--primary-light, rgba(23, 110, 106, .12));
     --dash-green: var(--color-success, #28A745);
     --dash-amber: var(--color-warning, #FFC107);
     --dash-red: var(--color-error, #DC3545);
     --dash-radius: 13px;
-    --dash-focus: 0 0 0 3px rgba(233, 30, 99, .25);
+    --dash-focus: 0 0 0 3px color-mix(in srgb, var(--focus, #176E6A) 25%, transparent);
 }
 
 .sr-only {
@@ -741,4 +739,54 @@
     .workspace-logout:hover {
         transform: none;
     }
+}
+
+/* Shared semantic palette for admin/member dashboards and their data states. */
+.dashboard-shell { color: var(--text); }
+.dashboard-kicker, .dashboard-btn.primary, .dash-nav-link.active { color: var(--primary); }
+.dashboard-title, .dash-panel-title, .metric-value, .dash-table strong { color: var(--text); }
+.dashboard-subtitle, .dash-panel-note, .metric-label, .metric-meta, .dash-muted, .dash-empty { color: var(--text-2); }
+.dashboard-nav { background: var(--surface-2); border-color: var(--border-soft); box-shadow: none; backdrop-filter: none; }
+.dash-nav-pill { background: var(--surface); border: 1px solid var(--border-soft); box-shadow: 0 2px 7px rgba(10,30,43,.08); }
+.dashboard-btn { border-color: var(--border); background: var(--surface); color: var(--text); box-shadow: none; }
+.dashboard-btn:hover { border-color: var(--border-hover); background: var(--surface-2); box-shadow: none; }
+.dashboard-btn.primary { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+.dashboard-btn.primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: var(--on-primary); }
+.dashboard-btn.danger, .dash-danger { color: var(--error); border-color: var(--error-bg); background: var(--surface); }
+.dashboard-btn:focus-visible, .dashboard-nav a:focus-visible, .dash-id:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; box-shadow: none; }
+.dash-batch-bar { background: var(--primary-light); border-color: var(--border); color: var(--text); }
+.dash-modal-overlay { background: var(--overlay); backdrop-filter: blur(4px); }
+.dash-modal-box, .dash-step-card, .metric { background: var(--surface); border-color: var(--border-soft); color: var(--text); }
+.dashboard-alert { background: var(--info-bg); border-color: var(--border); color: var(--text); }
+.dashboard-alert strong { color: var(--info); }
+.dash-panel-head, .dash-toolbar { background: var(--surface); border-color: var(--border-soft); }
+.dash-table-wrap { max-width: 100%; overscroll-behavior-x: contain; scrollbar-color: var(--border-hover) transparent; }
+.dash-table-wrap::after { background: linear-gradient(to left, var(--surface), transparent); }
+.dash-table th { background: var(--surface-2); color: var(--text-2); border-color: var(--border-soft); }
+.dash-table td, .dash-list li { border-color: var(--border-soft); color: var(--text); }
+.dash-table tbody tr:hover { background: var(--surface-2); }
+.dash-id { color: var(--link); }
+.dash-id:hover { color: var(--link-hover); }
+.dash-badge { background: var(--surface-2); border-color: var(--border); color: var(--text-2); }
+.dash-badge.good { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+.dash-badge.warn { background: var(--warning-bg); border-color: var(--warning); color: var(--warning); }
+.dash-badge.bad { background: var(--error-bg); border-color: var(--error); color: var(--error); }
+.dash-badge.info { background: var(--info-bg); border-color: var(--info); color: var(--info); }
+.dash-callout { background: var(--surface-2); border-color: var(--border); color: var(--text-2); }
+.dash-form-grid label { color: var(--text-2); }
+.dash-form-grid input, .dash-form-grid textarea { background: var(--input-bg); border-color: var(--border); color: var(--text); }
+.dash-form-grid input:focus, .dash-form-grid textarea:focus { border-color: var(--focus); outline: 2px solid var(--primary-light); }
+.dash-danger .dash-panel-head { background: var(--error-bg); }
+
+@media (max-width: 700px) {
+    .dash-table-wrap { width: 100%; max-width: calc(100vw - 24px); overscroll-behavior-x: contain; }
+    .dash-panel-head { flex-direction: column; align-items: stretch; }
+    .dashboard-actions .dashboard-btn { min-height: 44px; }
+}
+
+@media (max-width: 420px) {
+    .dash-grid.metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .metric { min-width: 0; min-height: 96px; padding: 12px; }
+    .metric-label { font-size: .65rem; }
+    .metric-value { font-size: 1.6rem; }
 }

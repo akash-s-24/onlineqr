@@ -36,6 +36,6 @@ services:
       - key: COLLEGE_NAME
         value: Shree Daksha Academy
       - key: COLLEGE_SUBTITLE
-        value: Department of Computer Applications
+        value: Affiliated to Bengaluru University and approved by AICTE; Degree Programmes: BCA · MCA
       - key: EVENT_TITLE
         value: Daksha Infinix

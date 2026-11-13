@@ -308,17 +308,17 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         draw_award_emblem(draw, width - 210, 205)
 
         # 5. Top Center Institution Branding
-        # Institution Name in bold uppercase serif lettering: "SHREE DAKSHA ACADEMY PU COLLEGE"
+        # Institution Name in bold uppercase serif lettering.
         f_inst = get_font_by_name("georgiab.ttf", 52)
         f_sub1 = get_font_by_name("georgia.ttf", 20)
         f_addr = get_font_by_name("georgia.ttf", 19)
 
-        inst_name = "SHREE DAKSHA ACADEMY PU COLLEGE"
+        inst_name = "SHREE DAKSHA ACADEMY"
         draw.text((width // 2, 130), inst_name,
                   fill=border_navy, font=f_inst, anchor="mm")
 
-        # Affiliation Subtitle: "RECOGNIZED BY THE GOVT. OF KARNATAKA, AFFILIATED TO BANGALORE UNIVERSITY - APPROVED BY AICTE"
-        sub1_text = "RECOGNIZED BY THE GOVT. OF KARNATAKA, AFFILIATED TO BANGALORE UNIVERSITY - APPROVED BY AICTE"
+        # Affiliation subtitle follows the current academy branding.
+        sub1_text = "AFFILIATED TO BENGALURU UNIVERSITY AND APPROVED BY AICTE"
         draw.text((width // 2, 190), sub1_text,
                   fill=(51, 65, 85), font=f_sub1, anchor="mm")
 
@@ -326,9 +326,11 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         addr_text = "No.596, Andrahalli Main Road, Opp. D.Group Layout Arch, Bengaluru - 560091"
         draw.text((width // 2, 232), addr_text,
                   fill=(100, 116, 139), font=f_addr, anchor="mm")
+        draw.text((width // 2, 260), "DEGREE PROGRAMMES: BCA · MCA",
+                  fill=(80, 80, 80), font=f_addr, anchor="mm")
 
         # Decorative Divider Line with Center Diamond
-        divider_y = 278
+        divider_y = 298
         draw.line([(width // 2 - 380, divider_y), (width // 2 +
                   380, divider_y)], fill=border_gold, width=3)
         draw.polygon([

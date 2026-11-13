@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Admin dashboard – Shree Daksha Academy{% endblock %}
 {% block head_extra %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}?v=20261113_v2">
 <style>
     .dash-subtabs {
         display: flex;
@@ -105,7 +105,6 @@
 <div class="dashboard-shell">
     <header class="dashboard-topbar">
         <div>
-            <p class="dashboard-kicker">Administration</p>
             <h1 class="dashboard-title">Event operations</h1>
             <p class="dashboard-subtitle">Review registrations, verify payments, manage attendance, and keep participant
                 records accurate.</p>

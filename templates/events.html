@@ -24,17 +24,6 @@ EVENTS PAGE — Mobile-first & Desktop styles
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-/* Guarantee smooth mobile reveals without layout shifts */
-.scroll-reveal {
-opacity: 1;
-transform: translateY(0);
-transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.scroll-reveal.visible {
-opacity: 1 !important;
-transform: none !important;
-}
-
 .hero-wrapper, .hero-section { min-height: 100svh; height: auto !important; }
 .hero-section {
 padding: clamp(86px, 12vh, 108px) 16px 40px !important;
@@ -115,9 +104,6 @@ line-height: 1.35 !important;
 white-space: normal !important;
 text-wrap: balance !important;
 }
-
-#hero-particle-text { height: clamp(140px, 32vw, 200px) !important; margin-top: 0 !important; margin-bottom: 16px
-!important; position: relative; z-index: 5; }
 
 .hero-badge-pill {
 max-width: 96vw !important;
@@ -218,12 +204,6 @@ font-size: var(--m-text-sm) !important; font-weight: 600 !important;
 display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 6px
 !important;
 }
-.pop-btn {
-min-height: 46px !important;
-font-size: var(--m-text-base) !important;
-font-weight: 700 !important;
-}
-
 .map-section { padding: var(--m-space-section) 16px !important; }
 .map-section h2.section-title,
 #location.map-section h2.section-title,
@@ -288,9 +268,8 @@ html:not([data-theme="light"]) .header-cta-classic,
 html:not([data-theme="light"]) .hero-wrapper,
 [data-theme="dark"] .hero-wrapper { background:var(--color-bg, #121212) !important; }
 html:not([data-theme="light"]) .hero-title,
-html:not([data-theme="light"]) #heroFallbackTitle,
 [data-theme="dark"] .hero-title,
-[data-theme="dark"] #heroFallbackTitle { color:var(--color-text-primary, #E0E0E0) !important; }
+[data-theme="dark"] .hero-title { color:var(--color-text-primary, #E0E0E0) !important; }
 html:not([data-theme="light"]) .hero-subtitle,
 [data-theme="dark"] .hero-subtitle { color:var(--color-text-secondary, #A0A0A0) !important; }
 html:not([data-theme="light"]) .hero-badge-pill,
@@ -1007,6 +986,8 @@ background: rgba(59, 130, 246, 0.1);
 background: rgba(59, 130, 246, 0.2);
 border-color: #3b82f6;
 }
+
+/* ── 3D Tactile Pop Button (Maintaining Current Design) ── */
 
 /* ── 3D Tactile Pop Button (Maintaining Current Design) ── */
 .pop-btn {
@@ -2219,14 +2200,19 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     @media (prefers-reduced-motion: reduce) { .disc-cascade-disc { transition:none; } .disc-cascade-disc[data-active]
     .disc-cascade-disc-art,.disc-cascade-disc[data-active] .disc-cascade-disc-idle { animation:none; } }
 
-    /* Space theme & Hero Starfield */
-    .hero-wrapper { background: #000000 !important; min-height: 100vh; position: relative; overflow: hidden; }
-    .hero-starfield { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none;
-    z-index: 0; }
+    /* Monochrome atmospheric hero environment */
+    .hero-wrapper { background: var(--bg) !important; min-height: 100vh; position: relative; overflow: hidden; isolation: isolate; }
+    .hero-wrapper::before { content: ''; position: absolute; inset: -12%; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 18% 22%, rgba(255,255,255,.07), transparent 48%),
+    radial-gradient(ellipse at 84% 35%, rgba(255,255,255,.045), transparent 46%),
+    radial-gradient(ellipse at 58% 88%, rgba(255,255,255,.025), transparent 48%); opacity: 0; }
+    :root[data-theme="dark"] .hero-wrapper::before { opacity: 1; }
+    @keyframes campus-hero-atmosphere { from { transform: translate3d(-1.5%, -1%, 0) scale(1); }
+    to { transform: translate3d(1.5%, 1%, 0) scale(1.06); } }
     .bg-3d-logo { display: none !important; }
     .hero-section { position: relative; z-index: 2; padding-top: 110px !important; }
-    .hero-title, #heroFallbackTitle { color: #f8fafc !important; }
-    .hero-subtitle { color: #cbd5e1 !important; max-width: 680px; }
+    .hero-title { color: var(--text) !important; }
+    .hero-subtitle { color: var(--text-2) !important; max-width: 680px; }
     .hero-badge-pill {
     background: #000000 !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
@@ -4303,28 +4289,6 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     .cd-ribbon-divider { font-size: 0.85rem; }
     }
 
-    /* ══════════════════════════════════════════════════════════
-    PREMIUM SCROLL REVEAL & MICRO-INTERACTIONS ENGINE
-    ══════════════════════════════════════════════════════════ */
-    .scroll-reveal {
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
-    transition-delay: var(--d, 0s);
-    }
-    .scroll-reveal.visible {
-    opacity: 1 !important;
-    transform: translateY(0) scale(1) !important;
-    }
-
-    @media (max-width: 768px) {
-    .scroll-reveal {
-    transform: translateY(14px) scale(0.995);
-    transition-duration: 0.45s;
-    }
-    }
-
     /* Card Micro-interactions & 3D Depth */
     .stat-card {
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
@@ -4425,10 +4389,6 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     background: transparent !important;
     }
 
-    [data-theme="light"] .hero-starfield {
-    opacity: 1 !important;
-    }
-
     [data-theme="light"] .hero-badge-pill {
     background: #ffffff !important;
     border: 1.5px solid #0f172a !important;
@@ -4451,9 +4411,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     white-space: nowrap !important;
     }
 
-    [data-theme="light"] .hero-title,
-    [data-theme="light"] #heroFallbackTitle {
-    color: #0f172a !important;
+    [data-theme="light"] .hero-title {
+    color: var(--text) !important;
     text-shadow: none !important;
     }
 
@@ -5865,36 +5824,66 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     font-size: 0.88rem !important;
     }
     }
+    /* Mobile-first event card entrance: a quiet rise, soft fade, and short stagger. */
+    html.event-card-reveal-ready .event-grid-card.reveal-pending {
+        opacity: 0;
+        transform: translate3d(0, 16px, 0) scale(.985);
+        filter: blur(3px);
+        transition: opacity 620ms cubic-bezier(.16, 1, .3, 1),
+                    transform 620ms cubic-bezier(.16, 1, .3, 1),
+                    filter 620ms cubic-bezier(.16, 1, .3, 1),
+                    background-color 180ms ease, border-color 180ms ease;
+        transition-delay: var(--card-delay, 0ms);
+        will-change: opacity, transform;
+    }
+    html.event-card-reveal-ready .event-grid-card.reveal-pending.reveal-visible {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+        filter: blur(0);
+        will-change: auto;
+    }
+    @media (min-width: 769px) {
+        html.event-card-reveal-ready .event-grid-card.reveal-pending {
+            transform: translate3d(0, 14px, 0) scale(.99);
+            transition-duration: 620ms;
+        }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        html.event-card-reveal-ready .event-grid-card.reveal-pending,
+        html.event-card-reveal-ready .event-grid-card.reveal-pending.reveal-visible {
+            opacity: 1;
+            transform: none;
+            filter: none;
+            transition: none;
+            will-change: auto;
+        }
+    }
+
     {% endblock %}
 
     {% block content %}
     <!-- Hero -->
-    <div class="hero-wrapper" id="vanta-bg" style="perspective: 1000px;">
-        <canvas id="heroStarfield" class="hero-starfield" aria-hidden="true"></canvas>
-
+    <div class="hero-wrapper" id="hero-atmosphere" style="perspective: 1000px;">
         <section class="hero-section" id="hero" style="position: relative; z-index: 2;">
             <!-- Registration Open Indicator Badge -->
-            <div class="hero-badge-pill" onclick="scrollToSection('events', event)" title="Explore Events">
+            <a class="hero-badge-pill" href="#events" title="Explore Events">
                 <span class="registration-dot" aria-hidden="true"></span>
                 <span class="hero-badge-text">Registration Open &bull; Daksha Infinix</span>
-            </div>
+            </a>
 
-            <!-- Interactive Animated Main Event Title (Particle Animation) -->
-            <div id="hero-particle-text"
-                style="width: 100%; max-width: 880px; height: clamp(140px, 24vw, 220px); margin: 0 auto 16px; position: relative; z-index: 5; display: flex; align-items: center; justify-content: center;">
-                <h1 class="hero-title shimmer-headline" id="heroFallbackTitle" style="margin: 0; line-height: 1.15;">
+            <div class="hero-title-wrap">
+                <h1 class="hero-title" style="margin: 0; line-height: 1.15;">
                     Daksha Infinix</h1>
             </div>
 
             <p class="hero-subtitle">
-                Experience the future of innovation.<br>
-                Join us for Daksha Infinix &mdash; a monumental celebration of<br>
-                technology, ideas, and competition.
+                Experience the future of innovation. Join us for Daksha Infinix — a monumental celebration of technology,
+                ideas, and competition.
             </p>
 
             <!-- Event Timing & Countdown Module -->
             <div class="hero-countdown-block" id="heroCountdownBlock" aria-label="Daksha Infinix timing and countdown">
-                <p class="hero-date-line"><span class="hero-starts-badge" style="display:inline-block; margin-right:4px; font-weight:700; color:#60a5fa; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.04em;">Starts in</span> <span class="hero-date-highlight">26th and 27th November</span> &bull; <span
+                <p class="hero-date-line"><span class="hero-starts-badge" style="display:inline-block; margin-right:4px; font-weight:700; color:#60a5fa; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.04em;">Starts in</span> <span class="hero-date-highlight">26–27 November 2026</span> &bull; <span
                         class="hero-date-highlight">Bangalore</span></p>
 
                 <div class="hero-timer-capsule" id="symposiumCountdown" aria-label="Countdown to 26th November 2026">
@@ -5934,12 +5923,12 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <button onclick="scrollToSection('contact', event)" class="candy-btn hero-contact-btn">Contact Organizers</button>
             </div>
 
-            <div class="scroll-indicator" onclick="scrollToSection('stats', event)" aria-label="Scroll down">
+            <a class="scroll-indicator" href="#stats" aria-label="Scroll to highlights">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
-            </div>
+            </a>
         </section>
     </div>
 
@@ -5955,12 +5944,12 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         alt="Shree Daksha Academy Logo">
                     <div class="crest-orbit-ring" aria-hidden="true"></div>
                 </div>
-                <span class="crest-institution-name">SHREE DAKSHA ACADEMY PU COLLEGE</span>
-                <span class="crest-institution-sub">RECOGNIZED BY THE GOVT. OF KARNATAKA, AFFILIATED TO BANGALORE
-                    UNIVERSITY - APPROVED BY AICTE</span>
+                <span class="crest-institution-name">SHREE DAKSHA ACADEMY</span>
+                <span class="crest-institution-sub">Affiliated to Bengaluru University and approved by AICTE.</span>
                 <span class="crest-institution-addr"
                     style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px; letter-spacing: 0.3px; text-align: center; max-width: 600px;">No.596,
                     Andrahalli Main Road, Opp. D.Group Layout Arch, Bengaluru - 560091</span>
+                <span class="crest-institution-programmes">Degree Programmes: BCA · MCA</span>
             </a>
 
             <div class="logo-sideline right" aria-hidden="true"></div>
@@ -5968,7 +5957,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     </div>
 
     <!-- Fest Stats & Highlights Section (12+ Competitions, ₹1 Lakh Prize Pool, 2 Days) -->
-    <section id="stats" class="fest-stats-section scroll-reveal" style="--d: 0.1s;">
+    <section id="stats" class="fest-stats-section" style="--d: 0.1s;">
         <div class="fest-stats-container">
             <!-- Card 1: 12+ Competitions -->
             <div class="stat-card rv" style="--d: 0.1s;">
@@ -5987,7 +5976,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
                 <h3 class="stat-title">Competitions</h3>
                 <p class="stat-desc">Spanning Technical, Gaming, Stage Arts, Culture, Strategy & Business arenas.</p>
-                <a href="#events" class="stat-action-link" onclick="return scrollToSection('events', event);">
+                <a href="#events" class="stat-action-link">
                     <span>Explore Lineup</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -6015,7 +6004,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <h3 class="stat-title">Prize Pool</h3>
                 <p class="stat-desc">Direct cash awards, winner shields, and excellence citations across all 12+
                     competitions.</p>
-                <a href="#events" class="stat-action-link" onclick="return scrollToSection('events', event);">
+                <a href="#events" class="stat-action-link">
                     <span>View Event Prizes</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -6044,7 +6033,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <h3 class="stat-title">26th &amp; 27th Nov</h3>
                 <p class="stat-desc">Two action-packed days of competitive brilliance and cultural festivity in
                     Bengaluru.</p>
-                <a href="#events" class="stat-action-link" onclick="return scrollToSection('events', event);">
+                <a href="#events" class="stat-action-link">
                     <span>Explore Schedule</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -6064,7 +6053,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <span
                     style="display: inline-block; font-size: 0.82rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #60a5fa; margin-bottom: 6px;">Institution
                     Spotlight</span>
-                <h2 class="section-title scroll-reveal"
+                <h2 class="section-title"
                     style="text-align: left; margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: clamp(2rem, 3.5vw, 2.6rem); font-weight: 800;">
                     About the Institution</h2>
             </div>
@@ -6371,7 +6360,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 {% set rim_class = 'card-rim-emerald' if cat_key == 'gaming' else ('card-rim-silver' if cat_key ==
                 'technical' else 'card-rim-indigo') %}
                 <article class="event-grid-card {{ rim_class }} {% if loop.first %}event-featured-anchor{% endif %}"
-                    data-category="{{ cat_key }}" data-palette-category="{{ cat_key }}" data-event-id="{{ ev.id }}" style="--card-index: {{ loop.index0 }};">
+                    data-category="{{ cat_key }}" data-palette-category="{{ cat_key }}" data-event-id="{{ ev.id }}" style="--card-index: {{ loop.index0 }}; --card-delay: {{ ([loop.index0, 4]|min) * 55 }}ms;">
                     <div class="event-card-media">
                         {% if ev.banner_image %}
                         <img src="{{ url_for('static', filename='images/' ~ ev.banner_image) }}"
@@ -6456,7 +6445,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
     <!-- General Rules & Regulations Section (High-Contrast White & Black) -->
     <section id="rules" class="monochrome-section rules-section">
-        <div class="section-header-centered scroll-reveal">
+        <div class="section-header-centered">
             <span class="section-eyebrow-pill">Official Directives</span>
             <h2 class="section-headline">General Rules & Regulations</h2>
             <div class="section-headline-bar" aria-hidden="true"></div>
@@ -6569,7 +6558,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
     <!-- Registration Procedures & Payment Details Section (Covering Online & Offline) -->
     <section id="registration" class="monochrome-section registration-section">
-        <div class="section-header-centered scroll-reveal">
+        <div class="section-header-centered">
             <span class="section-eyebrow-pill">Participation Roadmap</span>
             <h2 class="section-headline">Registration Procedures & Payment Details</h2>
             <div class="section-headline-bar" aria-hidden="true"></div>
@@ -6684,8 +6673,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
 
                 <div class="track-footer">
-                    <a href="#location" class="track-btn track-btn-secondary"
-                        onclick="return scrollToSection('location', event);">
+                    <a href="#location" class="track-btn track-btn-secondary">
                         <span>View Campus Desk Location &rarr;</span>
                     </a>
                 </div>
@@ -6721,7 +6709,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
     <!-- Frequently Asked Questions (FAQ) Section -->
     <section id="faq" class="monochrome-section faq-section">
-        <div class="section-header-centered scroll-reveal">
+        <div class="section-header-centered">
             <span class="section-eyebrow-pill">Knowledge Base</span>
             <h2 class="section-headline">Frequently Asked Questions</h2>
             <div class="section-headline-bar" aria-hidden="true"></div>
@@ -6729,7 +6717,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 and event day logistics.</p>
         </div>
 
-        <div class="faq-accordion-container scroll-reveal" style="--d: 0.2s;">
+        <div class="faq-accordion-container" style="--d: 0.2s;">
             <details class="faq-item">
                 <summary class="faq-question">
                     <span>Who is eligible to participate in the symposium events?</span>
@@ -6884,9 +6872,9 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
     <!-- Location Section (Unified Map with Glassmorphic Corner Dock) -->
     <section id="location" class="map-section">
-        <h2 class="section-title scroll-reveal" style="margin-bottom: 25px; text-align: center;">Find Us</h2>
+        <h2 class="section-title" style="margin-bottom: 25px; text-align: center;">Find Us</h2>
 
-        <div class="unified-map-wrapper scroll-reveal">
+        <div class="unified-map-wrapper">
             <!-- Campus Desk panel -->
             <div class="map-corner-dock campus-desk-panel">
                 <div class="dock-header">
@@ -6965,10 +6953,10 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
     <!-- Contact Us Section (Compact, Smooth, and Refined) -->
     <section id="contact" class="map-section">
-        <h2 class="section-title scroll-reveal" style="margin-bottom: 22px; text-align: center;">Contact Us</h2>
+        <h2 class="section-title" style="margin-bottom: 22px; text-align: center;">Contact Us</h2>
         <div class="contact-grid">
             <!-- Faculty Coordinator -->
-            <div class="contact-card scroll-reveal">
+            <div class="contact-card">
                 <span class="contact-role-badge">Faculty Coordinator</span>
                 <h3>Prof. R. Narayana Swamy</h3>
                 <p>Primary Symposium Desk</p>
@@ -6985,7 +6973,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             </div>
 
             <!-- Student Coordinator -->
-            <div class="contact-card scroll-reveal">
+            <div class="contact-card">
                 <span class="contact-role-badge">Student Coordinator</span>
                 <h3>Akash S.</h3>
                 <p>Student Operations Desk</p>
@@ -7006,7 +6994,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     <!-- Rules Modal -->
     <div id="rulesModal" class="rulesModal"
         style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 9999; justify-content: center; align-items: flex-end; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
-        <div data-lenis-prevent
+        <div
             style="border-radius: 20px 20px 0 0; max-width: 500px; width: 100%; max-height: 80vh; max-height: 80dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 28px 20px; position: relative;">
             <div class="modal-drag-handle"></div>
             <button onclick="closeRulesModal()"
@@ -7024,7 +7012,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     <!-- Contact Modal -->
     <div id="contactModal" class="contactModal"
         style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 9999; justify-content: center; align-items: flex-end; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
-        <div data-lenis-prevent
+        <div
             style="border-radius: 20px 20px 0 0; max-width: 450px; width: 100%; max-height: 80vh; max-height: 80dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 28px 20px; position: relative;">
             <div class="modal-drag-handle"></div>
             <button onclick="closeContactModal()"
@@ -7259,6 +7247,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
         });
 
         document.addEventListener('DOMContentLoaded', () => {
+            if (window.initScrollReveal) window.initScrollReveal('.scroll-reveal');
 
             // 2. Rules & Contact buttons
             document.querySelectorAll('.rules-trigger[data-event-name]').forEach(button => {
@@ -7307,181 +7296,45 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 }
             }
 
-            // 6. Main Event-Name Particle Text Animation (Responsive to Light / Dark Theme)
-            const particleContainer = document.getElementById('hero-particle-text');
-            const fallbackTitle = document.getElementById('heroFallbackTitle');
-            let particleCleanup = null;
-
-            function renderHeroParticles() {
-                if (isMobileDevice) {
-                    if (particleCleanup) {
-                        try { particleCleanup(); } catch(e){}
-                        particleCleanup = null;
-                    }
-                    if (particleContainer) {
-                        particleContainer.style.height = 'auto';
-                        particleContainer.style.minHeight = '70px';
-                    }
-                    if (fallbackTitle) {
-                        fallbackTitle.style.display = 'block';
-                        fallbackTitle.style.opacity = '1';
-                        fallbackTitle.style.visibility = 'visible';
-                    }
-                    return;
-                }
-                if (!particleContainer || !window.initParticleText) {
-                    if (fallbackTitle) fallbackTitle.style.display = 'block';
-                    return;
-                }
-                if (typeof particleCleanup === 'function') {
-                    try { particleCleanup(); } catch (e) { }
-                    particleCleanup = null;
-                }
-                particleContainer.innerHTML = '';
-                if (fallbackTitle) fallbackTitle.style.display = 'none';
-
-                const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-                particleCleanup = window.initParticleText(particleContainer, {
-                    text: "Daksha Infinix",
-                    particleSize: 3,
-                    density: 3,
-                    color: isLight ? '#000000' : '#ffffff',
-                    highlightColor: isLight ? '#2563eb' : '#ffffff',
-                    scatter: 220,
-                    gatherDuration: 1400,
-                    stagger: 250,
-                    pointerRepel: 50,
-                    repelRadius: 160,
-                    idleDrift: 1.2,
-                    trigger: 'mount',
-                    fontSize: 'clamp(3.8rem, 6.8vw, 5.8rem)',
-                    fontWeight: 800,
-                    fontFamily: '"Space Grotesk", sans-serif',
-                    glow: !isLight
-                });
-            }
-
-            if (particleContainer && window.initParticleText) {
-                renderHeroParticles();
-            }
-
-            window.addEventListener('sda-theme-changed', () => {
-                renderHeroParticles();
-            });
-
-            // 7. Smooth IntersectionObserver Scroll Reveal Engine
-            if ('IntersectionObserver' in window) {
-                const revealObserver = new IntersectionObserver((entries, observer) => {
+            // Premium, mobile-first reveal for the actual event cards. Keep the
+            // cards visible unless both motion and IntersectionObserver are available.
+            const eventCards = document.querySelectorAll('#eventsCardsGrid .event-grid-card');
+            if (eventCards.length && 'IntersectionObserver' in window &&
+                !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.documentElement.classList.add('event-card-reveal-ready');
+                const eventCardObserver = new IntersectionObserver((entries, observer) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
-                            entry.target.classList.add('visible');
+                            entry.target.classList.add('reveal-visible');
                             observer.unobserve(entry.target);
                         }
                     });
-                }, { root: null, rootMargin: '0px 0px -40px 0px', threshold: 0.08 });
+                }, { root: null, rootMargin: '0px 0px -48px 0px', threshold: 0.08 });
 
-                document.querySelectorAll('.scroll-reveal').forEach(el => {
-                    const rect = el.getBoundingClientRect();
-                    // If element is already in the viewport on initial load (e.g. hero elements), reveal immediately
+                eventCards.forEach(card => {
+                    card.classList.add('reveal-pending');
+                    const rect = card.getBoundingClientRect();
                     if (rect.top < window.innerHeight && rect.bottom > 0) {
-                        el.classList.add('visible');
+                        card.classList.add('reveal-visible');
                     } else {
-                        revealObserver.observe(el);
+                        eventCardObserver.observe(card);
                     }
                 });
-            } else {
-                document.querySelectorAll('.scroll-reveal').forEach(el => el.classList.add('visible'));
             }
 
-
-
-            // 7. Animated background-only starfield: continuous space travel, no pointer input.
-            const starfield = document.getElementById('heroStarfield');
-            const hero = document.getElementById('vanta-bg');
-            if (starfield && hero) {
-                const ctx = starfield.getContext('2d');
-                const stars = [];
-                let lastTime = performance.now();
-                let frame = 0;
-                const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-                const makeStar = () => {
-                    let x = (Math.random() * 2 - 1) * 1.15;
-                    let y = (Math.random() * 2 - 1) * .86;
-                    if (Math.hypot(x, y) < .14) { x += x < 0 ? -.2 : .2; y += y < 0 ? -.12 : .12; }
-                    return { x, y, z: Math.random() * .94 + .06, px: 0, py: 0, seen: false };
-                };
-                const isMobile = window.innerWidth <= 768;
-                const resizeStarfield = () => {
-                    const rect = hero.getBoundingClientRect();
-                    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
-                    starfield.width = Math.max(1, Math.floor(rect.width * dpr));
-                    starfield.height = Math.max(1, Math.floor(rect.height * dpr));
-                    starfield.style.width = `${rect.width}px`;
-                    starfield.style.height = `${rect.height}px`;
-                    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                    const count = isMobile ? 35 : Math.min(950, Math.max(480, Math.floor(rect.width * rect.height / 2400)));
-                    stars.length = 0;
-                    for (let i = 0; i < count; i += 1) stars.push(makeStar());
-                };
-                const paintStarfield = (time) => {
-                    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-                    const rect = hero.getBoundingClientRect();
-                    ctx.clearRect(0, 0, rect.width, rect.height);
-                    const delta = Math.min((time - lastTime) / 1000, .05);
-                    lastTime = time;
-                    const vanishX = rect.width / 2;
-                    const vanishY = rect.height / 2;
-                    const projection = Math.min(rect.width, rect.height) * .75;
-                    stars.forEach((star) => {
-                        if (!reducedMotion) star.z -= delta * .48;
-                        if (star.z < .035) Object.assign(star, makeStar(), { z: 1, seen: false });
-                        const x = vanishX + star.x / star.z * projection;
-                        const y = vanishY + star.y / star.z * projection;
-                        const alpha = isLight ? Math.min(1.0, 0.70 + (1 - star.z) * 0.30) : Math.min(1.0, 0.55 + (1 - star.z) * 0.45);
-                        const radius = isLight ? Math.max(1.35, (1 - star.z) * 3.5) : Math.max(1.1, (1 - star.z) * 3.2);
-                        if (star.seen && !reducedMotion) {
-                            ctx.beginPath();
-                            ctx.moveTo(star.px, star.py);
-                            ctx.lineTo(x, y);
-                            ctx.strokeStyle = isLight ? `rgba(15, 23, 42, ${alpha * 0.88})` : `rgba(255, 255, 255, ${alpha * 0.85})`;
-                            ctx.lineWidth = Math.max(0.9, radius * 0.7);
-                            ctx.stroke();
-                        }
-                        ctx.beginPath();
-                        ctx.arc(x, y, radius * 0.55, 0, Math.PI * 2);
-                        ctx.fillStyle = isLight ? `rgba(15, 23, 42, ${alpha * 0.98})` : `rgba(255, 255, 255, ${alpha})`;
-                        ctx.fill();
-                        star.px = x;
-                        star.py = y;
-                        star.seen = true;
+            // Run the slow hero color field only while its section is on screen.
+            const heroAtmosphere = document.querySelector('.hero-wrapper');
+            if (heroAtmosphere && 'IntersectionObserver' in window &&
+                !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                const atmosphereObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        entry.target.classList.toggle('atmosphere-active', entry.isIntersecting);
                     });
-                    ctx.globalAlpha = 1;
-                    if (!reducedMotion) frame = window.requestAnimationFrame(paintStarfield);
-                };
-                resizeStarfield();
-                paintStarfield(performance.now());
-                window.addEventListener('resize', () => { window.cancelAnimationFrame(frame); resizeStarfield(); lastTime = performance.now(); paintStarfield(lastTime); }, { passive: true });
-
-                // Pause starfield animation when hero is off-screen to save 100% mobile CPU/GPU
-                if ('IntersectionObserver' in window) {
-                    const heroObs = new IntersectionObserver((entries) => {
-                        entries.forEach(entry => {
-                            if (entry.isIntersecting) {
-                                if (!frame && !reducedMotion) {
-                                    lastTime = performance.now();
-                                    frame = window.requestAnimationFrame(paintStarfield);
-                                }
-                            } else {
-                                if (frame) {
-                                    window.cancelAnimationFrame(frame);
-                                    frame = 0;
-                                }
-                            }
-                        });
-                    }, { threshold: 0.05 });
-                    heroObs.observe(hero);
-                }
+                }, { threshold: 0.01 });
+                atmosphereObserver.observe(heroAtmosphere);
             }
+
+
 
             // 10. Instant Jump Scroll if hash or ?jump exists
             const jumpId = (new URLSearchParams(window.location.search)).get('jump') || (window.location.hash ? window.location.hash.substring(1) : null);

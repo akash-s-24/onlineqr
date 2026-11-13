@@ -1089,8 +1089,8 @@ select.f-select {
 {% endblock %}
 
 {% block content %}
-<section class="registration-section" data-lenis-prevent>
-    <div class="glass-form-card" data-lenis-prevent>
+<section class="registration-section">
+    <div class="glass-form-card">
         <!-- Header Navigation & College Logo -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
             <a href="{{ url_for('events_list') }}#events" class="back-btn-ghost">
@@ -1129,9 +1129,15 @@ select.f-select {
         <form method="POST" action="{{ url_for('register_participant') }}" id="eventRegistrationForm" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
+            <section class="registration-form-section" aria-labelledby="eventDetailsHeading">
+            <div class="form-section-heading">
+                <div><h2 id="eventDetailsHeading">Choose your event</h2>
+                    <p>Review the event format, date, venue, and entry fee.</p></div>
+            </div>
+
             <!-- ── EVENT SELECTION SECTION ── -->
             <div class="f-form-group">
-                <label class="f-label">Selected Event *</label>
+                <label class="f-label" id="eventSelectionHeading">Selected Event *</label>
 
                 {# Determine if a valid pre-selected event was passed #}
                 {% set ns = namespace(selected_event=None) %}
@@ -1146,7 +1152,7 @@ select.f-select {
 
                 {% if selected_event %}
                     <!-- Full Preselected Event Presentation Card with All Elements -->
-                    <div class="selected-event-card">
+                    <div class="selected-event-card" role="region" aria-label="Selected event details for {{ selected_event.event_name }}">
                         <div class="event-card-top">
                             <div>
                                 <div class="event-badges-row">
@@ -1251,24 +1257,24 @@ select.f-select {
                         {% endfor %}
                     </select>
 
-                    <div class="cb-wrapper" data-cb-for="event_id" data-lenis-prevent>
-                        <div class="cb-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
+                    <div class="cb-wrapper" data-cb-for="event_id">
+                        <div class="cb-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="eventSelectionHeading">
                             <span class="cb-trigger-text placeholder">-- Choose an Event --</span>
                             <span class="cb-chevron">
                                 <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                             </span>
                         </div>
-                        <div class="cb-dropdown" data-lenis-prevent>
+                        <div class="cb-dropdown">
                             <div class="cb-search-wrap">
                                 <input type="text" class="cb-search" placeholder="🔍 Search events by name or category…" autocomplete="off">
                             </div>
-                            <div class="cb-options" role="listbox" data-lenis-prevent></div>
+                            <div class="cb-options" role="listbox"></div>
                             <div class="cb-empty">No matching events found.</div>
                         </div>
                     </div>
 
                     <!-- Dynamic Event Summary Presentation Card (Appears immediately when user picks an event from dropdown) -->
-                    <div id="dynamicEventSummaryCard" class="selected-event-card" style="display: none; margin-top: 14px;">
+                    <div id="dynamicEventSummaryCard" class="selected-event-card" role="region" aria-labelledby="dynEvName" aria-live="polite" style="display: none; margin-top: 14px;">
                         <div class="event-card-top">
                             <div>
                                 <div class="event-badges-row">
@@ -1320,9 +1326,10 @@ select.f-select {
                     </div>
                 {% endif %}
             </div>
+            </section>
 
             <!-- ── DYNAMIC GROUP / TEAM SQUAD CONFIGURATION CARD ── -->
-            <div id="groupEventCard" class="f-dynamic-card" style="display: none;">
+            <div id="groupEventCard" class="f-dynamic-card" role="group" aria-labelledby="groupEventHeading" style="display: none;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                     <div style="display: inline-flex; align-items: center; gap: 8px; background: #0b0f19; padding: 6px 14px; border-radius: 10px; border: 1.5px solid #1e293b;">
                         <span style="font-size: 1.15rem; line-height: 1;">👥</span>
@@ -1342,15 +1349,15 @@ select.f-select {
                             <option value="3" selected>3 Participants (Trio)</option>
                             <option value="4">4 Participants (Squad)</option>
                         </select>
-                        <div class="cb-wrapper" data-cb-for="team_size" data-lenis-prevent>
+                        <div class="cb-wrapper" data-cb-for="team_size">
                             <div class="cb-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
                                 <span class="cb-trigger-text">3 Participants (Trio)</span>
                                 <span class="cb-chevron">
                                     <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                                 </span>
                             </div>
-                            <div class="cb-dropdown" data-lenis-prevent>
-                                <div class="cb-options" role="listbox" data-lenis-prevent></div>
+                            <div class="cb-dropdown">
+                                <div class="cb-options" role="listbox"></div>
                             </div>
                         </div>
                     </div>
@@ -1370,6 +1377,12 @@ select.f-select {
                         <!-- Injected dynamically by JavaScript -->
                     </div>
                 </div>
+            </div>
+
+            <section class="registration-form-section" aria-labelledby="participantDetailsHeading">
+            <div class="form-section-heading">
+                <div><h2 id="participantDetailsHeading">Participant details</h2>
+                    <p>Tell us who is taking part and where they study.</p></div>
             </div>
 
             <!-- ── PARTICIPANT DETAILS ── -->
@@ -1396,15 +1409,15 @@ select.f-select {
                         <option value="I PUC">I PUC</option>
                         <option value="II PUC">II PUC</option>
                     </select>
-                    <div class="cb-wrapper" data-cb-for="semester" data-lenis-prevent>
+                    <div class="cb-wrapper" data-cb-for="semester">
                         <div class="cb-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
                             <span class="cb-trigger-text placeholder">-- Select Academic Year / Class --</span>
                             <span class="cb-chevron">
                                 <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                             </span>
                         </div>
-                        <div class="cb-dropdown" data-lenis-prevent>
-                            <div class="cb-options" role="listbox" data-lenis-prevent></div>
+                        <div class="cb-dropdown">
+                            <div class="cb-options" role="listbox"></div>
                         </div>
                     </div>
                 </div>
@@ -1432,18 +1445,18 @@ select.f-select {
                         <option value="Other">Other (Specify below)</option>
                     </optgroup>
                 </select>
-                <div class="cb-wrapper" data-cb-for="department" data-lenis-prevent>
+                <div class="cb-wrapper" data-cb-for="department">
                     <div class="cb-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
                         <span class="cb-trigger-text placeholder">-- Select Stream / Category --</span>
                         <span class="cb-chevron">
                             <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                         </span>
                     </div>
-                    <div class="cb-dropdown" data-lenis-prevent>
+                    <div class="cb-dropdown">
                         <div class="cb-search-wrap">
                             <input type="text" class="cb-search" placeholder="🔍 Search streams or courses…" autocomplete="off">
                         </div>
-                        <div class="cb-options" role="listbox" data-lenis-prevent></div>
+                        <div class="cb-options" role="listbox"></div>
                         <div class="cb-empty">No matching streams found.</div>
                     </div>
                 </div>
@@ -1453,11 +1466,12 @@ select.f-select {
                 <label class="f-label" for="other_department">Specify Your Course / Branch *</label>
                 <input type="text" id="other_department" class="f-control" placeholder="e.g. BCA, BBA, B.Com, B.Sc, Diploma">
             </div>
+            </section>
 
             <!-- ── PAYMENT SECTION ── -->
-            <div id="paymentSection" class="f-dynamic-card" style="display: none;">
+            <div id="paymentSection" class="f-dynamic-card" role="group" aria-labelledby="paymentSectionHeading" style="display: none;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
-                    <strong style="font-size: 1.15rem; font-family: 'Space Grotesk', sans-serif;">Payment Options</strong>
+                    <strong id="paymentSectionHeading" style="font-size: 1.15rem; font-family: 'Space Grotesk', sans-serif;">Payment Options</strong>
                     <div style="display: inline-flex; align-items: baseline; gap: 6px; background: rgba(34, 197, 94, 0.12); border: 1.5px solid #16a34a; padding: 5px 16px; border-radius: 9999px; box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);">
                         <span style="font-size: 0.78rem; font-weight: 800; color: #15803d; text-transform: uppercase; letter-spacing: 0.5px;">Amount:</span>
                         <span id="displayEventFee" style="font-size: 1.45rem; font-weight: 900; color: #16a34a !important; font-family: 'Space Grotesk', sans-serif;">₹ 400</span>
@@ -1465,8 +1479,9 @@ select.f-select {
                 </div>
 
                 <div class="f-form-group" style="text-align: left;">
-                    <label class="f-label">Select Payment Mode *</label>
-                    <div style="display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap;">
+                    <fieldset class="payment-mode-options" aria-labelledby="paymentModeHeading">
+                    <legend class="f-label" id="paymentModeHeading">Select Payment Mode *</legend>
+                    <div class="payment-mode-options-grid">
                         <label class="payment-method-card" id="payOnlineCard">
                             <input type="radio" name="payment_method" value="Online" id="payOnlineRadio" onchange="togglePaymentMethod()" style="accent-color: #2563eb; width: 18px; height: 18px;">
                             <div>
@@ -1482,6 +1497,7 @@ select.f-select {
                             </div>
                         </label>
                     </div>
+                    </fieldset>
                 </div>
 
                 <!-- Online UPI Payment Details -->
@@ -1850,7 +1866,7 @@ class Combobox {
             });
         }
 
-        // Prevent wheel & touchmove inside dropdown from being captured by document Lenis scroll
+        // Keep wheel and touch gestures local to the open event dropdown.
         this.dropdown.addEventListener('wheel', (e) => {
             e.stopPropagation();
         }, { passive: true });
