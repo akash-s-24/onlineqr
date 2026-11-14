@@ -69,7 +69,7 @@ class Config:
 
     # Academy / College Branding & Role Credentials (SEC-01 & SEC-14)
     COLLEGE_NAME = os.environ.get('COLLEGE_NAME', 'Shree Daksha Academy')
-    COLLEGE_SUBTITLE = os.environ.get('COLLEGE_SUBTITLE', 'Affiliated to Bengaluru University and approved by AICTE; Degree Programmes: BCA · MCA')
+    COLLEGE_SUBTITLE = os.environ.get('COLLEGE_SUBTITLE', 'Pre-University College · I & II PUC')
     EVENT_TITLE = os.environ.get('EVENT_TITLE', 'Daksha Infinix').strip() or 'Daksha Infinix'
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '').strip()
     MEMBER_PASSWORD = os.environ.get('MEMBER_PASSWORD', '').strip()

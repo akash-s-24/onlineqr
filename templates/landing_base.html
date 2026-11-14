@@ -1682,7 +1682,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261113_v7">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261114_v8">
  </head>
 
 <body
@@ -1722,9 +1722,8 @@
                     <span class="landing-logo-title"
                         style="font-size: 0.98rem; font-weight: 800; letter-spacing: -0.01em;">SHREE DAKSHA ACADEMY</span>
                     <span class="landing-logo-meta"
-                        style="font-size: 0.62rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">Affiliated to Bengaluru University and approved by AICTE.</span>
+                        style="font-size: 0.62rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">Pre-University College · I &amp; II PUC</span>
                     <span class="landing-logo-addr" style="font-size: 0.58rem; color: #64748b;">No.596, Andrahalli Main Road, Bengaluru - 560091</span>
-                    <span class="landing-logo-programmes">Degree Programmes: BCA · MCA</span>
                 </div>
             </a>
 
@@ -1883,7 +1882,7 @@
                             alt="Shree Daksha Academy Logo" class="footer-brand-logo">
                         <div class="footer-brand-text">
                             <h4 class="footer-brand-title">Shree Daksha Academy</h4>
-                            <span class="footer-brand-dept">Affiliated to Bengaluru University and approved by AICTE</span>
+                            <span class="footer-brand-dept">Pre-University College · I &amp; II PUC</span>
                         </div>
                     </div>
                     <p class="footer-brand-desc">Empowering student innovation, leadership, and competitive excellence.
@@ -2007,7 +2006,7 @@
                         <span class="footer-contact-icon">📍</span>
                         <div class="footer-contact-address">
                             <span class="footer-contact-label">Campus Address</span>
-                            No 596, Andrahalli Main Rd, Lingadeeranahalli, Bengaluru 560091<br>Degree Programmes: BCA · MCA
+                            No 596, Andrahalli Main Rd, Lingadeeranahalli, Bengaluru 560091
                         </div>
                     </div>
                 </div>
@@ -2067,6 +2066,12 @@
             <div class="footer-bottom">
                 <div>&copy; 2026 Shree Daksha Academy. All rights reserved.</div>
                 <div style="display: flex; gap: 20px; align-items: center;">
+                    <button type="button" id="footerThemeToggle" class="footer-theme-toggle"
+                        onclick="toggleFooterTheme()" aria-label="Switch to dark theme" title="Switch to dark theme">
+                        <svg class="theme-icon theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.9 13A8.5 8.5 0 0 1 11 3.1 8.5 8.5 0 1 0 20.9 13Z"/><path d="M16 3v4M14 5h4"/></svg>
+                        <svg class="theme-icon theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+                        <span>Theme</span>
+                    </button>
                     <a href="#hero" class="footer-back-to-top">Back to
                         Top &uarr;</a>
                 </div>
@@ -2403,6 +2408,13 @@
                         trigger.setAttribute('title', 'Choose appearance');
                     }
                 });
+                const footerToggle = document.getElementById('footerThemeToggle');
+                if (footerToggle) {
+                    const current = document.documentElement.getAttribute('data-theme') || 'light';
+                    const target = current === 'dark' ? 'light' : 'dark';
+                    footerToggle.setAttribute('aria-label', `Switch to ${target} theme`);
+                    footerToggle.setAttribute('title', `Switch to ${target} theme`);
+                }
             }
 
             window.setSiteTheme = function (theme) {
@@ -2431,6 +2443,10 @@
                 });
                 window.dispatchEvent(new CustomEvent('sda-theme-changed', { detail: { theme: next } }));
                 return true;
+            };
+            window.toggleFooterTheme = function () {
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                window.setSiteTheme(current === 'dark' ? 'light' : 'dark');
             };
             window.toggleSiteTheme = function (event) {
                 const panel = document.getElementById('appearancePanel');

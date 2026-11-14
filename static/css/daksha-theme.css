@@ -494,9 +494,30 @@ html.dark body {
 }
 
 /* Dark surfaces reveal the layered campus atmosphere instead of masking it with black slabs. */
-.base-theme-toggle { position: fixed; z-index: 1200; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border: 1px solid var(--border); border-radius: 999px; background: var(--toggle-bg); color: var(--text); font: 600 14px var(--font-ui); cursor: pointer; }
-.base-theme-toggle svg { width: 18px; height: 18px; }
-.base-theme-toggle:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+.footer-theme-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 8px 13px; border: 1px solid rgba(255,255,255,.24); border-radius: 999px; background: rgba(255,255,255,.08); color: #FFFFFF; font: 700 .82rem var(--font-ui); cursor: pointer; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+.footer-theme-toggle:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.45); transform: translateY(-1px); }
+.footer-theme-toggle .theme-icon { display: none; width: 18px; height: 18px; flex: 0 0 18px; }
+:root[data-theme="light"] .footer-theme-toggle .theme-icon-moon,
+:root[data-theme="dark"] .footer-theme-toggle .theme-icon-sun { display: block; }
+.footer-theme-toggle:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 3px; }
+:root[data-theme="light"] .l-footer { background: #111111 !important; color: #D4D4D4 !important; }
+:root[data-theme="light"] .l-footer .footer-col h4,
+:root[data-theme="light"] .l-footer .footer-brand-title { color: #FFFFFF !important; }
+:root[data-theme="light"] .l-footer .footer-brand-dept,
+:root[data-theme="light"] .l-footer .footer-brand-desc,
+:root[data-theme="light"] .l-footer .footer-col p,
+:root[data-theme="light"] .l-footer .footer-contact-item,
+:root[data-theme="light"] .l-footer .footer-contact-label,
+:root[data-theme="light"] .l-footer .footer-contact-link,
+:root[data-theme="light"] .l-footer .footer-contact-email,
+:root[data-theme="light"] .l-footer .footer-contact-phone,
+:root[data-theme="light"] .l-footer .footer-contact-address { color: #D4D4D4 !important; }
+:root[data-theme="light"] .l-footer .footer-col a { color: #FFFFFF !important; }
+:root[data-theme="light"] .l-footer .footer-col a:hover { color: #93C5FD !important; }
+:root[data-theme="light"] .l-footer .footer-bottom,
+:root[data-theme="light"] .l-footer .footer-bottom * { color: #B8B8B8 !important; }
+:root[data-theme="light"] .l-footer .footer-back-to-top { color: #FFFFFF !important; }
+:root[data-theme="light"] .l-footer .footer-back-to-top:hover { color: #D4D4D4 !important; }
 :root[data-theme] .about-section,
 :root[data-theme] .institution-logo-divider-section,
 :root[data-theme] .map-section,

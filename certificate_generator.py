@@ -318,7 +318,7 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
                   fill=border_navy, font=f_inst, anchor="mm")
 
         # Affiliation subtitle follows the current academy branding.
-        sub1_text = "AFFILIATED TO BENGALURU UNIVERSITY AND APPROVED BY AICTE"
+        sub1_text = "PRE-UNIVERSITY COLLEGE · I & II PUC"
         draw.text((width // 2, 190), sub1_text,
                   fill=(51, 65, 85), font=f_sub1, anchor="mm")
 
@@ -326,8 +326,6 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         addr_text = "No.596, Andrahalli Main Road, Opp. D.Group Layout Arch, Bengaluru - 560091"
         draw.text((width // 2, 232), addr_text,
                   fill=(100, 116, 139), font=f_addr, anchor="mm")
-        draw.text((width // 2, 260), "DEGREE PROGRAMMES: BCA · MCA",
-                  fill=(80, 80, 80), font=f_addr, anchor="mm")
 
         # Decorative Divider Line with Center Diamond
         divider_y = 298
@@ -370,7 +368,7 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
                       2 + 6, 484 + 6], fill=border_gold)
 
     # 8. Formal Certificate Narrative Text:
-    # "This is to Certify that Mr. / Ms. __________ has secured __________ of __________ BCA and has secured __________ Place in the __________ Event."
+    # "This is to Certify that Mr. / Ms. __________ has earned __________ while studying in __________ and has secured __________ Place in the __________ Event."
     f_body = get_font_by_name("georgiai.ttf", 35)
     f_handwriting = get_font_by_name("segoescb.ttf", 39)
     f_handwriting_name = get_font_by_name("segoescb.ttf", 47)
@@ -384,9 +382,6 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         sec_details = "I Class Distinction"
     else:
         sec_details = "Active Participation"
-
-    # Course name default to BCA per prompt specification
-    course_suffix = "BCA"
 
     # Clean semester
     sem_text = semester.strip() if semester else "Second PUC"
@@ -471,12 +466,12 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
                   fill=(148, 163, 184), width=2)
 
         # ----------------------------------------------------
-        # Line 2: "has secured ___________ of ___________ BCA"
+        # Line 2 names the award and the participant's PUC year.
         # ----------------------------------------------------
         y_l2 = 745
-        l2_pre = "has secured "
-        l2_mid = " of "
-        l2_suf = f" {course_suffix}"
+        l2_pre = "has earned "
+        l2_mid = " while studying in "
+        l2_suf = ""
 
         w_l2_pre = draw.textbbox((0, 0), l2_pre, font=f_body)[2]
         w_sec = draw.textbbox((0, 0), sec_details, font=f_handwriting)[2]
@@ -627,9 +622,9 @@ if __name__ == '__main__':
     code, path, rel = generate_certificate(
         participant_name="Student Participant",
         event_name="BGMI",
-        event_date="19-Sep-2026",
+        event_date="25–26 Nov 2026",
         rank="1st",
-        department="BCA",
+        department="PCMC",
         semester="Second PUC",
         team_name="CyberKnights"
     )

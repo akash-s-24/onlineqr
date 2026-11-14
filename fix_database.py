@@ -8,11 +8,11 @@ old_block = """    # Seed Sample Participants if none exist
     parts_count = query_db("SELECT COUNT(*) as count FROM participants", one=True)
     if parts_count and parts_count.get('count', 0) == 0:
         sample_parts = [
-            (2, 'Varshitha H', 'varshitha@college.edu', '9876543210', 'Shree Daksha Academy', 'BCA', '5th Sem'),
-            (None, 'Rahul Kumar', 'rahul.k@univ.ac.in', '9845123456', 'City College of Technology', 'BSc Computer Science', '3rd Sem'),
-            (None, 'Ananya Sharma', 'ananya.s@tech.edu', '9123456780', 'Shree Daksha Academy', 'BCA', '5th Sem'),
-            (None, 'Karthik Rao', 'karthik.rao@gmail.com', '9880011223', 'National Institute of Engineering', 'B.Tech IT', '7th Sem'),
-            (None, 'Sneha Patel', 'sneha.patel@college.edu', '9771122334', 'Shree Daksha Academy', 'MCA', '1st Sem')
+            (2, 'Varshitha H', 'varshitha@college.edu', '9876543210', 'Shree Daksha Academy', 'PCMC', 'II PUC'),
+            (None, 'Rahul Kumar', 'rahul@dakshapuc.edu.in', '9845123456', 'Shree Daksha Academy', 'CEBA', 'II PUC'),
+            (None, 'Ananya Sharma', 'ananya.s@tech.edu', '9123456780', 'Shree Daksha Academy', 'PCMC', 'II PUC'),
+            (None, 'Karthik Rao', 'karthik.rao@gmail.com', '9880011223', 'Shree Daksha Academy', 'PCMB', 'I PUC'),
+            (None, 'Sneha Patel', 'sneha.patel@college.edu', '9771122334', 'Shree Daksha Academy', 'CEBA', 'I PUC')
         ]
         part_ids = []
         for p in sample_parts:

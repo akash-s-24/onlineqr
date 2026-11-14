@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS participants (
     phone VARCHAR(20) NOT NULL,
     college_name VARCHAR(150) NOT NULL,
     department VARCHAR(100) NOT NULL,
-    semester VARCHAR(20) DEFAULT '5th Sem',
+    semester VARCHAR(20) DEFAULT 'II PUC',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
@@ -134,19 +134,19 @@ CREATE TABLE IF NOT EXISTS certificates (
 
 -- 2. Core Events Required by User (including Binary Brains, Digital Dynamos, CodeCraft, etc.)
 INSERT INTO events (id, event_name, event_type, event_date, event_time, venue, description, max_participants, is_group, min_team_size, max_team_size) VALUES
-(1, 'Binary Brains', 'Technical Quiz & Logic Duel', '18-sep-2026', '11:00 AM', 'Seminar Hall 1', 'Rapid-fire technical quiz, logic reasoning puzzles, and algorithmic brain teasers for dynamic teams.', 60, 1, 2, 4),
-(2, 'Digital Dynamos', 'Full-Stack Innovation Duel', '19-sep-2026', '01:30 PM', 'Innovation & Web Lab', 'Collaborative web application design, UI/UX sprint, and creative software project showcase for squads.', 50, 1, 2, 4),
-(3, 'CodeCraft', 'Hackathon / Coding', '18-sep-2026', '09:30 AM', 'Lab 1 - Turing Computing Centre', 'The premier college hackathon challenging students to build innovative software solutions within a 6-hour sprint.', 60, 0, 1, 1),
-(4, 'CodeStorm', 'Debugging & DSA', '19-sep-2026', '10:00 AM', 'Main Auditorium & CS Lab 2', 'A high-intensity coding & algorithmic problem solving competition testing speed, precision, and bug eradication skills.', 80, 0, 1, 1),
-(5, 'CodeVerse', 'Web & App Design', '19-sep-2026', '02:00 PM', 'Seminar Hall 3', 'Showcase of modern UI/UX design, full-stack application development, and interactive web architecture presentations.', 50, 0, 1, 1),
-(6, 'ByteBattle', 'Speed Coding Duel', '20-sep-2026', '11:00 AM', 'Advanced Computing Lab', '1-on-1 fast-paced knockout speed coding rounds on algorithms, data structures, and mathematical puzzles.', 40, 0, 1, 1);
+(1, 'Binary Brains', 'Technical Quiz & Logic Duel', '25-26-nov-2026', '11:00 AM', 'Seminar Hall 1', 'Rapid-fire technical quiz, logic reasoning puzzles, and algorithmic brain teasers for dynamic teams.', 60, 1, 2, 4),
+(2, 'Digital Dynamos', 'Full-Stack Innovation Duel', '25-26-nov-2026', '01:30 PM', 'Innovation & Web Lab', 'Collaborative web application design, UI/UX sprint, and creative software project showcase for squads.', 50, 1, 2, 4),
+(3, 'CodeCraft', 'Hackathon / Coding', '25-26-nov-2026', '09:30 AM', 'Lab 1 - Turing Computing Centre', 'The premier college hackathon challenging students to build innovative software solutions within a 6-hour sprint.', 60, 0, 1, 1),
+(4, 'CodeStorm', 'Debugging & DSA', '25-26-nov-2026', '10:00 AM', 'Main Auditorium & CS Lab 2', 'A high-intensity coding & algorithmic problem solving competition testing speed, precision, and bug eradication skills.', 80, 0, 1, 1),
+(5, 'CodeVerse', 'Web & App Design', '25-26-nov-2026', '02:00 PM', 'Seminar Hall 3', 'Showcase of modern UI/UX design, full-stack application development, and interactive web architecture presentations.', 50, 0, 1, 1),
+(6, 'ByteBattle', 'Speed Coding Duel', '25-26-nov-2026', '11:00 AM', 'Advanced Computing Lab', '1-on-1 fast-paced knockout speed coding rounds on algorithms, data structures, and mathematical puzzles.', 40, 0, 1, 1);
 
 -- 3. Initial Sample Participants
 INSERT INTO participants (id, user_id, full_name, email, phone, college_name, department, semester) VALUES
-(1, 2, 'Varshitha H', 'varshitha@college.edu', '9876543210', 'Shree Daksha Academy', 'BCA', '5th Sem'),
-(2, NULL, 'Rahul Kumar', 'rahul.k@univ.ac.in', '9845123456', 'City College of Technology', 'BSc Computer Science', '3rd Sem'),
-(3, NULL, 'Ananya Sharma', 'ananya.s@tech.edu', '9123456780', 'Shree Daksha Academy', 'BCA', '5th Sem'),
-(4, NULL, 'Karthik Rao', 'karthik.rao@gmail.com', '9880011223', 'National Institute of Engineering', 'B.Tech IT', '7th Sem');
+(1, 2, 'Varshitha H', 'varshitha@college.edu', '9876543210', 'Shree Daksha Academy', 'PCMC', 'II PUC'),
+(2, NULL, 'Rahul Kumar', 'rahul@dakshapuc.edu.in', '9845123456', 'Shree Daksha Academy', 'CEBA', 'II PUC'),
+(3, NULL, 'Ananya Sharma', 'ananya.s@tech.edu', '9123456780', 'Shree Daksha Academy', 'PCMC', 'II PUC'),
+(4, NULL, 'Karthik Rao', 'karthik.rao@gmail.com', '9880011223', 'Shree Daksha Academy', 'PCMB', 'I PUC');
 
 -- 4. Initial Registrations
 INSERT INTO registrations (id, registration_uid, participant_id, event_id, registered_by, is_group, team_name, team_size, team_members, status, payment_status) VALUES

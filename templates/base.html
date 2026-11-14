@@ -506,7 +506,7 @@
             margin-top: auto;
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261113_v7">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261114_v8">
     <script>
         (function () {
             window.setSiteTheme = function (theme) {
@@ -530,74 +530,25 @@
                 return true;
             };
 
-            window.toggleBaseTheme = function (event) {
-                const panel = document.getElementById('appearancePanel');
-                const trigger = document.getElementById('baseThemeToggle');
-                if (!panel || !trigger) return;
-                const opening = panel.hidden;
-                panel.hidden = !opening;
-                trigger.setAttribute('aria-expanded', String(opening));
-                if (opening) {
-                    panel.dataset.openerId = trigger.id;
-                    const theme = document.documentElement.getAttribute('data-theme') || 'light';
-                    panel.querySelector(`[data-theme-choice="${theme}"]`)?.focus();
-                } else if (event && event.currentTarget) {
-                    event.currentTarget.focus();
-                }
+            window.toggleBaseTheme = function () {
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                window.setSiteTheme(current === 'dark' ? 'light' : 'dark');
             };
-
-            document.addEventListener('DOMContentLoaded', function () {
-                const panel = document.getElementById('appearancePanel');
-                const trigger = document.getElementById('baseThemeToggle');
-                const theme = document.documentElement.getAttribute('data-theme') || 'light';
-                const closePanel = function (restoreFocus) {
-                    if (!panel || panel.hidden) return;
-                    panel.hidden = true;
-                    trigger?.setAttribute('aria-expanded', 'false');
-                    if (restoreFocus) document.getElementById(panel.dataset.openerId || 'baseThemeToggle')?.focus();
-                };
-
-                document.querySelectorAll('[data-theme-choice]').forEach(choice => {
-                    choice.setAttribute('aria-pressed', String(choice.dataset.themeChoice === theme));
-                    choice.addEventListener('click', function () {
-                        window.setSiteTheme(choice.dataset.themeChoice);
-                        closePanel(true);
-                    });
-                });
-                panel?.querySelector('.appearance-close')?.addEventListener('click', () => closePanel(true));
-                document.addEventListener('pointerdown', event => {
-                    if (panel && !panel.hidden && !panel.contains(event.target) &&
-                        !event.target.closest('#baseThemeToggle')) closePanel(false);
-                });
-                document.addEventListener('keydown', event => {
-                    if (event.key === 'Escape' && panel && !panel.hidden) closePanel(true);
-                });
-            });
+            function updateBaseThemeButton() {
+                const button = document.getElementById('baseThemeToggle');
+                if (!button) return;
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                const target = current === 'dark' ? 'light' : 'dark';
+                button.setAttribute('aria-label', `Switch to ${target} theme`);
+                button.setAttribute('title', `Switch to ${target} theme`);
+            }
+            document.addEventListener('DOMContentLoaded', updateBaseThemeButton);
+            window.addEventListener('sda-theme-changed', updateBaseThemeButton);
         })();
     </script>
 </head>
 
 <body class="light-theme">
-    <button type="button" id="baseThemeToggle" class="base-theme-toggle" onclick="toggleBaseTheme(event)" aria-label="Choose appearance" aria-haspopup="dialog" aria-controls="appearancePanel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17"/></svg><span>Appearance</span></button>
-    <section class="appearance-panel workspace-appearance-panel" id="appearancePanel" role="dialog" aria-label="Choose appearance" hidden>
-        <div class="appearance-panel-heading">
-            <div><h2>Choose your palette</h2><p>Set the campus mood for this device.</p></div>
-            <button type="button" class="appearance-close" aria-label="Close appearance panel"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m5 5 10 10M15 5 5 15"/></svg></button>
-        </div>
-        <div class="appearance-options" role="group" aria-label="Color themes">
-            <button type="button" class="appearance-choice" data-theme-choice="light" aria-pressed="false">
-                <span class="appearance-choice-top"><strong>Daylight</strong><span>Light</span></span>
-                <span class="appearance-preview appearance-preview-light" aria-hidden="true"><i></i><i></i><i></i></span>
-                <span class="appearance-choice-note">Clear, calm, and open</span>
-            </button>
-            <button type="button" class="appearance-choice" data-theme-choice="dark" aria-pressed="false">
-                <span class="appearance-choice-top"><strong>After hours</strong><span>Dark</span></span>
-                <span class="appearance-preview appearance-preview-dark" aria-hidden="true"><i></i><i></i><i></i></span>
-                <span class="appearance-choice-note">Layered forest charcoal with soft contrast</span>
-            </button>
-        </div>
-        <p class="appearance-saved-note">Your choice is saved on this device.</p>
-    </section>
 
     {% if session.get('user_id') %}
     <!-- Authenticated workspace header: compact, role-aware, and independent from the public event header. -->
@@ -656,9 +607,8 @@
                 style="height: 48px; width: auto; object-fit: contain;">
             <div class="landing-logo-copy" style="display: flex; flex-direction: column;">
                 <span style="font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 800; color: #0f172a; line-height: 1.2;">SHREE DAKSHA ACADEMY</span>
-                <span style="font-size: 0.65rem; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">Affiliated to Bengaluru University and approved by AICTE.</span>
+                <span style="font-size: 0.65rem; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">Pre-University College · I &amp; II PUC</span>
                 <span style="font-size: 0.62rem; color: #64748b;">No.596, Andrahalli Main Road, Opp. D.Group Layout Arch, Bengaluru - 560091</span>
-                <span class="landing-logo-programmes">Degree Programmes: BCA · MCA</span>
             </div>
         </a>
         <div class="header-actions">
@@ -675,9 +625,8 @@
                 style="height: 44px; width: auto; object-fit: contain;">
             <div class="landing-logo-copy" style="display: flex; flex-direction: column; justify-content: center; line-height: 1.2;">
                 <span style="font-family: 'Space Grotesk', sans-serif; font-size: 0.98rem; font-weight: 800; color: inherit;">SHREE DAKSHA ACADEMY</span>
-                <span style="font-size: 0.64rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">Affiliated to Bengaluru University and approved by AICTE.</span>
+                <span style="font-size: 0.64rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">Pre-University College · I &amp; II PUC</span>
                 <span style="font-size: 0.60rem; color: #94a3b8;">No.596, Andrahalli Main Road, Bengaluru - 560091</span>
-                <span class="landing-logo-programmes">Degree Programmes: BCA · MCA</span>
             </div>
         </a>
 
@@ -806,6 +755,12 @@
         <p style="margin-top: 10px;"><a href="{{ url_for('login') }}"
                 style="color: #64748b; text-decoration: none;">Admin Login</a></p>
         {% endif %}
+        <button type="button" id="baseThemeToggle" class="footer-theme-toggle" onclick="toggleBaseTheme()"
+            aria-label="Switch to dark theme" title="Switch to dark theme">
+            <svg class="theme-icon theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.9 13A8.5 8.5 0 0 1 11 3.1 8.5 8.5 0 1 0 20.9 13Z"/><path d="M16 3v4M14 5h4"/></svg>
+            <svg class="theme-icon theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+            <span>Theme</span>
+        </button>
     </footer>
 
     <!-- Client Script -->

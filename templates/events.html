@@ -5883,10 +5883,10 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
             <!-- Event Timing & Countdown Module -->
             <div class="hero-countdown-block" id="heroCountdownBlock" aria-label="Daksha Infinix timing and countdown">
-                <p class="hero-date-line"><span class="hero-starts-badge" style="display:inline-block; margin-right:4px; font-weight:700; color:#60a5fa; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.04em;">Starts in</span> <span class="hero-date-highlight">26–27 November 2026</span> &bull; <span
+                <p class="hero-date-line"><span class="hero-starts-badge" style="display:inline-block; margin-right:4px; font-weight:700; color:#60a5fa; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.04em;">Starts in</span> <span class="hero-date-highlight">25–26 November 2026</span> &bull; <span
                         class="hero-date-highlight">Bangalore</span></p>
 
-                <div class="hero-timer-capsule" id="symposiumCountdown" aria-label="Countdown to 26th November 2026">
+                <div class="hero-timer-capsule" id="symposiumCountdown" aria-label="Countdown to 25th November 2026">
                     <div class="timer-digits-strip" id="timerDigitsStrip">
                         <div class="timer-unit">
                             <span class="timer-val" id="cdDays">00</span>
@@ -5945,11 +5945,10 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     <div class="crest-orbit-ring" aria-hidden="true"></div>
                 </div>
                 <span class="crest-institution-name">SHREE DAKSHA ACADEMY</span>
-                <span class="crest-institution-sub">Affiliated to Bengaluru University and approved by AICTE.</span>
+                <span class="crest-institution-sub">Pre-University College · I &amp; II PUC</span>
                 <span class="crest-institution-addr"
                     style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px; letter-spacing: 0.3px; text-align: center; max-width: 600px;">No.596,
                     Andrahalli Main Road, Opp. D.Group Layout Arch, Bengaluru - 560091</span>
-                <span class="crest-institution-programmes">Degree Programmes: BCA · MCA</span>
             </a>
 
             <div class="logo-sideline right" aria-hidden="true"></div>
@@ -6257,7 +6256,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         </div>
                         <div class="disc-cascade-meta-row">
                             <dt>When</dt>
-                            <dd id="discCascadeWhen">26 November 2026 · {{
+                            <dd id="discCascadeWhen">25–26 November 2026 · {{
                                 events[0].event_time if events else 'Details inside' }}</dd>
                         </div>
                         <div class="disc-cascade-meta-row">
@@ -6273,7 +6272,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         data-title="{{ ev.event_name|e }}"
                         data-format="{{ 'Group event' if ev.is_group else 'Solo event' }}"
                         data-fee="{% if ev.event_fee and ev.event_fee > 0 %}₹ {{ ev.event_fee }}{% else %}Free entry{% endif %}"
-                        data-venue="{{ ev.venue|e }}" data-date="26 Nov 2026"
+                        data-venue="{{ ev.venue|e }}" data-date="25–26 Nov 2026"
                         data-palette-category="{{ ev.category_key }}"
                         data-time="{{ ev.event_time|e }}"
                         data-description="{{ (ev.description or 'Bring your best idea and make the stage yours.')|e }}"
@@ -6394,7 +6393,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                                     <line x1="8" y1="2" x2="8" y2="6"></line>
                                     <line x1="3" y1="10" x2="21" y2="10"></line>
                                 </svg>
-                                <span>26 November 2026{% if ev.event_time
+                                <span>25–26 November 2026{% if ev.event_time
                                     %} · {{ ev.event_time }}{% endif %}</span>
                             </div>
                             <div class="event-detail-item">
@@ -7958,7 +7957,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             })();
             // ── Symposium Countdown Timer & "Fest is Live" Status ──
             (function initCountdown() {
-                const targetDate = new Date('2026-11-26T09:00:00+05:30').getTime();
+                const targetDate = new Date('2026-11-25T09:00:00+05:30').getTime();
                 const capsule = document.getElementById('symposiumCountdown');
                 const elDays = document.getElementById('cdDays');
                 const elHours = document.getElementById('cdHours');

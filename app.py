@@ -1230,7 +1230,7 @@ def register_participant():
         phone = request.form.get('phone', '').strip()
         college_name = request.form.get('college_name', '').strip()
         department = request.form.get('department', '').strip()
-        semester = request.form.get('semester', 'Second PUC').strip()
+        semester = request.form.get('semester', '').strip()
         event_id = safe_int(request.form.get('event_id', '').strip(), 0)
 
         # Group Event Fields
@@ -1246,6 +1246,10 @@ def register_participant():
         ev_record = query_db("SELECT event_name, is_group, min_team_size, max_team_size, event_fee FROM events WHERE id = %s", (event_id,), one=True) if event_id else None
         if not ev_record:
             flash('Invalid event selected.', 'danger')
+            return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
+
+        if semester not in ('I PUC', 'II PUC'):
+            flash('Registration is open to I and II PUC students only.', 'danger')
             return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
         
         event_fee = max(0, safe_int(ev_record.get('event_fee'), 0))

@@ -20,7 +20,7 @@ Built using **Python (Flask)**, **PostgreSQL** (with an automatic SQLite fallbac
 3. **Event Management (CRUD)**:
    - Create, edit, view, and delete symposium events.
    - Pre-loaded with college tech events:
-     - Official event cards currently use **26-Nov-2026**; Daksha Infinix runs **26–27 Nov 2026**.
+     - Official event cards use **25–26 Nov 2026**; Daksha Infinix runs **25–26 Nov 2026** for I and II PUC students.
 
 4. **Participant Registration & Duplicate Prevention**:
    - Clean registration form capturing Participant Name, Email, Phone, College, Department, Semester, and Event selection.
@@ -39,7 +39,7 @@ Built using **Python (Flask)**, **PostgreSQL** (with an automatic SQLite fallbac
      - College Name & Department Branding
      - Event Name (**CodeCraft**, **CodeStorm**, **CodeVerse**, **ByteBattle**)
      - Participant Name
-     - Event Date (26-Nov-2026)
+     - Event Date (25–26-Nov-2026)
      - Unique Certificate ID (e.g. `EM-2026-CC-8742`)
      - Official Gold Seal Emblem & Authorized Signatures
    - Single-click bulk generator for all verified attendees.
@@ -191,7 +191,7 @@ Set `ADMIN_PASSWORD` to a strong, private value before creating or provisioning 
 
 ---
 
-## 📖 Module Explanation (For BCA Mini Project Viva)
+## 📖 Module Explanation (For Application Project Viva)
 
 1. **User Authentication Module (`app.py`, `templates/login.html`)**:
    - Uses Flask session management with cryptographic signing.

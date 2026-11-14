@@ -23,7 +23,7 @@ No distinct market position is confirmed. Preserve the product's connected event
 
 - Public event visitors browse on desktop and mobile, often arriving directly at the event page or registration form.
 - Organizers use authenticated workspaces to maintain event and participant operations.
-- The event is scheduled for 26–27 November 2026. Event entries currently use 26 November for the event date; schedules can be changed later.
+- The event is scheduled for 25–26 November 2026 and is for I and II PUC students.
 - Online UPI is explicitly in demo mode pending confirmation of a real payment destination.
 
 ## Capabilities and Constraints

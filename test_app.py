@@ -28,7 +28,10 @@ class SDATestCase(unittest.TestCase):
         self.assertIn(b'BGMI', response.data)
         self.assertIn(b'Free Fire', response.data)
         self.assertIn(b'Pencil Sketch', response.data)
-        self.assertIn(b'26 November 2026', response.data)
+        self.assertIn(b'25\xe2\x80\x9326 November 2026', response.data)
+        self.assertIn(b'Pre-University College', response.data)
+        self.assertNotIn(b'BCA', response.data)
+        self.assertNotIn(b'MCA', response.data)
         self.assertNotIn(b'18-sep-2026', response.data)
 
     def test_03_login_page_renders(self):
@@ -64,9 +67,9 @@ class SDATestCase(unittest.TestCase):
             'full_name': 'Test Participant',
             'email': test_email,
             'phone': '9988776655',
-            'college_name': 'City Engineering College',
-            'department': 'BCA',
-            'semester': '5th Sem',
+            'college_name': 'Shree Daksha Academy PU College',
+            'department': 'PCMC',
+            'semester': 'II PUC',
             'event_id': target_event_id,
             'payment_method': 'Cash'
         }, follow_redirects=True)
@@ -78,9 +81,9 @@ class SDATestCase(unittest.TestCase):
             'full_name': 'Test Participant',
             'email': test_email,
             'phone': '9988776655',
-            'college_name': 'City Engineering College',
-            'department': 'BCA',
-            'semester': '5th Sem',
+            'college_name': 'Shree Daksha Academy PU College',
+            'department': 'PCMC',
+            'semester': 'II PUC',
             'event_id': target_event_id,
             'payment_method': 'Cash'
         }, follow_redirects=True)
@@ -90,6 +93,22 @@ class SDATestCase(unittest.TestCase):
         # Cleanup test registration to preserve event capacity for repeated test runs
         database.query_db("DELETE FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email = %s)", (test_email,), commit=True)
         database.query_db("DELETE FROM participants WHERE email = %s", (test_email,), commit=True)
+
+    def test_registration_rejects_non_puc_class(self):
+        event = database.query_db("SELECT id FROM events LIMIT 1", one=True)
+        response = self.client.post('/register', data={
+            'full_name': 'Ineligible Class Student',
+            'email': 'ineligible.class@example.edu',
+            'phone': '9988776600',
+            'college_name': 'Test College',
+            'department': 'PCMC',
+            'semester': 'III PUC',
+            'event_id': str(event['id']),
+            'payment_method': 'Cash'
+        }, follow_redirects=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Registration is open to I and II PUC students only.', response.data)
 
     def test_06_attendance_toggle_and_certificate_flow(self):
         """Test attendance toggle via AJAX and certificate generation"""
@@ -103,7 +122,7 @@ class SDATestCase(unittest.TestCase):
         if not reg:
             part_id = database.execute_db(
                 "INSERT INTO participants (full_name, email, phone, college_name, department) VALUES (%s, %s, %s, %s, %s)",
-                ("Test Flow Student", f"flow.test_{int(time.time())}@example.com", "9876543210", "Test College", "BCA")
+                ("Test Flow Student", f"flow.test_{int(time.time())}@example.com", "9876543210", "Test College", "PCMC")
             )
             reg_id = database.execute_db(
                 "INSERT INTO registrations (registration_uid, participant_id, event_id, status, payment_status, payment_method, amount_paid) VALUES (%s, %s, %s, %s, %s, %s, %s)",
@@ -194,7 +213,7 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('SDA 2026-27', data)
         self.assertNotIn('2026-27', data)
         self.assertNotIn('Annual Symposium 2026-27', data)
-        self.assertIn('26 November 2026', data)
+        self.assertIn('25–26 November 2026', data)
         self.assertTrue('Bengaluru' in data or 'Bangalore' in data)
         self.assertIn('hero-date-highlight', data)
         self.assertNotIn('November 19th', data)
@@ -285,6 +304,9 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('id="themeToggleBtn"', data, "Desktop theme toggle button missing")
         self.assertIn('id="themeToggleBtnMobile"', data, "Mobile theme toggle button missing")
         self.assertIn('toggleSiteTheme', data, "toggleSiteTheme function missing")
+        self.assertIn('id="footerThemeToggle"', data, "Footer theme toggle missing")
+        self.assertIn('theme-icon-moon', data, "Moon icon missing from footer toggle")
+        self.assertIn('theme-icon-sun', data, "Sun icon missing from footer toggle")
         self.assertIn('sda_theme', data, "localStorage theme key missing")
         self.assertIn('[data-theme="light"]', data, "Light theme CSS rules missing")
 
@@ -296,6 +318,9 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('[data-theme="light"] .header-nav-center', data, "Light theme .header-nav-center rule missing")
         self.assertIn('[data-theme="light"] .l-footer', data, "Light theme .l-footer rule missing")
         self.assertIn('[data-theme="light"] .l-footer', data, "Light theme footer rule missing")
+        theme_css = self.client.get('/static/css/daksha-theme.css').data.decode('utf-8')
+        self.assertIn(':root[data-theme="light"] .l-footer .footer-col p', theme_css,
+                      "Light-theme footer contrast override missing")
 
         # 4. Verify no dark inline style pollution on key section roots
         self.assertNotIn('id="about" style="padding: 60px 20px 70px; max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 48px; align-items: center; background: #000000;"', data,
@@ -345,6 +370,9 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('<select id="semester" name="semester" style="display:none;"', data)
         self.assertIn('value="I PUC"', data)
         self.assertIn('value="II PUC"', data)
+        self.assertIn('Specify Your PUC Stream', data)
+        self.assertNotIn('BCA', data)
+        self.assertNotIn('MCA', data)
 
     def test_12_csv_exports_and_offline_pass_service_worker(self):
         """Test non-colliding CSV export routes, service worker, and ticket pass QR code"""
@@ -618,7 +646,7 @@ class SDATestCase(unittest.TestCase):
         if not reg:
             part_id = database.execute_db(
                 "INSERT INTO participants (full_name, email, phone, college_name, department) VALUES (%s, %s, %s, %s, %s)",
-                ("Backup Test Attendee", f"backup_{int(time.time())}@college.edu", "9988776655", "SDA College", "BCA")
+                ("Backup Test Attendee", f"backup_{int(time.time())}@college.edu", "9988776655", "SDA College", "CEBA")
             )
             reg_id = database.execute_db(
                 "INSERT INTO registrations (registration_uid, participant_id, event_id, status, payment_status, payment_method, amount_paid) VALUES (%s, %s, %s, %s, %s, %s, %s)",
@@ -693,7 +721,7 @@ class SDATestCase(unittest.TestCase):
             'phone': '9876543210',
             'college_name': 'Test College',
             'department': 'Other',
-            'other_department': 'BCA Tech',
+            'other_department': 'PUC Science',
             'event_id': '2',
             'team_name': 'Alpha Squad',
             'team_size': '4',
@@ -722,7 +750,7 @@ class SDATestCase(unittest.TestCase):
         edit_post_res = self.client.post(f"/admin/events/edit/{bgmi_event['id']}", data={
             'event_name': 'BGMI',
             'event_type': 'Gaming',
-            'event_date': '26-nov-2026',
+            'event_date': '25-26-nov-2026',
             'event_time': '10:00 AM',
             'venue': 'Computer Lab 3',
             'max_participants': '100',
@@ -1035,17 +1063,23 @@ class SDATestCase(unittest.TestCase):
 
         dates = database.query_db("SELECT DISTINCT event_date FROM events")
 
-        self.assertEqual(dates, [{'event_date': '26-nov-2026'}])
+        self.assertEqual(dates, [{'event_date': '25-26-nov-2026'}])
 
     def test_seed_migrates_all_legacy_event_dates(self):
         if database.DB_MODE != 'sqlite':
             self.skipTest('This regression checks the isolated SQLite seed.')
 
         fixture_name = 'Legacy Schedule Migration Fixture'
+        custom_fixture_name = 'Custom Schedule Preservation Fixture'
         database.execute_db(
             """INSERT INTO events (event_name, event_type, event_date, event_time, venue)
                VALUES (%s, %s, %s, %s, %s)""",
             (fixture_name, 'Test', '19-sep-2026', '10:00 AM', 'Test Venue')
+        )
+        database.execute_db(
+            """INSERT INTO events (event_name, event_type, event_date, event_time, venue)
+               VALUES (%s, %s, %s, %s, %s)""",
+            (custom_fixture_name, 'Test', '01-dec-2026', '10:00 AM', 'Test Venue')
         )
         initialized_before = database._DB_INITIALIZED
         try:
@@ -1055,10 +1089,16 @@ class SDATestCase(unittest.TestCase):
                 "SELECT event_date FROM events WHERE event_name = %s",
                 (fixture_name,), one=True
             )
-            self.assertEqual(migrated['event_date'], '26-nov-2026')
+            self.assertEqual(migrated['event_date'], '25-26-nov-2026')
+            custom = database.query_db(
+                "SELECT event_date FROM events WHERE event_name = %s",
+                (custom_fixture_name,), one=True
+            )
+            self.assertEqual(custom['event_date'], '01-dec-2026')
         finally:
             database._DB_INITIALIZED = initialized_before
             database.execute_db("DELETE FROM events WHERE event_name = %s", (fixture_name,))
+            database.execute_db("DELETE FROM events WHERE event_name = %s", (custom_fixture_name,))
 
     def test_public_events_deduplicate_pubg_and_bgmi_aliases(self):
         rows = [
@@ -1159,7 +1199,7 @@ class SDATestCase(unittest.TestCase):
             'email': email,
             'phone': '9876500001',
             'college_name': 'Original College',
-            'department': 'BCA',
+            'department': 'PCMC',
             'semester': 'I PUC',
             'event_id': ev1,
             'payment_method': 'Cash'
@@ -1172,7 +1212,7 @@ class SDATestCase(unittest.TestCase):
             'email': email,
             'phone': '9111111111',
             'college_name': 'Fake College',
-            'department': 'BCA',
+            'department': 'PCMC',
             'semester': 'I PUC',
             'event_id': ev2,
             'payment_method': 'Cash'
