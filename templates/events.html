@@ -6446,7 +6446,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                                     data-student-phone="{{ ev.student_phone|default(config.EVENT_COORDINATOR_SECONDARY_PHONE, true)|e }}">Contact</button>
                             </div>
                             <a href="{{ url_for('register_participant') }}?event_id={{ ev.id }}"
-                                class="btn-card-register">Register ↗</a>
+                                class="btn-card-register" data-no-liquid>Register ↗</a>
                         </div>
                     </div>
                 </article>

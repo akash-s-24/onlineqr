@@ -1787,6 +1787,7 @@
                     <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
                     {% else %}
                     <a href="#events" class="header-cta-classic"
+                        data-no-liquid
                         onclick="window.closeMobileNav && window.closeMobileNav();"
                         style="margin-top:16px; width:100%;">
                         <span>Register for Event &rarr;</span>
@@ -1809,7 +1810,7 @@
                 <a href="{{ url_for('logout') }}" class="header-btn logout-btn"
                     style="min-width: max-content;">Logout</a>
                 {% else %}
-                <a href="#events" class="header-cta-classic" id="headerRegisterBtn">
+                <a href="#events" class="header-cta-classic" id="headerRegisterBtn" data-no-liquid>
                     <span>Register for Event</span>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
