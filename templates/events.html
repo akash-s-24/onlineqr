@@ -5947,7 +5947,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             </div>
 
             <div class="hero-actions">
-                <button onclick="scrollToSection('events', event)" class="candy-btn hero-explore-btn btn-luxe-primary">
+                <button onclick="scrollToSection('events', event)" class="candy-btn hero-explore-btn" data-no-liquid>
                     <span>Explore Events</span>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
@@ -5955,7 +5955,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </svg>
                 </button>
                 <button onclick="scrollToSection('rules', event)" class="candy-btn hero-rules-btn" data-no-liquid>Rules &amp; Guidelines</button>
-                <button onclick="scrollToSection('contact', event)" class="candy-btn hero-contact-btn" data-no-liquid>Contact Organizers</button>
+                <button onclick="openContactDialog()" class="candy-btn hero-contact-btn" data-no-liquid>Contact Organizers</button>
             </div>
 
             <a class="scroll-indicator" href="#stats" aria-label="Scroll to highlights">
@@ -5995,7 +5995,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
         <div class="fest-stats-container">
             <!-- Card 1: Competition threshold highlight -->
             <div class="stat-card rv" style="--d: 0.1s;">
-                <div class="stat-badge stat-badge-events">12+ COMPETITIONS</div>
+                <div class="stat-badge stat-badge-events">15 COMPETITIONS</div>
                 <div class="stat-icon-wrapper">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -6005,7 +6005,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </svg>
                 </div>
                 <div class="stat-value-row">
-                    <b class="stat-number" data-target="12">12</b><span class="stat-number-plus" aria-label="plus">+</span>
+                    <b class="stat-number" data-target="15">15</b>
                 </div>
                 <h3 class="stat-title">Competitions</h3>
                 <p class="stat-desc">Browse the complete lineup of registered competitions below.</p>
@@ -6028,7 +6028,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         <path d="M7 6H4v2a4 4 0 0 0 4 4m9-6h3v2a4 4 0 0 1-4 4"></path>
                     </svg>
                 </div>
-                <h3 class="stat-title">General Championship</h3>
+                <h3 class="stat-title stat-title-championship"><span>General</span> <span>Championship</span></h3>
                 <p class="stat-desc">Colleges registered for all 15 competitions are eligible to compete for the overall fest title.</p>
             </div>
 
@@ -6050,7 +6050,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <h3 class="stat-title">Prize Pool</h3>
                 <p class="stat-desc">(up to ₹1 lakh) in prizes across the fest competitions.</p>
                 <a href="#events" class="stat-action-link">
-                    <span>Explore Schedule</span>
+                    <span>Explore Events</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M5 12h14" />
@@ -6298,6 +6298,10 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         data-time="{{ ev.event_time|e }}"
                         data-description="{{ (ev.description or 'Bring your best idea and make the stage yours.')|e }}"
                         data-rules="{{ ev.rules_text|default('', true)|e }}"
+                        data-faculty-name="{{ ev.faculty_name|default(config.EVENT_COORDINATOR_PRIMARY_NAME, true)|e }}"
+                        data-faculty-phone="{{ ev.faculty_phone|default(config.EVENT_COORDINATOR_PRIMARY_PHONE, true)|e }}"
+                        data-student-name="{{ ev.student_name|default(config.EVENT_COORDINATOR_SECONDARY_NAME, true)|e }}"
+                        data-student-phone="{{ ev.student_phone|default(config.EVENT_COORDINATOR_SECONDARY_PHONE, true)|e }}"
                         data-register-url="{{ url_for('register_participant') }}?event_id={{ ev.id }}"
                         aria-label="{{ ev.event_name|e }}">
                         <span class="disc-cascade-disc-shell">
@@ -6332,6 +6336,15 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </div>
                 </div>
                 <div class="disc-cascade-actions">
+                    <button type="button" id="discCascadeRules" class="disc-cascade-rules" data-no-liquid
+                        data-event-name="{{ events[0].event_name|default('This event', true)|e if events else 'This event' }}"
+                        data-rules="{{ events[0].rules_text|default('', true)|e if events else '' }}">Rules</button>
+                    <button type="button" id="discCascadeCall" class="disc-cascade-call" data-no-liquid
+                        data-contact-event="{{ events[0].event_name|default('This event', true)|e if events else 'This event' }}"
+                        data-faculty-name="{{ events[0].faculty_name|default(config.EVENT_COORDINATOR_PRIMARY_NAME, true)|e if events else config.EVENT_COORDINATOR_PRIMARY_NAME|e }}"
+                        data-faculty-phone="{{ events[0].faculty_phone|default(config.EVENT_COORDINATOR_PRIMARY_PHONE, true)|e if events else config.EVENT_COORDINATOR_PRIMARY_PHONE|e }}"
+                        data-student-name="{{ events[0].student_name|default(config.EVENT_COORDINATOR_SECONDARY_NAME, true)|e if events else config.EVENT_COORDINATOR_SECONDARY_NAME|e }}"
+                        data-student-phone="{{ events[0].student_phone|default(config.EVENT_COORDINATOR_SECONDARY_PHONE, true)|e if events else config.EVENT_COORDINATOR_SECONDARY_PHONE|e }}">Contact</button>
                     <a id="discCascadeRegister" class="disc-cascade-register" data-no-liquid
                         href="{{ url_for('register_participant') }}{% if events %}?event_id={{ events[0].id }}{% endif %}">Register for this event ↗</a>
                 </div>
@@ -6422,10 +6435,18 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         </div>
 
                         <div class="event-card-actions">
+                            <div class="event-card-subactions">
+                                <button type="button" class="btn-card-rules" data-no-liquid
+                                    data-event-name="{{ ev.event_name|e }}" data-rules="{{ ev.rules_text|default('', true)|e }}">Rules</button>
+                                <button type="button" class="btn-card-contact" data-no-liquid
+                                    data-event-name="{{ ev.event_name|e }}"
+                                    data-faculty-name="{{ ev.faculty_name|default(config.EVENT_COORDINATOR_PRIMARY_NAME, true)|e }}"
+                                    data-faculty-phone="{{ ev.faculty_phone|default(config.EVENT_COORDINATOR_PRIMARY_PHONE, true)|e }}"
+                                    data-student-name="{{ ev.student_name|default(config.EVENT_COORDINATOR_SECONDARY_NAME, true)|e }}"
+                                    data-student-phone="{{ ev.student_phone|default(config.EVENT_COORDINATOR_SECONDARY_PHONE, true)|e }}">Contact</button>
+                            </div>
                             <a href="{{ url_for('register_participant') }}?event_id={{ ev.id }}"
-                                class="btn-card-register">
-                                Register ↗
-                            </a>
+                                class="btn-card-register">Register ↗</a>
                         </div>
                     </div>
                 </article>
@@ -6833,7 +6854,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>For event-specific questions, open the "Details" button on an event card or contact the fest
+                    <p>For event-specific questions, open the "Contact" button on an event card or contact the fest
                         registration desk. Individual coordinator numbers will appear here once confirmed.</p>
                 </div>
             </details>
@@ -6921,66 +6942,22 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
         </div>
     </section>
 
-    <!-- Contact Us Section (Compact, Smooth, and Refined) -->
-    <section id="contact" class="map-section">
-        <h2 class="section-title" style="margin-bottom: 22px; text-align: center;">Contact Us</h2>
-        <div class="contact-grid">
-            <!-- Coordinator 1 -->
-            <div class="contact-card">
-                <span class="contact-role-badge">Coordinator</span>
-                <h3>NARASIMHAREDDY Y V</h3>
-                <p>Symposium Coordinator Desk</p>
-                <div class="coordinator-phone-list" aria-label="Coordinator phone number">
-                    <a href="tel:{{ config.CONTACT_PHONE_PRIMARY|replace(' ', '') }}" class="streamlined-call-link"
-                        aria-label="Call Coordinator NARASIMHAREDDY Y V at {{ config.CONTACT_PHONE_PRIMARY }}">
-                        <svg class="phone-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                        </svg>
-                        <span>{{ config.CONTACT_PHONE_PRIMARY }}</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Coordinator 2 -->
-            <div class="contact-card">
-                <span class="contact-role-badge">Coordinator</span>
-                <h3>PREETI P</h3>
-                <p>Symposium Coordinator Desk</p>
-                <div class="coordinator-phone-list" aria-label="Coordinator phone number">
-                    <a href="tel:{{ config.CONTACT_PHONE_SECONDARY|replace(' ', '') }}" class="streamlined-call-link"
-                        aria-label="Call Coordinator PREETI P at {{ config.CONTACT_PHONE_SECONDARY }}">
-                        <svg class="phone-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                        </svg>
-                        <span>{{ config.CONTACT_PHONE_SECONDARY }}</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Event coordinators are listed here, away from the event cards. -->
-            <div class="contact-card event-coordinator-card">
-                <span class="contact-role-badge">Event Coordinator</span>
-                <h3>{{ config.EVENT_COORDINATOR_PRIMARY_NAME }}</h3>
-                <p>Event coordination and participant support</p>
-                <a href="tel:{{ config.EVENT_COORDINATOR_PRIMARY_PHONE|replace(' ', '') }}" class="streamlined-call-link"
-                    aria-label="Call Event Coordinator {{ config.EVENT_COORDINATOR_PRIMARY_NAME }} at {{ config.EVENT_COORDINATOR_PRIMARY_PHONE }}">
-                    <span>{{ config.EVENT_COORDINATOR_PRIMARY_PHONE }}</span>
-                </a>
-            </div>
-
-            <div class="contact-card event-coordinator-card">
-                <span class="contact-role-badge">Event Coordinator</span>
-                <h3>{{ config.EVENT_COORDINATOR_SECONDARY_NAME }}</h3>
-                <p>Event coordination and participant support</p>
-                <a href="tel:{{ config.EVENT_COORDINATOR_SECONDARY_PHONE|replace(' ', '') }}" class="streamlined-call-link"
-                    aria-label="Call Event Coordinator {{ config.EVENT_COORDINATOR_SECONDARY_NAME }} at {{ config.EVENT_COORDINATOR_SECONDARY_PHONE }}">
-                    <span>{{ config.EVENT_COORDINATOR_SECONDARY_PHONE }}</span>
-                </a>
-            </div>
-        </div>
-    </section>
+    <div class="event-dialog-backdrop" id="rulesModal" hidden>
+        <section class="event-dialog" role="dialog" aria-modal="true" aria-labelledby="rulesModalTitle">
+            <button type="button" class="event-dialog-close" aria-label="Close rules">×</button>
+            <p class="event-dialog-eyebrow">EVENT GUIDELINES</p>
+            <h2 id="rulesModalTitle">Event rules</h2>
+            <div id="rulesModalContent" class="event-dialog-content"></div>
+        </section>
+    </div>
+    <div class="event-dialog-backdrop" id="contactModal" hidden>
+        <section class="event-dialog" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
+            <button type="button" class="event-dialog-close" aria-label="Close contacts">×</button>
+            <p class="event-dialog-eyebrow">EVENT COORDINATORS</p>
+            <h2 id="contactModalTitle">Contact the organizers</h2>
+            <div id="contactModalContent" class="event-dialog-content"></div>
+        </section>
+    </div>
 
     {% endblock %}
 
@@ -6989,6 +6966,84 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (window.initScrollReveal) window.initScrollReveal('.scroll-reveal');
+
+            const rulesDialog = document.getElementById('rulesModal');
+            const contactDialog = document.getElementById('contactModal');
+            let lastDialogOpener = null;
+            function showDialog(dialog, opener) {
+                if (!dialog) return;
+                lastDialogOpener = opener || document.activeElement;
+                dialog.hidden = false;
+                dialog.classList.add('active');
+                document.body.classList.add('event-dialog-open');
+                dialog.querySelector('.event-dialog-close')?.focus();
+            }
+            function hideDialogs() {
+                [rulesDialog, contactDialog].forEach(dialog => {
+                    if (!dialog) return;
+                    dialog.hidden = true;
+                    dialog.classList.remove('active');
+                });
+                document.body.classList.remove('event-dialog-open');
+                lastDialogOpener?.focus?.();
+            }
+            function openRulesDialog(name, rules, opener) {
+                const title = document.getElementById('rulesModalTitle');
+                const content = document.getElementById('rulesModalContent');
+                if (title) title.textContent = `${name || 'Event'} rules`;
+                if (content) {
+                    content.replaceChildren();
+                    const entries = (rules || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+                    if (entries.length) {
+                        const list = document.createElement('ol');
+                        entries.forEach(line => { const item = document.createElement('li'); item.textContent = line.replace(/^[-•*]\s*/, ''); list.append(item); });
+                        content.append(list);
+                    } else {
+                        const note = document.createElement('p');
+                        note.textContent = 'Please arrive on time, follow the instructions of the event coordinators, and maintain fair play throughout the event.';
+                        content.append(note);
+                    }
+                }
+                showDialog(rulesDialog, opener);
+            }
+            function openContactDialog(data = {}, opener) {
+                const title = document.getElementById('contactModalTitle');
+                const content = document.getElementById('contactModalContent');
+                const eventName = data.eventName || 'Event';
+                if (title) title.textContent = `${eventName} coordinators`;
+                if (content) {
+                    content.replaceChildren();
+                    [[data.facultyName, data.facultyPhone, 'Faculty coordinator'], [data.studentName, data.studentPhone, 'Student coordinator']]
+                        .filter(([name, phone]) => name || phone)
+                        .forEach(([name, phone, role]) => {
+                            const card = document.createElement('article'); card.className = 'event-contact-person';
+                            const label = document.createElement('span'); label.textContent = role;
+                            const person = document.createElement('strong'); person.textContent = name || role;
+                            card.append(label, person);
+                            if (phone) { const link = document.createElement('a'); link.href = `tel:${String(phone).replace(/[^+\d]/g, '')}`; link.textContent = phone; card.append(link); }
+                            content.append(card);
+                        });
+                }
+                showDialog(contactDialog, opener);
+            }
+            window.openContactDialog = (opener = document.activeElement) => openContactDialog({
+                eventName: 'Event',
+                facultyName: {{ config.EVENT_COORDINATOR_PRIMARY_NAME|tojson }},
+                facultyPhone: {{ config.EVENT_COORDINATOR_PRIMARY_PHONE|tojson }},
+                studentName: {{ config.EVENT_COORDINATOR_SECONDARY_NAME|tojson }},
+                studentPhone: {{ config.EVENT_COORDINATOR_SECONDARY_PHONE|tojson }}
+            }, opener);
+            document.querySelectorAll('.btn-card-rules, #discCascadeRules').forEach(button => button.addEventListener('click', () =>
+                openRulesDialog(button.dataset.eventName || 'Event', button.dataset.rules || '', button)));
+            document.querySelectorAll('.btn-card-contact, #discCascadeCall').forEach(button => button.addEventListener('click', () =>
+                openContactDialog({ eventName: button.dataset.eventName || button.dataset.contactEvent, facultyName: button.dataset.facultyName, facultyPhone: button.dataset.facultyPhone, studentName: button.dataset.studentName, studentPhone: button.dataset.studentPhone }, button)));
+            [rulesDialog, contactDialog].forEach(dialog => {
+                dialog?.querySelector('.event-dialog-close')?.addEventListener('click', hideDialogs);
+                dialog?.addEventListener('click', event => { if (event.target === dialog) hideDialogs(); });
+            });
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && [rulesDialog, contactDialog].some(dialog => dialog && !dialog.hidden)) hideDialogs();
+            });
 
             // 4. Device Detection
             const isMobileDevice = (window.innerWidth <= 768) || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -7113,6 +7168,13 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     setText('discCascadeWhen', `${data.date || 'Registration open'} · ${data.time || 'Details inside'}`);
                     setText('discCascadeVenue', data.venue);
                     setText('discCascadeDescription', data.description || 'Bring your best idea and make the stage yours.');
+                    const rulesButton = document.getElementById('discCascadeRules');
+                    if (rulesButton) { rulesButton.dataset.eventName = data.title || 'Event'; rulesButton.dataset.rules = data.rules || ''; }
+                    const contactButton = document.getElementById('discCascadeCall');
+                    if (contactButton) {
+                        contactButton.dataset.contactEvent = data.title || 'Event';
+                        ['facultyName', 'facultyPhone', 'studentName', 'studentPhone'].forEach(key => { contactButton.dataset[key] = data[key] || ''; });
+                    }
                     setText('discCascadeCount', `${active + 1} / ${total}`);
                     const prevBtn = document.getElementById('discCascadePrev');
                     const nextBtn = document.getElementById('discCascadeNext');

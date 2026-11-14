@@ -76,7 +76,7 @@ class SDATestCase(unittest.TestCase):
         }, follow_redirects=True)
         self.assertEqual(response1.status_code, 200)
         self.assertTrue(b'Registration submitted' in response1.data or b'Registration successful' in response1.data)
-        self.assertIn(b'daksha-theme.css?v=20261114_v10', response1.data)
+        self.assertIn(b'daksha-theme.css?v=20261114_v11', response1.data)
         self.assertIn(b'registration-pass-qr', response1.data)
         self.assertIn(b'registration-pass-qr-frame', response1.data)
         theme_css = self.client.get('/static/css/daksha-theme.css').data.decode('utf-8')
@@ -238,9 +238,9 @@ class SDATestCase(unittest.TestCase):
 
         # 2. Fest Highlights & Stats Section
         self.assertIn('id="stats"', data)
-        self.assertIn('data-target="12"', data)
-        self.assertIn('stat-badge-events">12+ COMPETITIONS<', data)
-        self.assertIn('stat-number-plus', data)
+        self.assertIn('data-target="15"', data)
+        self.assertIn('stat-badge-events">15 COMPETITIONS<', data)
+        self.assertNotIn('stat-number-plus', data)
         self.assertIn('General Championship', data)
         self.assertIn('₹1 lakh', data)
         self.assertIn('(up to ₹1 lakh)', data)
@@ -682,7 +682,7 @@ class SDATestCase(unittest.TestCase):
         self.assertTrue('registered for all 15 competitions' in html)
         self.assertTrue('Overall Championship Trophy' not in html)
         self.assertTrue('data-title="Solo Singing"' in html)
-        self.assertTrue('12+ COMPETITIONS' in html)
+        self.assertTrue('15 COMPETITIONS' in html)
         self.assertTrue('Register Online Only' in html)
         self.assertTrue('data-no-liquid' in html)
         self.assertTrue('25–26 November 2026' in html)
@@ -692,7 +692,7 @@ class SDATestCase(unittest.TestCase):
         self.assertTrue('hard copy of the receipt' in html)
         self.assertTrue('all 14 fest events' not in html)
         self.assertNotIn('Recognized by the Government of Karnataka, affiliated to Bengaluru University', html)
-        self.assertIn('Govt. of Karnataka · BU · AICTE approved', html)
+        self.assertIn('Government of Karnataka approved by Bengaluru University', html)
         self.assertIn('id="headerRegisterBtn"', html)
         self.assertIn('id="tabModeCarousel"', html)
         self.assertIn('id="tabModeGrid"', html)
@@ -700,20 +700,21 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('class="stat-unit stat-blue-accent"', html)
 
         championship_card = html.split('class="stat-card stat-card-highlight', 1)[1].split('<!-- Card 3: Prize pool -->', 1)[0]
-        self.assertEqual(championship_card.count('<h3 class="stat-title">General Championship</h3>'), 1)
+        self.assertIn('<span>General</span> <span>Championship</span>', championship_card)
         self.assertIn('eligible to compete for the overall fest title.', championship_card)
         self.assertNotIn('championship-competition-list', championship_card)
         self.assertNotIn('<div class="stat-badge">GENERAL CHAMPIONSHIP</div>', championship_card)
 
         carousel_panel = html.split('id="eventsCarouselPanel"', 1)[1].split('id="eventsGridPanel"', 1)[0]
         self.assertNotIn('Contacts', carousel_panel)
-        self.assertNotIn('discCascadeCall', carousel_panel)
+        self.assertIn('id="discCascadeRules"', carousel_panel)
+        self.assertIn('id="discCascadeCall"', carousel_panel)
         self.assertNotIn('discCascadeCoords', carousel_panel)
         grid_cards = html.split('id="eventsCardsGrid"', 1)[1].split('</div>\n        </div>\n    </section>', 1)[0]
         self.assertNotIn('event-contact-item', grid_cards)
         self.assertNotIn('Coordinators:', grid_cards)
-        self.assertNotIn('btn-card-contact', grid_cards)
-        self.assertNotIn('btn-card-rules', grid_cards)
+        self.assertIn('btn-card-contact', grid_cards)
+        self.assertIn('btn-card-rules', grid_cards)
         self.assertIn('class="btn-card-register"', grid_cards)
 
         theme_css = self.client.get('/static/css/daksha-theme.css').data.decode('utf-8')
@@ -1048,8 +1049,8 @@ class SDATestCase(unittest.TestCase):
         # 2. Disc cascade action buttons
         self.assertIn('Register for this event ↗', html)
         self.assertIn('id="discCascadeRegister"', html)
-        self.assertNotIn('id="discCascadeRules"', html)
-        self.assertNotIn('id="discCascadeCall"', html)
+        self.assertIn('id="discCascadeRules"', html)
+        self.assertIn('id="discCascadeCall"', html)
 
         # 3. Registration procedure buttons
         self.assertIn('Register Online Only', html)
@@ -1187,17 +1188,15 @@ class SDATestCase(unittest.TestCase):
     def test_public_certificate_verification_route_is_removed(self):
         self.assertEqual(self.client.get('/verify').status_code, 404)
 
-    def test_contact_cards_show_demo_phone_numbers_as_call_links(self):
-        with patch.object(Config, 'CONTACT_PHONE_PRIMARY', '+91 90000 00001'), \
-             patch.object(Config, 'CONTACT_PHONE_SECONDARY', '+91 90000 00002'):
-            response = self.client.get('/events')
+    def test_event_contacts_are_available_through_contact_dialog(self):
+        response = self.client.get('/events')
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'tel:+919000000001', response.data)
-        self.assertIn(b'tel:+919000000002', response.data)
-        self.assertIn(b'+91 90000 00001', response.data)
-        self.assertIn(b'+91 90000 00002', response.data)
-        self.assertNotIn(b'Message official desk on WhatsApp', response.data)
+        self.assertIn(b'id="contactModal"', response.data)
+        self.assertIn(b'openContactDialog', response.data)
+        self.assertIn(b'btn-card-contact', response.data)
+        self.assertIn(b'id="discCascadeCall"', response.data)
+        self.assertNotIn(b'id="contact" class="map-section"', response.data)
 
     def test_pending_payment_pass_is_not_called_confirmed(self):
         pending_registration = {
@@ -1418,11 +1417,9 @@ class SDATestCase(unittest.TestCase):
         # 2. BGMI Description
         self.assertIn('A premier battle royale tournament where four-player squads deploy across high-stakes battlegrounds', html)
 
-        # 3. Main Contact Us Section
-        self.assertIn('NARASIMHAREDDY Y V', html)
-        self.assertIn('6362436295', html)
-        self.assertIn('PREETI P', html)
-        self.assertIn('7975287515', html)
+        # 3. Coordinator details are only shown by the on-demand contact dialogs.
+        self.assertNotIn('id="contact" class="map-section"', html)
+        self.assertIn('id="contactModal"', html)
 
         # 4. Event Coordinators for every event
         self.assertIn('RANJITHA B K', html)

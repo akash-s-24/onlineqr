@@ -1072,6 +1072,78 @@ html.dark body {
   .registration-pass-qr-copy { text-align: center; }
 }
 
+/* Public landing header: keep the desktop nav on the page surface and show one clear active state. */
+.landing-header #headerNavCenter:not(.open) { background: transparent !important; }
+.landing-header #mainBreadcrumb,
+.landing-header .image-like-nav { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+.landing-header .nav-pill-indicator { display: none !important; }
+.landing-header .image-like-nav .nav-link { text-decoration: none !important; transition: color .16s ease, background-color .16s ease !important; }
+.landing-header .image-like-nav .nav-link:hover { color: #2563eb !important; background: rgba(37,99,235,.08) !important; }
+.landing-header .image-like-nav .nav-link.active { color: #1d4ed8 !important; background: rgba(37,99,235,.12) !important; }
+.landing-header .image-like-nav .nav-link::before,
+.landing-header .image-like-nav .nav-link::after { text-decoration: none !important; box-shadow: none !important; }
+.landing-header #themeToggleBtn { width: 38px !important; height: 38px !important; padding: 8px !important; border: 1px solid var(--border) !important; border-radius: 50% !important; background: transparent !important; color: var(--text-2) !important; box-shadow: none !important; }
+.landing-header #themeToggleBtn:hover { background: var(--surface-2) !important; color: var(--link) !important; }
+.landing-header #headerRegisterBtn,
+.landing-header .header-cta-classic,
+.landing-header .landing-logo,
+.landing-header .landing-logo *,
+#hero .hero-actions .hero-explore-btn,
+#hero .hero-actions .hero-rules-btn,
+#hero .hero-actions .hero-contact-btn,
+#events .btn-card-register,
+#events .stat-action-link { text-decoration: none !important; }
+#hero .hero-actions .hero-explore-btn,
+#hero .hero-actions .hero-rules-btn,
+#hero .hero-actions .hero-contact-btn,
+.landing-header #headerRegisterBtn {
+  position: relative !important; isolation: isolate; overflow: hidden;
+  color: #111827 !important; background: #fff !important; border-color: #d1d5db !important;
+  transition: color .2s ease, border-color .2s ease, background-color .2s ease !important;
+}
+#hero .hero-actions .hero-explore-btn::before,
+#hero .hero-actions .hero-rules-btn::before,
+#hero .hero-actions .hero-contact-btn::before,
+.landing-header #headerRegisterBtn::before {
+  content: ""; position: absolute; z-index: -1; inset: 0; background: #2563eb;
+  transform: scaleX(0); transform-origin: left; transition: transform .24s ease;
+}
+#hero .hero-actions .hero-explore-btn:hover,
+#hero .hero-actions .hero-rules-btn:hover,
+#hero .hero-actions .hero-contact-btn:hover,
+.landing-header #headerRegisterBtn:hover { color: #fff !important; background: #fff !important; border-color: #2563eb !important; text-decoration: none !important; }
+#hero .hero-actions .hero-explore-btn:hover::before,
+#hero .hero-actions .hero-rules-btn:hover::before,
+#hero .hero-actions .hero-contact-btn:hover::before,
+.landing-header #headerRegisterBtn:hover::before { transform: scaleX(1); }
+:root[data-theme] .hero-badge-pill .registration-dot { background: #16a34a !important; box-shadow: 0 0 0 3px rgba(22,163,74,.17) !important; }
+:root[data-theme] .stat-card-championship { min-height: 270px !important; background: #101318 !important; border-color: rgba(96,165,250,.48) !important; color: #fff !important; box-shadow: 0 18px 42px rgba(15,23,42,.22), inset 0 1px rgba(255,255,255,.08) !important; }
+:root[data-theme] .stat-card-championship .stat-title-championship { color: #fff !important; }
+:root[data-theme] .stat-card-championship .stat-title-championship span:last-child { color: #60a5fa !important; }
+:root[data-theme] .stat-card-championship .stat-desc { color: #d1d5db !important; }
+.event-dialog-backdrop[hidden] { display: none !important; }
+.event-dialog-backdrop { position: fixed; z-index: 3000; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(8,15,25,.64); backdrop-filter: blur(8px); }
+.event-dialog { position: relative; width: min(100%, 520px); max-height: min(82vh, 720px); overflow: auto; padding: 28px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--text); box-shadow: 0 24px 80px rgba(0,0,0,.28); }
+.event-dialog h2 { margin: 0 36px 18px 0; color: var(--text); font-size: clamp(1.3rem, 4vw, 1.8rem); }
+.event-dialog-eyebrow { margin: 0 0 8px; color: var(--link); font-size: .72rem; font-weight: 800; letter-spacing: .12em; }
+.event-dialog-content { color: var(--text-2); line-height: 1.65; overflow-wrap: anywhere; }
+.event-dialog-content ol { display: grid; gap: 10px; padding-left: 1.4rem; }
+.event-dialog-close { position: absolute; top: 14px; right: 14px; display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 50%; background: var(--surface-2); color: var(--text); font-size: 1.5rem; cursor: pointer; }
+.event-contact-person { display: grid; gap: 4px; padding: 14px 0; border-top: 1px solid var(--border); }
+.event-contact-person span { color: var(--text-2); font-size: .8rem; }
+.event-contact-person strong { color: var(--text); }
+.event-contact-person a { width: fit-content; color: var(--link); text-decoration: none !important; font-weight: 700; }
+body.event-dialog-open { overflow: hidden; }
+@media (max-width: 560px) {
+  #events .event-card-actions { display: grid !important; grid-template-columns: 1fr !important; gap: 8px !important; }
+  #events .event-card-subactions { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  #events .btn-card-rules, #events .btn-card-contact, #events .btn-card-register { width: 100% !important; min-width: 0 !important; min-height: 42px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #hero .hero-actions :is(.hero-explore-btn,.hero-rules-btn,.hero-contact-btn)::before,
+  .landing-header #headerRegisterBtn::before { transition: none !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root[data-theme] #hero .hero-title { animation: none !important; }
   :root[data-theme] #hero .hero-actions .hero-explore-btn::before { transition: none !important; }
