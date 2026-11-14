@@ -1428,16 +1428,21 @@ class SDATestCase(unittest.TestCase):
         # 2. BGMI Description
         self.assertIn('A premier battle royale tournament where four-player squads deploy across high-stakes battlegrounds', html)
 
-        # 3. Contact Us lists all four faculty coordinators by name and phone.
+        # 3. Contact Us lists only the two faculty in charge; event coordinators remain on event cards.
         contact_section = html.split('<section id="contact"', 1)[1].split('</section>', 1)[0]
-        for name in (Config.COORDINATOR_PRIMARY_NAME, Config.COORDINATOR_SECONDARY_NAME,
-                     Config.EVENT_COORDINATOR_PRIMARY_NAME, Config.EVENT_COORDINATOR_SECONDARY_NAME):
+        for name in (Config.COORDINATOR_PRIMARY_NAME, Config.COORDINATOR_SECONDARY_NAME):
             self.assertIn(name, contact_section)
-        for phone in (Config.CONTACT_PHONE_PRIMARY, Config.CONTACT_PHONE_SECONDARY,
-                      Config.EVENT_COORDINATOR_PRIMARY_PHONE, Config.EVENT_COORDINATOR_SECONDARY_PHONE):
+        for phone in (Config.CONTACT_PHONE_PRIMARY, Config.CONTACT_PHONE_SECONDARY):
             self.assertIn(phone, contact_section)
+        for name in (Config.EVENT_COORDINATOR_PRIMARY_NAME, Config.EVENT_COORDINATOR_SECONDARY_NAME):
+            self.assertNotIn(name, contact_section)
+            self.assertIn(name, html)
+        for phone in (Config.EVENT_COORDINATOR_PRIMARY_PHONE, Config.EVENT_COORDINATOR_SECONDARY_PHONE):
+            self.assertNotIn(phone, contact_section)
+            self.assertIn(phone, html)
+        self.assertEqual(contact_section.count('class="contact-card coordinator-phone-card"'), 2)
         self.assertEqual(contact_section.count('Faculty in Charge'), 2)
-        self.assertEqual(contact_section.count('Faculty Event Coordinator'), 2)
+        self.assertNotIn('Faculty Event Coordinator', contact_section)
         self.assertIn('id="contactModal"', html)
 
         # 4. Event Coordinators for every event
