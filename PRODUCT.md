@@ -24,7 +24,7 @@ No distinct market position is confirmed. Preserve the product's connected event
 - Public event visitors browse on desktop and mobile, often arriving directly at the event page or registration form.
 - Organizers use authenticated workspaces to maintain event and participant operations.
 - The event is scheduled for 25–26 November 2026 and is for I and II PUC students.
-- Online UPI is explicitly in demo mode pending confirmation of a real payment destination.
+- Online UPI uses the supplied Federal Bank payment destination (`919980846695@federal`); the selected event fee is prefilled in the UPI payment link.
 
 ## Capabilities and Constraints
 
@@ -32,7 +32,7 @@ No distinct market position is confirmed. Preserve the product's connected event
 - Admin and member workflows cover event management, participant and registration records, payment review, attendance, and certificate issuance/downloads.
 - Keep the existing 3D CD carousel, its disc treatment, controls, and motion intact. Its surrounding stage/background may adopt the approved theme colors.
 - Remove the starfield/space-flight background and particle-text headline. Use a white theme and a black theme with layered background depth. Give only the Events-section Rules and Contact controls a restrained, theme-aware mechanical candy press. Leave Contact Us and every other button unchanged, and preserve the CD carousel controls and motion.
-- Preserve the Flask routes, form fields, business rules, existing event facts, and demo payment behavior. This work changes visual structure and presentation only.
+- Preserve the Flask routes and registration/payment review rules while using the shared official UPI destination and prefilled event fee for all paid events.
 - Existing brand assets, names, event content, and supplied institutional information are the available evidence. Do not invent event claims or imagery.
 
 ## Evidence on Hand

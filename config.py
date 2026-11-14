@@ -1,4 +1,5 @@
 import os
+import re
 import secrets
 from dotenv import load_dotenv
 
@@ -73,8 +74,9 @@ class Config:
     EVENT_TITLE = os.environ.get('EVENT_TITLE', 'Daksha Infinix').strip() or 'Daksha Infinix'
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '').strip()
     MEMBER_PASSWORD = os.environ.get('MEMBER_PASSWORD', '').strip()
-    PAYMENT_MODE = os.environ.get('PAYMENT_MODE', 'demo').strip().lower() or 'demo'
-    DEFAULT_UPI_ID = os.environ.get('DEFAULT_UPI_ID', 'admin@upi').strip() or 'admin@upi'
+    PAYMENT_MODE = os.environ.get('PAYMENT_MODE', 'live').strip().lower() or 'live'
+    DEFAULT_UPI_ID = os.environ.get('DEFAULT_UPI_ID', '919980846695@federal').strip() or '919980846695@federal'
+    UPI_PAYEE_NAME = os.environ.get('UPI_PAYEE_NAME', 'CHETHANA K').strip() or 'CHETHANA K'
     CONTACT_PHONE_PRIMARY = os.environ.get('CONTACT_PHONE_PRIMARY', '').strip() or '+91 63624 36295'
     CONTACT_PHONE_SECONDARY = os.environ.get('CONTACT_PHONE_SECONDARY', '').strip() or '+91 79752 87515'
     COORDINATOR_PRIMARY_NAME = os.environ.get('COORDINATOR_PRIMARY_NAME', 'NARASIMHAREDDY Y V').strip() or 'NARASIMHAREDDY Y V'
@@ -128,9 +130,9 @@ if Config.APP_ENV == 'production':
         production_errors.append('ADMIN_PASSWORD must be at least 8 characters')
     if Config.MEMBER_PASSWORD and len(Config.MEMBER_PASSWORD) < 8:
         production_errors.append('MEMBER_PASSWORD must be at least 8 characters when set')
-    if Config.PAYMENT_MODE not in ('demo', 'live'):
-        production_errors.append('PAYMENT_MODE must be either demo or live')
-    if Config.PAYMENT_MODE == 'live' and Config.DEFAULT_UPI_ID.lower() in ('admin@upi', 'test@upi'):
-        print('[Config Warning] DEFAULT_UPI_ID is still set to a placeholder while PAYMENT_MODE=live; set DEFAULT_UPI_ID in Render Environment Variables.')
+    if Config.PAYMENT_MODE != 'live':
+        production_errors.append('PAYMENT_MODE must be live')
+    if not re.fullmatch(r'[A-Za-z0-9._-]{2,100}@[A-Za-z0-9.-]{2,100}', Config.DEFAULT_UPI_ID):
+        production_errors.append('DEFAULT_UPI_ID must be a valid UPI ID')
     if production_errors:
         raise RuntimeError('Production configuration is incomplete: ' + '; '.join(production_errors))

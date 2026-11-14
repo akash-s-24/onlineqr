@@ -121,7 +121,7 @@ body.registration-page .registration-section {
     font-weight: 500;
 }
 
-/* 5. Quick Demo Help Card */
+/* 5. Registration Help Card */
 .help-guide-card {
     background: #f8fafc;
     border: 1.5px solid #e2e8f0;
@@ -1108,18 +1108,18 @@ select.f-select {
         <h1 class="form-title">Event Registration</h1>
         <p class="form-subtitle">Secure your official Daksha Infinix challenge pass and entry credentials.</p>
 
-        <!-- Quick Demo Guide Card -->
+        <!-- Registration Guide Card -->
         <div class="help-guide-card">
             <div>
                 <h4>Need assistance registering?</h4>
                 <p>Watch our step-by-step guidance walkthrough.</p>
             </div>
-            <button type="button" onclick="document.getElementById('demo-video-container').style.display='block'; this.style.display='none';" class="help-guide-btn">
+            <button type="button" onclick="document.getElementById('registration-video-container').style.display='block'; this.style.display='none';" class="help-guide-btn">
                 ▶ Watch Video Guide
             </button>
         </div>
 
-        <div id="demo-video-container" style="display: none; margin-bottom: 28px; border-radius: 12px; overflow: hidden; border: 1.5px solid #000000; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: #000;">
+        <div id="registration-video-container" style="display: none; margin-bottom: 28px; border-radius: 12px; overflow: hidden; border: 1.5px solid #000000; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: #000;">
             <video width="100%" controls preload="metadata" style="display: block;">
                 <source src="{{ url_for('static', filename='videos/demovideo.mp4') }}" type="video/mp4">
                 Your browser does not support the video tag.
@@ -1228,8 +1228,8 @@ select.f-select {
                                 data-time="{{ selected_event.event_time }}"
                                 data-venue="{{ selected_event.venue }}"
                                 data-desc="{{ selected_event.description or '' }}"
-                                data-upi-id="{{ selected_event.upi_id or 'admin@upi' }}"
-                                data-qr-code="{{ selected_event.qr_code_image or '' }}" selected>
+                                data-upi-id="{{ config.DEFAULT_UPI_ID }}"
+                                data-upi-payee="{{ config.UPI_PAYEE_NAME }}" selected>
                             {{ selected_event.event_name }}
                         </option>
                     </select>
@@ -1250,8 +1250,8 @@ select.f-select {
                                     data-time="{{ ev.event_time }}"
                                     data-venue="{{ ev.venue }}"
                                     data-desc="{{ ev.description or '' }}"
-                                    data-upi-id="{{ ev.upi_id or 'admin@upi' }}"
-                                    data-qr-code="{{ ev.qr_code_image or '' }}">
+                                    data-upi-id="{{ config.DEFAULT_UPI_ID }}"
+                                    data-upi-payee="{{ config.UPI_PAYEE_NAME }}">
                                 {{ ev.event_name }} • [{{ ev.event_type }}] • {% if ev.is_group %}Group ({{ ev.min_team_size }}-{{ ev.max_team_size }}){% else %}Solo{% endif %} • {{ ev.event_date }} • Fee: {% if ev.event_fee and ev.event_fee > 0 %}₹{{ ev.event_fee }}{% else %}Free{% endif %}
                             </option>
                         {% endfor %}
@@ -1486,7 +1486,7 @@ select.f-select {
                             <input type="radio" name="payment_method" value="Online" id="payOnlineRadio" onchange="togglePaymentMethod()" style="accent-color: #2563eb; width: 18px; height: 18px;">
                             <div>
                                 <span style="display: block; font-weight: 800; font-size: 0.95rem;">⚡ Pay Online (UPI / QR)</span>
-                                <span style="display: block; font-size: 0.78rem; opacity: 0.85;">{% if config.PAYMENT_MODE == 'demo' %}Demo only — do not send real money.{% else %}Pay via UPI and upload the transaction screenshot.{% endif %}</span>
+                                <span style="display: block; font-size: 0.78rem; opacity: 0.85;">Pay the event fee via UPI and upload the transaction screenshot.</span>
                             </div>
                         </label>
                         <label class="payment-method-card" id="payOfflineCard">
@@ -1502,11 +1502,8 @@ select.f-select {
 
                 <!-- Online UPI Payment Details -->
                 <div id="upiPaymentDetails" style="display: none; text-align: center; margin-top: 20px; padding: 24px; background: #ffffff; border: 2px solid #2563eb; border-radius: 14px; box-shadow: 0 4px 16px rgba(37, 99, 235, 0.1);">
-                    <p style="color: #0f172a; font-weight: 800; font-size: 1.05rem; margin-bottom: 14px;">{% if config.PAYMENT_MODE == 'demo' %}Demo UPI — Test Flow Only{% else %}Scan UPI QR Code or Tap to Pay via UPI App{% endif %}</p>
-                    {% if config.PAYMENT_MODE == 'demo' %}
-                    <p role="note" style="max-width: 480px; margin: 0 auto 14px; color: #92400e; font-weight: 700;">Demo payment details are placeholders. Do not transfer real money; online submissions are not payment confirmation.</p>
-                    {% endif %}
-                    <img id="upiQrCode" src="{{ url_for('static', filename='favicon.svg') }}" alt="UPI QR Code" style="width: 190px; height: 190px; margin: 0 auto 14px; display: block; border: 2px solid #000000; border-radius: 12px; padding: 6px; background: #ffffff;">
+                    <p style="color: #0f172a; font-weight: 800; font-size: 1.05rem; margin-bottom: 14px;">Scan the UPI QR code or open your UPI app to pay.</p>
+                    <img id="upiQrCode" src="{{ url_for('static', filename='images/federal-upi-qr.png') }}" alt="UPI payment QR code" style="width: 190px; height: 190px; margin: 0 auto 14px; display: block; border: 2px solid #000000; border-radius: 12px; padding: 6px; background: #ffffff;">
                     
                     <!-- Primary Single Open UPI App Button -->
                     <a id="upiPayButton" href="#" class="clean-black-submit-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 340px; margin: 0 auto 14px; text-decoration: none; padding: 13px 22px; font-size: 1rem; font-weight: 700; border-radius: 10px; background: #2563eb; color: #ffffff; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);">
@@ -1516,15 +1513,15 @@ select.f-select {
 
                     <!-- UPI ID & One-Click Copy -->
                     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
-                        <span style="font-size: 0.9rem; color: #475569;"><strong>{% if config.PAYMENT_MODE == 'demo' %}Demo UPI ID (test only):{% else %}UPI ID:{% endif %}</strong></span>
-                        <code id="displayUpiId" style="font-family: monospace; font-weight: 700; background: #f4f4f5; padding: 4px 10px; border-radius: 6px; border: 1px solid #d4d4d8; color: #0f172a;">demopay@ybl</code>
+                        <span style="font-size: 0.9rem; color: #475569;"><strong>UPI ID:</strong></span>
+                        <code id="displayUpiId" style="font-family: monospace; font-weight: 700; background: #f4f4f5; padding: 4px 10px; border-radius: 6px; border: 1px solid #d4d4d8; color: #0f172a;">{{ config.DEFAULT_UPI_ID }}</code>
                         <button type="button" id="copyUpiBtn" style="padding: 5px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; border: 1.5px solid #2563eb; background: #eff6ff; color: #2563eb; cursor: pointer; transition: all 0.2s ease;">📋 Copy ID</button>
                     </div>
 
                     <div class="f-form-group" style="text-align: left; max-width: 440px; margin: 0 auto 18px;">
-                        <label class="f-label" for="utr_number">{% if config.PAYMENT_MODE == 'demo' %}Demo transaction reference *{% else %}UPI transaction reference *{% endif %}</label>
+                        <label class="f-label" for="utr_number">UPI transaction reference *</label>
                         <input type="text" id="utr_number" name="utr_number" class="f-control" placeholder="Enter a 6–64 character reference" pattern="[A-Za-z0-9][A-Za-z0-9._/-]{5,63}" maxlength="64" autocapitalize="characters" title="Enter a transaction reference with 6 to 64 letters, numbers, or separators">
-                        <span class="f-hint">{% if config.PAYMENT_MODE == 'demo' %}Use a sample value to preview this flow; do not send money.{% else %}Enter the reference shown in your payment app.{% endif %}</span>
+                        <span class="f-hint">Enter the transaction reference shown in your payment app.</span>
                     </div>
 
                     <div class="f-form-group" style="text-align: left; max-width: 440px; margin: 0 auto;">
@@ -1905,6 +1902,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================================
 // Event Selection Handler — updates all elements in Event section
 // ============================================================
+const DEFAULT_UPI_ID = {{ config.DEFAULT_UPI_ID|tojson }};
+const UPI_PAYEE_NAME = {{ config.UPI_PAYEE_NAME|tojson }};
+
 function handleEventSelectionChange(selectElement) {
     if (!selectElement || selectElement.selectedIndex < 0) return;
     const selectedOption = selectElement.options[selectElement.selectedIndex];
@@ -1917,8 +1917,8 @@ function handleEventSelectionChange(selectElement) {
     const eventName = selectedOption.getAttribute('data-event-name') || selectedOption.textContent.trim();
     const eventType = selectedOption.getAttribute('data-event-type') || 'Event';
     const eventFee = parseInt(selectedOption.getAttribute('data-event-fee') || '0', 10);
-    const upiId = selectedOption.getAttribute('data-upi-id') || 'demopay@ybl';
-    const qrCodeImage = selectedOption.getAttribute('data-qr-code') || '';
+    const upiId = selectedOption.getAttribute('data-upi-id') || DEFAULT_UPI_ID;
+    const upiPayeeName = selectedOption.getAttribute('data-upi-payee') || UPI_PAYEE_NAME;
     const eventDate = selectedOption.getAttribute('data-date') || '';
     const eventTime = selectedOption.getAttribute('data-time') || '';
     const venue = selectedOption.getAttribute('data-venue') || 'Campus Venue';
@@ -2009,15 +2009,9 @@ function handleEventSelectionChange(selectElement) {
         if (displayFee) displayFee.innerText = `₹ ${eventFee}`;
         if (displayUpiId) displayUpiId.innerText = upiId;
         
-        if (upiQrCode) {
-            if (qrCodeImage) {
-                upiQrCode.src = `/static/${qrCodeImage}`;
-            } else {
-                upiQrCode.src = `/events/${encodeURIComponent(eventId)}/upi-qr`;
-            }
-        }
+        if (upiQrCode) upiQrCode.src = `{{ url_for('static', filename='images/federal-upi-qr.png') }}`;
         if (upiPayButton) {
-            const upiPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(eventName)}&am=${encodeURIComponent(eventFee.toFixed(2))}&cu=INR&tn=${encodeURIComponent(`Event registration ${eventId}`)}`;
+            const upiPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiPayeeName)}&am=${encodeURIComponent(eventFee.toFixed(2))}&cu=INR&tn=${encodeURIComponent(`Event registration ${eventName}`)}`;
             upiPayButton.href = upiPayload;
             upiPayButton.style.display = 'inline-flex';
         }
@@ -2163,12 +2157,13 @@ function triggerUpiPayment(appType) {
         return;
     }
     const selectedOption = eventSelect.options[eventSelect.selectedIndex];
-    const upiId = selectedOption ? (selectedOption.getAttribute('data-upi-id') || 'demopay@ybl') : 'demopay@ybl';
+    const upiId = selectedOption ? (selectedOption.getAttribute('data-upi-id') || DEFAULT_UPI_ID) : DEFAULT_UPI_ID;
+    const upiPayeeName = selectedOption ? (selectedOption.getAttribute('data-upi-payee') || UPI_PAYEE_NAME) : UPI_PAYEE_NAME;
     const eventName = selectedOption ? (selectedOption.getAttribute('data-event-name') || selectedOption.textContent.trim()) : 'Fest Event';
     const eventFee = selectedOption ? parseFloat(selectedOption.getAttribute('data-event-fee') || '0') : 0;
     const eventId = eventSelect.value;
 
-    const basePayload = `pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(eventName)}&am=${encodeURIComponent(eventFee.toFixed(2))}&cu=INR&tn=${encodeURIComponent('Daksha Fest ' + eventId)}`;
+    const basePayload = `pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiPayeeName)}&am=${encodeURIComponent(eventFee.toFixed(2))}&cu=INR&tn=${encodeURIComponent('Event registration ' + eventName)}`;
 
     let targetUrl = `upi://pay?${basePayload}`;
     if (appType === 'gpay') {

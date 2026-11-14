@@ -77,9 +77,6 @@
                 <strong>Payment submitted for verification</strong><br>
                 The college will verify the UTR against its bank records before confirming payment.
             </div>
-            {% if config.PAYMENT_MODE == 'demo' %}
-            <p role="note"><strong>Demo mode:</strong> this submission is for preview only. No payment was confirmed or settled; do not send real money using the test details.</p>
-            {% endif %}
             <p><strong>Submitted payment ID / UTR:</strong> <code>{{ registration.utr_number }}</code></p>
             {% if registration.payment_proof and can_view_proof %}
             <p><strong>Payment screenshot attached:</strong> <a href="{{ url_for('serve_payment_proof', filename=registration.payment_proof) }}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">View Uploaded Screenshot ↗</a></p>

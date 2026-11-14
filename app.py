@@ -13,7 +13,7 @@ import uuid
 import secrets
 import hmac
 import base64
-from urllib.parse import quote, urlparse
+from urllib.parse import urlencode, urlparse
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -30,13 +30,10 @@ app.config.from_object(Config)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 # Configure upload folders
-UPLOAD_FOLDER_QR = os.path.join(app.root_path, 'static', 'uploads', 'qr_codes')
 UPLOAD_FOLDER_BANNERS = os.path.join(app.root_path, 'static', 'images')
 UPLOAD_FOLDER_PAYMENTS = os.path.join(app.root_path, 'payment_proofs')
-os.makedirs(UPLOAD_FOLDER_QR, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER_BANNERS, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER_PAYMENTS, exist_ok=True)
-app.config['UPLOAD_FOLDER_QR'] = UPLOAD_FOLDER_QR
 app.config['UPLOAD_FOLDER_BANNERS'] = UPLOAD_FOLDER_BANNERS
 app.config['UPLOAD_FOLDER_PAYMENTS'] = UPLOAD_FOLDER_PAYMENTS
 app.config['ALLOWED_IMAGE_EXTENSIONS'] = {'jpg', 'jpeg', 'png', 'webp', 'gif'}
@@ -1120,21 +1117,25 @@ def update_event_showcase():
 
 @app.route('/events/<int:event_id>/upi-qr')
 def event_upi_qr(event_id):
-    """Serve a locally generated UPI QR without an external QR dependency."""
+    """Serve a fee-prefilled QR for the event using the shared official payee."""
     event = query_db(
-        "SELECT event_name, event_fee, upi_id FROM events WHERE id = %s",
+        "SELECT event_name, event_fee FROM events WHERE id = %s",
         (event_id,), one=True
     )
     if not event or safe_int(event.get('event_fee'), 0) <= 0:
         abort(404)
 
-    upi_id = (event.get('upi_id') or '').strip()
+    upi_id = Config.DEFAULT_UPI_ID.strip()
     if not re.fullmatch(r'[A-Za-z0-9._-]{2,100}@[A-Za-z0-9.-]{2,100}', upi_id):
-        abort(404)
-    payload = (
-        f'upi://pay?pa={quote(upi_id)}&pn={quote(Config.EVENT_TITLE)}'
-        f'&am={safe_int(event.get("event_fee"), 0)}&cu=INR'
-    )
+        abort(503)
+    fee = safe_int(event.get('event_fee'), 0)
+    payload = 'upi://pay?' + urlencode({
+        'pa': upi_id,
+        'pn': Config.UPI_PAYEE_NAME,
+        'am': str(fee),
+        'cu': 'INR',
+        'tn': f'{event.get("event_name", "Event")} registration',
+    })
     image = qrcode.make(payload)
     image_bytes = io.BytesIO()
     image.save(image_bytes, format='PNG')
@@ -1156,7 +1157,7 @@ def add_event():
         min_team_size = max(1, safe_int(request.form.get('min_team_size', ''), 1 if is_group == 0 else 2))
         max_team_size = max(min_team_size, safe_int(request.form.get('max_team_size', ''), 1 if is_group == 0 else 4))
         event_fee = max(0, safe_int(request.form.get('event_fee', ''), 0))
-        upi_id = request.form.get('upi_id', 'admin@upi').strip()
+        upi_id = Config.DEFAULT_UPI_ID
         rules_text = request.form.get('rules_text', '').strip()
         faculty_name = request.form.get('faculty_name', '').strip()
         faculty_phone = request.form.get('faculty_phone', '').strip()
@@ -1167,28 +1168,23 @@ def add_event():
             flash('Event name, date, and venue are required.', 'danger')
             return render_template('add_event.html')
         if event_fee > 0 and not re.fullmatch(r'[A-Za-z0-9._-]{2,100}@[A-Za-z0-9.-]{2,100}', upi_id):
-            flash('Enter a valid UPI ID for paid events.', 'danger')
+            flash('The configured UPI recipient is invalid. Contact an administrator.', 'danger')
             return render_template('add_event.html')
 
         try:
             banner_filename = save_image_upload(
                 request.files.get('banner_image'), app.config['UPLOAD_FOLDER_BANNERS']
             )
-            qr_filename = save_image_upload(
-                request.files.get('qr_code'), app.config['UPLOAD_FOLDER_QR']
-            )
         except ValueError as error:
             flash(str(error), 'danger')
             return render_template('add_event.html')
-
-        qr_code_image = f"uploads/qr_codes/{qr_filename}" if qr_filename else None
 
         execute_db(
             """
             INSERT INTO events (event_name, event_type, event_date, event_time, venue, description, max_participants, is_group, min_team_size, max_team_size, event_fee, upi_id, qr_code_image, banner_image, rules_text, faculty_name, faculty_phone, student_name, student_phone)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """,
-            (event_name, event_type, event_date, event_time, venue, description, max_participants, is_group, min_team_size, max_team_size, event_fee, upi_id, qr_code_image, banner_filename, rules_text, faculty_name, faculty_phone, student_name, student_phone)
+            (event_name, event_type, event_date, event_time, venue, description, max_participants, is_group, min_team_size, max_team_size, event_fee, upi_id, None, banner_filename, rules_text, faculty_name, faculty_phone, student_name, student_phone)
         )
         flash(f"Event '{event_name}' created successfully!", 'success')
         return redirect(url_for('events_list'))
@@ -1215,7 +1211,7 @@ def edit_event(event_id):
         min_team_size = max(1, safe_int(request.form.get('min_team_size', ''), 1 if is_group == 0 else 2))
         max_team_size = max(min_team_size, safe_int(request.form.get('max_team_size', ''), 1 if is_group == 0 else 4))
         event_fee = max(0, safe_int(request.form.get('event_fee', ''), 0))
-        upi_id = request.form.get('upi_id', 'admin@upi').strip()
+        upi_id = Config.DEFAULT_UPI_ID
         rules_text = request.form.get('rules_text', '').strip()
         faculty_name = request.form.get('faculty_name', '').strip()
         faculty_phone = request.form.get('faculty_phone', '').strip()
@@ -1226,66 +1222,31 @@ def edit_event(event_id):
             flash('Event name, date, and venue are required.', 'danger')
             return render_template('edit_event.html', event=event)
         if event_fee > 0 and not re.fullmatch(r'[A-Za-z0-9._-]{2,100}@[A-Za-z0-9.-]{2,100}', upi_id):
-            flash('Enter a valid UPI ID for paid events.', 'danger')
+            flash('The configured UPI recipient is invalid. Contact an administrator.', 'danger')
             return render_template('edit_event.html', event=event)
 
         try:
             banner_filename = save_image_upload(
                 request.files.get('banner_image'), app.config['UPLOAD_FOLDER_BANNERS']
             )
-            qr_filename = save_image_upload(
-                request.files.get('qr_code'), app.config['UPLOAD_FOLDER_QR']
-            )
         except ValueError as error:
             flash(str(error), 'danger')
             return render_template('edit_event.html', event=event)
 
-        qr_code_image = f"uploads/qr_codes/{qr_filename}" if qr_filename else event.get('qr_code_image')
-
-        if banner_filename and qr_filename:
-            execute_db(
-                """
-                UPDATE events 
-                SET event_name = %s, event_type = %s, event_date = %s, event_time = %s, 
-                    venue = %s, description = %s, max_participants = %s,
-                    is_group = %s, min_team_size = %s, max_team_size = %s, event_fee = %s, upi_id = %s, qr_code_image = %s, banner_image = %s
-                WHERE id = %s
-                """,
-                (event_name, event_type, event_date, event_time, venue, description, max_participants, is_group, min_team_size, max_team_size, event_fee, upi_id, qr_code_image, banner_filename, event_id)
-            )
-        elif banner_filename:
-            execute_db(
-                """
-                UPDATE events
-                SET event_name = %s, event_type = %s, event_date = %s, event_time = %s,
-                    venue = %s, description = %s, max_participants = %s,
-                    is_group = %s, min_team_size = %s, max_team_size = %s, event_fee = %s, upi_id = %s, banner_image = %s
-                WHERE id = %s
-                """,
-                (event_name, event_type, event_date, event_time, venue, description, max_participants, is_group, min_team_size, max_team_size, event_fee, upi_id, banner_filename, event_id)
-            )
-        elif qr_filename:
-            execute_db(
-                """
-                UPDATE events
-                SET event_name = %s, event_type = %s, event_date = %s, event_time = %s,
-                    venue = %s, description = %s, max_participants = %s,
-                    is_group = %s, min_team_size = %s, max_team_size = %s, event_fee = %s, upi_id = %s, qr_code_image = %s
-                WHERE id = %s
-                """,
-                (event_name, event_type, event_date, event_time, venue, description, max_participants, is_group, min_team_size, max_team_size, event_fee, upi_id, qr_code_image, event_id)
-            )
-        else:
-            execute_db(
-                """
-                UPDATE events 
-                SET event_name = %s, event_type = %s, event_date = %s, event_time = %s, 
-                    venue = %s, description = %s, max_participants = %s,
-                    is_group = %s, min_team_size = %s, max_team_size = %s, event_fee = %s, upi_id = %s
-                WHERE id = %s
-                """,
-                (event_name, event_type, event_date, event_time, venue, description, max_participants, is_group, min_team_size, max_team_size, event_fee, upi_id, event_id)
-            )
+        execute_db(
+            """
+            UPDATE events
+            SET event_name = %s, event_type = %s, event_date = %s, event_time = %s,
+                venue = %s, description = %s, max_participants = %s,
+                is_group = %s, min_team_size = %s, max_team_size = %s,
+                event_fee = %s, upi_id = %s, qr_code_image = NULL,
+                banner_image = COALESCE(%s, banner_image)
+            WHERE id = %s
+            """,
+            (event_name, event_type, event_date, event_time, venue, description,
+             max_participants, is_group, min_team_size, max_team_size, event_fee,
+             upi_id, banner_filename, event_id)
+        )
         # Save contact & rules fields
         execute_db(
             """UPDATE events SET rules_text = %s, faculty_name = %s, faculty_phone = %s,

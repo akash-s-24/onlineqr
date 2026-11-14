@@ -6546,8 +6546,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
                 <ol class="rule-list">
                     <li>Individual event winners receive special prizes and rewards. E-certificates are provided to all participants.</li>
-                    <li>For on-desk and online payments, use the payment QR officially provided by the organizers and submit a hard copy of the receipt to the event coordinator before participating.</li>
-                    <li>The website's UPI details are currently in demo mode. Do not send real money using the website's test payment details; wait for confirmed payment instructions from organizers.</li>
+                    <li>For online payments, scan the UPI QR code or tap the UPI payment link. The event fee is prefilled for the selected competition; submit the transaction reference and payment screenshot for verification.</li>
+                    <li>Keep the payment receipt and submit a hard copy of the receipt to the event coordinator before participating.</li>
                     <li>The organizers may change the event schedule when necessary.</li>
                 </ol>
             </article>
@@ -6596,14 +6596,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     <div class="step-item">
                         <div class="step-badge">3</div>
                         <div class="step-content">
-                            <h4>{% if config.PAYMENT_MODE == 'demo' %}Try Demo UPI Payment{% else %}Scan Official UPI QR &amp; Pay{% endif %}</h4>
-                            {% if config.PAYMENT_MODE == 'demo' %}
-                            <p>Demo mode is active. The displayed UPI details are test placeholders: do not send real
-                                money. Use a sample transaction reference and screenshot to preview the registration flow.</p>
-                            {% else %}
-                            <p>Scan the configured symposium UPI QR code, then enter the transaction reference and upload
-                                the transfer screenshot. Online submissions remain pending until organizers verify them.</p>
-                            {% endif %}
+                            <h4>Pay the Event Fee with UPI</h4>
+                            <p>Scan the supplied UPI QR code or tap Open UPI App to pay. The fee for the selected event is prefilled; enter the transaction reference and upload the payment screenshot. Online submissions remain pending until organizers verify them.</p>
                         </div>
                     </div>
 
@@ -6612,7 +6606,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         <div class="step-content">
                             <h4>Registration Pass with QR</h4>
                             <p>After submission, you receive a registration reference and scannable pass. Online payments
-                                remain unconfirmed until an organizer verifies them; a demo submission does not transfer money.</p>
+                                remain pending until an organizer verifies the transaction reference and payment receipt.</p>
                         </div>
                     </div>
                 </div>
@@ -6756,9 +6750,9 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>You can submit an online UPI reference and payment screenshot, or choose cash at the campus
-                        registration desk. Online submissions stay pending until organizers verify payment. Demo mode
-                        uses test details only; do not send real money.</p>
+                    <p>You can pay the selected event fee through UPI or choose cash at the campus registration desk.
+                        The UPI app link pre-fills that event's fee. Online submissions stay pending until organizers
+                        verify the transaction reference and payment screenshot.</p>
                 </div>
             </details>
 

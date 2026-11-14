@@ -16,7 +16,7 @@ services:
       - key: SMTP_MODE
         value: demo
       - key: PAYMENT_MODE
-        value: demo
+        value: live
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
@@ -26,7 +26,9 @@ services:
       - key: MEMBER_PASSWORD
         sync: false
       - key: DEFAULT_UPI_ID
-        sync: false
+        value: 919980846695@federal
+      - key: UPI_PAYEE_NAME
+        value: CHETHANA K
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM_EMAIL

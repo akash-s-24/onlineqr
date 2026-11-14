@@ -504,7 +504,7 @@ def create_tables_and_seed():
                 max_team_size INTEGER DEFAULT 1,
                 banner_image VARCHAR(255) DEFAULT 'event_default.jpg',
                 event_fee INTEGER DEFAULT 0,
-                upi_id VARCHAR(100) DEFAULT 'admin@upi',
+                upi_id VARCHAR(100) DEFAULT '919980846695@federal',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             """,
@@ -625,7 +625,7 @@ def create_tables_and_seed():
             ("events", "min_team_size", "INTEGER DEFAULT 1"),
             ("events", "max_team_size", "INTEGER DEFAULT 1"),
             ("events", "event_fee", "INTEGER DEFAULT 0"),
-            ("events", "upi_id", "VARCHAR(100) DEFAULT 'admin@upi'"),
+            ("events", "upi_id", "VARCHAR(100) DEFAULT '919980846695@federal'"),
             ("events", "banner_image", "VARCHAR(255) DEFAULT 'event_default.jpg'"),
             ("events", "qr_code_image", "VARCHAR(255) NULL"),
             ("registrations", "is_group", "INTEGER DEFAULT 0"),
@@ -807,7 +807,7 @@ def create_tables_and_seed():
                 'banner_image': '89e73e3fb00545329bed5ddb69478ea6.webp',
                 'event_fee': 400,
                 'upi_id': Config.DEFAULT_UPI_ID,
-                'qr_code_image': 'uploads/qr_codes/c8d1eeb6e2fd420fad37edd0c7bb0baa.jpeg',
+                'qr_code_image': None,
                 'rules_text': 'Each team must have 4 players. Network or device issues are the players responsibility. Hacking and cheating are strictly prohibited. No teaming with other squads. Players must join the match on time. The organizers decision will be final.',
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
@@ -828,7 +828,7 @@ def create_tables_and_seed():
                 'banner_image': 'freefire.jpeg',
                 'event_fee': 400,
                 'upi_id': Config.DEFAULT_UPI_ID,
-                'qr_code_image': 'uploads/qr_codes/f09529478c554e5d91ed22023082dca2.jpeg',
+                'qr_code_image': None,
                 'rules_text': 'Each team must have 4 players. Network or device issues are the players responsibility. Hacking and cheating are strictly prohibited. No teaming with other squads. Players must join the match on time. The organizers decision will be final.',
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
@@ -849,7 +849,7 @@ def create_tables_and_seed():
                 'banner_image': 'pencilesketch.jpeg',
                 'event_fee': 100,
                 'upi_id': Config.DEFAULT_UPI_ID,
-                'qr_code_image': 'uploads/qr_codes/5c07f555d6444d5398d7b33273b42147.jpeg',
+                'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹100. Time limit: 60 minutes. Theme: A world I wish to see. Sketch sheets will be provided. Participants must bring pencils, erasers, sharpeners, rulers, and blending tools. Artwork must follow the given theme. Copying, tracing, mobile phones, or similar aids are prohibited. Any form of manipulation will lead to disqualification.',
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
@@ -870,7 +870,7 @@ def create_tables_and_seed():
                 'banner_image': 'get_the_shield.jpeg',
                 'event_fee': 200,
                 'upi_id': Config.DEFAULT_UPI_ID,
-                'qr_code_image': 'uploads/qr_codes/2c106876e1e14a049e4bda3ab316a82b.jpeg',
+                'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹200. Each team must consist of 2 participants. The competition has multiple clues and challenges leading to the final treasure. Follow clues in sequence and solve each clue to proceed. Follow the event coordinators instructions. Mobile phones, internet access, and assistance from outsiders are prohibited.',
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
@@ -1163,13 +1163,14 @@ def create_tables_and_seed():
                     """
                     UPDATE events SET
                         event_name = %s, event_type = %s, is_group = %s, min_team_size = %s, max_team_size = %s,
-                        event_fee = %s, description = %s, rules_text = %s, banner_image = %s,
+                        event_fee = %s, upi_id = %s, qr_code_image = NULL,
+                        description = %s, rules_text = %s, banner_image = %s,
                         faculty_name = %s, faculty_phone = %s, student_name = %s, student_phone = %s
                     WHERE event_name = %s
                     """,
                     (
                         ev['event_name'], ev['event_type'], ev['is_group'], ev['min_team_size'], ev['max_team_size'],
-                        ev['event_fee'], ev['description'], ev['rules_text'], ev['banner_image'],
+                        ev['event_fee'], Config.DEFAULT_UPI_ID, ev['description'], ev['rules_text'], ev['banner_image'],
                         ev['faculty_name'], ev['faculty_phone'], ev['student_name'], ev['student_phone'],
                         existing_name
                     )
@@ -1236,6 +1237,12 @@ def create_tables_and_seed():
         ]
         for ev_name, b_img in banner_sync_rules:
             run_exec("UPDATE events SET banner_image = %s WHERE event_name = %s", (b_img, ev_name))
+
+        # Every event uses the supplied UPI recipient and shared QR asset.
+        run_exec(
+            "UPDATE events SET upi_id = %s, qr_code_image = NULL",
+            (Config.DEFAULT_UPI_ID,)
+        )
 
         conn.commit()
         _DB_INITIALIZED = True

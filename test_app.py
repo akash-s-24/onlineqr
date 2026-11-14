@@ -829,7 +829,7 @@ class SDATestCase(unittest.TestCase):
             'min_team_size': '4',
             'max_team_size': '4',
             'event_fee': '400',
-            'upi_id': 'admin@upi',
+            'upi_id': Config.DEFAULT_UPI_ID,
             'description': 'Battle Royale championship at Daksha Infinix.',
             'rules_text': 'Rule 1: Mobile only, no emulators.\nRule 2: Fair play mandatory.',
             'faculty_name': 'Prof. Rajesh Kumar',
@@ -844,6 +844,8 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(ev['faculty_name'], 'Prof. Rajesh Kumar')
         self.assertEqual(ev['student_name'], 'Akash S')
         self.assertIn('Rule 1', ev['rules_text'])
+        self.assertEqual(ev['upi_id'], Config.DEFAULT_UPI_ID)
+        self.assertIsNone(ev['qr_code_image'])
 
         # 6. Verify attendance view has no inflated 140 fake absence
         att_res = self.client.get('/admin/attendance')
@@ -1215,7 +1217,7 @@ class SDATestCase(unittest.TestCase):
             'payment_status': 'pending',
             'amount_paid': 0,
             'payment_method': 'Online',
-            'utr_number': 'DEMO123456',
+            'utr_number': 'UTR123456',
             'payment_proof': None,
             'payment_verified_at': None,
             'receipt_delivery_status': 'not_sent',
@@ -1230,16 +1232,51 @@ class SDATestCase(unittest.TestCase):
         self.assertIn(b'Registration received', response.data)
         self.assertIn(b'not confirmed until', response.data.lower())
         self.assertNotIn(b'Successfully registered!', response.data)
+        self.assertNotIn(b'Demo mode', response.data)
 
-    def test_demo_upi_is_clearly_marked_as_test_only(self):
-        if Config.PAYMENT_MODE != 'demo':
-            self.skipTest('This regression covers demo payment messaging.')
+    def test_registration_uses_the_live_upi_recipient_without_demo_copy(self):
+        from io import BytesIO
+        from PIL import Image
 
         response = self.client.get('/register?event_id=1')
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Demo only', response.data)
-        self.assertIn(b'do not send real money', response.data.lower())
+        self.assertIn(b'919980846695@federal', response.data)
+        self.assertIn(b'/static/images/federal-upi-qr.png', response.data)
+        self.assertIn(b'eventFee.toFixed(2)', response.data)
+        self.assertIn(b'UPI_PAYEE_NAME', response.data)
+        for obsolete in (b'Demo only', b'Demo UPI', b'Demo mode', b'test placeholders', b'demopay@ybl', b'admin@upi'):
+            self.assertNotIn(obsolete, response.data)
+
+        qr_response = self.client.get('/static/images/federal-upi-qr.png')
+        self.assertEqual(qr_response.status_code, 200)
+        self.assertEqual(qr_response.mimetype, 'image/png')
+        self.assertEqual(Image.open(BytesIO(qr_response.data)).size, (529, 529))
+
+    def test_every_event_uses_the_shared_payment_recipient_and_qr(self):
+        rows = database.query_db("SELECT upi_id, qr_code_image FROM events")
+
+        self.assertTrue(rows)
+        for event in rows:
+            self.assertEqual(event['upi_id'], Config.DEFAULT_UPI_ID)
+            self.assertIsNone(event['qr_code_image'])
+
+    def test_event_upi_qr_uses_shared_payee_and_event_fee(self):
+        from urllib.parse import parse_qs, urlparse
+
+        event = {'event_name': 'Pencil Sketching', 'event_fee': 100, 'upi_id': 'old-event@upi'}
+        real_qr_make = app_module.qrcode.make
+        with patch.object(app_module, 'query_db', return_value=event), \
+                patch.object(app_module.qrcode, 'make', wraps=real_qr_make) as make_qr:
+            response = self.client.get('/events/12/upi-qr')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, 'image/png')
+        payload = parse_qs(urlparse(make_qr.call_args.args[0]).query)
+        self.assertEqual(payload['pa'], ['919980846695@federal'])
+        self.assertEqual(payload['pn'], ['CHETHANA K'])
+        self.assertEqual(payload['am'], ['100'])
+        self.assertEqual(payload['cu'], ['INR'])
 
     def test_admin_participants_list_renders_on_sqlite(self):
         """Verify /admin/participants executes valid SQLite GROUP_CONCAT syntax without syntax error."""

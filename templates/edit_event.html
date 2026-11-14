@@ -79,10 +79,6 @@
                 <input type="number" id="event_fee" name="event_fee" class="form-control" value="{{ event.event_fee }}" min="0">
             </div>
             <div class="form-group" style="flex: 1;">
-                <label class="form-label" for="upi_id">UPI ID (For Payments)</label>
-                <input type="text" id="upi_id" name="upi_id" class="form-control" value="{{ event.upi_id }}" placeholder="e.g. yourname@upi">
-            </div>
-            <div class="form-group" style="flex: 1;">
                 <label class="form-label" for="banner_image">Event Banner Image</label>
                 <input type="file" id="banner_image" name="banner_image" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif,image/*">
                 <small class="form-hint">Upload a new image to replace the current banner. Leave blank to keep it.</small>
@@ -93,18 +89,6 @@
                     </div>
                 {% endif %}
             </div>
-        </div>
-
-        <div class="form-group">
-            <label class="form-label" for="qr_code">Custom QR Code Image</label>
-            <input type="file" id="qr_code" name="qr_code" class="form-control" accept="image/*">
-            <small class="form-hint">Upload custom QR code to overwrite. If blank, existing one or dynamically generated will be used.</small>
-            {% if event.qr_code_image %}
-                <div style="margin-top: 10px;">
-                    <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">Currently Uploaded QR Code:</p>
-                    <img src="{{ url_for('static', filename=event.qr_code_image) }}" alt="QR Code" style="width: 100px; height: 100px; border-radius: 8px; border: 2px solid #fecaca;">
-                </div>
-            {% endif %}
         </div>
 
         <div class="form-group">
