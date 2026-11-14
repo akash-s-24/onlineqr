@@ -36,6 +36,6 @@ services:
       - key: COLLEGE_NAME
         value: Shree Daksha Academy
       - key: COLLEGE_SUBTITLE
-        value: Pre-University College · I & II PUC
+        value: Recognized by the Government of Karnataka, affiliated to Bengaluru University, approved by AICTE.
       - key: EVENT_TITLE
         value: Daksha Infinix

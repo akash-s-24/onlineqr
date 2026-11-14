@@ -688,6 +688,62 @@ def site_webmanifest():
     response.headers['Cache-Control'] = 'public, max-age=86400'
     return response
 
+@app.route('/static/images/<path:filename>')
+def serve_event_static_image(filename):
+    """Resilient static image server handling casing variations, spaces, and fallbacks."""
+    static_images_dir = os.path.join(app.root_path, 'static', 'images')
+    # 1. Exact match on disk
+    exact_path = os.path.join(static_images_dir, filename)
+    if os.path.isfile(exact_path):
+        return send_from_directory(static_images_dir, filename)
+
+    # 2. Case-insensitive and punctuation-normalized lookup
+    clean_req = re.sub(r'[^a-z0-9.]+', '', filename.lower())
+    try:
+        available_files = os.listdir(static_images_dir)
+    except OSError:
+        available_files = []
+
+    for disk_file in available_files:
+        if re.sub(r'[^a-z0-9.]+', '', disk_file.lower()) == clean_req:
+            return send_from_directory(static_images_dir, disk_file)
+
+    # 3. Known event image alias map
+    event_key = os.path.splitext(clean_req)[0]
+    canonical_lookup = {
+        'beatboxing': 'Beatboxing.jpeg',
+        'contentcreator': 'Content_Creator.jpeg',
+        'solodance': 'Solo_Dance.jpeg',
+        'groupdance': 'groupdance.jpeg',
+        'techquiz': 'Tech_Quiz.jpeg',
+        'photography': 'Photography.jpeg',
+        'facepainting': 'facepanting.jpeg',
+        'facepanting': 'facepanting.jpeg',
+        'gettheshield': 'get_the_shield.jpeg',
+        'madads': 'mad_adds.jpeg',
+        'madadds': 'mad_adds.jpeg',
+        'monoacting': 'monoacting.jpeg',
+        'pencilsketching': 'pencilesketch.jpeg',
+        'pencilsketch': 'pencilesketch.jpeg',
+        'freefire': 'freefire.jpeg',
+        'bgmi': '89e73e3fb00545329bed5ddb69478ea6.webp',
+        'fashionwalk': '47a83de9ff4c4712b65dd41197a65d40.jpeg',
+        'solosinging': 'solo-singing.webp',
+        'singingsolo': 'solo-singing.webp',
+        'singing': 'solo-singing.webp',
+    }
+    if event_key in canonical_lookup:
+        target = canonical_lookup[event_key]
+        if os.path.isfile(os.path.join(static_images_dir, target)):
+            return send_from_directory(static_images_dir, target)
+
+    # 4. Ultimate fallback to default banner image if available
+    default_asset = 'event_default.jpg' if os.path.isfile(os.path.join(static_images_dir, 'event_default.jpg')) else 'hero_bg.jpg'
+    if os.path.isfile(os.path.join(static_images_dir, default_asset)):
+        return send_from_directory(static_images_dir, default_asset)
+
+    return abort(404)
+
 @app.route('/payment-status/<registration_uid>')
 def payment_status(registration_uid):
     """Show a limited, shareable payment-status record."""
@@ -918,6 +974,26 @@ def get_public_events():
     events = query_db("SELECT * FROM events ORDER BY id ASC")
     public_events = []
     seen = set()
+    canonical_banners = {
+        'bgmi': '89e73e3fb00545329bed5ddb69478ea6.webp',
+        'freefire': 'freefire.jpeg',
+        'pencilsketching': 'pencilesketch.jpeg',
+        'pencilsketch': 'pencilesketch.jpeg',
+        'gettheshield': 'get_the_shield.jpeg',
+        'photography': 'Photography.jpeg',
+        'contentcreator': 'Content_Creator.jpeg',
+        'solodance': 'Solo_Dance.jpeg',
+        'groupdance': 'groupdance.jpeg',
+        'beatboxing': 'Beatboxing.jpeg',
+        'facepainting': 'facepanting.jpeg',
+        'techquiz': 'Tech_Quiz.jpeg',
+        'madads': 'mad_adds.jpeg',
+        'madadds': 'mad_adds.jpeg',
+        'monoacting': 'monoacting.jpeg',
+        'fashionwalk': '47a83de9ff4c4712b65dd41197a65d40.jpeg',
+        'solosinging': 'solo-singing.webp',
+    }
+    static_images_dir = os.path.join(app.root_path, 'static', 'images')
     for event in events:
         normalized_name = re.sub(r'[^a-z0-9]+', '', (event.get('event_name') or '').lower())
         identity = 'bgmi' if normalized_name in ('bgmi', 'pubg') else normalized_name
@@ -927,10 +1003,13 @@ def get_public_events():
             continue
         seen.add(identity)
 
-        # Ensure Solo Singing banner image
-        if identity == 'solosinging':
-            if not event.get('banner_image') or event.get('banner_image') == 'event_default.jpg':
-                event['banner_image'] = 'solo-singing.webp'
+        # Ensure valid banner image that exists on disk
+        banner_img = event.get('banner_image')
+        file_exists = False
+        if banner_img and banner_img != 'event_default.jpg':
+            file_exists = os.path.isfile(os.path.join(static_images_dir, banner_img))
+        if not file_exists and identity in canonical_banners:
+            event['banner_image'] = canonical_banners[identity]
 
         # Ensure official Event Coordinators are always present
         if not event.get('faculty_phone'):

@@ -909,7 +909,7 @@ def create_tables_and_seed():
                 'is_group': 0,
                 'min_team_size': 1,
                 'max_team_size': 1,
-                'banner_image': 'contentcreator.jpeg',
+                'banner_image': 'Content_Creator.jpeg',
                 'event_fee': 100,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
@@ -930,7 +930,7 @@ def create_tables_and_seed():
                 'is_group': 0,
                 'min_team_size': 1,
                 'max_team_size': 1,
-                'banner_image': 'solo_dance.jpeg',
+                'banner_image': 'Solo_Dance.jpeg',
                 'event_fee': 100,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
@@ -951,7 +951,7 @@ def create_tables_and_seed():
                 'is_group': 1,
                 'min_team_size': 8,
                 'max_team_size': 10,
-                'banner_image': 'Group_Dance.jpeg',
+                'banner_image': 'groupdance.jpeg',
                 'event_fee': 500,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
@@ -972,7 +972,7 @@ def create_tables_and_seed():
                 'is_group': 1,
                 'min_team_size': 2,
                 'max_team_size': 3,
-                'banner_image': 'beatboxing.jpeg',
+                'banner_image': 'Beatboxing.jpeg',
                 'event_fee': 300,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
@@ -1217,6 +1217,25 @@ def create_tables_and_seed():
             WHERE LOWER(TRIM(event_name)) IN ('bgmi', 'pubg')
             """
         )
+
+        # Synchronize canonical event banner images with exact static asset filenames
+        banner_sync_rules = [
+            ('Beat Boxing', 'Beatboxing.jpeg'),
+            ('Content Creator', 'Content_Creator.jpeg'),
+            ('Solo Dance', 'Solo_Dance.jpeg'),
+            ('Group Dance', 'groupdance.jpeg'),
+            ('Photography', 'Photography.jpeg'),
+            ('Tech Quiz', 'Tech_Quiz.jpeg'),
+            ('Face Painting', 'facepanting.jpeg'),
+            ('Mad Ads', 'mad_adds.jpeg'),
+            ('Mono Acting', 'monoacting.jpeg'),
+            ('Pencil Sketching', 'pencilesketch.jpeg'),
+            ('Free Fire', 'freefire.jpeg'),
+            ('Get the Shield', 'get_the_shield.jpeg'),
+            ('Solo Singing', 'solo-singing.webp'),
+        ]
+        for ev_name, b_img in banner_sync_rules:
+            run_exec("UPDATE events SET banner_image = %s WHERE event_name = %s", (b_img, ev_name))
 
         conn.commit()
         _DB_INITIALIZED = True

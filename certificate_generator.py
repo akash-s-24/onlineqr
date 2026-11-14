@@ -318,7 +318,7 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
                   fill=border_navy, font=f_inst, anchor="mm")
 
         # Affiliation subtitle follows the current academy branding.
-        sub1_text = "PRE-UNIVERSITY COLLEGE · I & II PUC"
+        sub1_text = "RECOGNIZED BY THE GOVT. OF KARNATAKA, AFFILIATED TO BANGALORE UNIVERSITY - APPROVED BY AICTE"
         draw.text((width // 2, 190), sub1_text,
                   fill=(51, 65, 85), font=f_sub1, anchor="mm")
 

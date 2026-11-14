@@ -29,7 +29,8 @@ class SDATestCase(unittest.TestCase):
         self.assertIn(b'Free Fire', response.data)
         self.assertIn(b'Pencil Sketch', response.data)
         self.assertIn(b'25\xe2\x80\x9326 November 2026', response.data)
-        self.assertIn(b'Pre-University College', response.data)
+        self.assertIn(b'Recognized by the Government of Karnataka', response.data)
+        self.assertNotIn(b'Pre-University College', response.data)
         self.assertNotIn(b'BCA', response.data)
         self.assertNotIn(b'MCA', response.data)
         self.assertNotIn(b'18-sep-2026', response.data)
@@ -1381,6 +1382,28 @@ class SDATestCase(unittest.TestCase):
             self.assertEqual(ev['student_phone'], '88922 63116')
             self.assertTrue(ev['description'] and len(ev['description'].strip()) > 10)
             self.assertTrue(ev['banner_image'] and len(ev['banner_image'].strip()) > 3)
+
+            # 6. Verify image endpoint returns HTTP 200 (not 404)
+            img_res = self.client.get(f"/static/images/{ev['banner_image']}")
+            self.assertEqual(img_res.status_code, 200, f"Image for {ev['event_name']} ({ev['banner_image']}) returned {img_res.status_code}")
+
+    def test_banner_images_resilience_and_specific_events(self):
+        """Verify beatboxing, content creator, solo dance, and group dance images load reliably."""
+        target_images = [
+            'Beatboxing.jpeg',
+            'beatboxing.jpeg',
+            'Content_Creator.jpeg',
+            'contentcreator.jpeg',
+            'Solo_Dance.jpeg',
+            'solo_dance.jpeg',
+            'groupdance.jpeg',
+            'Group_Dance.jpeg',
+            'solo-singing.webp',
+        ]
+        for img_name in target_images:
+            res = self.client.get(f"/static/images/{img_name}")
+            self.assertEqual(res.status_code, 200, f"Expected 200 for {img_name}, got {res.status_code}")
+            self.assertGreater(len(res.data), 1000)
 
 if __name__ == '__main__':
     unittest.main()
