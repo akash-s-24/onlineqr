@@ -829,12 +829,6 @@ html.dark body {
 }
 
 :root[data-theme] :is(
-  #hero .hero-actions .hero-rules-btn,
-  #hero .hero-actions .hero-contact-btn,
-  #events .btn-card-rules,
-  #events .btn-card-contact,
-  #events #discCascadeRules,
-  #events #discCascadeCall,
   #events #discCascadeRegister,
   #registration .track-btn-primary,
   #registration .track-btn-secondary
@@ -879,12 +873,6 @@ html.dark body {
   -webkit-text-fill-color: #ffffff !important;
 }
 :root[data-theme] :is(
-  #hero .hero-actions .hero-rules-btn,
-  #hero .hero-actions .hero-contact-btn,
-  #events .btn-card-rules,
-  #events .btn-card-contact,
-  #events #discCascadeRules,
-  #events #discCascadeCall,
   #events #discCascadeRegister,
   #registration .track-btn-primary,
   #registration .track-btn-secondary
@@ -901,50 +889,20 @@ html.dark body {
   pointer-events: none;
 }
 :root[data-theme] :is(
-  #hero .hero-actions .hero-rules-btn,
-  #hero .hero-actions .hero-contact-btn,
-  #events .btn-card-rules,
-  #events .btn-card-contact,
-  #events #discCascadeRules,
-  #events #discCascadeCall,
   #events #discCascadeRegister,
   #registration .track-btn-primary,
   #registration .track-btn-secondary
 ) > * { position: relative; z-index: 1; text-decoration: none !important; }
 :root[data-theme] :is(
-  #hero .hero-actions .hero-rules-btn,
-  #hero .hero-actions .hero-contact-btn,
-  #events .btn-card-rules,
-  #events .btn-card-contact,
-  #events #discCascadeRules,
-  #events #discCascadeCall,
   #events #discCascadeRegister
 ):hover::before,
 :root[data-theme] :is(
-  #hero .hero-actions .hero-rules-btn,
-  #hero .hero-actions .hero-contact-btn,
-  #events .btn-card-rules,
-  #events .btn-card-contact,
-  #events #discCascadeRules,
-  #events #discCascadeCall,
   #events #discCascadeRegister
 ):focus-visible::before { transform: scaleX(1); }
 :root[data-theme] :is(
-  #hero .hero-actions .hero-rules-btn,
-  #hero .hero-actions .hero-contact-btn,
-  #events .btn-card-rules,
-  #events .btn-card-contact,
-  #events #discCascadeRules,
-  #events #discCascadeCall,
   #events #discCascadeRegister
 ):hover,
 :root[data-theme] :is(
-  #hero .hero-actions .hero-rules-btn,
-  #hero .hero-actions .hero-contact-btn,
-  #events .btn-card-rules,
-  #events .btn-card-contact,
-  #events #discCascadeRules,
-  #events #discCascadeCall,
   #events #discCascadeRegister
 ):focus-visible {
   color: #111111 !important;
@@ -973,36 +931,16 @@ html.dark body {
   transform: translateY(-1px) !important;
 }
 :root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):active,
-:root[data-theme] #events :is(.btn-card-rules, .btn-card-contact, #discCascadeRules, #discCascadeCall, #discCascadeRegister):active {
+:root[data-theme] #events :is(#discCascadeRegister):active {
   transform: translateY(1px) !important;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, .16) !important;
 }
-:root[data-theme] #events :is(.btn-card-rules, .btn-card-contact) {
-  box-shadow: 0 3px 0 rgba(0, 0, 0, .2), 0 5px 12px rgba(0, 0, 0, .1) !important;
-  transition: color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 120ms ease !important;
-}
-:root[data-theme] #events :is(.btn-card-rules, .btn-card-contact):active {
-  transform: translateY(3px) !important;
-  box-shadow: 0 0 0 rgba(0, 0, 0, 0), inset 0 1px 3px rgba(0, 0, 0, .16) !important;
-}
 :root[data-theme] :is(
-  #hero .hero-actions .hero-rules-btn,
-  #hero .hero-actions .hero-contact-btn,
-  #events .btn-card-rules,
-  #events .btn-card-contact,
-  #events #discCascadeRules,
-  #events #discCascadeCall,
   #events #discCascadeRegister,
   #registration .track-btn-primary,
   #registration .track-btn-secondary
 )::after { content: none !important; display: none !important; }
 :root[data-theme] :is(
-  #hero .hero-actions .hero-rules-btn,
-  #hero .hero-actions .hero-contact-btn,
-  #events .btn-card-rules,
-  #events .btn-card-contact,
-  #events #discCascadeRules,
-  #events #discCascadeCall,
   #events #discCascadeRegister,
   #registration .track-btn-primary,
   #registration .track-btn-secondary
@@ -1097,33 +1035,22 @@ html.dark body {
 .landing-header .header-cta-classic,
 .landing-header .landing-logo,
 .landing-header .landing-logo *,
-#hero .hero-actions .hero-explore-btn,
-#hero .hero-actions .hero-rules-btn,
-#hero .hero-actions .hero-contact-btn,
 #events .btn-card-register,
 #events .stat-action-link { text-decoration: none !important; }
 #hero .hero-actions .hero-explore-btn,
-#hero .hero-actions .hero-rules-btn,
-#hero .hero-actions .hero-contact-btn,
 .landing-header #headerRegisterBtn {
   position: relative !important; isolation: isolate; overflow: hidden;
   color: #111827 !important; background: #fff !important; border-color: #d1d5db !important;
   transition: color .2s ease, border-color .2s ease, background-color .2s ease !important;
 }
 #hero .hero-actions .hero-explore-btn::before,
-#hero .hero-actions .hero-rules-btn::before,
-#hero .hero-actions .hero-contact-btn::before,
 .landing-header #headerRegisterBtn::before {
   content: ""; position: absolute; z-index: -1; inset: 0; background: #2563eb;
   transform: scaleX(0); transform-origin: left; transition: transform .24s ease;
 }
 #hero .hero-actions .hero-explore-btn:hover,
-#hero .hero-actions .hero-rules-btn:hover,
-#hero .hero-actions .hero-contact-btn:hover,
 .landing-header #headerRegisterBtn:hover { color: #fff !important; background: #fff !important; border-color: #2563eb !important; text-decoration: none !important; }
 #hero .hero-actions .hero-explore-btn:hover::before,
-#hero .hero-actions .hero-rules-btn:hover::before,
-#hero .hero-actions .hero-contact-btn:hover::before,
 .landing-header #headerRegisterBtn:hover::before { transform: scaleX(1); }
 :root[data-theme] .hero-badge-pill .registration-dot { background: #16a34a !important; box-shadow: 0 0 0 3px rgba(22,163,74,.17) !important; }
 :root[data-theme] .stat-card-championship .stat-title-championship { font-size: clamp(1.65rem, 2.4vw, 2rem) !important; line-height: 1.15 !important; }
@@ -1252,7 +1179,7 @@ body.event-dialog-open { overflow: hidden; }
   #events .btn-card-rules, #events .btn-card-contact, #events .btn-card-register { width: 100% !important; min-width: 0 !important; min-height: 42px !important; }
 }
 @media (prefers-reduced-motion: reduce) {
-  #hero .hero-actions :is(.hero-explore-btn,.hero-rules-btn,.hero-contact-btn)::before,
+  #hero .hero-actions .hero-explore-btn::before,
   .landing-header #headerRegisterBtn::before { transition: none !important; }
 }
 
@@ -1260,25 +1187,222 @@ body.event-dialog-open { overflow: hidden; }
   :root[data-theme] #hero .hero-title { animation: none !important; }
   :root[data-theme] #hero .hero-actions .hero-explore-btn::before { transition: none !important; }
   :root[data-theme] :is(
-    #hero .hero-actions .hero-rules-btn,
-    #hero .hero-actions .hero-contact-btn,
-    #events .btn-card-rules,
-    #events .btn-card-contact,
-    #events #discCascadeRules,
-    #events #discCascadeCall,
     #events #discCascadeRegister,
     #registration .track-btn-primary,
     #registration .track-btn-secondary
   ),
   :root[data-theme] :is(
-    #hero .hero-actions .hero-rules-btn,
-    #hero .hero-actions .hero-contact-btn,
-    #events .btn-card-rules,
-    #events .btn-card-contact,
-    #events #discCascadeRules,
-    #events #discCascadeCall,
     #events #discCascadeRegister,
     #registration .track-btn-primary,
     #registration .track-btn-secondary
   )::before { transition: none !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BUTTON ANIMATION SYSTEM (Neobrutalism Button Animation)
+   Variants:
+   - Resting: 4px 4px 0px 0px border-color, translate(0, 0)
+   - Hover: translate(4px, 4px), box-shadow: none (while keeping original colors)
+   - Active: translate(4px, 4px), box-shadow: none
+   Buttons:
+   - Rules and Guidelines (#hero .hero-actions .hero-rules-btn)
+   - Contact Organizer (#hero .hero-actions .hero-contact-btn)
+   - Rules (in the event section: .btn-card-rules, #discCascadeRules)
+   - Contact (in the event section: .btn-card-contact, #discCascadeCall)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  .hero-rules-btn,
+  .hero-contact-btn,
+  .btn-card-rules,
+  .btn-card-contact,
+  .disc-cascade-rules,
+  .disc-cascade-call
+) {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  overflow: visible !important;
+  transform: translate(0, 0) !important;
+  transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+}
+
+/* Remove pseudo-elements so no sliding backgrounds disrupt original colors */
+:root :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  .hero-rules-btn,
+  .hero-contact-btn,
+  .btn-card-rules,
+  .btn-card-contact,
+  .disc-cascade-rules,
+  .disc-cascade-call
+)::before,
+:root :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  .hero-rules-btn,
+  .hero-contact-btn,
+  .btn-card-rules,
+  .btn-card-contact,
+  .disc-cascade-rules,
+  .disc-cascade-call
+)::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Light Theme: original colors with 4px 4px border shadow */
+:root[data-theme="light"] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  .hero-rules-btn,
+  .hero-contact-btn,
+  .btn-card-rules,
+  .btn-card-contact,
+  .disc-cascade-rules,
+  .disc-cascade-call
+) {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: 2px solid #0f172a !important;
+  box-shadow: 4px 4px 0px 0px #0f172a !important;
+}
+
+/* Dark Theme: original colors with 4px 4px border shadow */
+:root:not([data-theme="light"]) :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  .hero-rules-btn,
+  .hero-contact-btn,
+  .btn-card-rules,
+  .btn-card-contact,
+  .disc-cascade-rules,
+  .disc-cascade-call
+),
+:root[data-theme="dark"] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  .hero-rules-btn,
+  .hero-contact-btn,
+  .btn-card-rules,
+  .btn-card-contact,
+  .disc-cascade-rules,
+  .disc-cascade-call
+) {
+  background: rgba(15, 23, 42, 0.85) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border: 2px solid #2563eb !important;
+  box-shadow: 4px 4px 0px 0px #2563eb !important;
+}
+
+/* Hover State: translate(4px, 4px) and shadow: none (keeping original colors) */
+:root[data-theme="light"] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  .hero-rules-btn,
+  .hero-contact-btn,
+  .btn-card-rules,
+  .btn-card-contact,
+  .disc-cascade-rules,
+  .disc-cascade-call
+):hover {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border-color: #0f172a !important;
+  transform: translate(4px, 4px) !important;
+  box-shadow: 0px 0px 0px 0px transparent !important;
+}
+
+:root:not([data-theme="light"]) :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  .hero-rules-btn,
+  .hero-contact-btn,
+  .btn-card-rules,
+  .btn-card-contact,
+  .disc-cascade-rules,
+  .disc-cascade-call
+):hover,
+:root[data-theme="dark"] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  .hero-rules-btn,
+  .hero-contact-btn,
+  .btn-card-rules,
+  .btn-card-contact,
+  .disc-cascade-rules,
+  .disc-cascade-call
+):hover {
+  background: rgba(15, 23, 42, 0.85) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: #2563eb !important;
+  transform: translate(4px, 4px) !important;
+  box-shadow: 0px 0px 0px 0px transparent !important;
+}
+
+/* Active State: Pressed down (translate 4px, 4px; shadow: none) */
+:root :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  .hero-rules-btn,
+  .hero-contact-btn,
+  .btn-card-rules,
+  .btn-card-contact,
+  .disc-cascade-rules,
+  .disc-cascade-call
+):active {
+  transform: translate(4px, 4px) !important;
+  box-shadow: 0px 0px 0px 0px transparent !important;
 }

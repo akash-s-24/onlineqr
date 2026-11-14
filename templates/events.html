@@ -503,19 +503,34 @@ content: none !important;
 
 .hero-rules-btn,
 .hero-contact-btn {
-background: rgba(15, 23, 42, 0.75) !important;
+background: rgba(15, 23, 42, 0.85) !important;
 backdrop-filter: blur(12px) !important;
 -webkit-backdrop-filter: blur(12px) !important;
-border: 1.5px solid rgba(59, 130, 246, 0.45) !important;
+border: 2px solid #2563eb !important;
 color: #ffffff !important;
-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+box-shadow: 4px 4px 0px #2563eb !important;
 border-radius: 9999px !important;
 font-weight: 700 !important;
 position: relative !important;
-overflow: hidden !important;
+transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+}
+.hero-rules-btn:hover,
+.hero-contact-btn:hover {
+background: rgba(15, 23, 42, 0.85) !important;
+color: #ffffff !important;
+border-color: #2563eb !important;
+transform: translate(4px, 4px) !important;
+box-shadow: none !important;
+}
+.hero-rules-btn:active,
+.hero-contact-btn:active {
+transform: translate(4px, 4px) !important;
+box-shadow: none !important;
 }
 .hero-rules-btn::after,
-.hero-contact-btn::after {
+.hero-contact-btn::after,
+.hero-rules-btn::before,
+.hero-contact-btn::before {
 display: none !important;
 content: none !important;
 }
@@ -1555,42 +1570,31 @@ font: 700 13px 'DM Mono', monospace;
 text-decoration: none;
 text-transform: uppercase;
 cursor: pointer;
-box-shadow: 4px 4px 0px rgba(37, 99, 235, 0.5) !important;
+box-shadow: 4px 4px 0px #2563eb !important;
 border-radius: 8px;
 position: relative !important;
-overflow: hidden !important;
-transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+transform: translate(0, 0) !important;
+transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
 }
 .disc-cascade-rules::after,
-.disc-cascade-call::after {
-content: '';
-position: absolute;
-top: 0;
-left: -130%;
-width: 100%;
-height: 100%;
-background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.25) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(59,
-130, 246, 0.25) 75%, transparent 100%);
-transform: skewX(-20deg);
-transition: left 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-pointer-events: none;
+.disc-cascade-call::after,
+.disc-cascade-rules::before,
+.disc-cascade-call::before {
+display: none !important;
+content: none !important;
 }
 .disc-cascade-rules:hover,
 .disc-cascade-call:hover {
-background: rgba(37, 99, 235, 0.22) !important;
+background: rgba(15, 23, 42, 0.85) !important;
 color: #ffffff !important;
-border-color: #ffffff !important;
-transform: translate(-2px, -2px) !important;
-box-shadow: 6px 6px 0px #2563eb, 0 0 20px rgba(37, 99, 235, 0.55) !important;
-}
-.disc-cascade-rules:hover::after,
-.disc-cascade-call:hover::after {
-left: 140%;
+border-color: #2563eb !important;
+transform: translate(4px, 4px) !important;
+box-shadow: none !important;
 }
 .disc-cascade-rules:active,
 .disc-cascade-call:active {
-transform: translate(3px, 3px) !important;
-box-shadow: 0px 0px 0px transparent !important;
+transform: translate(4px, 4px) !important;
+box-shadow: none !important;
 }
 
 .disc-cascade-controls { position:absolute; right:24px; bottom:22px; z-index:20; display:flex; align-items:center;
@@ -2116,26 +2120,27 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    border: 2px solid rgba(255, 255, 255, 0.35) !important;
-    box-shadow: 3px 3px 0px rgba(255, 255, 255, 0.25) !important;
+    background: rgba(15, 23, 42, 0.85) !important;
+    border: 2px solid #2563eb !important;
+    box-shadow: 4px 4px 0px #2563eb !important;
     color: #ffffff !important;
     padding: 0 10px !important;
     touch-action: manipulation !important;
-    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transform: translate(0, 0) !important;
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
     }
     .disc-cascade-rules:hover,
     .disc-cascade-call:hover {
-    background: rgba(255, 255, 255, 0.16) !important;
+    background: rgba(15, 23, 42, 0.85) !important;
     color: #ffffff !important;
-    border-color: rgba(255, 255, 255, 0.7) !important;
-    transform: translate(-2px, -2px) !important;
-    box-shadow: 5px 5px 0px rgba(255, 255, 255, 0.45) !important;
+    border-color: #2563eb !important;
+    transform: translate(4px, 4px) !important;
+    box-shadow: none !important;
     }
     .disc-cascade-rules:active,
     .disc-cascade-call:active {
-    transform: translate(3px, 3px) !important;
-    box-shadow: 0px 0px 0px transparent !important;
+    transform: translate(4px, 4px) !important;
+    box-shadow: none !important;
     }
     .disc-cascade-register {
     flex: 1 1 100% !important;
@@ -3158,7 +3163,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     .btn-card-rules,
     .btn-card-contact {
     background: rgba(15, 23, 42, 0.85);
-    border: 1.5px solid #2563eb;
+    border: 2px solid #2563eb;
     color: #ffffff;
     padding: 8px 15px;
     border-radius: 8px;
@@ -3166,11 +3171,25 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 3px 3px 0px rgba(37, 99, 235, 0.45);
+    box-shadow: 4px 4px 0px #2563eb;
     position: relative;
     overflow: hidden;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translate(0, 0);
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     white-space: nowrap;
+    }
+    .btn-card-rules:hover,
+    .btn-card-contact:hover {
+    background: rgba(15, 23, 42, 0.85);
+    color: #ffffff;
+    border-color: #2563eb;
+    transform: translate(4px, 4px) !important;
+    box-shadow: none !important;
+    }
+    .btn-card-rules:active,
+    .btn-card-contact:active {
+    transform: translate(4px, 4px) !important;
+    box-shadow: none !important;
     }
 
     .btn-card-rules::after,
@@ -4472,15 +4491,15 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     }
     [data-theme="light"] .hero-actions button:nth-child(2):hover,
     [data-theme="light"] .hero-rules-btn:hover {
-    background: #f8fafc !important;
+    background: #ffffff !important;
     border-color: #0f172a !important;
-    transform: translate(-2px, -2px) !important;
-    box-shadow: 6px 6px 0px #0f172a !important;
+    transform: translate(4px, 4px) !important;
+    box-shadow: none !important;
     }
     [data-theme="light"] .hero-actions button:nth-child(2):active,
     [data-theme="light"] .hero-rules-btn:active {
     transform: translate(4px, 4px) !important;
-    box-shadow: 0px 0px 0px #0f172a !important;
+    box-shadow: none !important;
     }
 
     /* Contact Organizer Button — Brutal Shadow System */
@@ -4499,16 +4518,16 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     }
     [data-theme="light"] .hero-contact-btn:hover,
     [data-theme="light"] .hero-actions button:nth-child(3):hover {
-    background: #f8fafc !important;
+    background: #ffffff !important;
     border-color: #0f172a !important;
     color: #0f172a !important;
-    transform: translate(-2px, -2px) !important;
-    box-shadow: 6px 6px 0px #0f172a !important;
+    transform: translate(4px, 4px) !important;
+    box-shadow: none !important;
     }
     [data-theme="light"] .hero-contact-btn:active,
     [data-theme="light"] .hero-actions button:nth-child(3):active {
     transform: translate(4px, 4px) !important;
-    box-shadow: 0px 0px 0px #0f172a !important;
+    box-shadow: none !important;
     }
 
     [data-theme="light"] .hero-countdown-block {
@@ -4983,22 +5002,23 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     font-weight: 700 !important;
     box-shadow: 4px 4px 0px #0f172a !important;
     border-radius: 6px !important;
-    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transform: translate(0, 0) !important;
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
     }
 
     [data-theme="light"] .disc-cascade-rules:hover,
     [data-theme="light"] .disc-cascade-call:hover {
-    background: #f8fafc !important;
+    background: #ffffff !important;
     border-color: #0f172a !important;
     color: #0f172a !important;
-    transform: translate(-2px, -2px) !important;
-    box-shadow: 6px 6px 0px #0f172a !important;
+    transform: translate(4px, 4px) !important;
+    box-shadow: none !important;
     }
 
     [data-theme="light"] .disc-cascade-rules:active,
     [data-theme="light"] .disc-cascade-call:active {
     transform: translate(4px, 4px) !important;
-    box-shadow: 0px 0px 0px #0f172a !important;
+    box-shadow: none !important;
     }
 
     [data-theme="light"] .disc-cascade-controls {
@@ -5191,24 +5211,25 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     border: 2px solid #0f172a !important;
     color: #0f172a !important;
     font-weight: 700 !important;
-    box-shadow: 3px 3px 0px #0f172a !important;
+    box-shadow: 4px 4px 0px #0f172a !important;
     border-radius: 8px !important;
-    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transform: translate(0, 0) !important;
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
     }
 
     [data-theme="light"] .btn-card-rules:hover,
     [data-theme="light"] .btn-card-contact:hover {
-    background: #f8fafc !important;
+    background: #ffffff !important;
     color: #0f172a !important;
     border-color: #0f172a !important;
-    transform: translate(-2px, -2px) !important;
-    box-shadow: 5px 5px 0px #0f172a !important;
+    transform: translate(4px, 4px) !important;
+    box-shadow: none !important;
     }
 
     [data-theme="light"] .btn-card-rules:active,
     [data-theme="light"] .btn-card-contact:active {
-    transform: translate(3px, 3px) !important;
-    box-shadow: 0px 0px 0px #0f172a !important;
+    transform: translate(4px, 4px) !important;
+    box-shadow: none !important;
     }
 
     [data-theme="light"] .btn-card-register {

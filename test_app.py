@@ -1740,6 +1740,61 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('scan the UPI QR code', awards_card)
         self.assertNotIn('The website\'s UPI details are currently in demo mode', awards_card)
 
+    def test_button_animation_and_shadcn_integration(self):
+        """Verify the neobrutalism button animation and shadcn/Tailwind configuration files."""
+        import os
+
+        # 1. Verify component files exist in components/ui
+        self.assertTrue(os.path.exists("components/ui/button.tsx"))
+        self.assertTrue(os.path.exists("components/ui/demo.tsx"))
+
+        with open("components/ui/button.tsx", "r", encoding="utf-8") as f:
+            button_code = f.read()
+            self.assertIn("cva(", button_code)
+            self.assertIn("hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none", button_code)
+            self.assertIn("export { Button, buttonVariants }", button_code)
+
+        with open("components/ui/demo.tsx", "r", encoding="utf-8") as f:
+            demo_code = f.read()
+            self.assertIn("export {", demo_code)
+            self.assertIn("Default,", demo_code)
+            self.assertIn("Reverse,", demo_code)
+            self.assertIn("NoShadow,", demo_code)
+            self.assertIn("Neutral", demo_code)
+
+        # 2. Verify Tailwind config and Globals CSS exist and contain shadow/translate tokens
+        self.assertTrue(os.path.exists("tailwind.config.js"))
+        with open("tailwind.config.js", "r", encoding="utf-8") as f:
+            tw_code = f.read()
+            self.assertIn("boxShadowX: '4px'", tw_code)
+            self.assertIn("boxShadowY: '4px'", tw_code)
+            self.assertIn("secondaryBlack: '#212121'", tw_code)
+
+        self.assertTrue(os.path.exists("globals.css"))
+        with open("globals.css", "r", encoding="utf-8") as f:
+            css_code = f.read()
+            self.assertIn("--box-shadow-x: 4px;", css_code)
+            self.assertIn("--shadow: var(--box-shadow-x) var(--box-shadow-y) 0px 0px var(--border);", css_code)
+
+        # 3. Verify the 4 designated buttons use the exact neobrutalism animation in theme CSS
+        theme_css = self.client.get('/static/css/daksha-theme.css').data.decode('utf-8')
+
+        # Check button selectors exist in the animation block
+        self.assertIn('#hero .hero-actions .hero-rules-btn', theme_css)
+        self.assertIn('#hero .hero-actions .hero-contact-btn', theme_css)
+        self.assertIn('#events .btn-card-rules', theme_css)
+        self.assertIn('#events .btn-card-contact', theme_css)
+        self.assertIn('#events #discCascadeRules', theme_css)
+        self.assertIn('#events #discCascadeCall', theme_css)
+
+        # Check hover translation & shadow-none
+        self.assertIn('transform: translate(4px, 4px) !important;', theme_css)
+        self.assertIn('box-shadow: 0px 0px 0px 0px transparent !important;', theme_css)
+
+        # Check resting 4px 4px border shadow
+        self.assertIn('box-shadow: 4px 4px 0px 0px #0f172a !important;', theme_css)
+        self.assertIn('box-shadow: 4px 4px 0px 0px #2563eb !important;', theme_css)
+
 
 if __name__ == '__main__':
     unittest.main()
