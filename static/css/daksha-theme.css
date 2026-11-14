@@ -412,14 +412,33 @@ html.dark body {
 :root[data-theme] body.registration-page .form-title { color: var(--text) !important; font: 650 clamp(1.75rem,4vw,2.3rem)/1.15 'Fraunces',Georgia,serif !important; }
 :root[data-theme] body.registration-page .form-subtitle { color: var(--text-2) !important; line-height: 1.6; }
 :root[data-theme] body.registration-page .form-section-heading {
-  display: grid; grid-template-columns: 34px minmax(0,1fr); align-items: start; gap: 12px; margin: 4px 0 18px;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  text-align: left !important;
+  gap: 4px !important;
+  margin: 4px 0 20px !important;
+  width: 100% !important;
+}
+:root[data-theme] body.registration-page .form-section-heading > div {
+  width: 100% !important;
+  text-align: left !important;
 }
 :root[data-theme] body.registration-page .form-section-heading > span {
-  display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
-  background: var(--surface-3); color: var(--primary); font: 700 11px/1 'DM Sans',sans-serif;
+  display: none !important;
 }
-:root[data-theme] body.registration-page .form-section-heading h2 { margin: 0 0 4px; color: var(--text); font: 600 1.3rem/1.25 'Fraunces',Georgia,serif; }
-:root[data-theme] body.registration-page .form-section-heading p { margin: 0; color: var(--text-2); font: 400 .84rem/1.5 'DM Sans',sans-serif; }
+:root[data-theme] body.registration-page .form-section-heading h2 {
+  margin: 0 0 4px !important;
+  color: var(--text) !important;
+  font: 700 1.35rem/1.25 'Fraunces', Georgia, serif !important;
+  text-align: left !important;
+}
+:root[data-theme] body.registration-page .form-section-heading p {
+  margin: 0 !important;
+  color: var(--text-2) !important;
+  font: 400 .88rem/1.5 'DM Sans', sans-serif !important;
+  text-align: left !important;
+}
 :root[data-theme] body.registration-page .registration-form-section { padding: 14px 0 22px; margin-bottom: 20px; border-bottom: 1px solid var(--border-soft); }
 :root[data-theme] body.registration-page .f-label,
 :root[data-theme] body.registration-page .payment-mode-options legend { color: var(--text) !important; font: 650 .88rem/1.4 'DM Sans',sans-serif; }

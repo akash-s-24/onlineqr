@@ -691,8 +691,9 @@
                                             action="{{ url_for('send_receipt_email_route', reg_id=reg.registration_id) }}"
                                             style="display:inline;">
                                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                            <button class="dashboard-btn small" type="submit">Receipt</button>
+                                            <button class="dashboard-btn small" type="submit" title="Resend receipt via Email & WhatsApp">Receipt</button>
                                         </form>
+                                        <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=reg.registration_uid) }}" target="_blank" rel="noopener noreferrer" class="dashboard-btn small" style="text-decoration:none; background:#15803d; color:#ffffff;" title="Open WhatsApp Receipt">📱 WhatsApp</a>
                                         {% endif %}
                                         <button type="button" class="dashboard-btn small danger"
                                             data-reg-id="{{ reg.registration_id }}" data-full-name="{{ reg.full_name|e }}" onclick="confirmDeleteOne(this.dataset.regId, this.dataset.fullName)">Delete</button>
@@ -835,8 +836,9 @@
                                         action="{{ url_for('send_receipt_email_route', reg_id=reg.registration_id) }}"
                                         style="display:inline;">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button class="dashboard-btn small" type="submit">Resend receipt</button>
+                                        <button class="dashboard-btn small" type="submit" title="Resend receipt via Email & WhatsApp">Resend receipt</button>
                                     </form>
+                                    <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=reg.registration_uid) }}" target="_blank" rel="noopener noreferrer" class="dashboard-btn small" style="text-decoration:none; background:#15803d; color:#ffffff;" title="Open WhatsApp Receipt">📱 WhatsApp</a>
                                     {% endif %}
                                 </div>
                             </td>
@@ -894,8 +896,9 @@
                                         action="{{ url_for('send_receipt_email_route', reg_id=reg.registration_id) }}"
                                         style="display:inline;">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button class="dashboard-btn small" type="submit">Resend receipt</button>
+                                        <button class="dashboard-btn small" type="submit" title="Resend receipt via Email & WhatsApp">Resend receipt</button>
                                     </form>
+                                    <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=reg.registration_uid) }}" target="_blank" rel="noopener noreferrer" class="dashboard-btn small" style="text-decoration:none; background:#15803d; color:#ffffff;" title="Open WhatsApp Receipt">📱 WhatsApp</a>
                                     {% else %}
                                     <form method="POST"
                                         action="{{ url_for('toggle_payment', reg_id=reg.registration_id) }}"

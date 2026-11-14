@@ -33,7 +33,7 @@
                 <strong style="color: #92400e; font-size: 1rem; display: block; margin-bottom: 4px;">Action Required: Take a photo or screenshot of this pass now!</strong>
                 <p style="color: #78350f; font-size: 0.88rem; line-height: 1.5; margin: 0 0 10px;">Please photograph or save a screenshot of this official QR code and pass to your mobile phone gallery right now. You must present this pass or screenshot at the college check-in desk upon campus arrival.</p>
                 <div class="registration-pass-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <a href="https://api.whatsapp.com/send?text={{ ('Hello, here is my official Daksha Infinix Gate Pass for ' ~ registration.event_name ~ ' (ID: ' ~ registration.registration_uid ~ '). View Pass: ' ~ request.url)|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #11763d; color: #ffffff; text-decoration: none; font-weight: 700; padding: 6px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem;">
+                    <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=registration.registration_uid) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #11763d; color: #ffffff; text-decoration: none; font-weight: 700; padding: 7px 16px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem;">
                         📱 Send Pass to Mobile / WhatsApp
                     </a>
                     <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary" style="font-weight: 600; padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; background: #ffffff; border: 1px solid #cbd5e1; cursor: pointer;">
@@ -71,7 +71,7 @@
                 ₹{{ registration.amount_paid }} received by the college.
             </div>
             <p><strong>Payment ID / UTR:</strong> <code>{{ registration.utr_number or 'Recorded by desk/admin' }}</code></p>
-            <p><strong>Receipt:</strong> {{ 'Sent to the registered email address.' if registration.receipt_delivery_status == 'sent' else 'Being prepared or available from the registration desk.' }}</p>
+            <p><strong>Receipt:</strong> {{ 'Dispatched via WhatsApp & registered email address.' if registration.receipt_delivery_status == 'sent' else 'Being prepared or available from the registration desk.' }}</p>
         {% elif registration.payment_status == 'pending' %}
             <div class="alert alert-warning" style="padding:1rem; border-radius:8px;">
                 <strong>Payment submitted for verification</strong><br>

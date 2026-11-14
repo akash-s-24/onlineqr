@@ -400,47 +400,41 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         place_text = "Merit"
 
     if has_custom_template:
-        import json
-        
-        f_handwriting = get_font_by_name("segoescb.ttf", 39)
-        f_handwriting_name = get_font_by_name("segoescb.ttf", 47)
-        blue_ink = (24, 58, 140)
-        border_navy = (11, 25, 44)
-        
+        # User constraint: ONLY the participant's name should appear in the placeholder dash,
+        # perfectly aligned in dark blue (#123066). No event name, title, rank, date, or other text.
+        blue_ink = (18, 48, 102)  # Rich academic dark blue matching the template crest and ribbon
+
         coords = {
-            'name_x': 1532, 'name_y': 920,
-            'rank_x': 0, 'rank_y': 0,
-            'event_x': 0, 'event_y': 0,
-            'date_x': 0, 'date_y': 0
+            'name_x': 1573,
+            'name_y': 870
         }
         coords_path = os.path.join(
             "static", "uploads", "cert_coordinates.json")
         if os.path.exists(coords_path):
             try:
+                import json
                 with open(coords_path, 'r') as f:
-                    coords.update(json.load(f))
+                    custom_coords = json.load(f)
+                    if 'name_x' in custom_coords and 'name_y' in custom_coords:
+                        coords['name_x'] = int(custom_coords['name_x'])
+                        coords['name_y'] = int(custom_coords['name_y'])
             except Exception:
                 pass
 
-        # Print candidate name right above the signature line
-        draw.text((coords['name_x'], coords['name_y']), p_name,
-                  fill=blue_ink, font=f_handwriting_name, anchor="mm")
-        
-        # Only draw rank/event/date if explicitly configured in coordinates file
-        if coords.get('rank_x', 0) > 0 and coords.get('rank_y', 0) > 0:
-            draw.text((coords['rank_x'], coords['rank_y']), place_text,
-                      fill=blue_ink, font=f_handwriting, anchor="mm")
-        if coords.get('event_x', 0) > 0 and coords.get('event_y', 0) > 0:
-            draw.text((coords['event_x'], coords['event_y']), event_name,
-                      fill=blue_ink, font=f_handwriting, anchor="mm")
-        if coords.get('date_x', 0) > 0 and coords.get('date_y', 0) > 0:
-            draw.text((coords['date_x'], coords['date_y']), event_date,
-                      fill=border_navy, font=get_font_by_name("arialbd.ttf", 14))
+        # Dynamic font scaling to guarantee candidate name never overflows the dash line
+        font_size = 72
+        font_candidate = get_font_by_name("georgiab.ttf", font_size)
+        bbox = draw.textbbox((0, 0), p_name, font=font_candidate)
+        text_w = bbox[2] - bbox[0]
+        while text_w > 1150 and font_size > 36:
+            font_size -= 2
+            font_candidate = get_font_by_name("georgiab.ttf", font_size)
+            bbox = draw.textbbox((0, 0), p_name, font=font_candidate)
+            text_w = bbox[2] - bbox[0]
 
-        if team_name and coords.get('event_x', 0) > 0:
-            team_display = f"(Team: {team_name})"
-            draw.text((coords['event_x'], coords['event_y'] + 60), team_display, fill=(
-                71, 85, 105), font=get_font_by_name("georgiai.ttf", 28), anchor="mm")
+        # Draw ONLY the participant name centered above the placeholder dash
+        draw.text((coords['name_x'], coords['name_y']), p_name,
+                  fill=blue_ink, font=font_candidate, anchor="mm")
 
     else:
 

@@ -23,7 +23,7 @@ from config import Config
 import database
 from database import query_db, execute_db, create_registration
 from certificate_generator import generate_certificate, generate_team_certificates_zip
-from mailer import send_certificate_email, get_smtp_info, send_receipt_email
+from mailer import send_certificate_email, get_smtp_info, send_receipt_email, send_whatsapp_receipt
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -897,7 +897,8 @@ def toggle_payment(reg_id):
         """
         SELECT r.registered_by, r.payment_status, r.status,
                r.payment_method, r.utr_number, r.payment_verified_at,
-               r.receipt_delivery_status, p.full_name, p.email, e.event_name, e.event_fee
+               r.receipt_delivery_status, r.registration_uid,
+               p.full_name, p.email, p.phone, e.event_name, e.event_fee
         FROM registrations r
         JOIN events e ON e.id = r.event_id
         JOIN participants p ON p.id = r.participant_id
@@ -947,14 +948,24 @@ def toggle_payment(reg_id):
         event_name=reg['event_name'],
         payment_method=reg['payment_method'],
         amount_paid=fee,
-        utr_number=reg['utr_number']
+        utr_number=reg['utr_number'],
+        registration_uid=reg['registration_uid']
     )
-    if receipt_ok:
+    wa_ok, wa_msg, wa_url = send_whatsapp_receipt(
+        recipient_phone=reg['phone'],
+        participant_name=reg['full_name'],
+        event_name=reg['event_name'],
+        payment_method=reg['payment_method'],
+        amount_paid=fee,
+        utr_number=reg['utr_number'],
+        registration_uid=reg['registration_uid']
+    )
+    if receipt_ok or wa_ok:
         execute_db(
             "UPDATE registrations SET receipt_sent_at = CURRENT_TIMESTAMP, receipt_delivery_status = 'sent' WHERE id = %s",
             (reg_id,)
         )
-        flash(f"Payment verified and receipt sent to {reg['email']}.", "success")
+        flash(f"Payment verified and receipt sent via email to {reg['email']} and WhatsApp to {reg['phone']}.", "success")
     else:
         execute_db(
             "UPDATE registrations SET receipt_delivery_status = 'failed' WHERE id = %s",
@@ -1898,10 +1909,10 @@ def send_certificate_email_route(cert_id):
 @admin_required
 def send_receipt_email_route(reg_id):
     """
-    Emails the payment receipt to the participant.
+    Sends the payment receipt to the participant via both Email and WhatsApp.
     """
     reg = query_db("""
-        SELECT r.*, p.full_name, p.email, e.event_name
+        SELECT r.*, p.full_name, p.email, p.phone, e.event_name
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
         JOIN events e ON r.event_id = e.id
@@ -1916,27 +1927,63 @@ def send_receipt_email_route(reg_id):
         flash("Cannot send receipt for unpaid registration.", "warning")
         return redirect(request.referrer or url_for('admin_dashboard'))
 
-    success, msg = send_receipt_email(
+    email_ok, email_msg = send_receipt_email(
         recipient_email=reg['email'],
         participant_name=reg['full_name'],
         event_name=reg['event_name'],
         payment_method=reg['payment_method'],
         amount_paid=reg['amount_paid'],
-        utr_number=reg['utr_number']
+        utr_number=reg['utr_number'],
+        registration_uid=reg['registration_uid']
+    )
+    wa_ok, wa_msg, wa_url = send_whatsapp_receipt(
+        recipient_phone=reg['phone'],
+        participant_name=reg['full_name'],
+        event_name=reg['event_name'],
+        payment_method=reg['payment_method'],
+        amount_paid=reg['amount_paid'],
+        utr_number=reg['utr_number'],
+        registration_uid=reg['registration_uid']
     )
     
-    if success:
+    if email_ok or wa_ok:
         execute_db(
             "UPDATE registrations SET receipt_sent_at = CURRENT_TIMESTAMP, receipt_delivery_status = 'sent' WHERE id = %s",
             (reg_id,)
         )
-        flash(msg, 'success')
+        flash(f"Receipt dispatched successfully via Email ({reg['email']}) and WhatsApp ({reg['phone']}).", 'success')
     else:
         execute_db(
             "UPDATE registrations SET receipt_delivery_status = 'failed' WHERE id = %s",
             (reg_id,)
         )
-        flash(f"Email dispatch error: {msg}", 'danger')
+        flash(f"Receipt dispatch error: {email_msg}", 'danger')
+        
+    return redirect(request.referrer or url_for('admin_dashboard'))
+
+@app.route('/registration/<registration_uid>/whatsapp-receipt')
+def registration_whatsapp_receipt(registration_uid):
+    """Generate and redirect to a WhatsApp receipt click-to-chat URL."""
+    reg = query_db("""
+        SELECT r.*, p.full_name, p.phone, p.email, e.event_name, e.event_fee
+        FROM registrations r
+        JOIN participants p ON r.participant_id = p.id
+        JOIN events e ON r.event_id = e.id
+        WHERE r.registration_uid = %s
+    """, (registration_uid,), one=True)
+    if not reg:
+        abort(404)
+    amount = reg.get('amount_paid') or reg.get('event_fee') or 0
+    _, _, wa_url = send_whatsapp_receipt(
+        recipient_phone=reg.get('phone'),
+        participant_name=reg.get('full_name'),
+        event_name=reg.get('event_name'),
+        payment_method=reg.get('payment_method') or 'Verified',
+        amount_paid=amount,
+        utr_number=reg.get('utr_number'),
+        registration_uid=reg.get('registration_uid')
+    )
+    return redirect(wa_url)
         
     return redirect(request.referrer or url_for('admin_dashboard'))
 
@@ -2372,8 +2419,8 @@ def api_mark_attended():
     # Verify cash payment and record the same audit trail as online payment.
     reg = query_db(
         """
-        SELECT r.id, r.payment_status, r.payment_method, r.utr_number,
-               p.full_name, p.email, e.event_name, e.event_fee
+        SELECT r.id, r.payment_status, r.payment_method, r.utr_number, r.registration_uid,
+               p.full_name, p.email, p.phone, e.event_name, e.event_fee
         FROM registrations r
         JOIN participants p ON p.id = r.participant_id
         JOIN events e ON e.id = r.event_id
@@ -2411,9 +2458,19 @@ def api_mark_attended():
                 event_name=reg['event_name'],
                 payment_method='Cash',
                 amount_paid=fee,
-                utr_number=None
+                utr_number=None,
+                registration_uid=reg.get('registration_uid')
             )
-            if receipt_ok:
+            wa_ok, wa_msg, wa_url = send_whatsapp_receipt(
+                recipient_phone=reg.get('phone'),
+                participant_name=reg['full_name'],
+                event_name=reg['event_name'],
+                payment_method='Cash',
+                amount_paid=fee,
+                utr_number=None,
+                registration_uid=reg.get('registration_uid')
+            )
+            if receipt_ok or wa_ok:
                 execute_db(
                     "UPDATE registrations SET receipt_sent_at = CURRENT_TIMESTAMP, receipt_delivery_status = 'sent' WHERE id = %s",
                     (reg_id,)
@@ -2451,9 +2508,19 @@ def api_mark_attended():
                 event_name=reg['event_name'],
                 payment_method=reg.get('payment_method') or 'Online',
                 amount_paid=fee,
-                utr_number=reg.get('utr_number')
+                utr_number=reg.get('utr_number'),
+                registration_uid=reg.get('registration_uid')
             )
-            if receipt_ok:
+            wa_ok, wa_msg, wa_url = send_whatsapp_receipt(
+                recipient_phone=reg.get('phone'),
+                participant_name=reg['full_name'],
+                event_name=reg['event_name'],
+                payment_method=reg.get('payment_method') or 'Online',
+                amount_paid=fee,
+                utr_number=reg.get('utr_number'),
+                registration_uid=reg.get('registration_uid')
+            )
+            if receipt_ok or wa_ok:
                 execute_db(
                     "UPDATE registrations SET receipt_sent_at = CURRENT_TIMESTAMP, receipt_delivery_status = 'sent' WHERE id = %s",
                     (reg_id,)

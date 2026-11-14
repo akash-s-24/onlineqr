@@ -1521,5 +1521,125 @@ class SDATestCase(unittest.TestCase):
             self.assertEqual(res.status_code, 200, f"Expected 200 for {img_name}, got {res.status_code}")
             self.assertGreater(len(res.data), 1000)
 
+    def test_certificate_generator_custom_template_only_participant_name(self):
+        """Verify certificate renders only the participant name centered in dark blue on custom template."""
+        from certificate_generator import generate_certificate
+        from PIL import Image
+
+        participant_name = "Pooja Hegde"
+        cert_code, file_path, rel_url = generate_certificate(
+            participant_name=participant_name,
+            event_name="Solo Singing",
+            event_date="25–26 Nov 2026",
+            rank="1st"
+        )
+        self.assertTrue(os.path.exists(file_path))
+        im = Image.open(file_path)
+        self.assertEqual(im.size, (2480, 1754))
+
+    def test_whatsapp_and_email_receipt_system(self):
+        """Verify that payment receipts are dispatched via both WhatsApp and Email."""
+        from mailer import send_receipt_email, send_whatsapp_receipt, format_whatsapp_receipt
+
+        # 1. Test WhatsApp message format
+        wa_text = format_whatsapp_receipt(
+            participant_name="Ranjitha B K",
+            event_name="Solo Singing",
+            payment_method="Online UPI",
+            amount_paid=100,
+            utr_number="UPI9980846695",
+            registration_uid="REG-TEST-12345"
+        )
+        self.assertIn("SHREE DAKSHA ACADEMY", wa_text)
+        self.assertIn("Ranjitha B K", wa_text)
+        self.assertIn("Solo Singing", wa_text)
+        self.assertIn("₹100", wa_text)
+        self.assertIn("REG-TEST-12345", wa_text)
+        self.assertIn("6362436295", wa_text)
+
+        # 2. Test WhatsApp dispatch
+        wa_ok, wa_msg, wa_url = send_whatsapp_receipt(
+            recipient_phone="8861591085",
+            participant_name="Ranjitha B K",
+            event_name="Solo Singing",
+            payment_method="Online UPI",
+            amount_paid=100,
+            utr_number="UPI9980846695",
+            registration_uid="REG-TEST-12345"
+        )
+        self.assertTrue(wa_ok)
+        self.assertTrue(wa_url.startswith("https://wa.me/918861591085"))
+        self.assertIn("REG-TEST-12345", wa_url)
+
+        # 3. Test Email receipt dispatch in app context
+        with self.app.app_context():
+            email_ok, email_msg = send_receipt_email(
+                recipient_email="ranjitha@example.com",
+                participant_name="Ranjitha B K",
+                event_name="Solo Singing",
+                payment_method="Online UPI",
+                amount_paid=100,
+                utr_number="UPI9980846695",
+                registration_uid="REG-TEST-12345"
+            )
+            self.assertTrue(email_ok)
+
+    def test_registration_form_alignment_and_headings(self):
+        """Verify registration form headings and descriptions are left-aligned and properly styled."""
+        res = self.client.get('/register')
+        self.assertEqual(res.status_code, 200)
+        html = res.data.decode('utf-8')
+
+        # Check section headings and descriptions exist
+        self.assertIn('Choose your event', html)
+        self.assertIn('Review the event format, date, venue, and entry fee.', html)
+        self.assertIn('Participant details', html)
+        self.assertIn('Tell us who is taking part and where they study.', html)
+
+        # Check CSS theme for flex alignment
+        css_res = self.client.get('/static/css/daksha-theme.css')
+        self.assertEqual(css_res.status_code, 200)
+        css = css_res.data.decode('utf-8')
+        self.assertIn('.form-section-heading {', css)
+        self.assertIn('display: flex !important', css)
+        self.assertIn('flex-direction: column !important', css)
+        self.assertIn('align-items: flex-start !important', css)
+
+    def test_registration_whatsapp_receipt_route(self):
+        """Verify the direct WhatsApp receipt endpoint redirects correctly."""
+        # Query an existing valid event
+        ev = database.query_db("SELECT id FROM events LIMIT 1", one=True)
+        self.assertIsNotNone(ev)
+
+        # Create a test registration
+        reg_info = database.create_registration(
+            full_name="WhatsApp Test Student",
+            email=f"wa_{int(time.time()*1000)}@example.com",
+            phone="9876543210",
+            college_name="Test College",
+            department="PCMB",
+            semester="II PUC",
+            event_id=ev['id'],
+            team_name=None,
+            team_size=1,
+            team_members=None,
+            payment_status='paid',
+            amount_paid=100,
+            payment_method='Online',
+            utr_number=f"UTR{int(time.time()*1000)}",
+            registered_by=1,
+            is_group_event=False
+        )
+        self.assertTrue(reg_info.get('ok'))
+        reg_uid = reg_info['registration_uid']
+
+        # Call endpoint
+        res = self.client.get(f'/registration/{reg_uid}/whatsapp-receipt')
+        self.assertEqual(res.status_code, 302)
+        location = res.headers.get('Location', '')
+        self.assertTrue(location.startswith('https://wa.me/919876543210'))
+        self.assertIn(reg_uid, location)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -6,6 +6,7 @@ import base64
 import json
 import urllib.error
 import urllib.request
+import urllib.parse
 from html import escape
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -295,9 +296,147 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
         return False, 'SMTP delivery failed; the certificate remains queued for retry.'
 
 
-def send_receipt_email(recipient_email, participant_name, event_name, payment_method, amount_paid, utr_number=None):
+def format_whatsapp_receipt(participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None):
     """
-    Send an email receipt for event registration payment.
+    Format a clean, official WhatsApp receipt message for Daksha Udbhav 2026.
+    """
+    base_url = getattr(Config, 'BASE_URL', 'https://shreedakshaacademyedu.in')
+    pass_link = f"{base_url}/payment-status/{registration_uid}" if registration_uid else base_url
+
+    utr_text = f"\n💳 *Transaction / UTR:* {utr_number}" if utr_number else ""
+    uid_text = f"\n🆔 *Registration ID:* {registration_uid}" if registration_uid else ""
+
+    message = (
+        f"🎓 *SHREE DAKSHA ACADEMY PU COLLEGE*\n"
+        f"✨ *Daksha Udbhav 2026 - Official Payment Receipt*\n"
+        f"----------------------------------------\n"
+        f"✅ *Status:* Confirmed & Verified\n\n"
+        f"👤 *Participant:* {participant_name}{uid_text}\n"
+        f"🎪 *Event:* {event_name}\n"
+        f"💰 *Amount Paid:* ₹{amount_paid}\n"
+        f"💵 *Payment Mode:* {payment_method}{utr_text}\n"
+        f"📅 *Date:* {datetime.date.today().strftime('%d %B %Y')}\n\n"
+        f"🎟️ *Your Gate Pass & Receipt QR:* \n"
+        f"{pass_link}\n\n"
+        f"📍 *Venue:* No.596, Andrahalli Main Road, Opp. D.Group Layout Arch, Bengaluru - 560091\n\n"
+        f"📞 *Event Coordinators:*\n"
+        f"• NARASIMHAREDDY Y V: 6362436295\n"
+        f"• PREETI P: 79752 87515\n"
+        f"----------------------------------------\n"
+        f"Keep this receipt and present your Gate Pass at the registration desk upon campus arrival."
+    )
+    return message
+
+
+def send_whatsapp_receipt(recipient_phone, participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None):
+    """
+    Dispatches a payment receipt to the participant via WhatsApp.
+    Supports:
+    1. WhatsApp Business Cloud API / Webhook if configured in environment.
+    2. Click-to-chat URL (https://wa.me/<phone>?text=...) generation.
+    3. Safe Demo Mode simulation when running tests or in development.
+    Returns: (success: bool, message: str, wa_url: str)
+    """
+    load_dotenv(override=True)
+    is_demo, demo_reason = is_demo_mode()
+
+    # Clean phone number: keep only digits
+    raw_digits = re.sub(r'\D', '', str(recipient_phone or ''))
+    if not raw_digits:
+        raw_digits = "919980846695"
+    elif len(raw_digits) == 10:
+        raw_digits = "91" + raw_digits
+    elif len(raw_digits) == 11 and raw_digits.startswith('0'):
+        raw_digits = "91" + raw_digits[1:]
+
+    receipt_text = format_whatsapp_receipt(
+        participant_name=participant_name,
+        event_name=event_name,
+        payment_method=payment_method,
+        amount_paid=amount_paid,
+        utr_number=utr_number,
+        registration_uid=registration_uid
+    )
+
+    wa_url = f"https://wa.me/{raw_digits}?text={urllib.parse.quote(receipt_text)}"
+
+    # Check for direct WhatsApp API integration (Cloud API or Webhook)
+    wa_token = os.environ.get('WHATSAPP_API_TOKEN', getattr(Config, 'WHATSAPP_API_TOKEN', '')).strip()
+    wa_phone_id = os.environ.get('WHATSAPP_PHONE_NUMBER_ID', getattr(Config, 'WHATSAPP_PHONE_NUMBER_ID', '')).strip()
+    wa_webhook = os.environ.get('WHATSAPP_WEBHOOK_URL', getattr(Config, 'WHATSAPP_WEBHOOK_URL', '')).strip()
+
+    if is_demo or (not wa_token and not wa_webhook):
+        print("=" * 60)
+        print("[WhatsApp Safe Demo Mode] Receipt Simulated")
+        print("=" * 60)
+        print(f" - Recipient Phone : +{raw_digits}")
+        print(f" - Participant Name: {participant_name}")
+        print(f" - Event Name      : {event_name}")
+        print(f" - Amount Paid     : ₹{amount_paid}")
+        print(f" - Registration ID : {registration_uid or 'N/A'}")
+        print(f" - WhatsApp Link   : {wa_url}")
+        print("=" * 60)
+        return True, f"Receipt dispatched to WhatsApp (+{raw_digits})! [Safe Demo Mode]", wa_url
+
+    # Live Cloud API dispatch
+    if wa_token and wa_phone_id:
+        try:
+            api_url = f"https://graph.facebook.com/v19.0/{wa_phone_id}/messages"
+            payload = {
+                "messaging_product": "whatsapp",
+                "recipient_type": "individual",
+                "to": raw_digits,
+                "type": "text",
+                "text": {"preview_url": True, "body": receipt_text}
+            }
+            req = urllib.request.Request(
+                api_url,
+                data=json.dumps(payload).encode('utf-8'),
+                headers={
+                    "Authorization": f"Bearer {wa_token}",
+                    "Content-Type": "application/json"
+                },
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                if 200 <= resp.status < 300:
+                    return True, f"Receipt delivered via WhatsApp to +{raw_digits}.", wa_url
+        except Exception as e:
+            print(f"[WhatsApp API Error] {e}")
+            return False, f"WhatsApp delivery failed: {e}", wa_url
+
+    # Live Webhook dispatch
+    if wa_webhook:
+        try:
+            payload = {
+                "phone": raw_digits,
+                "message": receipt_text,
+                "participant_name": participant_name,
+                "event_name": event_name,
+                "amount_paid": amount_paid,
+                "registration_uid": registration_uid,
+                "utr_number": utr_number
+            }
+            req = urllib.request.Request(
+                wa_webhook,
+                data=json.dumps(payload).encode('utf-8'),
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                if 200 <= resp.status < 300:
+                    return True, f"Receipt delivered via WhatsApp webhook to +{raw_digits}.", wa_url
+        except Exception as e:
+            print(f"[WhatsApp Webhook Error] {e}")
+            return False, f"WhatsApp delivery failed: {e}", wa_url
+
+    return True, f"Receipt prepared for WhatsApp (+{raw_digits}).", wa_url
+
+
+def send_receipt_email(recipient_email, participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None):
+    """
+    Send a flawless email receipt for event registration payment.
+    Includes registration UID, gate pass link, college branding, and coordinator details.
     """
     load_dotenv(override=True)
     is_demo, demo_reason = is_demo_mode()
@@ -311,6 +450,7 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
         print(f" - Recipient Email : {clean_recipient}")
         print(f" - Participant Name: {participant_name}")
         print(f" - Event Name      : {event_name}")
+        print(f" - Registration ID : {registration_uid or 'N/A'}")
         print(f" - Amount Paid     : ₹{amount_paid}")
         print(f" - Payment Method  : {payment_method}")
         print(f" - UTR Number      : {utr_number or 'N/A'}")
@@ -334,50 +474,93 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
         safe_payment_method = escape(str(payment_method))
         safe_utr_number = escape(str(utr_number)) if utr_number else ''
         safe_college_name = escape(str(Config.COLLEGE_NAME))
+        safe_uid = escape(str(registration_uid)) if registration_uid else ''
         subject_event_name = _sanitize_header_value(event_name)
-        msg['Subject'] = f"Payment Receipt: Registration Confirmed for {subject_event_name}"
+        msg['Subject'] = f"Payment Receipt: Registration Confirmed for {subject_event_name} - Shree Daksha Academy"
+
+        base_url = getattr(Config, 'BASE_URL', 'https://shreedakshaacademyedu.in')
+        pass_link = f"{base_url}/payment-status/{registration_uid}" if registration_uid else base_url
 
         payment_details = f"<strong>Payment Mode:</strong> {safe_payment_method}"
         if utr_number:
             payment_details += f"<br><strong>Transaction / UTR:</strong> <code>{safe_utr_number}</code>"
-        
+
+        uid_row = f"""
+        <tr>
+            <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Registration ID</td>
+            <td style="padding: 10px 0; font-weight: 700; color: #1e3a8a; font-family: monospace; font-size: 15px; text-align: right; border-bottom: 1px solid #f1f5f9;">{safe_uid}</td>
+        </tr>
+        """ if registration_uid else ""
+
         html_content = f"""
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }}
-                .email-container {{ max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }}
-                .header {{ background: linear-gradient(135deg, #0f766e, #14b8a6); color: #ffffff; padding: 30px; text-align: center; }}
-                .header h1 {{ margin: 0; font-size: 24px; font-weight: 700; }}
-                .header p {{ margin: 5px 0 0; opacity: 0.9; font-size: 14px; }}
-                .content {{ padding: 30px; line-height: 1.6; font-size: 15px; }}
-                .highlight-box {{ background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 15px; margin: 20px 0; }}
-                .footer {{ background: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; }}
+                body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding: 24px; color: #0f172a; }}
+                .email-container {{ max-width: 620px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }}
+                .header {{ background: linear-gradient(135deg, #0b192c 0%, #1e3a8a 100%); color: #ffffff; padding: 36px 30px 28px; text-align: center; }}
+                .header h1 {{ margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; color: #ffffff; }}
+                .header .subtitle {{ margin: 6px 0 0; opacity: 0.85; font-size: 12px; letter-spacing: 0.2px; color: #cbd5e1; }}
+                .badge {{ display: inline-block; background: #f59e0b; color: #000000; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 9999px; margin-top: 14px; text-transform: uppercase; letter-spacing: 0.5px; }}
+                .content {{ padding: 32px 30px; line-height: 1.6; font-size: 15px; }}
+                .receipt-card {{ background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 24px 0; }}
+                .receipt-table {{ width: 100%; border-collapse: collapse; }}
+                .btn-pass {{ display: inline-block; background: #2563eb; color: #ffffff !important; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 700; font-size: 15px; margin: 20px 0 10px; text-align: center; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); }}
+                .coordinators-box {{ background: #eff6ff; border-radius: 10px; padding: 16px; margin-top: 24px; font-size: 13px; color: #1e40af; border: 1px solid #bfdbfe; }}
+                .footer {{ background: #f8fafc; padding: 24px 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; }}
             </style>
         </head>
         <body>
             <div class="email-container">
                 <div class="header">
                     <h1>{safe_college_name}</h1>
-                    <p>Payment Receipt</p>
+                    <p class="subtitle">Recognized by Govt. of Karnataka | Affiliated to Bangalore University | Approved by AICTE</p>
+                    <div class="badge">Official Payment Receipt • Daksha Udbhav 2026</div>
                 </div>
                 <div class="content">
-                    <h2>Hello {safe_participant_name},</h2>
-                    <p>Your payment for <strong>{safe_event_name}</strong> has been successfully received and confirmed!</p>
+                    <h2 style="margin: 0 0 12px; font-size: 18px; color: #0f172a;">Dear {safe_participant_name},</h2>
+                    <p style="margin: 0 0 18px; color: #334155;">Your registration and payment for <strong>{safe_event_name}</strong> have been successfully verified and confirmed!</p>
                     
-                    <div class="highlight-box">
-                        <p style="margin: 0 0 8px 0; font-size: 1.1em;"><strong>Amount Paid:</strong> ₹{escape(str(amount_paid))}</p>
-                        <p style="margin: 0 0 8px 0;">{payment_details}</p>
-                        <p style="margin: 0;"><strong>Status:</strong> Confirmed ✅</p>
+                    <div class="receipt-card">
+                        <table class="receipt-table">
+                            {uid_row}
+                            <tr>
+                                <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Event Name</td>
+                                <td style="padding: 10px 0; font-weight: 600; color: #0f172a; text-align: right; border-bottom: 1px solid #f1f5f9;">{safe_event_name}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Amount Paid</td>
+                                <td style="padding: 10px 0; font-weight: 800; color: #16a34a; font-size: 18px; text-align: right; border-bottom: 1px solid #f1f5f9;">₹{escape(str(amount_paid))}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Payment Mode</td>
+                                <td style="padding: 10px 0; font-weight: 600; color: #334155; text-align: right; border-bottom: 1px solid #f1f5f9;">{safe_payment_method}</td>
+                            </tr>
+                            {"<tr><td style='padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;'>Transaction / UTR</td><td style='padding: 10px 0; font-weight: 600; font-family: monospace; color: #334155; text-align: right; border-bottom: 1px solid #f1f5f9;'>" + safe_utr_number + "</td></tr>" if utr_number else ""}
+                            <tr>
+                                <td style="padding: 10px 0; color: #64748b; font-size: 14px;">Status</td>
+                                <td style="padding: 10px 0; font-weight: 700; color: #16a34a; text-align: right;">Verified & Confirmed ✅</td>
+                            </tr>
+                        </table>
                     </div>
 
-                    <p>Thank you for registering. We look forward to seeing you at the event!</p>
+                    <div style="text-align: center;">
+                        <a href="{pass_link}" class="btn-pass">🎟️ View & Download Official Gate Pass</a>
+                    </div>
+                    <p style="text-align: center; margin: 4px 0 20px; font-size: 12px; color: #64748b;">Save or screenshot your Gate Pass QR code for quick check-in upon arrival.</p>
+
+                    <div class="coordinators-box">
+                        <strong style="display: block; margin-bottom: 6px;">📞 Event Support & Coordinators:</strong>
+                        <span>• Narasimhareddy Y V: <strong>6362436295</strong></span><br>
+                        <span>• Preeti P: <strong>79752 87515</strong></span>
+                    </div>
                 </div>
                 <div class="footer">
-                    <p>This is an automated receipt from Shree Daksha Academy Event Management System.</p>
-                    <p>&copy; 2026 {safe_college_name}. All rights reserved.</p>
+                    <p style="margin: 0 0 6px;">Venue: No.596, Andrahalli Main Road, Opp. D.Group Layout Arch, Bengaluru – 560091</p>
+                    <p style="margin: 0;">&copy; 2026 {safe_college_name}. All rights reserved.</p>
                 </div>
             </div>
         </body>
