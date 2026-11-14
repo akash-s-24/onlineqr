@@ -704,7 +704,9 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('<span>General</span> <span class="stat-title-accent">Championship</span>', championship_card)
         self.assertIn('Eligible colleges compete for the overall fest title.', championship_card)
         self.assertNotIn('15 competitions', championship_card)
-        self.assertNotIn('stat-action-link', championship_card)
+        self.assertIn('stat-action-link', championship_card)
+        self.assertIn('href="#rules"', championship_card)
+        self.assertIn('Championship Rules', championship_card)
         self.assertNotIn('championship-competition-list', championship_card)
         self.assertNotIn('<div class="stat-badge">GENERAL CHAMPIONSHIP</div>', championship_card)
         competitions_card = html.split('class="stat-value-row stat-value-events"', 1)[1].split('<!-- Card 2: General Championship -->', 1)[0]
@@ -1680,6 +1682,63 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('smartphones', ff_rules.lower())
         self.assertIn('emulators', ff_rules.lower())
         self.assertIn('screenshot', ff_rules.lower())
+
+    def test_general_rules_and_regulations_categorization_and_championship_button(self):
+        """Verify General Rules & Regulations categorization, clarified 3rd point, complete awards points, and highlight championship redirect button."""
+        res = self.client.get('/events')
+        self.assertEqual(res.status_code, 200)
+        html = res.data.decode('utf-8')
+
+        # 1. Highlight Section: General Championship button redirects to #rules
+        championship_stat = html.split('class="stat-card stat-card-championship', 1)[1].split('<!-- Card 3: Prize pool -->', 1)[0]
+        self.assertIn('stat-action-link', championship_stat)
+        self.assertIn('href="#rules"', championship_stat)
+        self.assertIn('Championship Rules', championship_stat)
+
+        # 2. General Rules Section
+        self.assertIn('id="rules"', html)
+        rules_section = html.split('id="rules"', 1)[1].split('id="registration"', 1)[0]
+
+        # Eligibility & Registration card
+        self.assertIn('Eligibility & Registration', rules_section)
+        self.assertIn('Academic Eligibility:', rules_section)
+        self.assertIn('PUC students (I PUC & II PUC)', rules_section)
+        self.assertIn('Identity Verification:', rules_section)
+        self.assertIn('Mandatory Registration:', rules_section)
+        self.assertIn('hard copy of the receipt', rules_section)
+        self.assertIn('Gate Pass with QR code', rules_section)
+        self.assertIn('Institutional Representation:', rules_section)
+        self.assertIn('General Championship Qualification:', rules_section)
+        self.assertIn('registered for all 15 competitions', rules_section)
+
+        # Conduct & Safety card
+        self.assertIn('Conduct & Safety', rules_section)
+        self.assertIn('Decorum & Discipline:', rules_section)
+        self.assertIn('Prohibited Hazardous Items:', rules_section)
+
+        # Timing & Preparation card (specifically verifying clarified 3rd point)
+        self.assertIn('Timing & Preparation', rules_section)
+        self.assertIn('30 minutes before inauguration', rules_section)
+        self.assertIn('Audio Tracks & Technical Media Submission:', rules_section)
+        self.assertIn('USB flash drive in MP3 or WAV format', rules_section)
+        self.assertIn('45 minutes prior to event commencement', rules_section)
+        self.assertIn('secondary backup copy on a mobile device', rules_section)
+
+        # Awards & Certification card (verifying missing 4 points are restored and misplaced payment removed)
+        self.assertIn('id="rules-awards"', rules_section)
+        awards_card = rules_section.split('id="rules-awards"', 1)[1].split('</article>', 1)[0]
+        self.assertIn('Winners & Runners-up Trophies:', awards_card)
+        self.assertIn('₹1 Lakh prize pool', awards_card)
+        self.assertIn('Official Participation E-Certificates:', awards_card)
+        self.assertIn('General Championship Rolling Trophy:', awards_card)
+        self.assertIn('Valedictory Ceremony Conferral:', awards_card)
+        self.assertIn('Digital Certificate Access:', awards_card)
+        self.assertIn('WhatsApp and email', awards_card)
+        self.assertIn("Judges' Decisions Finality:", awards_card)
+
+        # Ensure payment instructions are NOT inside Awards & Certification
+        self.assertNotIn('scan the UPI QR code', awards_card)
+        self.assertNotIn('The website\'s UPI details are currently in demo mode', awards_card)
 
 
 if __name__ == '__main__':
