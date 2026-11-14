@@ -139,11 +139,13 @@
             top: 0;
             left: 0;
             height: 3px;
-            width: 0%;
+            width: 100%;
+            transform: scaleX(0);
+            transform-origin: left center;
             background: linear-gradient(90deg, #ffffff 0%, #3b82f6 50%, #e2e8f0 100%);
             z-index: 10001;
             pointer-events: none;
-            transition: width 0.08s linear;
+            transition: transform 0.08s linear;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
@@ -1188,12 +1190,12 @@
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
-                line-height: 1.18 !important;
+                line-height: 1.3 !important;
                 color: #ffffff !important;
             }
 
             .landing-logo-meta {
-                font-size: clamp(0.48rem, 2vw, 0.58rem) !important;
+                font-size: clamp(0.6875rem, 2vw, 0.72rem) !important;
                 color: #94a3b8 !important;
                 font-weight: 600 !important;
                 white-space: nowrap !important;
@@ -1203,13 +1205,13 @@
 
             .landing-logo-addr {
                 display: block !important;
-                font-size: clamp(0.46rem, 1.8vw, 0.54rem) !important;
+                font-size: clamp(0.6875rem, 1.8vw, 0.72rem) !important;
                 color: #94a3b8 !important;
                 font-weight: 500 !important;
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
-                line-height: 1.15 !important;
+                line-height: 1.3 !important;
             }
 
             .mobile-toggle {
@@ -1682,7 +1684,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261114_v9">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261114_v10">
  </head>
 
 <body
@@ -1722,8 +1724,8 @@
                     <span class="landing-logo-title"
                         style="font-size: 0.98rem; font-weight: 800; letter-spacing: -0.01em;">SHREE DAKSHA ACADEMY</span>
                     <span class="landing-logo-meta"
-                        style="font-size: 0.62rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">Recognized by the Government of Karnataka, affiliated to Bengaluru University, approved by AICTE.</span>
-                    <span class="landing-logo-addr" style="font-size: 0.58rem; color: #64748b;">No.596, Andrahalli Main Road, Bengaluru - 560091</span>
+                        style="font-size: 0.7rem; color: #94a3b8; font-weight: 600; letter-spacing: 0.2px;">Govt. of Karnataka · BU · AICTE approved</span>
+                    <span class="landing-logo-addr" style="font-size: 0.7rem; color: #64748b;">No.596, Andrahalli Main Road, Bengaluru - 560091</span>
                 </div>
             </a>
 
@@ -1882,7 +1884,7 @@
                             alt="Shree Daksha Academy Logo" class="footer-brand-logo">
                         <div class="footer-brand-text">
                             <h4 class="footer-brand-title">Shree Daksha Academy</h4>
-                            <span class="footer-brand-dept">Recognized by the Government of Karnataka, affiliated to Bengaluru University, approved by AICTE</span>
+                            <span class="footer-brand-dept">Govt. of Karnataka · BU · AICTE approved</span>
                         </div>
                     </div>
                     <p class="footer-brand-desc">Empowering student innovation, leadership, and competitive excellence.
@@ -2508,7 +2510,7 @@
                 var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
                 var scrolled = (height > 0) ? (winScroll / height) * 100 : 0;
                 var bar = document.getElementById('scrollProgressBar');
-                if (bar) bar.style.width = scrolled + '%';
+                if (bar) bar.style.transform = 'scaleX(' + (scrolled / 100) + ')';
             }
             window.addEventListener('scroll', updateScrollProgress, { passive: true });
             document.addEventListener('DOMContentLoaded', updateScrollProgress);

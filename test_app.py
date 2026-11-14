@@ -29,7 +29,7 @@ class SDATestCase(unittest.TestCase):
         self.assertIn(b'Free Fire', response.data)
         self.assertIn(b'Pencil Sketch', response.data)
         self.assertIn(b'25\xe2\x80\x9326 November 2026', response.data)
-        self.assertIn(b'Recognized by the Government of Karnataka', response.data)
+        self.assertIn(b'Govt. of Karnataka', response.data)
         self.assertNotIn(b'Pre-University College', response.data)
         self.assertNotIn(b'BCA', response.data)
         self.assertNotIn(b'MCA', response.data)
@@ -76,7 +76,7 @@ class SDATestCase(unittest.TestCase):
         }, follow_redirects=True)
         self.assertEqual(response1.status_code, 200)
         self.assertTrue(b'Registration submitted' in response1.data or b'Registration successful' in response1.data)
-        self.assertIn(b'daksha-theme.css?v=20261114_v9', response1.data)
+        self.assertIn(b'daksha-theme.css?v=20261114_v10', response1.data)
         self.assertIn(b'registration-pass-qr', response1.data)
         self.assertIn(b'registration-pass-qr-frame', response1.data)
         theme_css = self.client.get('/static/css/daksha-theme.css').data.decode('utf-8')
@@ -421,7 +421,7 @@ class SDATestCase(unittest.TestCase):
 
         theme_res = self.client.get('/static/css/daksha-theme.css')
         theme_css = theme_res.data.decode('utf-8')
-        self.assertIn('#events :is(.btn-card-rules, .btn-card-contact, .disc-cascade-rules, .disc-cascade-call)', theme_css)
+        self.assertIn('#events #discCascadeRegister', theme_css)
         self.assertIn('background: var(--primary) !important;', theme_css)
         self.assertIn('color: var(--on-primary) !important;', theme_css)
         self.assertIn('.registration-pass-qr { display: grid;', theme_css)
@@ -691,6 +691,41 @@ class SDATestCase(unittest.TestCase):
         self.assertTrue('General Championship' in html)
         self.assertTrue('hard copy of the receipt' in html)
         self.assertTrue('all 14 fest events' not in html)
+        self.assertNotIn('Recognized by the Government of Karnataka, affiliated to Bengaluru University', html)
+        self.assertIn('Govt. of Karnataka · BU · AICTE approved', html)
+        self.assertIn('id="headerRegisterBtn"', html)
+        self.assertIn('id="tabModeCarousel"', html)
+        self.assertIn('id="tabModeGrid"', html)
+        self.assertIn('class="stat-currency rupee-blue-accent"', html)
+        self.assertIn('class="stat-unit stat-blue-accent"', html)
+
+        championship_card = html.split('class="stat-card stat-card-highlight', 1)[1].split('<!-- Card 3: Prize pool -->', 1)[0]
+        self.assertEqual(championship_card.count('<h3 class="stat-title">General Championship</h3>'), 1)
+        self.assertIn('eligible to compete for the overall fest title.', championship_card)
+        self.assertNotIn('championship-competition-list', championship_card)
+        self.assertNotIn('<div class="stat-badge">GENERAL CHAMPIONSHIP</div>', championship_card)
+
+        carousel_panel = html.split('id="eventsCarouselPanel"', 1)[1].split('id="eventsGridPanel"', 1)[0]
+        self.assertNotIn('Contacts', carousel_panel)
+        self.assertNotIn('discCascadeCall', carousel_panel)
+        self.assertNotIn('discCascadeCoords', carousel_panel)
+        grid_cards = html.split('id="eventsCardsGrid"', 1)[1].split('</div>\n        </div>\n    </section>', 1)[0]
+        self.assertNotIn('event-contact-item', grid_cards)
+        self.assertNotIn('Coordinators:', grid_cards)
+        self.assertNotIn('btn-card-contact', grid_cards)
+        self.assertNotIn('btn-card-rules', grid_cards)
+        self.assertIn('class="btn-card-register"', grid_cards)
+
+        theme_css = self.client.get('/static/css/daksha-theme.css').data.decode('utf-8')
+        self.assertIn(':root[data-theme="dark"] #faq .faq-item[open] .faq-question', theme_css)
+        self.assertIn(':root[data-theme="dark"] #faq .faq-item:not([open])', theme_css)
+        self.assertIn('background: #2563eb !important', theme_css)
+        self.assertIn('background: #090b10 !important', theme_css)
+        self.assertIn('background: #ffffff !important; color: #111827 !important', theme_css)
+        self.assertIn('.header-cta-classic { flex: 0 0 auto; min-height: 44px; white-space: nowrap;', theme_css)
+        self.assertIn(':root[data-theme="light"] .registration-success-notice', theme_css)
+        self.assertIn(':root[data-theme="dark"] .registration-success-notice', theme_css)
+        self.assertIn('.institution-spotlight-heading', theme_css)
 
         brochure_competitions = [
             'Pencil Sketching', 'Photography', 'Content Creator', 'Solo Dance',
@@ -698,9 +733,8 @@ class SDATestCase(unittest.TestCase):
             'Free Fire', 'BGMI', 'Beat Boxing', 'Get the Shield',
             'Fashion Walk', 'Mad Ads', 'Group Dance',
         ]
-        championship_list = html.split('class="championship-competition-list"', 1)[1].split('</ul>', 1)[0]
         for competition in brochure_competitions:
-            self.assertIn(competition, championship_list)
+            self.assertIn(f'data-title="{competition}"', carousel_panel)
 
         # Live event lineup controls
         self.assertIn('id="discCascadeIndex"', html)
@@ -1014,8 +1048,8 @@ class SDATestCase(unittest.TestCase):
         # 2. Disc cascade action buttons
         self.assertIn('Register for this event ↗', html)
         self.assertIn('id="discCascadeRegister"', html)
-        self.assertIn('id="discCascadeRules"', html)
-        self.assertIn('id="discCascadeCall"', html)
+        self.assertNotIn('id="discCascadeRules"', html)
+        self.assertNotIn('id="discCascadeCall"', html)
 
         # 3. Registration procedure buttons
         self.assertIn('Register Online Only', html)

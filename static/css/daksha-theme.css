@@ -773,17 +773,40 @@ html.dark body {
 :root[data-theme] .crest-institution-sub,
 :root[data-theme] .crest-institution-addr,
 :root[data-theme] .crest-institution-programmes { color: var(--text-2) !important; }
+:root[data-theme] .institution-spotlight-heading { margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+:root[data-theme="light"] .institution-spotlight-kicker,
+:root[data-theme="light"] .institution-name-heading { color: #1d4ed8 !important; }
+:root[data-theme="dark"] .institution-spotlight-kicker,
+:root[data-theme="dark"] .institution-name-heading { color: #93c5fd !important; }
 
 /* Public event controls use a visible resting state and a restrained CSS spread. */
-:root[data-theme="dark"] .landing-header .image-like-nav {
+:root[data-theme] .landing-header .image-like-nav {
   background: transparent !important;
   border: 0 !important;
   outline: 0 !important;
   box-shadow: none !important;
 }
-:root[data-theme="dark"] .landing-header .image-like-nav .nav-link {
+:root[data-theme] .landing-header .image-like-nav .nav-link {
   border: 0 !important;
   box-shadow: none !important;
+}
+:root[data-theme] .landing-header .nav-pill-indicator { border: 0 !important; box-shadow: none !important; }
+
+/* Give the event header enough room for its brand, navigation, theme switch, and CTA. */
+.landing-header .landing-logo { flex: 0 1 auto; min-width: 0; }
+.landing-header .header-nav-center { flex: 1 1 auto; min-width: 0; }
+.landing-header .image-like-nav { border: 0 !important; outline: 0 !important; box-shadow: none !important; }
+.landing-header .header-actions.desktop-actions { flex: 0 0 auto; min-width: max-content; }
+.landing-header .header-cta-classic { flex: 0 0 auto; min-height: 44px; white-space: nowrap; }
+@media (min-width: 1161px) and (max-width: 1499px) {
+  .landing-header .header-inner { gap: 8px; padding-inline: 14px; }
+  .landing-header .landing-logo { gap: 7px; }
+  .landing-header .landing-logo-img { height: 38px; }
+  .landing-header .landing-logo-title { font-size: .82rem !important; }
+  .landing-header .landing-logo-meta { font-size: .6875rem !important; }
+  .landing-header .image-like-nav { gap: 0; }
+  .landing-header .image-like-nav .nav-link { padding-inline: 7px; font-size: .76rem; letter-spacing: 0; }
+  .landing-header .header-cta-classic { padding-inline: 10px; font-size: .76rem; }
 }
 
 :root[data-theme] :is(
@@ -811,6 +834,30 @@ html.dark body {
   transform: translateY(0) !important;
   filter: none !important;
   transition: color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease !important;
+}
+:root[data-theme] #hero .hero-actions .hero-explore-btn {
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden !important;
+}
+:root[data-theme] #hero .hero-actions .hero-explore-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #3b82f6;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms ease;
+}
+:root[data-theme] #hero .hero-actions .hero-explore-btn > * { position: relative; z-index: 1; }
+:root[data-theme] #hero .hero-actions .hero-explore-btn:hover::before,
+:root[data-theme] #hero .hero-actions .hero-explore-btn:focus-visible::before { transform: scaleX(1); }
+:root[data-theme] #hero .hero-actions .hero-explore-btn:hover,
+:root[data-theme] #hero .hero-actions .hero-explore-btn:focus-visible {
+  background: #1d4ed8 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 :root[data-theme] :is(
   #hero .hero-actions .hero-rules-btn,
@@ -942,51 +989,39 @@ html.dark body {
   #registration .track-btn-secondary
 ) a { text-decoration: none !important; }
 
-:root[data-theme] .championship-competition-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .32rem .9rem;
-  margin: .6rem 0 0;
-  padding: 0;
-  list-style: none;
-  text-align: left;
+:root[data-theme] .stat-card-championship { min-height: 0 !important; padding-bottom: 1.5rem !important; }
+:root[data-theme] .stat-card-championship .stat-icon-wrapper { margin-bottom: 14px; }
+:root[data-theme] .stat-card-championship .stat-title { margin: 0 0 .65rem; }
+:root[data-theme] .stat-card-championship .stat-desc { max-width: 32ch; margin: 0 auto; }
+:root[data-theme] .stat-badge-events {
+  background: #1d4ed8 !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
 }
-:root[data-theme] .championship-competition-list li {
-  display: flex;
-  align-items: baseline;
-  gap: .45rem;
-  min-width: 0;
-  color: var(--text-2);
-  font-size: .82rem;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
-}
-:root[data-theme] .championship-competition-list li::before {
-  content: "";
-  flex: 0 0 5px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #2563eb;
-}
+:root[data-theme] .stat-currency { color: #3b82f6 !important; text-shadow: none !important; }
+:root[data-theme] .stat-unit.stat-blue-accent { color: #3b82f6 !important; text-shadow: none !important; }
 :root[data-theme] .stat-number-plus { color: #2563eb !important; font-size: 2.3rem; font-weight: 800; line-height: 1; }
 :root[data-theme="dark"] .stat-number-plus { color: #93c5fd !important; }
 
-/* Dark theme FAQ panels deliberately use a white reading surface. */
+/* Dark FAQ returns to black collapsed panels, blue open questions, and white answers. */
 :root[data-theme="dark"] #faq .faq-item,
-:root[data-theme="dark"] #faq .faq-question,
-:root[data-theme="dark"] #faq .faq-answer {
-  background: #ffffff !important;
-  color: #111111 !important;
-  border-color: #d4d4d4 !important;
+:root[data-theme="dark"] #faq .faq-item:not([open]) { background: #090b10 !important; border-color: #292d36 !important; box-shadow: none !important; }
+:root[data-theme="dark"] #faq .faq-item:not([open]) .faq-question {
+  background: #090b10 !important; color: #f8fafc !important; -webkit-text-fill-color: #f8fafc !important;
 }
-:root[data-theme="dark"] #faq .faq-question,
-:root[data-theme="dark"] #faq .faq-question * { color: #111111 !important; -webkit-text-fill-color: #111111 !important; }
-:root[data-theme="dark"] #faq .faq-item[open] .faq-question { background: #eff6ff !important; }
-:root[data-theme="dark"] #faq .faq-answer,
+:root[data-theme="dark"] #faq .faq-item[open] .faq-question {
+  background: #2563eb !important; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important;
+  border-bottom-color: #1d4ed8 !important;
+}
+:root[data-theme="dark"] #faq .faq-answer {
+  background: #ffffff !important; color: #111827 !important; border-color: #ffffff !important;
+}
 :root[data-theme="dark"] #faq .faq-answer p,
-:root[data-theme="dark"] #faq .faq-answer code { color: #111111 !important; -webkit-text-fill-color: #111111 !important; }
-:root[data-theme="dark"] #faq .faq-chevron { color: #333333 !important; }
+:root[data-theme="dark"] #faq .faq-answer code { color: #111827 !important; -webkit-text-fill-color: #111827 !important; }
+:root[data-theme="dark"] #faq .faq-chevron { color: #e5e7eb !important; }
+:root[data-theme="dark"] #faq .faq-item[open] .faq-chevron { color: #ffffff !important; }
 
 @keyframes daksha-title-breathe {
   0%, 100% { text-shadow: 0 1px 2px rgba(59, 130, 246, .08); }
@@ -1008,6 +1043,15 @@ html.dark body {
 .registration-pass-qr { grid-template-columns: minmax(0, 200px) minmax(0, 1fr) !important; align-items: center !important; justify-items: center !important; overflow: hidden; }
 .registration-pass-qr-frame { justify-self: center; }
 .registration-pass-qr-copy { align-self: center; }
+
+:root[data-theme="light"] .registration-success-notice { background: #ecfdf5; border: 1px solid #a7f3d0; color: #14532d; }
+:root[data-theme="light"] .registration-success-notice h2 { color: #065f46; }
+:root[data-theme="light"] .registration-success-notice p { color: #14532d; }
+:root[data-theme="light"] .registration-success-notice strong { background: #d1fae5; color: #064e3b; }
+:root[data-theme="dark"] .registration-success-notice { background: #052e2b; border: 1px solid #047857; color: #d1fae5; }
+:root[data-theme="dark"] .registration-success-notice h2 { color: #a7f3d0; }
+:root[data-theme="dark"] .registration-success-notice p { color: #d1fae5; }
+:root[data-theme="dark"] .registration-success-notice strong { background: #064e3b; color: #d1fae5; }
 :root[data-theme="dark"] .registration-pass-success.alert-warning {
   background: #fffbeb !important;
   border-color: #f59e0b !important;
@@ -1030,6 +1074,7 @@ html.dark body {
 
 @media (prefers-reduced-motion: reduce) {
   :root[data-theme] #hero .hero-title { animation: none !important; }
+  :root[data-theme] #hero .hero-actions .hero-explore-btn::before { transition: none !important; }
   :root[data-theme] :is(
     #hero .hero-actions .hero-rules-btn,
     #hero .hero-actions .hero-contact-btn,
