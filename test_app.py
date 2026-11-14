@@ -1701,40 +1701,40 @@ class SDATestCase(unittest.TestCase):
 
         # Eligibility & Registration card
         self.assertIn('Eligibility & Registration', rules_section)
-        self.assertIn('Academic Eligibility:', rules_section)
+        self.assertNotIn('<strong>', rules_section)
+        self.assertIn('Participation is open exclusively to bona fide PUC students', rules_section)
         self.assertIn('PUC students (I PUC & II PUC)', rules_section)
-        self.assertIn('Identity Verification:', rules_section)
-        self.assertIn('Mandatory Registration:', rules_section)
+        self.assertIn('Every participant must carry a valid physical college ID card', rules_section)
         self.assertIn('hard copy of the receipt', rules_section)
         self.assertIn('Gate Pass with QR code', rules_section)
-        self.assertIn('Institutional Representation:', rules_section)
-        self.assertIn('General Championship Qualification:', rules_section)
         self.assertIn('registered for all 15 competitions', rules_section)
 
         # Conduct & Safety card
         self.assertIn('Conduct & Safety', rules_section)
-        self.assertIn('Decorum & Discipline:', rules_section)
-        self.assertIn('Prohibited Hazardous Items:', rules_section)
+        self.assertIn('Strict campus decorum and discipline must be maintained', rules_section)
+        self.assertIn('Sharp objects, fireworks, flammable substances, lasers', rules_section)
 
         # Timing & Preparation card (specifically verifying clarified 3rd point)
         self.assertIn('Timing & Preparation', rules_section)
         self.assertIn('30 minutes before inauguration', rules_section)
-        self.assertIn('Audio Tracks & Technical Media Submission:', rules_section)
         self.assertIn('USB flash drive in MP3 or WAV format', rules_section)
         self.assertIn('45 minutes prior to event commencement', rules_section)
-        self.assertIn('secondary backup copy on a mobile device', rules_section)
+        self.assertIn('backup copy on a mobile device', rules_section)
 
-        # Awards & Certification card (verifying missing 4 points are restored and misplaced payment removed)
+        # Awards & Certification card (verifying missing points restored, no cash prize / 1 lakh pool mention)
         self.assertIn('id="rules-awards"', rules_section)
         awards_card = rules_section.split('id="rules-awards"', 1)[1].split('</article>', 1)[0]
-        self.assertIn('Winners & Runners-up Trophies:', awards_card)
-        self.assertIn('₹1 Lakh prize pool', awards_card)
-        self.assertIn('Official Participation E-Certificates:', awards_card)
-        self.assertIn('General Championship Rolling Trophy:', awards_card)
-        self.assertIn('Valedictory Ceremony Conferral:', awards_card)
-        self.assertIn('Digital Certificate Access:', awards_card)
+        self.assertIn('Winners and runners-up in each competition will receive official trophies, medals, and merit certificates.', awards_card)
+        self.assertIn('Official E-Certificates of Participation authenticated by Shree Daksha Academy', awards_card)
+        self.assertIn('Overall General Championship Rolling Trophy', awards_card)
+        self.assertIn('Valedictory Ceremony', awards_card)
         self.assertIn('WhatsApp and email', awards_card)
-        self.assertIn("Judges' Decisions Finality:", awards_card)
+        self.assertIn('judging panel whose decisions are final, absolute, and binding', awards_card)
+
+        # Strictly ensure NO cash prize or 1 lakh pool references in rules
+        self.assertNotIn('cash prize', awards_card.lower())
+        self.assertNotIn('1 lakh', awards_card.lower())
+        self.assertNotIn('cash', awards_card.lower())
 
         # Ensure payment instructions are NOT inside Awards & Certification
         self.assertNotIn('scan the UPI QR code', awards_card)
