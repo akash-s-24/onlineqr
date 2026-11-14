@@ -75,8 +75,14 @@ class Config:
     MEMBER_PASSWORD = os.environ.get('MEMBER_PASSWORD', '').strip()
     PAYMENT_MODE = os.environ.get('PAYMENT_MODE', 'demo').strip().lower() or 'demo'
     DEFAULT_UPI_ID = os.environ.get('DEFAULT_UPI_ID', 'admin@upi').strip() or 'admin@upi'
-    CONTACT_PHONE_PRIMARY = os.environ.get('CONTACT_PHONE_PRIMARY', '').strip() or '+91 90000 00001'
-    CONTACT_PHONE_SECONDARY = os.environ.get('CONTACT_PHONE_SECONDARY', '').strip() or '+91 90000 00002'
+    CONTACT_PHONE_PRIMARY = os.environ.get('CONTACT_PHONE_PRIMARY', '').strip() or '+91 63624 36295'
+    CONTACT_PHONE_SECONDARY = os.environ.get('CONTACT_PHONE_SECONDARY', '').strip() or '+91 79752 87515'
+    COORDINATOR_PRIMARY_NAME = os.environ.get('COORDINATOR_PRIMARY_NAME', 'NARASIMHAREDDY Y V').strip() or 'NARASIMHAREDDY Y V'
+    COORDINATOR_SECONDARY_NAME = os.environ.get('COORDINATOR_SECONDARY_NAME', 'PREETI P').strip() or 'PREETI P'
+    EVENT_COORDINATOR_PRIMARY_NAME = os.environ.get('EVENT_COORDINATOR_PRIMARY_NAME', 'RANJITHA B K').strip() or 'RANJITHA B K'
+    EVENT_COORDINATOR_PRIMARY_PHONE = os.environ.get('EVENT_COORDINATOR_PRIMARY_PHONE', '88615 91085').strip() or '88615 91085'
+    EVENT_COORDINATOR_SECONDARY_NAME = os.environ.get('EVENT_COORDINATOR_SECONDARY_NAME', 'SINDHU M R').strip() or 'SINDHU M R'
+    EVENT_COORDINATOR_SECONDARY_PHONE = os.environ.get('EVENT_COORDINATOR_SECONDARY_PHONE', '88922 63116').strip() or '88922 63116'
     SIGNATORY_NAME = os.environ.get('SIGNATORY_NAME', 'Naveen Reddy')
     SIGNATORY_TITLE = os.environ.get('SIGNATORY_TITLE', 'Head of Department (HOD)')
 

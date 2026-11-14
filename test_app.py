@@ -780,6 +780,20 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('140', att_html)
         self.assertIn('Awaiting Check-in', att_html)
 
+        # Restore canonical BGMI event details for subsequent tests
+        database.execute_db(
+            """
+            UPDATE events
+            SET description = %s,
+                faculty_name = 'RANJITHA B K',
+                faculty_phone = '88615 91085',
+                student_name = 'SINDHU M R',
+                student_phone = '88922 63116'
+            WHERE event_name = 'BGMI'
+            """,
+            ('A premier battle royale tournament where four-player squads deploy across high-stakes battlegrounds, demonstrating tactical positioning, precision shooting, strategic communication, and relentless survival instincts to claim the ultimate championship.',)
+        )
+
     def test_20_password_required_login_and_navigation_verification(self):
         """Verify public navigation and enforce passwords for staff sign-in."""
         # 1. No login element on public events page or registration page
@@ -1001,7 +1015,7 @@ class SDATestCase(unittest.TestCase):
         official_names = [
             'BGMI', 'Free Fire', 'Pencil Sketching', 'Get the Shield',
             'Photography', 'Content Creator', 'Solo Dance', 'Group Dance',
-            'Beat Boxing', 'Face Painting', 'Tech Quiz', 'Singing', 'Mad Ads',
+            'Beat Boxing', 'Face Painting', 'Tech Quiz', 'Solo Singing', 'Mad Ads',
             'Mono Acting', 'Fashion Walk'
         ]
         for name in official_names:
@@ -1013,7 +1027,7 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('No teaming with other squads', ff_ev['rules_text'])
         self.assertNotIn('Kannada', ff_ev['rules_text'])
 
-        singing_ev = database.query_db("SELECT * FROM events WHERE event_name = 'Singing'", one=True)
+        singing_ev = database.query_db("SELECT * FROM events WHERE event_name IN ('Solo Singing', 'Singing')", one=True)
         self.assertIsNotNone(singing_ev)
         self.assertEqual(singing_ev['is_group'], 0)
         self.assertEqual(singing_ev['event_time'], 'To be announced')
@@ -1330,6 +1344,43 @@ class SDATestCase(unittest.TestCase):
         login_html = res_login.data.decode('utf-8')
         self.assertIn('theme.css', login_html)
         self.assertIn('themeColorMeta', login_html)
+
+    def test_event_banners_coordinators_and_descriptions(self):
+        """Verify 15th event (Solo Singing), BGMI description, and coordinator contacts across events and Contact Us."""
+        res = self.client.get('/events')
+        self.assertEqual(res.status_code, 200)
+        html = res.data.decode('utf-8')
+
+        # 1. 15th Event: Solo Singing
+        self.assertIn('Solo Singing', html)
+        self.assertIn('solo-singing.webp', html)
+        self.assertIn('A soulful solo singing competition celebrating vocal brilliance', html)
+
+        # 2. BGMI Description
+        self.assertIn('A premier battle royale tournament where four-player squads deploy across high-stakes battlegrounds', html)
+
+        # 3. Main Contact Us Section
+        self.assertIn('NARASIMHAREDDY Y V', html)
+        self.assertIn('6362436295', html)
+        self.assertIn('PREETI P', html)
+        self.assertIn('7975287515', html)
+
+        # 4. Event Coordinators for every event
+        self.assertIn('RANJITHA B K', html)
+        self.assertIn('88615 91085', html)
+        self.assertIn('SINDHU M R', html)
+        self.assertIn('88922 63116', html)
+
+        # 5. Database verification
+        events = database.query_db("SELECT * FROM events ORDER BY id ASC")
+        self.assertEqual(len(events), 15)
+        for ev in events:
+            self.assertEqual(ev['faculty_name'], 'RANJITHA B K')
+            self.assertEqual(ev['faculty_phone'], '88615 91085')
+            self.assertEqual(ev['student_name'], 'SINDHU M R')
+            self.assertEqual(ev['student_phone'], '88922 63116')
+            self.assertTrue(ev['description'] and len(ev['description'].strip()) > 10)
+            self.assertTrue(ev['banner_image'] and len(ev['banner_image'].strip()) > 3)
 
 if __name__ == '__main__':
     unittest.main()

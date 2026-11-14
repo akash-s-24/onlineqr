@@ -3118,6 +3118,29 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     flex-shrink: 0;
     }
 
+    .event-call-link {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.15s ease;
+    }
+
+    .event-call-link:hover {
+    color: #60a5fa;
+    text-decoration: underline;
+    }
+
+    .disc-cascade-coord-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+    }
+
+    .disc-cascade-coord-link:hover {
+    color: #60a5fa;
+    text-decoration: underline;
+    }
+
     .event-card-actions {
     display: flex;
     align-items: center;
@@ -5138,6 +5161,18 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     font-weight: 600 !important;
     }
 
+    [data-theme="light"] .event-call-link {
+    color: #1e293b !important;
+    }
+
+    [data-theme="light"] .event-call-link:hover {
+    color: #2563eb !important;
+    }
+
+    [data-theme="light"] .disc-cascade-coord-link:hover {
+    color: #2563eb !important;
+    }
+
     [data-theme="light"] .event-detail-item svg {
     color: #0f172a !important;
     }
@@ -6263,6 +6298,10 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                             <dt>Venue</dt>
                             <dd id="discCascadeVenue">{{ events[0].venue if events else 'Main stage' }}</dd>
                         </div>
+                        <div class="disc-cascade-meta-row">
+                            <dt>Contacts</dt>
+                            <dd id="discCascadeCoords"><a href="tel:{{ (events[0].faculty_phone if events and events[0].faculty_phone else '88615 91085')|replace(' ', '') }}" class="disc-cascade-coord-link">{{ events[0].faculty_phone if events and events[0].faculty_phone else '88615 91085' }}</a> &bull; <a href="tel:{{ (events[0].student_phone if events and events[0].student_phone else '88922 63116')|replace(' ', '') }}" class="disc-cascade-coord-link">{{ events[0].student_phone if events and events[0].student_phone else '88922 63116' }}</a></dd>
+                        </div>
                     </dl>
                 </div>
 
@@ -6342,7 +6381,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 {% endfor %}
             </div>
 
-            <!-- 14 Cards Grid with Bento Spotlight Anchor -->
+            <!-- 15 Cards Grid with Bento Spotlight Anchor -->
             <div class="events-cards-grid" id="eventsCardsGrid">
                 {% for ev in events %}
                 {% set cat_key = ev.category_key %}
@@ -6403,6 +6442,13 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                                     <circle cx="12" cy="10" r="3"></circle>
                                 </svg>
                                 <span>{{ ev.venue if ev.venue else 'Seminar Hall 1' }}</span>
+                            </div>
+                            <div class="event-detail-item event-contact-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                                </svg>
+                                <span>Coordinators: <a href="tel:{{ (ev.faculty_phone or '88615 91085')|replace(' ', '') }}" class="event-call-link">{{ ev.faculty_phone or '88615 91085' }}</a> &bull; <a href="tel:{{ (ev.student_phone or '88922 63116')|replace(' ', '') }}" class="event-call-link">{{ ev.student_phone or '88922 63116' }}</a></span>
                             </div>
                         </div>
 
@@ -6924,14 +6970,14 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     <section id="contact" class="map-section">
         <h2 class="section-title" style="margin-bottom: 22px; text-align: center;">Contact Us</h2>
         <div class="contact-grid">
-            <!-- Faculty Coordinator -->
+            <!-- Coordinator 1 -->
             <div class="contact-card">
-                <span class="contact-role-badge">Faculty Coordinator</span>
-                <h3>Prof. R. Narayana Swamy</h3>
-                <p>Primary Symposium Desk</p>
-                <div class="coordinator-phone-list" aria-label="Faculty coordinator phone number">
+                <span class="contact-role-badge">Coordinator</span>
+                <h3>NARASIMHAREDDY Y V</h3>
+                <p>Symposium Coordinator Desk</p>
+                <div class="coordinator-phone-list" aria-label="Coordinator phone number">
                     <a href="tel:{{ config.CONTACT_PHONE_PRIMARY|replace(' ', '') }}" class="streamlined-call-link"
-                        aria-label="Call Faculty Coordinator at {{ config.CONTACT_PHONE_PRIMARY }}">
+                        aria-label="Call Coordinator NARASIMHAREDDY Y V at {{ config.CONTACT_PHONE_PRIMARY }}">
                         <svg class="phone-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
@@ -6941,14 +6987,14 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
             </div>
 
-            <!-- Student Coordinator -->
+            <!-- Coordinator 2 -->
             <div class="contact-card">
-                <span class="contact-role-badge">Student Coordinator</span>
-                <h3>Akash S.</h3>
-                <p>Student Operations Desk</p>
-                <div class="coordinator-phone-list" aria-label="Student coordinator phone number">
+                <span class="contact-role-badge">Coordinator</span>
+                <h3>PREETI P</h3>
+                <p>Symposium Coordinator Desk</p>
+                <div class="coordinator-phone-list" aria-label="Coordinator phone number">
                     <a href="tel:{{ config.CONTACT_PHONE_SECONDARY|replace(' ', '') }}" class="streamlined-call-link"
-                        aria-label="Call Student Coordinator at {{ config.CONTACT_PHONE_SECONDARY }}">
+                        aria-label="Call Coordinator PREETI P at {{ config.CONTACT_PHONE_SECONDARY }}">
                         <svg class="phone-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
@@ -7027,16 +7073,16 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
         }
 
         function openContactModal(eventName, facultyName, facultyPhone, studentName, studentPhone) {
-            document.getElementById('contactModalTitle').innerText = 'Contact Call Desk';
+            document.getElementById('contactModalTitle').innerText = (eventName || 'Event') + ' - Coordinators';
             const content = document.getElementById('contactModalContent');
             content.textContent = '';
 
-            function appendPhoneCard(roleTitle, rawPhone) {
+            function appendPhoneCard(name, roleTitle, rawPhone) {
                 const card = document.createElement('div');
                 card.className = 'contact-coord-card';
                 const titleP = document.createElement('p');
                 titleP.className = 'contact-coord-title';
-                titleP.textContent = roleTitle;
+                titleP.textContent = name ? `${name} (${roleTitle})` : roleTitle;
                 card.appendChild(titleP);
 
                 const phoneP = document.createElement('p');
@@ -7051,39 +7097,13 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 content.appendChild(card);
             }
 
-            if (facultyPhone) {
-                appendPhoneCard('Faculty Coordinator', facultyPhone);
-            }
-            if (studentPhone) {
-                appendPhoneCard('Student Coordinator', studentPhone);
-            }
+            const facName = facultyName || 'RANJITHA B K';
+            const facPhone = facultyPhone || '88615 91085';
+            const stuName = studentName || 'SINDHU M R';
+            const stuPhone = studentPhone || '88922 63116';
 
-            if (!facultyPhone && !studentPhone) {
-                const message = encodeURIComponent('Hello, I have a question about ' + eventName + '.');
-                const card = document.createElement('div');
-                card.className = 'contact-coord-card';
-                card.style.textAlign = 'center';
-
-                const titleP = document.createElement('p');
-                titleP.className = 'contact-coord-title';
-                titleP.textContent = 'Official Symposium Desk';
-                card.appendChild(titleP);
-
-                const descP = document.createElement('p');
-                descP.style.cssText = 'margin:0 0 12px;color:#94a3b8;';
-                descP.textContent = 'Message the general desk for event-specific help.';
-                card.appendChild(descP);
-
-                const waLink = document.createElement('a');
-                waLink.href = 'https://wa.me/917892038099?text=' + message;
-                waLink.target = '_blank';
-                waLink.rel = 'noopener noreferrer';
-                waLink.className = 'contact-coord-phone';
-                waLink.textContent = 'Message on WhatsApp';
-                card.appendChild(waLink);
-
-                content.appendChild(card);
-            }
+            appendPhoneCard(facName, 'Event Coordinator', facPhone);
+            appendPhoneCard(stuName, 'Event Coordinator', stuPhone);
 
             const modal = document.getElementById('contactModal');
             modal.style.display = 'flex';
@@ -7267,6 +7287,14 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     setText('discCascadeVenue', data.venue);
                     setText('discCascadeDescription', data.description || 'Bring your best idea and make the stage yours.');
                     setText('discCascadeCount', `${active + 1} / ${total}`);
+                    const coordsEl = document.getElementById('discCascadeCoords');
+                    if (coordsEl) {
+                        const facPhone = data.facultyPhone || '88615 91085';
+                        const stuPhone = data.studentPhone || '88922 63116';
+                        const facClean = facPhone.replace(/[^0-9+]/g, '');
+                        const stuClean = stuPhone.replace(/[^0-9+]/g, '');
+                        coordsEl.innerHTML = `<a href="tel:${facClean}" class="disc-cascade-coord-link">${facPhone}</a> &bull; <a href="tel:${stuClean}" class="disc-cascade-coord-link">${stuPhone}</a>`;
+                    }
                     const prevBtn = document.getElementById('discCascadePrev');
                     const nextBtn = document.getElementById('discCascadeNext');
                     if (prevBtn) {

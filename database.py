@@ -692,7 +692,7 @@ def create_tables_and_seed():
 
         # Backfill event copy
         event_descriptions = {
-            'BGMI': 'A strategic battle royale team tournament testing communication, survival skills, and tactical decision-making.',
+            'BGMI': 'A premier battle royale tournament where four-player squads deploy across high-stakes battlegrounds, demonstrating tactical positioning, precision shooting, strategic communication, and relentless survival instincts to claim the ultimate championship.',
             'Fashion Walk': 'A fashion walk for teams of 6 to 8, themed around Seasons of Style.',
             'Free Fire': 'A fast-paced battle royale competition where teams compete through precision, strategy, and teamwork.',
             'Pencil Sketching': 'An individual sketching challenge themed A World I Wish to See.',
@@ -705,7 +705,9 @@ def create_tables_and_seed():
             'Face Painting': 'Transform a face into an expressive artwork through concept, technique, color, and finishing detail.',
             'Tech Quiz': 'A rapid-fire technology quiz covering computing fundamentals, innovation, logic, and current digital trends.',
             'Mad Ads': 'Develop and perform a memorable advertisement that combines a clear message, creativity, humor, and teamwork.',
-            'Singing': 'An individual singing performance featuring songs from Indian films.',
+            'Solo Singing': 'A soulful solo singing competition celebrating vocal brilliance, melodic expression, rhythm, and stage presence, inviting vocalists to perform iconic songs from Indian cinema.',
+            'Singing': 'A soulful solo singing competition celebrating vocal brilliance, melodic expression, rhythm, and stage presence, inviting vocalists to perform iconic songs from Indian cinema.',
+            'Singing Solo': 'A soulful solo singing competition celebrating vocal brilliance, melodic expression, rhythm, and stage presence, inviting vocalists to perform iconic songs from Indian cinema.',
             'Mono Acting': 'A solo acting performance focused on character, voice, body language, expression, and storytelling.',
         }
         for event_name, description in event_descriptions.items():
@@ -714,7 +716,6 @@ def create_tables_and_seed():
                 UPDATE events
                 SET description = %s
                 WHERE event_name = %s
-                  AND (description IS NULL OR TRIM(description) = '' OR LOWER(TRIM(description)) IN ('desc', 'description'))
                 """,
                 (description, event_name)
             )
@@ -779,7 +780,7 @@ def create_tables_and_seed():
         legacy_old_names = (
             'Binary Brains', 'Digital Dynamos', 'CodeCraft', 'CodeStorm', 'CodeVerse', 'ByteBattle',
             'Valorant', 'Code Sprint', 'Hackathon / Strategy', 'Hackathon',
-            'Solo Singing', 'Group Singing', 'Fashion Show',
+            'Group Singing', 'Fashion Show',
             'Spot Photography', 'Reel Making', 'Short Film'
         )
         legacy_placeholders = ', '.join(['%s'] * len(legacy_old_names))
@@ -798,7 +799,7 @@ def create_tables_and_seed():
                 'event_date': '25-26-nov-2026',
                 'event_time': '10:00 AM',
                 'venue': 'Computer Lab 3',
-                'description': 'Battle Royale championship at Daksha Infinix.',
+                'description': 'A premier battle royale tournament where four-player squads deploy across high-stakes battlegrounds, demonstrating tactical positioning, precision shooting, strategic communication, and relentless survival instincts to claim the ultimate championship.',
                 'max_participants': 100,
                 'is_group': 1,
                 'min_team_size': 4,
@@ -808,10 +809,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': 'uploads/qr_codes/c8d1eeb6e2fd420fad37edd0c7bb0baa.jpeg',
                 'rules_text': 'Each team must have 4 players. Network or device issues are the players responsibility. Hacking and cheating are strictly prohibited. No teaming with other squads. Players must join the match on time. The organizers decision will be final.',
-                'faculty_name': 'Prof. Rajesh Kumar',
-                'faculty_phone': '9876543210',
-                'student_name': 'Akash S',
-                'student_phone': '9000000001',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Free Fire',
@@ -829,10 +830,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': 'uploads/qr_codes/f09529478c554e5d91ed22023082dca2.jpeg',
                 'rules_text': 'Each team must have 4 players. Network or device issues are the players responsibility. Hacking and cheating are strictly prohibited. No teaming with other squads. Players must join the match on time. The organizers decision will be final.',
-                'faculty_name': 'a',
-                'faculty_phone': '1234567888',
-                'student_name': 's',
-                'student_phone': '123456890',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Pencil Sketching',
@@ -850,10 +851,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': 'uploads/qr_codes/5c07f555d6444d5398d7b33273b42147.jpeg',
                 'rules_text': 'Registration fee: ₹100. Time limit: 60 minutes. Theme: A world I wish to see. Sketch sheets will be provided. Participants must bring pencils, erasers, sharpeners, rulers, and blending tools. Artwork must follow the given theme. Copying, tracing, mobile phones, or similar aids are prohibited. Any form of manipulation will lead to disqualification.',
-                'faculty_name': 'cdc',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Get the Shield',
@@ -871,10 +872,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': 'uploads/qr_codes/2c106876e1e14a049e4bda3ab316a82b.jpeg',
                 'rules_text': 'Registration fee: ₹200. Each team must consist of 2 participants. The competition has multiple clues and challenges leading to the final treasure. Follow clues in sequence and solve each clue to proceed. Follow the event coordinators instructions. Mobile phones, internet access, and assistance from outsiders are prohibited.',
-                'faculty_name': 'a',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Photography',
@@ -892,10 +893,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹100. Time limit: 60 minutes. Participants must bring their own mobile phone or camera and accessories. Photos must be taken during the competition period on campus. Editing is not allowed. AI-generated images, downloaded photographs, stock images, previously published content, and any form of manipulation are prohibited.',
-                'faculty_name': 'cdc',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Content Creator',
@@ -913,10 +914,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹100. Time limit: 1 hour. Create an engaging reel based on the event. Participants may use their own mobile phones and basic editing applications. AI-generated or copied content must be disclosed and will be considered according to competition guidelines.',
-                'faculty_name': 'cdc',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Solo Dance',
@@ -934,10 +935,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹100. Time limit: 3 + 1 minutes. Submit the music track to the coordinator at least 30 minutes before the event in MP3 format. Props are allowed if safe and they do not damage the stage. Vulgar, offensive, or inappropriate songs, movements, and costumes are prohibited.',
-                'faculty_name': 'cdc',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Group Dance',
@@ -955,10 +956,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹500. Time limit: 3 + 1 minutes. Team size: 8 to 10 participants. Any form of vulgarity in costume or dance is prohibited. Submit the music track to the coordinator before the event in MP3 format. Safe props are allowed if they do not damage the stage. Vulgar, offensive, or inappropriate songs, movements, and costumes are prohibited.',
-                'faculty_name': 'cdc',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Beat Boxing',
@@ -976,10 +977,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹300. Time limit: 3 + 1 minutes. Participants: 2 to 3. Vulgarity, profanity, and inappropriate gestures are prohibited. Participants must maintain a respectful, sportsmanlike attitude. Pre-recorded beat tracks are not allowed unless specifically permitted.',
-                'faculty_name': 'a',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Face Painting',
@@ -997,10 +998,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹100. Time limit: 60 minutes. Team of 2: one artist and one model. Theme: Indian Folk and Tribal Art. Bring essential materials. Writing devices and other references may not be used. Use skin-safe, non-toxic, non-allergenic face paints safe for human skin. Permanent markers, industrial paints, chemicals, and harmful substances are prohibited. Painting near the eyes, mouth, and other sensitive areas must be done carefully; the model must remain comfortable.',
-                'faculty_name': 'a',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Tech Quiz',
@@ -1018,18 +1019,18 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹100. Participants: 1. Bring a mobile phone; it must be fully charged and have an active internet connection. The quiz may include technical, logical, and current-affairs-related rounds announced by the organizers.',
-                'faculty_name': 'a',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
-                'event_name': 'Singing',
+                'event_name': 'Solo Singing',
                 'event_type': 'Cultural & Performance',
                 'event_date': '25-26-nov-2026',
                 'event_time': 'To be announced',
                 'venue': 'To be announced',
-                'description': 'An individual singing performance featuring songs from Indian films.',
+                'description': 'A soulful solo singing competition celebrating vocal brilliance, melodic expression, rhythm, and stage presence, inviting vocalists to perform iconic songs from Indian cinema.',
                 'max_participants': 40,
                 'is_group': 0,
                 'min_team_size': 1,
@@ -1039,10 +1040,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹100. Time limit: 4 + 1 minutes. Theme: Indian films. Only individual performances are permitted; duets and backup singers are not allowed. Contestants must memorize lyrics; reading from a phone or paper on stage is prohibited. Submit the Karaoke/BGM music track to the coordinator at least 30 minutes before the event in MP3 format. Songs must be from Indian films. Vulgar, offensive, or double-entendre lyrics lead to immediate disqualification.',
-                'faculty_name': 'cdc',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Mad Ads',
@@ -1060,10 +1061,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹500. Time limit: 3 + 1 minutes. Team size: 8 to 10 participants. Teams may use dialogue, acting, music, dance, and comedy. The advertisement must promote the assigned real or fictional product. Offensive personal comments, deliberate insults or defamation of real brands, vulgarity, political or religious content, fire, water, sharp objects, hazardous materials, smoke machines, and unsafe props are prohibited. Submit music and any required backdrop images to the coordinator before the event.',
-                'faculty_name': 'a',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Mono Acting',
@@ -1081,10 +1082,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹100. Time limit: 3 + 1 minutes. Theme: Mythology characters; performance must be in Kannada. The performance should be an original act or a well-prepared portrayal. Perform individually without support from other actors. Vulgar, offensive, or inappropriate language and content are prohibited. Background music or sound effects may be used if arranged in advance.',
-                'faculty_name': 'cdc',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             },
             {
                 'event_name': 'Fashion Walk',
@@ -1102,10 +1103,10 @@ def create_tables_and_seed():
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': 'Registration fee: ₹500. Time limit: 3 + 1 minutes. Team size: 6 to 8 participants. Theme: Seasons of Style. Costumes and movements must be decent, respectful, and appropriate. Judging considers creativity and overall performance. Dangerous props are prohibited; safe props are allowed if they do not damage the stage. Vulgar, offensive, or inappropriate songs, movements, and costumes are prohibited. Submit the music track and any required backdrop images to the coordinator before the event.',
-                'faculty_name': 'a',
-                'faculty_phone': '4321234567',
-                'student_name': 's',
-                'student_phone': '1234567891',
+                'faculty_name': 'RANJITHA B K',
+                'faculty_phone': '88615 91085',
+                'student_name': 'SINDHU M R',
+                'student_phone': '88922 63116',
             }
         ]
 
@@ -1118,6 +1119,9 @@ def create_tables_and_seed():
                 'pencilsketch': 'pencilsketching',
                 'madadds': 'madads',
                 'rampwalk': 'fashionwalk',
+                'solosinging': 'solosinging',
+                'singingsolo': 'solosinging',
+                'singing': 'solosinging',
             }
             return aliases.get(normalized, normalized)
 
@@ -1159,12 +1163,15 @@ def create_tables_and_seed():
                     """
                     UPDATE events SET
                         event_name = %s, event_type = %s, is_group = %s, min_team_size = %s, max_team_size = %s,
-                        event_fee = %s, description = %s, rules_text = %s
+                        event_fee = %s, description = %s, rules_text = %s, banner_image = %s,
+                        faculty_name = %s, faculty_phone = %s, student_name = %s, student_phone = %s
                     WHERE event_name = %s
                     """,
                     (
                         ev['event_name'], ev['event_type'], ev['is_group'], ev['min_team_size'], ev['max_team_size'],
-                        ev['event_fee'], ev['description'], ev['rules_text'], existing_name
+                        ev['event_fee'], ev['description'], ev['rules_text'], ev['banner_image'],
+                        ev['faculty_name'], ev['faculty_phone'], ev['student_name'], ev['student_phone'],
+                        existing_name
                     )
                 )
 
@@ -1180,23 +1187,35 @@ def create_tables_and_seed():
             ('25-26-nov-2026', '26-nov-2026', '18-sep-2026', '19-sep-2026', '20-sep-2026')
         )
 
-        # The original fixture phone values are not verified organizer
-        # contacts. Remove only those exact defaults; admin-entered numbers
-        # remain untouched and can be published when confirmed.
-        placeholder_phones = (
-            '9876543210', '8050774071', '1234567888',
-            '123456890', '4321234567', '1234567891'
-        )
-        phone_placeholders = ', '.join(['%s'] * len(placeholder_phones))
+        # Set official Event Coordinators across all events uniformly
         run_exec(
-            f"""
+            """
             UPDATE events
-            SET faculty_phone = CASE WHEN faculty_phone IN ({phone_placeholders}) THEN NULL ELSE faculty_phone END,
-                student_phone = CASE WHEN student_phone IN ({phone_placeholders}) THEN NULL ELSE student_phone END
-            WHERE faculty_phone IN ({phone_placeholders})
-               OR student_phone IN ({phone_placeholders})
-            """,
-            placeholder_phones + placeholder_phones + placeholder_phones + placeholder_phones
+            SET faculty_name = 'RANJITHA B K',
+                faculty_phone = '88615 91085',
+                student_name = 'SINDHU M R',
+                student_phone = '88922 63116'
+            """
+        )
+
+        # Ensure Solo Singing event has its canonical name, banner image, and full description
+        run_exec(
+            """
+            UPDATE events
+            SET event_name = 'Solo Singing',
+                banner_image = 'solo-singing.webp',
+                description = 'A soulful solo singing competition celebrating vocal brilliance, melodic expression, rhythm, and stage presence, inviting vocalists to perform iconic songs from Indian cinema.'
+            WHERE LOWER(TRIM(event_name)) IN ('singing', 'singing solo', 'solo singing')
+            """
+        )
+
+        # Ensure BGMI has its full, engaging description
+        run_exec(
+            """
+            UPDATE events
+            SET description = 'A premier battle royale tournament where four-player squads deploy across high-stakes battlegrounds, demonstrating tactical positioning, precision shooting, strategic communication, and relentless survival instincts to claim the ultimate championship.'
+            WHERE LOWER(TRIM(event_name)) IN ('bgmi', 'pubg')
+            """
         )
 
         conn.commit()

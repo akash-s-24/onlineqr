@@ -19,8 +19,12 @@ mapping = {
     "groupdance": "Group Dance",
     "mad adds": "Mad Adds",
     "monoacting": "Mono Acting",
-    "pencilesketch": "Pencil Sketch",
-    "rampwalk": "Ramp Walk"
+    "pencilesketch": "Pencil Sketching",
+    "rampwalk": "Fashion Walk",
+    "solo-singing": "Solo Singing",
+    "Solo Singing": "Solo Singing",
+    "Singing Solo": "Solo Singing",
+    "singing": "Solo Singing",
 }
 
 # Ensure destination directory exists
@@ -44,6 +48,12 @@ for img_file in os.listdir(images_dir):
         
         # Update database
         cursor.execute("UPDATE events SET banner_image = ? WHERE event_name = ?", (img_file, event_name))
+        if event_name == "Solo Singing":
+            cursor.execute("UPDATE events SET banner_image = ? WHERE event_name IN ('Solo Singing', 'Singing Solo', 'Singing')", (img_file,))
+        if event_name == "Fashion Walk":
+            cursor.execute("UPDATE events SET banner_image = ? WHERE event_name IN ('Fashion Walk', 'Ramp Walk')", (img_file,))
+        if event_name == "Pencil Sketching":
+            cursor.execute("UPDATE events SET banner_image = ? WHERE event_name IN ('Pencil Sketching', 'Pencil Sketch')", (img_file,))
         
         # Also fix the "Python Test Update String" back to "BGMI"
         if event_name == "BGMI":

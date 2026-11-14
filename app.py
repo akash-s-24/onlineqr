@@ -914,16 +914,34 @@ def toggle_payment(reg_id):
 # Event Management Routes
 # ---------------------------------------------------------
 def get_public_events():
-    """Return public events without duplicate legacy PUBG/BGMI entries."""
+    """Return public events without duplicate legacy entries and ensure complete event metadata."""
     events = query_db("SELECT * FROM events ORDER BY id ASC")
     public_events = []
     seen = set()
     for event in events:
         normalized_name = re.sub(r'[^a-z0-9]+', '', (event.get('event_name') or '').lower())
         identity = 'bgmi' if normalized_name in ('bgmi', 'pubg') else normalized_name
+        if identity in ('singingsolo', 'singing'):
+            identity = 'solosinging'
         if identity in seen:
             continue
         seen.add(identity)
+
+        # Ensure Solo Singing banner image
+        if identity == 'solosinging':
+            if not event.get('banner_image') or event.get('banner_image') == 'event_default.jpg':
+                event['banner_image'] = 'solo-singing.webp'
+
+        # Ensure official Event Coordinators are always present
+        if not event.get('faculty_phone'):
+            event['faculty_phone'] = '88615 91085'
+        if not event.get('faculty_name'):
+            event['faculty_name'] = 'RANJITHA B K'
+        if not event.get('student_phone'):
+            event['student_phone'] = '88922 63116'
+        if not event.get('student_name'):
+            event['student_name'] = 'SINDHU M R'
+
         public_events.append(event)
     return public_events
 
