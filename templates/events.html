@@ -6007,8 +6007,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <div class="stat-value-row stat-value-events">
                     <b class="stat-number" data-target="12">12</b><span class="stat-number-plus" aria-label="plus">+</span>
                 </div>
-                <h3 class="stat-title">Competitions</h3>
-                <p class="stat-desc">Browse the complete lineup of registered competitions below.</p>
+                <p class="stat-desc">Browse the complete lineup of fest events below.</p>
                 <a href="#events" class="stat-action-link">
                     <span>Explore Lineup</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -6028,7 +6027,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         <path d="M7 6H4v2a4 4 0 0 0 4 4m9-6h3v2a4 4 0 0 1-4 4"></path>
                     </svg>
                 </div>
-                <h3 class="stat-title stat-title-championship">General Championship</h3>
+                <h3 class="stat-title stat-title-championship"><span>General</span> <span class="stat-title-accent">Championship</span></h3>
                 <p class="stat-desc">Colleges registered for all 15 competitions are eligible to compete for the overall fest title.</p>
             </div>
 
@@ -6942,19 +6941,39 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
         </div>
     </section>
 
-    <!-- Contact Us: show coordinator phone numbers without public names. -->
+    <!-- Contact Us: list all four faculty leads and their direct phone numbers. -->
     <section id="contact" class="map-section">
         <h2 class="section-title" style="margin-bottom: 22px; text-align: center;">Contact Us</h2>
         <div class="contact-grid coordinator-phone-grid">
             <article class="contact-card coordinator-phone-card">
+                <span class="contact-role-badge">Faculty in Charge</span>
+                <h3>{{ config.COORDINATOR_PRIMARY_NAME }}</h3>
+                <a href="tel:{{ config.CONTACT_PHONE_PRIMARY|replace(' ', '') }}"
+                    class="streamlined-call-link" aria-label="Call {{ config.COORDINATOR_PRIMARY_NAME }}, faculty in charge">
+                    <span>{{ config.CONTACT_PHONE_PRIMARY }}</span>
+                </a>
+            </article>
+            <article class="contact-card coordinator-phone-card">
+                <span class="contact-role-badge">Faculty in Charge</span>
+                <h3>{{ config.COORDINATOR_SECONDARY_NAME }}</h3>
+                <a href="tel:{{ config.CONTACT_PHONE_SECONDARY|replace(' ', '') }}"
+                    class="streamlined-call-link" aria-label="Call {{ config.COORDINATOR_SECONDARY_NAME }}, faculty in charge">
+                    <span>{{ config.CONTACT_PHONE_SECONDARY }}</span>
+                </a>
+            </article>
+            <article class="contact-card coordinator-phone-card">
+                <span class="contact-role-badge">Faculty Event Coordinator</span>
+                <h3>{{ config.EVENT_COORDINATOR_PRIMARY_NAME }}</h3>
                 <a href="tel:{{ config.EVENT_COORDINATOR_PRIMARY_PHONE|replace(' ', '') }}"
-                    class="streamlined-call-link" aria-label="Call event coordinator">
+                    class="streamlined-call-link" aria-label="Call {{ config.EVENT_COORDINATOR_PRIMARY_NAME }}, faculty event coordinator">
                     <span>{{ config.EVENT_COORDINATOR_PRIMARY_PHONE }}</span>
                 </a>
             </article>
             <article class="contact-card coordinator-phone-card">
+                <span class="contact-role-badge">Faculty Event Coordinator</span>
+                <h3>{{ config.EVENT_COORDINATOR_SECONDARY_NAME }}</h3>
                 <a href="tel:{{ config.EVENT_COORDINATOR_SECONDARY_PHONE|replace(' ', '') }}"
-                    class="streamlined-call-link" aria-label="Call event coordinator">
+                    class="streamlined-call-link" aria-label="Call {{ config.EVENT_COORDINATOR_SECONDARY_NAME }}, faculty event coordinator">
                     <span>{{ config.EVENT_COORDINATOR_SECONDARY_PHONE }}</span>
                 </a>
             </article>

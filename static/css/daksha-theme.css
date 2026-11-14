@@ -1108,8 +1108,96 @@ html.dark body {
 .landing-header #headerRegisterBtn:hover::before { transform: scaleX(1); }
 :root[data-theme] .hero-badge-pill .registration-dot { background: #16a34a !important; box-shadow: 0 0 0 3px rgba(22,163,74,.17) !important; }
 :root[data-theme] .stat-card-championship .stat-title-championship { font-size: clamp(1.65rem, 2.4vw, 2rem) !important; line-height: 1.15 !important; }
-:root[data-theme] .stat-value-events .stat-number,
+:root[data-theme] .stat-card-championship .stat-title-accent { color: #2563eb !important; -webkit-text-fill-color: #2563eb !important; }
 :root[data-theme] .stat-value-events .stat-number-plus { color: #2563eb !important; -webkit-text-fill-color: #2563eb !important; }
+
+/* Clear the public navigation containers while keeping its active item cue. */
+:root[data-theme] .landing-header #headerNavCenter:not(.open),
+:root[data-theme] .landing-header #mainBreadcrumb,
+:root[data-theme] .landing-header .image-like-nav {
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+html:not([data-theme="light"]) .landing-header #headerNavCenter:not(.open),
+[data-theme="dark"] .landing-header #headerNavCenter:not(.open),
+html:not([data-theme="light"]) .landing-header #mainBreadcrumb,
+[data-theme="dark"] .landing-header #mainBreadcrumb,
+html:not([data-theme="light"]) .landing-header .image-like-nav,
+[data-theme="dark"] .landing-header .image-like-nav {
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+:root[data-theme] .landing-header .image-like-nav .nav-link,
+:root[data-theme] .landing-header .image-like-nav .nav-link:hover,
+:root[data-theme] .landing-header .image-like-nav .nav-link:active {
+  border: 0 !important;
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+
+/* Links across the public site stay free of underlines in every interaction state. */
+:root[data-theme] .landing-header a,
+:root[data-theme] .landing-header a:hover,
+:root[data-theme] .landing-header a:focus-visible,
+:root[data-theme] .landing-header a:active,
+:root[data-theme] #hero a,
+:root[data-theme] #hero a:hover,
+:root[data-theme] #hero a:focus-visible,
+:root[data-theme] #hero a:active,
+:root[data-theme] #stats a,
+:root[data-theme] #stats a:hover,
+:root[data-theme] #stats a:focus-visible,
+:root[data-theme] #stats a:active,
+:root[data-theme] #institution-crest-section a,
+:root[data-theme] #institution-crest-section a:hover,
+:root[data-theme] #institution-crest-section a:focus-visible,
+:root[data-theme] #institution-crest-section a:active,
+:root[data-theme] #about a,
+:root[data-theme] #about a:hover,
+:root[data-theme] #about a:focus-visible,
+:root[data-theme] #about a:active,
+:root[data-theme] #events a,
+:root[data-theme] #events a:hover,
+:root[data-theme] #events a:focus-visible,
+:root[data-theme] #events a:active,
+:root[data-theme] #rules a,
+:root[data-theme] #rules a:hover,
+:root[data-theme] #rules a:focus-visible,
+:root[data-theme] #rules a:active,
+:root[data-theme] #registration a,
+:root[data-theme] #registration a:hover,
+:root[data-theme] #registration a:focus-visible,
+:root[data-theme] #registration a:active,
+:root[data-theme] #faq a,
+:root[data-theme] #faq a:hover,
+:root[data-theme] #faq a:focus-visible,
+:root[data-theme] #faq a:active,
+:root[data-theme] .map-section a,
+:root[data-theme] .map-section a:hover,
+:root[data-theme] .map-section a:focus-visible,
+:root[data-theme] .map-section a:active,
+:root[data-theme] .l-footer a,
+:root[data-theme] .l-footer a:hover,
+:root[data-theme] .l-footer a:focus-visible,
+:root[data-theme] .l-footer a:active {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+:root[data-theme] #contact a,
+:root[data-theme] #contact a:hover,
+:root[data-theme] #contact a:focus-visible,
+:root[data-theme] #contact a:active,
+html:not([data-theme="light"]) #contact a,
+html:not([data-theme="light"]) #contact a:hover,
+html:not([data-theme="light"]) #contact a:focus-visible,
+html:not([data-theme="light"]) #contact a:active {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
 .event-dialog-backdrop[hidden] { display: none !important; }
 .event-dialog-backdrop { position: fixed; z-index: 3000; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(8,15,25,.64); backdrop-filter: blur(8px); }
 .event-dialog { position: relative; width: min(100%, 520px); max-height: min(82vh, 720px); overflow: auto; padding: 28px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--text); box-shadow: 0 24px 80px rgba(0,0,0,.28); }

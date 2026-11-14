@@ -76,7 +76,7 @@ class SDATestCase(unittest.TestCase):
         }, follow_redirects=True)
         self.assertEqual(response1.status_code, 200)
         self.assertTrue(b'Registration submitted' in response1.data or b'Registration successful' in response1.data)
-        self.assertIn(b'daksha-theme.css?v=20261114_v12', response1.data)
+        self.assertIn(b'daksha-theme.css?v=20261114_v13', response1.data)
         self.assertIn(b'registration-pass-qr', response1.data)
         self.assertIn(b'registration-pass-qr-frame', response1.data)
         theme_css = self.client.get('/static/css/daksha-theme.css').data.decode('utf-8')
@@ -691,7 +691,7 @@ class SDATestCase(unittest.TestCase):
         self.assertTrue('General Championship' in html)
         self.assertTrue('hard copy of the receipt' in html)
         self.assertTrue('all 14 fest events' not in html)
-        self.assertIn('Government of Karnataka approved by Bengaluru University · AICTE approved', html)
+        self.assertIn('Government of Karnataka. BU. AICTE approved', html)
         self.assertIn('Recognized by Government of Karnataka, affiliated to Bengaluru University, approved by AICTE.', html)
         self.assertIn('id="headerRegisterBtn"', html)
         self.assertIn('id="tabModeCarousel"', html)
@@ -700,11 +700,14 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('class="stat-unit stat-blue-accent"', html)
 
         championship_card = html.split('class="stat-card stat-card-championship', 1)[1].split('<!-- Card 3: Prize pool -->', 1)[0]
-        self.assertIn('<h3 class="stat-title stat-title-championship">General Championship</h3>', championship_card)
+        self.assertIn('<span>General</span> <span class="stat-title-accent">Championship</span>', championship_card)
         self.assertIn('eligible to compete for the overall fest title.', championship_card)
         self.assertNotIn('stat-action-link', championship_card)
         self.assertNotIn('championship-competition-list', championship_card)
         self.assertNotIn('<div class="stat-badge">GENERAL CHAMPIONSHIP</div>', championship_card)
+        competitions_card = html.split('class="stat-value-row stat-value-events"', 1)[1].split('<!-- Card 2: General Championship -->', 1)[0]
+        self.assertIn('data-target="12"', competitions_card)
+        self.assertNotIn('>Competitions</h3>', competitions_card)
 
         carousel_panel = html.split('id="eventsCarouselPanel"', 1)[1].split('id="eventsGridPanel"', 1)[0]
         self.assertNotIn('Contacts', carousel_panel)
@@ -725,7 +728,10 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('background: #090b10 !important', theme_css)
         self.assertIn('background: #ffffff !important; color: #111827 !important', theme_css)
         self.assertIn('.header-cta-classic { flex: 0 0 auto; min-height: 44px; white-space: nowrap;', theme_css)
-        self.assertNotIn('.landing-header .nav-pill-indicator { display: none !important; }', theme_css)
+        self.assertIn('.landing-header #headerNavCenter:not(.open)', theme_css)
+        self.assertIn('.stat-value-events .stat-number-plus', theme_css)
+        self.assertNotIn('.stat-value-events .stat-number,', theme_css)
+        self.assertIn('text-decoration-line: none !important', theme_css)
         self.assertIn(':root[data-theme="light"] .registration-success-notice', theme_css)
         self.assertIn(':root[data-theme="dark"] .registration-success-notice', theme_css)
         self.assertIn('.institution-spotlight-heading', theme_css)
@@ -1419,12 +1425,16 @@ class SDATestCase(unittest.TestCase):
         # 2. BGMI Description
         self.assertIn('A premier battle royale tournament where four-player squads deploy across high-stakes battlegrounds', html)
 
-        # 3. The restored Contact Us section shows coordinator numbers, without names.
+        # 3. Contact Us lists all four faculty coordinators by name and phone.
         contact_section = html.split('<section id="contact"', 1)[1].split('</section>', 1)[0]
-        self.assertIn(Config.EVENT_COORDINATOR_PRIMARY_PHONE, contact_section)
-        self.assertIn(Config.EVENT_COORDINATOR_SECONDARY_PHONE, contact_section)
-        self.assertNotIn(Config.EVENT_COORDINATOR_PRIMARY_NAME, contact_section)
-        self.assertNotIn(Config.EVENT_COORDINATOR_SECONDARY_NAME, contact_section)
+        for name in (Config.COORDINATOR_PRIMARY_NAME, Config.COORDINATOR_SECONDARY_NAME,
+                     Config.EVENT_COORDINATOR_PRIMARY_NAME, Config.EVENT_COORDINATOR_SECONDARY_NAME):
+            self.assertIn(name, contact_section)
+        for phone in (Config.CONTACT_PHONE_PRIMARY, Config.CONTACT_PHONE_SECONDARY,
+                      Config.EVENT_COORDINATOR_PRIMARY_PHONE, Config.EVENT_COORDINATOR_SECONDARY_PHONE):
+            self.assertIn(phone, contact_section)
+        self.assertEqual(contact_section.count('Faculty in Charge'), 2)
+        self.assertEqual(contact_section.count('Faculty Event Coordinator'), 2)
         self.assertIn('id="contactModal"', html)
 
         # 4. Event Coordinators for every event
