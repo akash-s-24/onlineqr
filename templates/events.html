@@ -5954,8 +5954,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                 </button>
-                <button onclick="scrollToSection('rules', event)" class="candy-btn hero-rules-btn">Rules &amp; Guidelines</button>
-                <button onclick="scrollToSection('contact', event)" class="candy-btn hero-contact-btn">Contact Organizers</button>
+                <button onclick="scrollToSection('rules', event)" class="candy-btn hero-rules-btn" data-no-liquid>Rules &amp; Guidelines</button>
+                <button onclick="scrollToSection('contact', event)" class="candy-btn hero-contact-btn" data-no-liquid>Contact Organizers</button>
             </div>
 
             <a class="scroll-indicator" href="#stats" aria-label="Scroll to highlights">
@@ -5993,9 +5993,9 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     <!-- Fest Stats & Highlights Section -->
     <section id="stats" class="fest-stats-section" style="--d: 0.1s;">
         <div class="fest-stats-container">
-            <!-- Card 1: Live event total -->
+            <!-- Card 1: Competition threshold highlight -->
             <div class="stat-card rv" style="--d: 0.1s;">
-                <div class="stat-badge stat-badge-events">{{ events|length }} EVENTS</div>
+                <div class="stat-badge stat-badge-events">12+ COMPETITIONS</div>
                 <div class="stat-icon-wrapper">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -6005,7 +6005,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </svg>
                 </div>
                 <div class="stat-value-row">
-                    <b class="stat-number" data-target="{{ events|length }}">{{ events|length }}</b>
+                    <b class="stat-number" data-target="12">12</b><span class="stat-number-plus" aria-label="plus">+</span>
                 </div>
                 <h3 class="stat-title">Competitions</h3>
                 <p class="stat-desc">Browse the complete lineup of registered competitions below.</p>
@@ -6019,9 +6019,9 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </a>
             </div>
 
-            <!-- Card 2: Overall Championship Trophy -->
+            <!-- Card 2: General Championship -->
             <div class="stat-card stat-card-highlight rv" style="--d: 0.2s;">
-                <div class="stat-badge">OVERALL CHAMPIONSHIP</div>
+                <div class="stat-badge">GENERAL CHAMPIONSHIP</div>
                 <div class="stat-icon-wrapper trophy-icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -6030,40 +6030,38 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </svg>
                 </div>
                 <div class="stat-value-row">
-                    <b class="stat-number">Overall</b>
-                    <span class="stat-unit stat-blue-accent">Trophy</span>
+                    <b class="stat-number">General</b>
+                    <span class="stat-unit stat-blue-accent">Championship</span>
                 </div>
-                <h3 class="stat-title">Championship Trophy</h3>
-                <p class="stat-desc">Colleges registered across all fest events are eligible to compete for the trophy.</p>
-                <a href="#events" class="stat-action-link">
-                    <span>View Event Lineup</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14" />
-                        <path d="m12 5 7 7-7 7" />
-                    </svg>
-                </a>
+                <h3 class="stat-title">General Championship</h3>
+                <p class="stat-desc">Colleges registered for all 15 competitions are eligible to compete for the General Championship.</p>
+                <ul class="championship-competition-list" aria-label="The 15 General Championship competitions">
+                    <li>Pencil Sketching</li><li>Photography</li>
+                    <li>Content Creator</li><li>Solo Dance</li>
+                    <li>Face Painting</li><li>Mono Acting</li>
+                    <li>Tech Quiz</li><li>Solo Singing</li>
+                    <li>Free Fire</li><li>BGMI</li>
+                    <li>Beat Boxing</li><li>Get the Shield</li>
+                    <li>Fashion Walk</li><li>Mad Ads</li>
+                    <li>Group Dance</li>
+                </ul>
             </div>
 
-            <!-- Card 3: 2 Days of Action -->
+            <!-- Card 3: Prize pool -->
             <div class="stat-card rv" style="--d: 0.3s;">
-                <div class="stat-badge">FEST DATES</div>
+                <div class="stat-badge">PRIZE POOL</div>
                 <div class="stat-icon-wrapper">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                        <path d="M12 3v18M17 7.5c0-1.7-2-3-5-3S7 5.8 7 7.5 9 10 12 10s5 1.3 5 3-2 3.5-5 3.5-5-1.3-5-3"></path>
+                        <path d="M5 5h14M5 19h14"></path>
                     </svg>
                 </div>
                 <div class="stat-value-row">
-                    <b class="stat-number" data-target="2">2</b>
-                    <span class="stat-unit stat-blue-accent">Days</span>
+                    <b class="stat-number">₹1 lakh</b>
                 </div>
-                <h3 class="stat-title">26th &amp; 27th Nov</h3>
-                <p class="stat-desc">Two action-packed days of competitive brilliance and cultural festivity in
-                    Bengaluru.</p>
+                <h3 class="stat-title">Prize Pool</h3>
+                <p class="stat-desc">(up to ₹1 lakh) in prizes across the fest competitions.</p>
                 <a href="#events" class="stat-action-link">
                     <span>Explore Schedule</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -6354,9 +6352,9 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </div>
                 </div>
                 <div class="disc-cascade-actions">
-                    <button type="button" id="discCascadeRules" class="disc-cascade-rules">Rules</button>
-                    <button type="button" id="discCascadeCall" class="disc-cascade-call">Contact</button>
-                    <a id="discCascadeRegister" class="disc-cascade-register"
+                    <button type="button" id="discCascadeRules" class="disc-cascade-rules" data-no-liquid>Rules</button>
+                    <button type="button" id="discCascadeCall" class="disc-cascade-call" data-no-liquid>Contact</button>
+                    <a id="discCascadeRegister" class="disc-cascade-register" data-no-liquid
                         href="{{ url_for('register_participant') }}{% if events %}?event_id={{ events[0].id }}{% endif %}">Register for this event ↗</a>
                 </div>
                 <div class="disc-cascade-controls">
@@ -6454,11 +6452,11 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
                         <div class="event-card-actions">
                             <div class="event-card-subactions">
-                                <button type="button" class="btn-card-rules" data-event-name="{{ ev.event_name|e }}"
+                                <button type="button" class="btn-card-rules" data-no-liquid data-event-name="{{ ev.event_name|e }}"
                                     data-rules="{{ ev.rules_text|default('', true)|e }}">
                                     Rules
                                 </button>
-                                <button type="button" class="btn-card-contact" data-event-name="{{ ev.event_name|e }}"
+                                <button type="button" class="btn-card-contact" data-no-liquid data-event-name="{{ ev.event_name|e }}"
                                     data-faculty-name="{{ ev.faculty_name|default('', true)|e }}"
                                     data-faculty-phone="{{ ev.faculty_phone|default('', true)|e }}"
                                     data-student-name="{{ ev.student_name|default('', true)|e }}"
@@ -6509,7 +6507,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     <li>Participants must carry a valid college ID card on the day of the event.</li>
                     <li>Registration is mandatory for participants and visitors.</li>
                     <li>Solo events allow unlimited individual entries. All members of a team event must belong to the same institution.</li>
-                    <li>Colleges registered for all fest events are eligible to compete for the Overall Championship Trophy.</li>
+                    <li>Colleges registered for all 15 competitions are eligible to compete for the General Championship.</li>
                 </ol>
             </article>
 
@@ -6552,7 +6550,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     <li>Performers must bring a backup of their audio track when required.</li>
                     <li>Teams must bring required materials unless the event rules say otherwise.</li>
                     <li>Team coordinators must keep contact information for all members up to date.</li>
-                    <li>Follow the specific event guidelines and timings. Use of items prohibited by an event's rules, including mobile phones, Bluetooth devices, or copyrighted material, results in disqualification.</li>
+                    <li>Follow event-specific guidelines and timings. Prohibited items, including mobile phones, Bluetooth devices, or copyrighted material, may result in disqualification.</li>
                 </ol>
             </article>
 
@@ -6570,7 +6568,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
                 <ol class="rule-list">
                     <li>Individual event winners receive special prizes and rewards. E-certificates are provided to all participants.</li>
-                    <li>When payment is required, use the payment QR officially provided by the organizers and submit a hard copy of the receipt to the event coordinator before participating.</li>
+                    <li>For on-desk and online payments, use the payment QR officially provided by the organizers and submit a hard copy of the receipt to the event coordinator before participating.</li>
                     <li>The website's UPI details are currently in demo mode. Do not send real money using the website's test payment details; wait for confirmed payment instructions from organizers.</li>
                     <li>The organizers may change the event schedule when necessary.</li>
                 </ol>
@@ -6594,7 +6592,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             <div class="procedure-track-card rv" style="--d: 0.15s;">
                 <div class="track-header">
                     <span class="track-tag online-tag">ONLINE COMPETITIONS</span>
-                    <h3>Advance Digital Registration</h3>
+                    <h3>Advanced Digital Registration</h3>
                     <p>Recommended for all events to secure your slot prior to capacity limits.</p>
                 </div>
 
@@ -6642,8 +6640,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
 
                 <div class="track-footer">
-                    <a href="{{ url_for('register_participant') }}" class="track-btn track-btn-primary">
-                        <span>Register Online Now &rarr;</span>
+                    <a href="{{ url_for('register_participant') }}" class="track-btn track-btn-primary" data-no-liquid>
+                        <span>Register Online Only</span>
                     </a>
                 </div>
             </div>
@@ -6696,7 +6694,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
 
                 <div class="track-footer">
-                    <a href="#location" class="track-btn track-btn-secondary">
+                    <a href="#location" class="track-btn track-btn-primary" data-no-liquid>
                         <span>View Campus Desk Location &rarr;</span>
                     </a>
                 </div>
@@ -6814,7 +6812,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>Individual event winners receive special prizes and rewards. The brochure also describes an Overall Championship Trophy for colleges registered across all fest events. E-certificates are provided to all participants.</p>
+                    <p>Individual event winners receive prizes and rewards, and all 15 competitions contribute to the General Championship. E-certificates are provided to all participants.</p>
                 </div>
             </details>
 
@@ -6829,9 +6827,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>E-certificates are provided to all participants. Individual event winners receive special
-                        prizes and rewards; colleges registered for all fest events may compete for the Overall
-                        Championship Trophy.</p>
+                    <p>E-certificates are provided to all participants. Individual event winners receive prizes and
+                        rewards; colleges registered for all 15 competitions may compete for the General Championship.</p>
                 </div>
             </details>
 

@@ -773,3 +773,283 @@ html.dark body {
 :root[data-theme] .crest-institution-sub,
 :root[data-theme] .crest-institution-addr,
 :root[data-theme] .crest-institution-programmes { color: var(--text-2) !important; }
+
+/* Public event controls use a visible resting state and a restrained CSS spread. */
+:root[data-theme="dark"] .landing-header .image-like-nav {
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+:root[data-theme="dark"] .landing-header .image-like-nav .nav-link {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  #events #discCascadeRegister,
+  #registration .track-btn-primary,
+  #registration .track-btn-secondary
+) {
+  --daksha-button-spread: #dbeafe;
+  --daksha-button-hover-ink: #111111;
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  text-decoration: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .12) !important;
+  transform: translateY(0) !important;
+  filter: none !important;
+  transition: color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease !important;
+}
+:root[data-theme] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  #events #discCascadeRegister,
+  #registration .track-btn-primary,
+  #registration .track-btn-secondary
+)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--daksha-button-spread, #dbeafe);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 240ms cubic-bezier(.2, .7, .25, 1);
+  pointer-events: none;
+}
+:root[data-theme] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  #events #discCascadeRegister,
+  #registration .track-btn-primary,
+  #registration .track-btn-secondary
+) > * { position: relative; z-index: 1; text-decoration: none !important; }
+:root[data-theme] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  #events #discCascadeRegister
+):hover::before,
+:root[data-theme] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  #events #discCascadeRegister
+):focus-visible::before { transform: scaleX(1); }
+:root[data-theme] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  #events #discCascadeRegister
+):hover,
+:root[data-theme] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  #events #discCascadeRegister
+):focus-visible {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  border-color: #93b4de !important;
+  box-shadow: 0 5px 15px rgba(59, 130, 246, .18) !important;
+  transform: translateY(-1px) !important;
+}
+:root[data-theme] :is(#events #discCascadeRegister) {
+  --daksha-button-spread: #dcfce7;
+}
+:root[data-theme] :is(#events #discCascadeRegister):hover::before,
+:root[data-theme] :is(#events #discCascadeRegister):focus-visible::before { transform: scaleX(1); }
+:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary) {
+  --daksha-button-spread: #2f75b5;
+  --daksha-button-hover-ink: #ffffff;
+}
+:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):hover::before,
+:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):focus-visible::before { transform: scaleX(1); }
+:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):hover,
+:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):focus-visible {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: #2f75b5 !important;
+  box-shadow: 0 5px 16px rgba(47, 117, 181, .22) !important;
+  transform: translateY(-1px) !important;
+}
+:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):active,
+:root[data-theme] #events :is(.btn-card-rules, .btn-card-contact, #discCascadeRules, #discCascadeCall, #discCascadeRegister):active {
+  transform: translateY(1px) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .16) !important;
+}
+:root[data-theme] #events :is(.btn-card-rules, .btn-card-contact) {
+  box-shadow: 0 3px 0 rgba(0, 0, 0, .2), 0 5px 12px rgba(0, 0, 0, .1) !important;
+  transition: color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 120ms ease !important;
+}
+:root[data-theme] #events :is(.btn-card-rules, .btn-card-contact):active {
+  transform: translateY(3px) !important;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0), inset 0 1px 3px rgba(0, 0, 0, .16) !important;
+}
+:root[data-theme] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  #events #discCascadeRegister,
+  #registration .track-btn-primary,
+  #registration .track-btn-secondary
+)::after { content: none !important; display: none !important; }
+:root[data-theme] :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  #events #discCascadeRegister,
+  #registration .track-btn-primary,
+  #registration .track-btn-secondary
+) a { text-decoration: none !important; }
+
+:root[data-theme] .championship-competition-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .32rem .9rem;
+  margin: .6rem 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+:root[data-theme] .championship-competition-list li {
+  display: flex;
+  align-items: baseline;
+  gap: .45rem;
+  min-width: 0;
+  color: var(--text-2);
+  font-size: .82rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+:root[data-theme] .championship-competition-list li::before {
+  content: "";
+  flex: 0 0 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #2563eb;
+}
+:root[data-theme] .stat-number-plus { color: #2563eb !important; font-size: 2.3rem; font-weight: 800; line-height: 1; }
+:root[data-theme="dark"] .stat-number-plus { color: #93c5fd !important; }
+
+/* Dark theme FAQ panels deliberately use a white reading surface. */
+:root[data-theme="dark"] #faq .faq-item,
+:root[data-theme="dark"] #faq .faq-question,
+:root[data-theme="dark"] #faq .faq-answer {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border-color: #d4d4d4 !important;
+}
+:root[data-theme="dark"] #faq .faq-question,
+:root[data-theme="dark"] #faq .faq-question * { color: #111111 !important; -webkit-text-fill-color: #111111 !important; }
+:root[data-theme="dark"] #faq .faq-item[open] .faq-question { background: #eff6ff !important; }
+:root[data-theme="dark"] #faq .faq-answer,
+:root[data-theme="dark"] #faq .faq-answer p,
+:root[data-theme="dark"] #faq .faq-answer code { color: #111111 !important; -webkit-text-fill-color: #111111 !important; }
+:root[data-theme="dark"] #faq .faq-chevron { color: #333333 !important; }
+
+@keyframes daksha-title-breathe {
+  0%, 100% { text-shadow: 0 1px 2px rgba(59, 130, 246, .08); }
+  50% { text-shadow: 0 2px 16px rgba(59, 130, 246, .25); }
+}
+:root[data-theme] #hero .hero-title {
+  color: var(--text) !important;
+  -webkit-text-fill-color: var(--text) !important;
+  animation: daksha-title-breathe 8s ease-in-out infinite !important;
+}
+@media (max-width: 639px) {
+  :root[data-theme] #hero .hero-title {
+    font-size: clamp(2.3rem, 9.5vw, 3.7rem) !important;
+    line-height: 1.08 !important;
+  }
+}
+
+/* Registration passes keep their QR centered and reserve a separate text column. */
+.registration-pass-qr { grid-template-columns: minmax(0, 200px) minmax(0, 1fr) !important; align-items: center !important; justify-items: center !important; overflow: hidden; }
+.registration-pass-qr-frame { justify-self: center; }
+.registration-pass-qr-copy { align-self: center; }
+:root[data-theme="dark"] .registration-pass-success.alert-warning {
+  background: #fffbeb !important;
+  border-color: #f59e0b !important;
+  color: #78350f !important;
+}
+:root[data-theme="dark"] .registration-pass-success.alert-warning h2 { color: #92400e !important; }
+:root[data-theme="dark"] .registration-pass-success.alert-warning p { color: #78350f !important; }
+:root[data-theme="dark"] .registration-pass-success.alert-success {
+  background: #ecfdf5 !important;
+  border-color: #10b981 !important;
+  color: #065f46 !important;
+}
+:root[data-theme="dark"] .registration-pass-success.alert-success h2 { color: #047857 !important; }
+:root[data-theme="dark"] .registration-pass-success.alert-success p { color: #065f46 !important; }
+@media (max-width: 560px) {
+  .registration-pass-qr { grid-template-columns: minmax(0, 1fr) !important; }
+  .registration-pass-qr-frame { width: min(100%, 200px) !important; }
+  .registration-pass-qr-copy { text-align: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme] #hero .hero-title { animation: none !important; }
+  :root[data-theme] :is(
+    #hero .hero-actions .hero-rules-btn,
+    #hero .hero-actions .hero-contact-btn,
+    #events .btn-card-rules,
+    #events .btn-card-contact,
+    #events #discCascadeRules,
+    #events #discCascadeCall,
+    #events #discCascadeRegister,
+    #registration .track-btn-primary,
+    #registration .track-btn-secondary
+  ),
+  :root[data-theme] :is(
+    #hero .hero-actions .hero-rules-btn,
+    #hero .hero-actions .hero-contact-btn,
+    #events .btn-card-rules,
+    #events .btn-card-contact,
+    #events #discCascadeRules,
+    #events #discCascadeCall,
+    #events #discCascadeRegister,
+    #registration .track-btn-primary,
+    #registration .track-btn-secondary
+  )::before { transition: none !important; }
+}

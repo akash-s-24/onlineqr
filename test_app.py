@@ -76,6 +76,12 @@ class SDATestCase(unittest.TestCase):
         }, follow_redirects=True)
         self.assertEqual(response1.status_code, 200)
         self.assertTrue(b'Registration submitted' in response1.data or b'Registration successful' in response1.data)
+        self.assertIn(b'daksha-theme.css?v=20261114_v9', response1.data)
+        self.assertIn(b'registration-pass-qr', response1.data)
+        self.assertIn(b'registration-pass-qr-frame', response1.data)
+        theme_css = self.client.get('/static/css/daksha-theme.css').data.decode('utf-8')
+        self.assertTrue(':root[data-theme="dark"] .registration-pass-success.alert-warning' in theme_css)
+        self.assertTrue(':root[data-theme="dark"] .registration-pass-success.alert-success' in theme_css)
 
         # 2. Duplicate registration attempt for same event
         response2 = self.client.post('/register', data={
@@ -232,13 +238,14 @@ class SDATestCase(unittest.TestCase):
 
         # 2. Fest Highlights & Stats Section
         self.assertIn('id="stats"', data)
-        event_count = database.query_db("SELECT COUNT(*) AS count FROM events", one=True)['count']
-        self.assertIn(f'data-target="{event_count}"', data)
-        self.assertIn(f'stat-badge-events">{event_count} EVENTS<', data)
-        self.assertNotIn('+ Events', data)
-        self.assertIn('Overall Championship Trophy', data)
-        self.assertNotIn('Prize Pool', data)
-        self.assertNotIn('₹1 Lakh', data)
+        self.assertIn('data-target="12"', data)
+        self.assertIn('stat-badge-events">12+ COMPETITIONS<', data)
+        self.assertIn('stat-number-plus', data)
+        self.assertIn('General Championship', data)
+        self.assertIn('₹1 lakh', data)
+        self.assertIn('(up to ₹1 lakh)', data)
+        self.assertNotIn('2 Days', data)
+        self.assertNotIn('26th &amp; 27th Nov', data)
 
         # 3. Rules & Regulations Section
         self.assertIn('id="rules"', data)
@@ -664,19 +671,36 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('registration_uid', backup_data)
         self.assertIn('full_name', backup_data)
 
-    def test_18_overall_championship_and_live_event_count(self):
-        """Verify the brochure's Overall Championship Trophy and data-driven event lineup."""
+    def test_18_general_championship_and_live_event_count(self):
+        """Verify the requested 15-event championship copy and complete carousel lineup."""
         res = self.client.get('/events')
         self.assertEqual(res.status_code, 200)
         html = res.data.decode('utf-8')
         
         event_count = database.query_db("SELECT COUNT(*) AS count FROM events", one=True)['count']
-        self.assertIn('Overall Championship Trophy', html)
-        self.assertIn('registered for all fest events', html)
-        self.assertNotIn('₹1 Lakh', html)
-        self.assertNotIn('Prize Pool', html)
-        self.assertIn('Singing', html)
-        self.assertIn('Get the Shield', html)
+        self.assertTrue('General Championship' in html)
+        self.assertTrue('registered for all 15 competitions' in html)
+        self.assertTrue('Overall Championship Trophy' not in html)
+        self.assertTrue('data-title="Solo Singing"' in html)
+        self.assertTrue('12+ COMPETITIONS' in html)
+        self.assertTrue('Register Online Only' in html)
+        self.assertTrue('data-no-liquid' in html)
+        self.assertTrue('25–26 November 2026' in html)
+        self.assertTrue('26th/27th Nov' not in html)
+        self.assertTrue('30 minutes before inauguration' in html)
+        self.assertTrue('General Championship' in html)
+        self.assertTrue('hard copy of the receipt' in html)
+        self.assertTrue('all 14 fest events' not in html)
+
+        brochure_competitions = [
+            'Pencil Sketching', 'Photography', 'Content Creator', 'Solo Dance',
+            'Face Painting', 'Mono Acting', 'Tech Quiz', 'Solo Singing',
+            'Free Fire', 'BGMI', 'Beat Boxing', 'Get the Shield',
+            'Fashion Walk', 'Mad Ads', 'Group Dance',
+        ]
+        championship_list = html.split('class="championship-competition-list"', 1)[1].split('</ul>', 1)[0]
+        for competition in brochure_competitions:
+            self.assertIn(competition, championship_list)
 
         # Live event lineup controls
         self.assertIn('id="discCascadeIndex"', html)
@@ -994,7 +1018,7 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('id="discCascadeCall"', html)
 
         # 3. Registration procedure buttons
-        self.assertIn('Register Online Now', html)
+        self.assertIn('Register Online Only', html)
         self.assertIn('View Campus Desk Location', html)
         self.assertIn('track-btn-primary', html)
         self.assertIn('track-btn-secondary', html)

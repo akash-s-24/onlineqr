@@ -73,7 +73,7 @@
   let idCounter = 0;
 
   function initLiquidButton(btn, options) {
-    if (!btn || btn.hasAttribute('data-liquid-initialized')) return btn;
+    if (!btn || btn.hasAttribute('data-no-liquid') || btn.hasAttribute('data-liquid-initialized')) return btn;
     if (btn.matches && btn.matches('#events .btn-card-rules, #events .btn-card-contact')) return btn;
     btn.setAttribute('data-liquid-initialized', 'true');
     btn.setAttribute('data-liquid-button', 'true');
