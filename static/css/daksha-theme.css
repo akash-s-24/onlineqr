@@ -668,6 +668,65 @@ html.dark body {
 :root[data-theme] :is(.btn-secondary, .btn-outline-secondary, .btn-outline, .dashboard-btn:not(.primary), .header-btn, .back-btn-ghost, .change-event-btn, .help-guide-btn, .footer-social-btn) { background-color: var(--surface) !important; border-color: var(--border) !important; color: var(--text) !important; -webkit-text-fill-color: var(--text) !important; }
 :root[data-theme] :is(.btn-secondary, .btn-outline-secondary, .btn-outline, .dashboard-btn:not(.primary), .header-btn, .back-btn-ghost, .change-event-btn, .help-guide-btn, .footer-social-btn):hover { background-color: var(--surface-2) !important; border-color: var(--border-hover) !important; color: var(--text) !important; -webkit-text-fill-color: var(--text) !important; }
 
+/* Event Rules and Contact controls keep a visible, theme-aware resting state. */
+:root[data-theme] #events :is(.btn-card-rules, .btn-card-contact, .disc-cascade-rules, .disc-cascade-call) {
+  background: var(--primary) !important;
+  border: 1px solid var(--primary) !important;
+  color: var(--on-primary) !important;
+  -webkit-text-fill-color: var(--on-primary) !important;
+  box-shadow: 0 3px 0 var(--event-button-edge), 0 6px 14px rgba(0,0,0,.12), inset 0 1px 0 var(--button-highlight) !important;
+  transform: translateY(0) !important;
+  transition: transform 150ms ease, background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease !important;
+}
+:root[data-theme] #events :is(.btn-card-rules, .btn-card-contact, .disc-cascade-rules, .disc-cascade-call):hover {
+  background: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+  color: var(--on-primary) !important;
+  -webkit-text-fill-color: var(--on-primary) !important;
+  transform: translateY(-1px) !important;
+}
+:root[data-theme] #events :is(.btn-card-rules, .btn-card-contact, .disc-cascade-rules, .disc-cascade-call):active {
+  transform: translateY(2px) !important;
+  box-shadow: 0 1px 0 var(--event-button-edge), inset 0 1px 2px rgba(0,0,0,.16) !important;
+}
+:root[data-theme] #events :is(.btn-card-rules, .btn-card-contact, .disc-cascade-rules, .disc-cascade-call):focus-visible {
+  outline: 2px solid var(--focus) !important;
+  outline-offset: 3px !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme] #events :is(.btn-card-rules, .btn-card-contact, .disc-cascade-rules, .disc-cascade-call) { transition: none !important; }
+}
+
+/* Registration pass layout: keep the QR scan area and details from colliding. */
+.registration-pass-section { width: min(100% - 28px, 760px); margin-inline: auto; padding-top: 2rem; }
+.registration-pass-success { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+.registration-pass-success > div:first-child { flex: 1 1 340px; min-width: 0; }
+.registration-pass-success p { overflow-wrap: anywhere; }
+.registration-pass-success > a { flex: 0 0 auto; min-height: 44px; }
+.registration-pass-card { min-width: 0; padding: clamp(1rem, 4vw, 2rem) !important; }
+.registration-pass-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+.registration-pass-header > * { min-width: 0; }
+.registration-pass-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); gap: 1rem; align-items: start; }
+.registration-pass-details > div { min-width: 0; overflow-wrap: anywhere; }
+.registration-pass-qr { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); align-items: center; justify-items: center; gap: 1.25rem; min-width: 0; }
+.registration-pass-qr-frame { display: grid; place-items: center; width: min(100%, 200px); aspect-ratio: 1; padding: 10px; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+.registration-pass-qr-image { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; image-rendering: pixelated; }
+.registration-pass-qr-copy { width: 100%; min-width: 0; overflow-wrap: anywhere; }
+.registration-pass-qr-copy p { line-height: 1.5; }
+@media (max-width: 560px) {
+  .registration-pass-section { width: min(100% - 20px, 760px); }
+  .registration-pass-qr { grid-template-columns: minmax(0, 1fr); gap: .75rem; }
+  .registration-pass-qr-copy { text-align: center; }
+  .registration-pass-header { align-items: stretch; }
+  .registration-pass-success > a { flex: 1 1 100%; justify-content: center; }
+}
+@media print {
+  .registration-pass-section { width: 100%; padding: 0; }
+  .registration-pass-success > a, .registration-pass-actions, #swOfflineBadge { display: none !important; }
+  .registration-pass-qr { grid-template-columns: 180px minmax(0, 1fr); }
+  .registration-pass-qr-frame { width: 180px; box-shadow: none; }
+}
+
 /* Theme hierarchy for the event hero and its date/countdown details. */
 :root[data-theme] #hero .hero-date-line,
 :root[data-theme] #hero .hero-date-highlight,

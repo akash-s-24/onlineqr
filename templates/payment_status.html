@@ -3,9 +3,9 @@
 {% block title %}Successfully Registered - Shree Daksha Academy{% endblock %}
 
 {% block content %}
-<section class="page-section" style="max-width: 760px; margin: 0 auto; padding-top: 2rem;">
+<section class="page-section registration-pass-section">
     <!-- Large Success Confirmation Banner -->
-    <div class="alert {% if registration.payment_status == 'paid' %}alert-success{% else %}alert-warning{% endif %}" style="padding: 1.25rem 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; background: {% if registration.payment_status == 'paid' %}#ecfdf5{% else %}#fffbeb{% endif %}; border: 1.5px solid {% if registration.payment_status == 'paid' %}#10b981{% else %}#f59e0b{% endif %}; color: {% if registration.payment_status == 'paid' %}#065f46{% else %}#92400e{% endif %}; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+    <div class="alert registration-pass-success {% if registration.payment_status == 'paid' %}alert-success{% else %}alert-warning{% endif %}" style="padding: 1.25rem 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; background: {% if registration.payment_status == 'paid' %}#ecfdf5{% else %}#fffbeb{% endif %}; border: 1.5px solid {% if registration.payment_status == 'paid' %}#10b981{% else %}#f59e0b{% endif %}; color: {% if registration.payment_status == 'paid' %}#065f46{% else %}#92400e{% endif %}; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
         <div style="display: flex; align-items: center; gap: 14px;">
             <span style="font-size: 2.2rem; line-height: 1;">🎉</span>
             <div>
@@ -18,8 +18,8 @@
         </a>
     </div>
 
-    <div class="table-card" style="padding: 2rem; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-        <div class="page-header" style="margin-bottom: 1.5rem;">
+    <div class="table-card registration-pass-card" style="border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
+        <div class="page-header registration-pass-header" style="margin-bottom: 1.5rem;">
             <div class="page-title">
                 <h1 style="font-size: 1.6rem; margin-bottom: 4px;">Registration Pass & Details</h1>
                 <p style="color: #64748b; margin: 0;">Keep this official reference and pass handy to check in at the college desk.</p>
@@ -32,8 +32,8 @@
             <div style="flex: 1;">
                 <strong style="color: #92400e; font-size: 1rem; display: block; margin-bottom: 4px;">Action Required: Take a photo or screenshot of this pass now!</strong>
                 <p style="color: #78350f; font-size: 0.88rem; line-height: 1.5; margin: 0 0 10px;">Please photograph or save a screenshot of this official QR code and pass to your mobile phone gallery right now. You must present this pass or screenshot at the college check-in desk upon campus arrival.</p>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <a href="https://api.whatsapp.com/send?text={{ ('Hello, here is my official Daksha Infinix Gate Pass for ' ~ registration.event_name ~ ' (ID: ' ~ registration.registration_uid ~ '). View Pass: ' ~ request.url)|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #25D366; color: #ffffff; text-decoration: none; font-weight: 700; padding: 6px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem;">
+                <div class="registration-pass-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a href="https://api.whatsapp.com/send?text={{ ('Hello, here is my official Daksha Infinix Gate Pass for ' ~ registration.event_name ~ ' (ID: ' ~ registration.registration_uid ~ '). View Pass: ' ~ request.url)|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #11763d; color: #ffffff; text-decoration: none; font-weight: 700; padding: 6px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem;">
                         📱 Send Pass to Mobile / WhatsApp
                     </a>
                     <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary" style="font-weight: 600; padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; background: #ffffff; border: 1px solid #cbd5e1; cursor: pointer;">
@@ -42,7 +42,7 @@
                 </div>
             </div>
         </div>
-        <div style="display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
+        <div class="registration-pass-details">
             <div><small style="color: #64748b;">Participant</small><br><strong>{{ registration.full_name }}</strong></div>
             <div><small style="color: #64748b;">Event</small><br><strong>{{ registration.event_name }}</strong></div>
             <div><small style="color: #64748b;">Registration ID</small><br><strong style="font-family:monospace; color: #2563eb;">{{ registration.registration_uid }}</strong></div>
@@ -50,11 +50,11 @@
         </div>
 
         {% if qr_b64 %}
-        <div style="margin: 1.5rem 0; padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.75rem;">
-            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
-                <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR Ticket Pass for {{ registration.registration_uid }}" style="width: 180px; height: 180px; display: block;" />
+        <div class="registration-pass-qr" style="margin: 1.5rem 0; padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+            <div class="registration-pass-qr-frame">
+                <img class="registration-pass-qr-image" src="data:image/png;base64,{{ qr_b64 }}" alt="QR Ticket Pass for {{ registration.registration_uid }}" />
             </div>
-            <div>
+            <div class="registration-pass-qr-copy">
                 <strong style="font-size: 0.95rem; color: #0f172a;">Registration Pass QR</strong>
                 <p style="margin: 4px 0 0; font-size: 0.8rem; color: #64748b;">{% if registration.payment_status == 'paid' %}Present this QR code at the desk for check-in.{% else %}Present this QR at the desk to complete payment verification and check-in.{% endif %}</p>
                 <div id="swOfflineBadge" style="margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #059669; font-weight: 600;">

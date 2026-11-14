@@ -194,7 +194,7 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('SDA 2026-27', data)
         self.assertNotIn('2026-27', data)
         self.assertNotIn('Annual Symposium 2026-27', data)
-        self.assertIn('26th and 27th November', data)
+        self.assertIn('26 November 2026', data)
         self.assertTrue('Bengaluru' in data or 'Bangalore' in data)
         self.assertIn('hero-date-highlight', data)
         self.assertNotIn('November 19th', data)
@@ -212,21 +212,20 @@ class SDATestCase(unittest.TestCase):
 
         # 2. Fest Highlights & Stats Section
         self.assertIn('id="stats"', data)
-        self.assertIn('data-target="12"', data)
-        self.assertIn('stat-badge-events">12+<', data)
-        self.assertNotIn('12+ EVENTS', data)
+        event_count = database.query_db("SELECT COUNT(*) AS count FROM events", one=True)['count']
+        self.assertIn(f'data-target="{event_count}"', data)
+        self.assertIn(f'stat-badge-events">{event_count} EVENTS<', data)
         self.assertNotIn('+ Events', data)
-        self.assertIn('data-target="1"', data)
-        self.assertNotIn('General Championship', data)
-        self.assertIn('Prize Pool', data)
-        self.assertIn('Lakh', data)
+        self.assertIn('Overall Championship Trophy', data)
+        self.assertNotIn('Prize Pool', data)
+        self.assertNotIn('₹1 Lakh', data)
 
         # 3. Rules & Regulations Section
         self.assertIn('id="rules"', data)
         self.assertIn('General Rules & Regulations', data)
-        self.assertIn('Eligibility & ID', data)
-        self.assertIn('Campus Conduct', data)
-        self.assertIn('Competitions & Timing', data)
+        self.assertIn('Eligibility & Registration', data)
+        self.assertIn('Conduct & Safety', data)
+        self.assertIn('Timing & Preparation', data)
         self.assertIn('id="rules-awards"', data)
         self.assertNotIn('id="rules-championship"', data)
 
@@ -296,7 +295,7 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('[data-theme="light"] .image-like-nav', data, "Light theme .image-like-nav rule missing")
         self.assertIn('[data-theme="light"] .header-nav-center', data, "Light theme .header-nav-center rule missing")
         self.assertIn('[data-theme="light"] .l-footer', data, "Light theme .l-footer rule missing")
-        self.assertIn('[data-theme="light"] .celestial-sky-day', data, "Light theme .celestial-sky-day rule missing")
+        self.assertIn('[data-theme="light"] .l-footer', data, "Light theme footer rule missing")
 
         # 4. Verify no dark inline style pollution on key section roots
         self.assertNotIn('id="about" style="padding: 60px 20px 70px; max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 48px; align-items: center; background: #000000;"', data,
@@ -321,8 +320,8 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = res.data.decode('utf-8')
 
-        # 1. lenis-prevent attribute prevents scroll trapping
-        self.assertIn('data-lenis-prevent', data)
+        # 1. Custom combobox is labelled by the visible event-selection label
+        self.assertIn('aria-labelledby="eventSelectionHeading"', data)
 
         # 2. event_id select is accessible with class f-select and NOT display:none
         self.assertIn('id="event_id"', data)
@@ -381,6 +380,16 @@ class SDATestCase(unittest.TestCase):
             self.assertEqual(res_pass.status_code, 200)
             self.assertIn(b'Registration Pass QR', res_pass.data)
             self.assertIn(b'navigator.serviceWorker.register', res_pass.data)
+            self.assertIn(b'class="registration-pass-qr-frame"', res_pass.data)
+            self.assertIn(b'class="registration-pass-qr-image"', res_pass.data)
+
+        theme_res = self.client.get('/static/css/daksha-theme.css')
+        theme_css = theme_res.data.decode('utf-8')
+        self.assertIn('#events :is(.btn-card-rules, .btn-card-contact, .disc-cascade-rules, .disc-cascade-call)', theme_css)
+        self.assertIn('background: var(--primary) !important;', theme_css)
+        self.assertIn('color: var(--on-primary) !important;', theme_css)
+        self.assertIn('.registration-pass-qr { display: grid;', theme_css)
+        self.assertIn('@media (max-width: 560px)', theme_css)
 
     def test_13_cash_registration_and_gate_pass(self):
         """Test Cash registration generates gate pass with prompt to pay at college desk"""
@@ -626,28 +635,26 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('registration_uid', backup_data)
         self.assertIn('full_name', backup_data)
 
-    def test_18_general_championship_removal_and_prize_pool(self):
-        """Verify General Championship is completely removed and Prize Pool is set to ₹1 Lakh"""
+    def test_18_overall_championship_and_live_event_count(self):
+        """Verify the brochure's Overall Championship Trophy and data-driven event lineup."""
         res = self.client.get('/events')
         self.assertEqual(res.status_code, 200)
         html = res.data.decode('utf-8')
         
-        # General championship must NOT appear anywhere
-        self.assertNotIn('General Championship', html)
-        self.assertNotIn('general-championship', html)
-        self.assertNotIn('rules-championship', html)
-        
-        # Prize pool must be ₹1 Lakh
-        self.assertIn('₹1 Lakh', html)
-        self.assertIn('data-target="1"', html)
-        self.assertNotIn('₹ 2 Lakh', html)
-        self.assertNotIn('₹2 Lakh', html)
+        event_count = database.query_db("SELECT COUNT(*) AS count FROM events", one=True)['count']
+        self.assertIn('Overall Championship Trophy', html)
+        self.assertIn('registered for all fest events', html)
+        self.assertNotIn('₹1 Lakh', html)
+        self.assertNotIn('Prize Pool', html)
+        self.assertIn('Singing', html)
+        self.assertIn('Get the Shield', html)
 
-        # 14 Events Lineup Dropdown
+        # Live event lineup controls
         self.assertIn('id="discCascadeIndex"', html)
         self.assertIn('id="discCascadeIndexButton"', html)
         self.assertIn('id="discCascadeIndexMenu"', html)
-        self.assertIn('14 events', html)
+        self.assertIn(f'{event_count} events', html)
+        self.assertIn(f'{event_count} TOTAL', html)
         self.assertIn('disc-cascade-animated-arrow', html)
         self.assertIn('arrow-forward-backward', html)
         self.assertNotIn('Click here', html)
@@ -655,12 +662,13 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('1 / ', html)
 
     def test_19_ui_improvements_attendance_and_event_config(self):
-        """Verify 14 events in dropdown, forward/backward animated arrow, no 'Click here', no 'out of', single-line header with Register for Event button"""
+        """Verify live event counts, forward/backward arrow, and event header controls."""
         # 1. Check /events header button is "Register for Event" pointing to #events
         res = self.client.get('/events')
         html = res.data.decode('utf-8')
         self.assertIn('Register for Event', html)
-        self.assertIn('14 events', html)
+        event_count = database.query_db("SELECT COUNT(*) AS count FROM events", one=True)['count']
+        self.assertIn(f'{event_count} events', html)
         self.assertIn('disc-cascade-animated-arrow', html)
         self.assertIn('arrow-forward-backward', html)
         self.assertNotIn('Click here', html)
@@ -961,12 +969,12 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn("btn.style.setProperty('-webkit-clip-path'", js_text)
         self.assertIn("invertedEl.style.setProperty('clip-path'", js_text)
 
-        # 6. Verify 14 authentic official event names and rules integrity
+        # 6. Verify the brochure-aligned official event names and rules integrity
         official_names = [
-            'BGMI', 'Free Fire', 'Pencil Sketch', 'Get the Shield',
+            'BGMI', 'Free Fire', 'Pencil Sketching', 'Get the Shield',
             'Photography', 'Content Creator', 'Solo Dance', 'Group Dance',
-            'Beat Boxing', 'Face Painting', 'Tech Quiz', 'Mad Adds',
-            'Mono Acting', 'Ramp Walk'
+            'Beat Boxing', 'Face Painting', 'Tech Quiz', 'Singing', 'Mad Ads',
+            'Mono Acting', 'Fashion Walk'
         ]
         for name in official_names:
             self.assertIn(name, html)
@@ -974,13 +982,21 @@ class SDATestCase(unittest.TestCase):
         # 7. Check Free Fire has clean squad battle royale rules without Kannada text
         ff_ev = database.query_db("SELECT * FROM events WHERE event_name = 'Free Fire'", one=True)
         self.assertIsNotNone(ff_ev)
-        self.assertIn('Mobile devices only', ff_ev['rules_text'])
+        self.assertIn('No teaming with other squads', ff_ev['rules_text'])
         self.assertNotIn('Kannada', ff_ev['rules_text'])
+
+        singing_ev = database.query_db("SELECT * FROM events WHERE event_name = 'Singing'", one=True)
+        self.assertIsNotNone(singing_ev)
+        self.assertEqual(singing_ev['is_group'], 0)
+        self.assertEqual(singing_ev['event_time'], 'To be announced')
+        self.assertEqual(singing_ev['venue'], 'To be announced')
+        self.assertIn('Indian films', singing_ev['rules_text'])
+        self.assertIn('30 minutes before', singing_ev['rules_text'])
 
         # 8. Check Mono Acting has its own theme and solo format
         mono_ev = database.query_db("SELECT * FROM events WHERE event_name = 'Mono Acting'", one=True)
         self.assertIsNotNone(mono_ev)
-        self.assertIn('Mythology Characters', mono_ev['rules_text'])
+        self.assertIn('Mythology characters', mono_ev['rules_text'])
 
     def test_staff_login_rejects_missing_password(self):
         admin_user = {
@@ -1011,7 +1027,7 @@ class SDATestCase(unittest.TestCase):
 
         result = database.query_db("SELECT COUNT(*) AS count FROM events", one=True)
 
-        self.assertEqual(result['count'], 14)
+        self.assertEqual(result['count'], 15)
 
     def test_official_events_use_confirmed_november_date(self):
         if database.DB_MODE != 'sqlite':

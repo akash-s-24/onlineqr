@@ -1709,7 +1709,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     .disc-cascade-stage { height: 720px !important; min-height: 720px !important; max-height: none !important;
     border-radius: 20px !important; border: 1px solid rgba(255, 255, 255, 0.14) !important; position: relative
     !important; overflow: hidden !important; padding: 0 0 20px !important; box-shadow: 0 16px 44px rgba(0, 0, 0, 0.9)
-    !important; background: #000000 !important; } /* Top Bar: 14 Events Total + 14 Events Dropdown in Top-Right Corner
+    !important; background: #000000 !important; } /* Live event count and dropdown in the top-right corner
     */ .disc-cascade-topbar { position: absolute !important; top: 14px !important; left: 14px !important; right: 14px
     !important; z-index: 25 !important; display: flex !important; align-items: center !important; justify-content:
     flex-end !important; gap: 8px !important; } .disc-cascade-topbar-label { display: none !important; }
@@ -5956,12 +5956,12 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
         </div>
     </div>
 
-    <!-- Fest Stats & Highlights Section (12+ Competitions, ₹1 Lakh Prize Pool, 2 Days) -->
+    <!-- Fest Stats & Highlights Section -->
     <section id="stats" class="fest-stats-section" style="--d: 0.1s;">
         <div class="fest-stats-container">
-            <!-- Card 1: 12+ Competitions -->
+            <!-- Card 1: Live event total -->
             <div class="stat-card rv" style="--d: 0.1s;">
-                <div class="stat-badge stat-badge-events">12+</div>
+                <div class="stat-badge stat-badge-events">{{ events|length }} EVENTS</div>
                 <div class="stat-icon-wrapper">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -5971,11 +5971,10 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </svg>
                 </div>
                 <div class="stat-value-row">
-                    <b class="stat-number" data-target="12">12</b>
-                    <span class="stat-plus stat-blue-accent">+</span>
+                    <b class="stat-number" data-target="{{ events|length }}">{{ events|length }}</b>
                 </div>
                 <h3 class="stat-title">Competitions</h3>
-                <p class="stat-desc">Spanning Technical, Gaming, Stage Arts, Culture, Strategy & Business arenas.</p>
+                <p class="stat-desc">Browse the complete lineup of registered competitions below.</p>
                 <a href="#events" class="stat-action-link">
                     <span>Explore Lineup</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -5986,26 +5985,24 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </a>
             </div>
 
-            <!-- Card 2: ₹1 Lakh Prize Pool -->
+            <!-- Card 2: Overall Championship Trophy -->
             <div class="stat-card stat-card-highlight rv" style="--d: 0.2s;">
-                <div class="stat-badge">PRIZE POOL</div>
+                <div class="stat-badge">OVERALL CHAMPIONSHIP</div>
                 <div class="stat-icon-wrapper trophy-icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="1" x2="12" y2="23"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        <path d="M8 21h8m-4-4v4M7 4h10v5a5 5 0 0 1-10 0V4Z"></path>
+                        <path d="M7 6H4v2a4 4 0 0 0 4 4m9-6h3v2a4 4 0 0 1-4 4"></path>
                     </svg>
                 </div>
                 <div class="stat-value-row">
-                    <span class="stat-currency">₹</span>
-                    <b class="stat-number" data-target="1">1</b>
-                    <span class="stat-unit stat-blue-accent">Lakh</span>
+                    <b class="stat-number">Overall</b>
+                    <span class="stat-unit stat-blue-accent">Trophy</span>
                 </div>
-                <h3 class="stat-title">Prize Pool</h3>
-                <p class="stat-desc">Direct cash awards, winner shields, and excellence citations across all 12+
-                    competitions.</p>
+                <h3 class="stat-title">Championship Trophy</h3>
+                <p class="stat-desc">Colleges registered across all fest events are eligible to compete for the trophy.</p>
                 <a href="#events" class="stat-action-link">
-                    <span>View Event Prizes</span>
+                    <span>View Event Lineup</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M5 12h14" />
@@ -6204,19 +6201,19 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             <div class="disc-cascade-stage" id="discCascadeStage" tabindex="0" role="region"
                 aria-label="Event catalogue. Use arrow keys to browse.">
                 <div class="disc-cascade-topbar">
-                    <span class="disc-cascade-topbar-label">14 event cassettes</span>
+                    <span class="disc-cascade-topbar-label">{{ events|length }} event discs</span>
                     <div class="disc-cascade-index" id="discCascadeIndex">
-                        <!-- Animated arrow indicator moving forward and backward toward 14 events lineup -->
-                        <div class="disc-cascade-animated-arrow" aria-hidden="true" title="14 events lineup">
+                        <!-- Animated arrow indicator moving forward and backward across the live event lineup -->
+                        <div class="disc-cascade-animated-arrow" aria-hidden="true" title="{{ events|length }} events lineup">
                             <svg class="arrow-forward-backward" width="20" height="20" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M5 12h14M12 5l7 7-7 7" />
                             </svg>
                         </div>
                         <button type="button" id="discCascadeIndexButton" class="disc-cascade-lineup-btn"
-                            aria-label="Explore 14 events lineup" aria-haspopup="true" aria-expanded="false">
+                            aria-label="Explore {{ events|length }} events lineup" aria-haspopup="true" aria-expanded="false">
                             <span class="disc-cascade-btn-dot" aria-hidden="true"></span>
-                            <span>14 events</span>
+                            <span>{{ events|length }} events</span>
                             <svg class="btn-arrow-icon" width="13" height="13" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
                                 aria-hidden="true">
@@ -6225,15 +6222,15 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         </button>
                         <div class="disc-cascade-index-backdrop" id="discCascadeIndexBackdrop"></div>
                         <div class="disc-cascade-index-menu" id="discCascadeIndexMenu" role="menu"
-                            aria-label="14 Events Lineup">
+                            aria-label="Event Lineup">
                             <div class="disc-cascade-menu-header">
                                 <span class="disc-cascade-menu-title">Event Lineup <span
-                                        class="disc-cascade-menu-count">14 TOTAL</span></span>
+                                        class="disc-cascade-menu-count">{{ events|length }} TOTAL</span></span>
                                 <button type="button" class="disc-cascade-menu-close" id="discCascadeIndexClose"
                                     aria-label="Close menu">&times;</button>
                             </div>
                             <div class="disc-cascade-menu-list">
-                                {% for ev in events[:14] %}
+                                {% for ev in events %}
                                 <button type="button"
                                     class="disc-cascade-menu-item {% if loop.first %}active{% endif %}"
                                     data-index="{{ loop.index0 }}" role="menuitem">
@@ -6271,13 +6268,13 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
 
                 <div class="disc-cascade-track" id="discCascadeTrack" style="--dcc-size:clamp(190px, 28cqw, 360px);">
-                    {% for ev in events[:14] %}
+                    {% for ev in events %}
                     <button type="button" class="disc-cascade-disc" data-index="{{ loop.index0 }}"
                         data-title="{{ ev.event_name|e }}"
                         data-format="{{ 'Group event' if ev.is_group else 'Solo event' }}"
                         data-fee="{% if ev.event_fee and ev.event_fee > 0 %}₹ {{ ev.event_fee }}{% else %}Free entry{% endif %}"
                         data-venue="{{ ev.venue|e }}" data-date="26 Nov 2026"
-                        data-palette-category="{{ 'gaming' if ('bgmi' in ev.event_name|lower or 'pubg' in ev.event_name|lower or 'free fire' in ev.event_name|lower) else ('technical' if ('tech' in ev.event_name|lower or 'shield' in ev.event_name|lower) else ('cultural' if ('dance' in ev.event_name|lower or 'beatbox' in ev.event_name|lower or 'acting' in ev.event_name|lower or 'ramp' in ev.event_name|lower) else 'arts')) }}"
+                        data-palette-category="{{ ev.category_key }}"
                         data-time="{{ ev.event_time|e }}"
                         data-description="{{ (ev.description or 'Bring your best idea and make the stage yours.')|e }}"
                         data-rules="{{ ev.rules_text|default('', true)|e }}"
@@ -6326,7 +6323,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
                 <div class="disc-cascade-controls">
                     <button type="button" id="discCascadePrev" aria-label="Previous event">←</button>
-                    <span class="disc-cascade-count" id="discCascadeCount">1 / {{ [events|length, 14]|min }}</span>
+                    <span class="disc-cascade-count" id="discCascadeCount">1 / {{ events|length }}</span>
                     <button type="button" id="discCascadeNext" aria-label="Go to next event">→</button>
                 </div>
             </div>
@@ -6339,23 +6336,17 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             <div id="grid" style="scroll-margin-top: 100px;"></div>
             <!-- Category Filter Chips -->
             <div class="events-grid-filters" role="tablist" aria-label="Filter events by category">
-                <button type="button" class="filter-chip active" data-filter="all">All Events <span
-                        class="chip-count">14</span></button>
-                <button type="button" class="filter-chip" data-filter="gaming">Gaming <span
-                        class="chip-count">2</span></button>
-                <button type="button" class="filter-chip" data-filter="technical">Technical & Strategy <span
-                        class="chip-count">2</span></button>
-                <button type="button" class="filter-chip" data-filter="cultural">Cultural & Performance <span
-                        class="chip-count">5</span></button>
-                <button type="button" class="filter-chip" data-filter="arts">Arts & Media <span
-                        class="chip-count">5</span></button>
+                {% for category in event_category_filters %}
+                <button type="button" class="filter-chip {% if loop.first %}active{% endif %}" data-filter="{{ category.key }}">
+                    {{ category.label }} <span class="chip-count">{{ category.count }}</span>
+                </button>
+                {% endfor %}
             </div>
 
             <!-- 14 Cards Grid with Bento Spotlight Anchor -->
             <div class="events-cards-grid" id="eventsCardsGrid">
-                {% for ev in events[:14] %}
-                {% set ev_lower = (ev.event_name or '')|lower %}
-                {% set cat_key = 'gaming' if ('bgmi' in ev_lower or 'pubg' in ev_lower or 'free fire' in ev_lower) else ('technical' if ('tech' in ev_lower or 'shield' in ev_lower) else ('cultural' if ('dance' in ev_lower or 'beatbox' in ev_lower or 'acting' in ev_lower or 'ramp' in ev_lower) else 'arts')) %}
+                {% for ev in events %}
+                {% set cat_key = ev.category_key %}
                 {% set cat_label = 'Gaming' if cat_key == 'gaming' else ('Technical & Strategy' if cat_key == 'technical' else ('Cultural & Performance' if cat_key == 'cultural' else 'Arts & Media')) %}
                 {% set rim_class = 'card-rim-emerald' if cat_key == 'gaming' else ('card-rim-silver' if cat_key ==
                 'technical' else 'card-rim-indigo') %}
@@ -6449,13 +6440,12 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             <span class="section-eyebrow-pill">Official Directives</span>
             <h2 class="section-headline">General Rules & Regulations</h2>
             <div class="section-headline-bar" aria-hidden="true"></div>
-            <p class="section-lead-copy">These regulations apply across every competitive category at the symposium.
+            <p class="section-lead-copy">These regulations apply across every competitive category at the fest.
                 Please review them thoroughly before registering.</p>
         </div>
 
         <div class="rules-grid">
-            <!-- Card 1: Eligibility & College Identification -->
-            <div class="rule-card rv" style="--d: 0.1s;">
+            <article class="rule-card rv" style="--d: 0.1s;">
                 <div class="rule-card-header">
                     <span class="rule-card-num">01</span>
                     <div class="rule-icon-box">
@@ -6467,22 +6457,18 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                         </svg>
                     </div>
-                    <h3>Eligibility & ID</h3>
+                    <h3>Eligibility & Registration</h3>
                 </div>
                 <ol class="rule-list">
-                    <li>All participants must carry a valid physical institutional ID card at all times throughout the
-                        fest.</li>
-                    <li>Participation is open to bona fide undergraduate and postgraduate students from recognized
-                        colleges and universities.</li>
-                    <li>In group events, all team members must represent the same institution. Inter-college composite
-                        teams are not permitted.</li>
-                    <li>A maximum of three teams from the same institution may register for any single competitive
-                        event.</li>
+                    <li>Participation is open to PUC students only.</li>
+                    <li>Participants must carry a valid college ID card on the day of the event.</li>
+                    <li>Registration is mandatory for participants and visitors.</li>
+                    <li>Solo events allow unlimited individual entries. All members of a team event must belong to the same institution.</li>
+                    <li>Colleges registered for all fest events are eligible to compete for the Overall Championship Trophy.</li>
                 </ol>
-            </div>
+            </article>
 
-            <!-- Card 2: Campus Conduct & Discipline -->
-            <div class="rule-card rv" style="--d: 0.2s;">
+            <article class="rule-card rv" style="--d: 0.2s;">
                 <div class="rule-card-header">
                     <span class="rule-card-num">02</span>
                     <div class="rule-icon-box">
@@ -6491,22 +6477,19 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                         </svg>
                     </div>
-                    <h3>Campus Conduct</h3>
+                    <h3>Conduct & Safety</h3>
                 </div>
                 <ol class="rule-list">
-                    <li>Strict code of conduct applies on campus grounds. Participants must follow instructions from
-                        volunteers and faculty marshals.</li>
-                    <li>Zero tolerance towards alcohol, narcotics, smoking, e-cigarettes, or any banned substances.
-                        Violators face immediate disqualification and removal.</li>
-                    <li>Any intentional damage to college infrastructure, lab equipment, or stage AV systems will invite
-                        disciplinary action and full financial recovery.</li>
-                    <li>Participants are solely responsible for their personal belongings, kits, and laptops. Organizers
-                        bear no liability for loss or theft.</li>
+                    <li>Misconduct, inappropriate behaviour, or rule violations may lead to disqualification.</li>
+                    <li>Sharp or flammable substances, lasers, and other harmful objects are not allowed on campus or at performances.</li>
+                    <li>Teams are responsible for repairing damage to event property.</li>
+                    <li>Organizers are not responsible for loss of or damage to personal belongings.</li>
+                    <li>Follow safety protocols and report injuries to event coordinators or convenors.</li>
+                    <li>Decisions made by the event coordinator or judges are final and binding.</li>
                 </ol>
-            </div>
+            </article>
 
-            <!-- Card 3: Competitions & Reporting -->
-            <div class="rule-card rv" style="--d: 0.3s;">
+            <article class="rule-card rv" style="--d: 0.3s;">
                 <div class="rule-card-header">
                     <span class="rule-card-num">03</span>
                     <div class="rule-icon-box">
@@ -6516,22 +6499,19 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                             <polyline points="12 6 12 12 16 14" />
                         </svg>
                     </div>
-                    <h3>Competitions & Timing</h3>
+                    <h3>Timing & Preparation</h3>
                 </div>
                 <ol class="rule-list">
-                    <li>Participants must report to their assigned venue desk at least 30 minutes before the scheduled
-                        event time. Late check-ins may be forfeited.</li>
-                    <li>Vulgarity, obscenity, defamation, or inappropriate content in any form (music, speeches,
-                        outfits, or visuals) is strictly prohibited.</li>
-                    <li>Performers and teams must clear their equipment, props, and stage gear immediately upon round
-                        conclusion.</li>
-                    <li>The decision of the designated judges and evaluation panel is final, absolute, and binding on
-                        all contenders.</li>
+                    <li>Participants must report to the venue at least 30 minutes before inauguration.</li>
+                    <li>Check the timings of all events you enter and avoid schedule clashes.</li>
+                    <li>Performers must bring a backup of their audio track when required.</li>
+                    <li>Teams must bring required materials unless the event rules say otherwise.</li>
+                    <li>Team coordinators must keep contact information for all members up to date.</li>
+                    <li>Follow the specific event guidelines and timings. Use of items prohibited by an event's rules, including mobile phones, Bluetooth devices, or copyrighted material, results in disqualification.</li>
                 </ol>
-            </div>
+            </article>
 
-            <!-- Card 4: Awards & Certification -->
-            <div class="rule-card rule-card-highlight rv" id="rules-awards" style="--d: 0.4s;">
+            <article class="rule-card rule-card-highlight rv" id="rules-awards" style="--d: 0.4s;">
                 <div class="rule-card-header">
                     <span class="rule-card-num">04</span>
                     <div class="rule-icon-box">
@@ -6544,15 +6524,12 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     <h3>Awards & Certification</h3>
                 </div>
                 <ol class="rule-list">
-                    <li>All registered contenders will receive an official, authorized Certificate of Participation
-                        issued by Shree Daksha Academy.</li>
-                    <li>Winners and runners-up in each of the 12+ competitions are awarded trophies, merit certificates,
-                        and cash prizes from the ₹1 Lakh pool.</li>
-                    <li>Prizes and honors will be conferred during the valedictory ceremony on campus at the conclusion
-                        of the events.</li>
-                    <li>All digital certificates can be accessed directly from the official portal post-event.</li>
+                    <li>Individual event winners receive special prizes and rewards. E-certificates are provided to all participants.</li>
+                    <li>When payment is required, use the payment QR officially provided by the organizers and submit a hard copy of the receipt to the event coordinator before participating.</li>
+                    <li>The website's UPI details are currently in demo mode. Do not send real money using the website's test payment details; wait for confirmed payment instructions from organizers.</li>
+                    <li>The organizers may change the event schedule when necessary.</li>
                 </ol>
-            </div>
+            </article>
         </div>
     </section>
 
@@ -6631,7 +6608,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <div class="track-header">
                     <span class="track-tag offline-tag">OFFLINE & SPOT ENTRIES</span>
                     <h3>On-Campus Spot Registration</h3>
-                    <p>Available on fest days from 8:30 AM at the central campus registration desk.</p>
+                    <p>Spot registration may be available at the registration desk. Confirm the schedule and
+                        availability with the organizers.</p>
                 </div>
 
                 <div class="track-steps">
@@ -6693,15 +6671,10 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             <div class="policy-text">
                 <h4>Important Payment & Receipt Terms</h4>
                 <ul>
-                    <li><strong>Strict Non-Refundable Policy:</strong> Event registration and delegate fees once
-                        remitted are non-refundable and non-transferable under any circumstances, including schedule
-                        overlaps or no-shows.</li>
-                    <li><strong>Receipt Verification &amp; Security:</strong> Online registrations generate an
-                        authenticated digital receipt with an encrypted verification QR code. For spot desk
-                        registrations, official stamped receipts are issued once—duplicates cannot be provided.</li>
-                    <li><strong>Authorized Channels Only:</strong> Transactions must be completed exclusively through
-                        the verified portal QR code/UPI terminal or at the official campus symposium desk. Never
-                        transfer fees to unverified personal numbers or unauthorized intermediaries.</li>
+                    <li><strong>Payment receipt:</strong> Use the payment QR provided by organizers and submit a hard
+                        copy of the receipt to the event coordinator before participating.</li>
+                    <li><strong>Payment options:</strong> The brochure allows QR payment both at the desk and away
+                        from the desk. Confirm current payment instructions with the organizers.</li>
                 </ul>
             </div>
         </div>
@@ -6720,7 +6693,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
         <div class="faq-accordion-container" style="--d: 0.2s;">
             <details class="faq-item">
                 <summary class="faq-question">
-                    <span>Who is eligible to participate in the symposium events?</span>
+                    <span>Who is eligible to participate in the fest events?</span>
                     <span class="faq-chevron" aria-hidden="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -6729,8 +6702,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>Any bona fide student currently enrolled in an accredited undergraduate or postgraduate
-                        institution with a valid institutional identity card is eligible to compete.</p>
+                    <p>Participation is limited to PUC students. Participants must carry a valid college identity
+                        card on the event day and complete registration.</p>
                 </div>
             </details>
 
@@ -6796,8 +6769,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>Winners across all 12+ competitions will receive cash awards from the cumulative ₹1 Lakh prize
-                        pool, trophies, and merit certificates.</p>
+                    <p>Individual event winners receive special prizes and rewards. The brochure also describes an Overall Championship Trophy for colleges registered across all fest events. E-certificates are provided to all participants.</p>
                 </div>
             </details>
 
@@ -6812,9 +6784,9 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>Yes. Every eligible attendee receives an official, high-resolution digital Certificate of
-                        Participation powered by our Daksha Infinix platform. Winners also receive
-                        physical trophies, cash prizes, and merit certificates.</p>
+                    <p>E-certificates are provided to all participants. Individual event winners receive special
+                        prizes and rewards; colleges registered for all fest events may compete for the Overall
+                        Championship Trophy.</p>
                 </div>
             </details>
 
@@ -6829,15 +6801,14 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>Yes, spot registration opens at 8:30 AM at the central campus registration desk on event days.
-                        However, slots are allocated on a first-come, first-served basis, so online pre-registration is
-                        strongly encouraged to ensure slot availability.</p>
+                    <p>Spot registration may be available at the registration desk. Confirm the schedule and
+                        availability with the organizers.</p>
                 </div>
             </details>
 
             <details class="faq-item">
                 <summary class="faq-question">
-                    <span>Is there an entry fee to attend as a spectator or supporter?</span>
+                    <span>Do participants and visitors need to register?</span>
                     <span class="faq-chevron" aria-hidden="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -6846,9 +6817,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>Campus entry is completely free for all students carrying a valid college ID card who wish to
-                        cheer for their institutional delegations. Entry fees apply solely to registered participants in
-                        competitive events.</p>
+                    <p>Yes. The brochure requires registration for both participants and visitors. Participation in
+                        competitions is limited to PUC students; contact the organizers for visitor registration details.</p>
                 </div>
             </details>
 
@@ -6863,8 +6833,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </span>
                 </summary>
                 <div class="faq-answer">
-                    <p>For event-specific questions, open the "Details" button on an event card or message the official
-                        symposium desk on WhatsApp. Individual coordinator numbers will appear here once confirmed.</p>
+                    <p>For event-specific questions, open the "Details" button on an event card or contact the fest
+                        registration desk. Individual coordinator numbers will appear here once confirmed.</p>
                 </div>
             </details>
         </div>
@@ -7031,116 +7001,13 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     {% block extra_js %}
     <!-- Interactive Event Scripts & Rules Lookup -->
     <script>
-        // Master Event Rules Lookup
-        const eventRules = {
-            "BGMI": [
-                "Team participation only (Squad format: 4 players).",
-                "Emulators and iPad tablets are strictly prohibited. Only mobile devices permitted.",
-                "Use of any third-party plugins, hacks, or cheats will lead to immediate disqualification.",
-                "Room ID and Password will be shared 15 minutes before match start."
-            ],
-            "Free Fire": [
-                "Squad format (4 players per team).",
-                "Mobile devices only. No emulators or external triggers allowed.",
-                "Any exploit or glitch abuse results in immediate forfeiture.",
-                "Organizers' decisions on point calculation are final."
-            ],
-            "Pencil Sketch": [
-                "Solo participation event.",
-                "Drawing sheets will be provided by the organizers; bring your own drawing pencils and erasers.",
-                "Time limit is strictly 90 minutes from briefing.",
-                "Theme will be announced on the spot."
-            ],
-            "Ramp Walk": [
-                "Traditional, Western, or Creative Theme attire is accepted.",
-                "Props are permitted with advance organizer check-in.",
-                "Judging based on posture, confidence, outfit relevance, and stage presence.",
-                "Time per walk: maximum 2 minutes."
-            ],
-            "Get the Shield": [
-                "Participants must report to the venue before the briefing begins.",
-                "The challenge format and scoring criteria will be explained by the organizers.",
-                "Outside assistance and disruptive conduct are not permitted.",
-                "The judges' decision is final."
-            ],
-            "Photography": [
-                "Only photographs captured during the event window are eligible.",
-                "Participants may use a phone or camera, but all submitted work must be original.",
-                "Basic cropping and color correction are allowed; misleading edits are not.",
-                "Judging considers composition, storytelling, timing, and technical quality."
-            ],
-            "Content Creator": [
-                "The submission must be original and created within the announced time window.",
-                "Do not use copyrighted media without permission or attribution.",
-                "Content must be respectful, safe, and suitable for a college audience.",
-                "Judging considers originality, clarity, production quality, and audience impact."
-            ],
-            "Solo Dance": [
-                "Each participant receives the announced performance time limit.",
-                "Music and props must be submitted or approved before the performance.",
-                "Performances are judged on rhythm, expression, choreography, and stage presence.",
-                "Unsafe or offensive content is not permitted."
-            ],
-            "Group Dance": [
-                "Teams must perform with their registered members.",
-                "Music and props must be submitted or approved before the performance.",
-                "Performances are judged on synchronization, formations, creativity, and energy.",
-                "The team must remain within the announced time limit."
-            ],
-            "Beat Boxing": [
-                "Each participant receives the announced performance time limit.",
-                "All sounds must be performed live without pre-recorded vocal tracks.",
-                "Judging considers rhythm, musicality, technique, variety, and originality.",
-                "Respectful language and professional conduct are required."
-            ],
-            "Face Painting": [
-                "Participants must bring approved, skin-safe paints and materials.",
-                "The model must provide consent before painting begins.",
-                "Designs are judged on concept, technique, color, detail, and finish.",
-                "Unsafe materials and offensive imagery are prohibited."
-            ],
-            "Tech Quiz": [
-                "Participants must carry valid college IDs and report before the briefing.",
-                "The quiz covers computing fundamentals, innovation, logic, and digital trends.",
-                "Mobile phones, internet access, and outside assistance are prohibited.",
-                "Ties will be resolved through a rapid-fire tie-breaker."
-            ],
-            "Mad Adds": [
-                "Teams must perform with their registered members and stay within the time limit.",
-                "The advertisement must be original and suitable for a college audience.",
-                "Props and music cues require organizer approval before the event.",
-                "Judging considers message clarity, creativity, humor, and teamwork."
-            ],
-            "Mono Acting": [
-                "Each participant receives the announced performance time limit (3 + 1 min).",
-                "Theme: Mythology Characters or Social Themes (acting in Kannada or English language).",
-                "The act must be prepared and performed by one participant.",
-                "Judging considers character, voice, expression, body language, and storytelling.",
-                "Unsafe, vulgar, or discriminatory content is strictly prohibited."
-            ]
-        };
-        // Normalized event alias mappings
-        eventRules["Beatboxing"] = eventRules["Beat Boxing"];
-        eventRules["Monoacting"] = eventRules["Mono Acting"];
-        eventRules["Mad Ads"] = eventRules["Mad Adds"];
-        eventRules["Rampwalk"] = eventRules["Ramp Walk"];
-
         function openRulesModal(eventName, rulesFromDb) {
             document.getElementById('rulesModalTitle').innerText = eventName + " - Rules";
             const content = document.getElementById('rulesModalContent');
             content.innerHTML = '';
 
-            let rules;
-            if (rulesFromDb && rulesFromDb.trim()) {
-                rules = rulesFromDb.split('\n').filter(r => r.trim());
-            } else {
-                rules = eventRules[eventName] || [
-                    'All ' + eventName + ' entries must be original and prepared by the registered participant or team.',
-                    "Participants must carry a valid college ID and report before the briefing begins.",
-                    "Maintain professional decorum and follow the time, format, and safety instructions.",
-                    "The judges' decision is final; malpractice or outside assistance may lead to disqualification."
-                ];
-            }
+            const rules = (rulesFromDb || '').split('\n').filter(r => r.trim());
+            if (!rules.length) rules.push('Event rules will be shared by the organizers.');
 
             rules.forEach(rule => {
                 const li = document.createElement('li');
@@ -7574,7 +7441,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     );
                 });
 
-                // Interactive 14 Events Dropdown Drawer Menu
+                // Interactive live event lineup drawer menu
                 const indexButton = document.getElementById('discCascadeIndexButton');
                 const indexContainer = document.getElementById('discCascadeIndex');
                 const indexClose = document.getElementById('discCascadeIndexClose');
@@ -7940,7 +7807,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
                 const animateCount = (el) => {
                     const target = parseInt(el.getAttribute('data-target'), 10) || 0;
-                    // Fast and responsive: 1 Lakh in ~250ms, 14 events in ~500ms, 100% in ~750ms
+                    // Animate only the visible numeric counters; event counts come from rendered event data.
                     const duration = target <= 2 ? 250 : (target <= 20 ? 500 : 750);
                     const startTime = performance.now();
 

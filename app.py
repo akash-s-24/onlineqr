@@ -928,14 +928,48 @@ def get_public_events():
     return public_events
 
 
+def get_public_event_category(event_name):
+    """Return the public lineup category for an official event name."""
+    name = re.sub(r'[^a-z0-9]+', ' ', (event_name or '').lower()).strip()
+    if name in ('bgmi', 'free fire'):
+        return 'gaming'
+    if name in ('tech quiz', 'get the shield'):
+        return 'technical'
+    if any(token in name for token in ('dance', 'singing', 'beat boxing', 'acting', 'fashion walk', 'mad ads')):
+        return 'cultural'
+    return 'arts'
+
+
 @app.route('/events')
 def events_list():
     events = get_public_events()
+    category_labels = {
+        'gaming': 'Gaming',
+        'technical': 'Technical & Strategy',
+        'cultural': 'Cultural & Performance',
+        'arts': 'Arts & Media',
+    }
+    category_counts = {key: 0 for key in category_labels}
+    for event in events:
+        event['category_key'] = get_public_event_category(event.get('event_name'))
+        category_counts[event['category_key']] += 1
+    event_category_filters = [
+        {'key': 'all', 'label': 'All Events', 'count': len(events)},
+        *[
+            {'key': key, 'label': label, 'count': category_counts[key]}
+            for key, label in category_labels.items()
+        ],
+    ]
     showcase_section = query_db(
         "SELECT * FROM event_showcase_sections WHERE section_key = %s",
         ('main-events',), one=True
     )
-    return render_template('events.html', events=events, showcase_section=showcase_section)
+    return render_template(
+        'events.html',
+        events=events,
+        showcase_section=showcase_section,
+        event_category_filters=event_category_filters,
+    )
 
 
 @app.route('/admin/event-showcase', methods=['POST'])
