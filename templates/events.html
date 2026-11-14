@@ -7009,10 +7009,18 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 if (title) title.textContent = `${name || 'Event'} rules`;
                 if (content) {
                     content.replaceChildren();
-                    const entries = (rules || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+                    let entries = (rules || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+                    if (entries.length === 1 && entries[0].length > 80 && entries[0].includes('.')) {
+                        entries = entries[0].split(/(?<=[.!?])\s+(?=[A-Z0-9•\-])/).map(s => s.trim()).filter(Boolean);
+                    }
                     if (entries.length) {
                         const list = document.createElement('ol');
-                        entries.forEach(line => { const item = document.createElement('li'); item.textContent = line.replace(/^[-•*]\s*/, ''); list.append(item); });
+                        list.className = 'event-dialog-rules-list';
+                        entries.forEach(line => {
+                            const item = document.createElement('li');
+                            item.textContent = line.replace(/^[-•*]\s*/, '').replace(/^\d+[\.\)]\s*/, '');
+                            list.append(item);
+                        });
                         content.append(list);
                     } else {
                         const note = document.createElement('p');

@@ -808,7 +808,19 @@ def create_tables_and_seed():
                 'event_fee': 400,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Each team must have 4 players. Network or device issues are the players responsibility. Hacking and cheating are strictly prohibited. No teaming with other squads. Players must join the match on time. The organizers decision will be final.',
+                'rules_text': (
+                    "Each team must have 4 players.\n"
+                    "Only handheld mobile smartphones (Android / iOS) are permitted; emulators, iPads, tablets, triggers, and external controllers are strictly prohibited.\n"
+                    "Hacking and cheating are strictly prohibited; using third-party GFX tools, config files, aimbot, or ESP leads to instant team disqualification.\n"
+                    "No teaming with other squads.\n"
+                    "Network or device issues are the players responsibility; no match remakes for individual disconnections.\n"
+                    "Custom room ID and password will be shared 15 minutes before the match; all squad members must join on time.\n"
+                    "Matches will be played in Squad mode on official tournament maps (Erangel / Miramar) as scheduled by the coordinators.\n"
+                    "Scoring follows standard competitive esports points: placement points plus 1 point per kill.\n"
+                    "Team captains must take and submit a clear screenshot of the end-game result screen and kill feed to the coordinators immediately after the match.\n"
+                    "Players must join the match on time.\n"
+                    "The organizers decision will be final."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -829,7 +841,18 @@ def create_tables_and_seed():
                 'event_fee': 400,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Each team must have 4 players. Network or device issues are the players responsibility. Hacking and cheating are strictly prohibited. No teaming with other squads. Players must join the match on time. The organizers decision will be final.',
+                'rules_text': (
+                    "Each team must have 4 players.\n"
+                    "Only mobile smartphones are permitted; emulators, PC clients, tablets, iPads, external controllers, and macro triggers are strictly prohibited.\n"
+                    "Hacking and cheating are strictly prohibited; scripts, auto-aim, wall hacks, and glitch exploits will result in immediate disqualification.\n"
+                    "No teaming with other squads.\n"
+                    "Network or device issues are the players responsibility; no match will be paused or restarted for personal drops.\n"
+                    "Custom room ID and password will be provided before match time; players must join their designated slot on time.\n"
+                    "Gun skins and character skill attributes follow tournament custom room settings announced by the coordinators.\n"
+                    "Team captains must screenshot the final squad summary screen and submit it to the room coordinator.\n"
+                    "Players must join the match on time.\n"
+                    "The organizers decision will be final."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -850,7 +873,16 @@ def create_tables_and_seed():
                 'event_fee': 100,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹100. Time limit: 60 minutes. Theme: A world I wish to see. Sketch sheets will be provided. Participants must bring pencils, erasers, sharpeners, rulers, and blending tools. Artwork must follow the given theme. Copying, tracing, mobile phones, or similar aids are prohibited. Any form of manipulation will lead to disqualification.',
+                'rules_text': (
+                    "Registration fee: ₹100.\n"
+                    "Time limit: 60 minutes.\n"
+                    "Theme: A world I wish to see.\n"
+                    "Sketch sheets will be provided.\n"
+                    "Participants must bring pencils, erasers, sharpeners, rulers, and blending tools.\n"
+                    "Artwork must follow the given theme.\n"
+                    "Copying, tracing, mobile phones, or similar aids are prohibited.\n"
+                    "Any form of manipulation will lead to disqualification."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -871,7 +903,14 @@ def create_tables_and_seed():
                 'event_fee': 200,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹200. Each team must consist of 2 participants. The competition has multiple clues and challenges leading to the final treasure. Follow clues in sequence and solve each clue to proceed. Follow the event coordinators instructions. Mobile phones, internet access, and assistance from outsiders are prohibited.',
+                'rules_text': (
+                    "Registration fee: ₹200.\n"
+                    "Each team must consist of 2 participants.\n"
+                    "The competition has multiple clues and challenges leading to the final treasure.\n"
+                    "Follow clues in sequence and solve each clue to proceed.\n"
+                    "Follow the event coordinators instructions.\n"
+                    "Mobile phones, internet access, and assistance from outsiders are prohibited."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -892,7 +931,14 @@ def create_tables_and_seed():
                 'event_fee': 100,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹100. Time limit: 60 minutes. Participants must bring their own mobile phone or camera and accessories. Photos must be taken during the competition period on campus. Editing is not allowed. AI-generated images, downloaded photographs, stock images, previously published content, and any form of manipulation are prohibited.',
+                'rules_text': (
+                    "Registration fee: ₹100.\n"
+                    "Time limit: 60 minutes.\n"
+                    "Participants must bring their own mobile phone or camera and accessories.\n"
+                    "Photos must be taken during the competition period on campus.\n"
+                    "Editing is not allowed.\n"
+                    "AI-generated images, downloaded photographs, stock images, previously published content, and any form of manipulation are prohibited."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -913,7 +959,13 @@ def create_tables_and_seed():
                 'event_fee': 100,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹100. Time limit: 1 hour. Create an engaging reel based on the event. Participants may use their own mobile phones and basic editing applications. AI-generated or copied content must be disclosed and will be considered according to competition guidelines.',
+                'rules_text': (
+                    "Registration fee: ₹100.\n"
+                    "Time limit: 1 hour.\n"
+                    "Create an engaging reel based on the event.\n"
+                    "Participants may use their own mobile phones and basic editing applications.\n"
+                    "AI-generated or copied content must be disclosed and will be considered according to competition guidelines."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -934,7 +986,13 @@ def create_tables_and_seed():
                 'event_fee': 100,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹100. Time limit: 3 + 1 minutes. Submit the music track to the coordinator at least 30 minutes before the event in MP3 format. Props are allowed if safe and they do not damage the stage. Vulgar, offensive, or inappropriate songs, movements, and costumes are prohibited.',
+                'rules_text': (
+                    "Registration fee: ₹100.\n"
+                    "Time limit: 3 + 1 minutes.\n"
+                    "Submit the music track to the coordinator at least 30 minutes before the event in MP3 format.\n"
+                    "Props are allowed if safe and they do not damage the stage.\n"
+                    "Vulgar, offensive, or inappropriate songs, movements, and costumes are prohibited."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -955,7 +1013,15 @@ def create_tables_and_seed():
                 'event_fee': 500,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹500. Time limit: 3 + 1 minutes. Team size: 8 to 10 participants. Any form of vulgarity in costume or dance is prohibited. Submit the music track to the coordinator before the event in MP3 format. Safe props are allowed if they do not damage the stage. Vulgar, offensive, or inappropriate songs, movements, and costumes are prohibited.',
+                'rules_text': (
+                    "Registration fee: ₹500.\n"
+                    "Time limit: 3 + 1 minutes.\n"
+                    "Team size: 8 to 10 participants.\n"
+                    "Any form of vulgarity in costume or dance is prohibited.\n"
+                    "Submit the music track to the coordinator before the event in MP3 format.\n"
+                    "Safe props are allowed if they do not damage the stage.\n"
+                    "Vulgar, offensive, or inappropriate songs, movements, and costumes are prohibited."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -976,7 +1042,14 @@ def create_tables_and_seed():
                 'event_fee': 300,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹300. Time limit: 3 + 1 minutes. Participants: 2 to 3. Vulgarity, profanity, and inappropriate gestures are prohibited. Participants must maintain a respectful, sportsmanlike attitude. Pre-recorded beat tracks are not allowed unless specifically permitted.',
+                'rules_text': (
+                    "Registration fee: ₹300.\n"
+                    "Time limit: 3 + 1 minutes.\n"
+                    "Participants: 2 to 3.\n"
+                    "Vulgarity, profanity, and inappropriate gestures are prohibited.\n"
+                    "Participants must maintain a respectful, sportsmanlike attitude.\n"
+                    "Pre-recorded beat tracks are not allowed unless specifically permitted."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -997,7 +1070,17 @@ def create_tables_and_seed():
                 'event_fee': 100,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹100. Time limit: 60 minutes. Team of 2: one artist and one model. Theme: Indian Folk and Tribal Art. Bring essential materials. Writing devices and other references may not be used. Use skin-safe, non-toxic, non-allergenic face paints safe for human skin. Permanent markers, industrial paints, chemicals, and harmful substances are prohibited. Painting near the eyes, mouth, and other sensitive areas must be done carefully; the model must remain comfortable.',
+                'rules_text': (
+                    "Registration fee: ₹100.\n"
+                    "Time limit: 60 minutes.\n"
+                    "Team of 2: one artist and one model.\n"
+                    "Theme: Indian Folk and Tribal Art.\n"
+                    "Bring essential materials.\n"
+                    "Writing devices and other references may not be used.\n"
+                    "Use skin-safe, non-toxic, non-allergenic face paints safe for human skin.\n"
+                    "Permanent markers, industrial paints, chemicals, and harmful substances are prohibited.\n"
+                    "Painting near the eyes, mouth, and other sensitive areas must be done carefully; the model must remain comfortable."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -1018,7 +1101,12 @@ def create_tables_and_seed():
                 'event_fee': 100,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹100. Participants: 1. Bring a mobile phone; it must be fully charged and have an active internet connection. The quiz may include technical, logical, and current-affairs-related rounds announced by the organizers.',
+                'rules_text': (
+                    "Registration fee: ₹100.\n"
+                    "Participants: 1.\n"
+                    "Bring a mobile phone; it must be fully charged and have an active internet connection.\n"
+                    "The quiz may include technical, logical, and current-affairs-related rounds announced by the organizers."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -1039,7 +1127,16 @@ def create_tables_and_seed():
                 'event_fee': 100,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹100. Time limit: 4 + 1 minutes. Theme: Indian films. Only individual performances are permitted; duets and backup singers are not allowed. Contestants must memorize lyrics; reading from a phone or paper on stage is prohibited. Submit the Karaoke/BGM music track to the coordinator at least 30 minutes before the event in MP3 format. Songs must be from Indian films. Vulgar, offensive, or double-entendre lyrics lead to immediate disqualification.',
+                'rules_text': (
+                    "Registration fee: ₹100.\n"
+                    "Time limit: 4 + 1 minutes.\n"
+                    "Theme: Indian films.\n"
+                    "Only individual performances are permitted; duets and backup singers are not allowed.\n"
+                    "Contestants must memorize lyrics; reading from a phone or paper on stage is prohibited.\n"
+                    "Submit the Karaoke/BGM music track to the coordinator at least 30 minutes before the event in MP3 format.\n"
+                    "Songs must be from Indian films.\n"
+                    "Vulgar, offensive, or double-entendre lyrics lead to immediate disqualification."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -1060,7 +1157,15 @@ def create_tables_and_seed():
                 'event_fee': 500,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹500. Time limit: 3 + 1 minutes. Team size: 8 to 10 participants. Teams may use dialogue, acting, music, dance, and comedy. The advertisement must promote the assigned real or fictional product. Offensive personal comments, deliberate insults or defamation of real brands, vulgarity, political or religious content, fire, water, sharp objects, hazardous materials, smoke machines, and unsafe props are prohibited. Submit music and any required backdrop images to the coordinator before the event.',
+                'rules_text': (
+                    "Registration fee: ₹500.\n"
+                    "Time limit: 3 + 1 minutes.\n"
+                    "Team size: 8 to 10 participants.\n"
+                    "Teams may use dialogue, acting, music, dance, and comedy.\n"
+                    "The advertisement must promote the assigned real or fictional product.\n"
+                    "Offensive personal comments, deliberate insults or defamation of real brands, vulgarity, political or religious content, fire, water, sharp objects, hazardous materials, smoke machines, and unsafe props are prohibited.\n"
+                    "Submit music and any required backdrop images to the coordinator before the event."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -1081,7 +1186,15 @@ def create_tables_and_seed():
                 'event_fee': 100,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹100. Time limit: 3 + 1 minutes. Theme: Mythology characters; performance must be in Kannada. The performance should be an original act or a well-prepared portrayal. Perform individually without support from other actors. Vulgar, offensive, or inappropriate language and content are prohibited. Background music or sound effects may be used if arranged in advance.',
+                'rules_text': (
+                    "Registration fee: ₹100.\n"
+                    "Time limit: 3 + 1 minutes.\n"
+                    "Theme: Mythology characters; performance must be in Kannada.\n"
+                    "The performance should be an original act or a well-prepared portrayal.\n"
+                    "Perform individually without support from other actors.\n"
+                    "Vulgar, offensive, or inappropriate language and content are prohibited.\n"
+                    "Background music or sound effects may be used if arranged in advance."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',
@@ -1102,7 +1215,17 @@ def create_tables_and_seed():
                 'event_fee': 500,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
-                'rules_text': 'Registration fee: ₹500. Time limit: 3 + 1 minutes. Team size: 6 to 8 participants. Theme: Seasons of Style. Costumes and movements must be decent, respectful, and appropriate. Judging considers creativity and overall performance. Dangerous props are prohibited; safe props are allowed if they do not damage the stage. Vulgar, offensive, or inappropriate songs, movements, and costumes are prohibited. Submit the music track and any required backdrop images to the coordinator before the event.',
+                'rules_text': (
+                    "Registration fee: ₹500.\n"
+                    "Time limit: 3 + 1 minutes.\n"
+                    "Team size: 6 to 8 participants.\n"
+                    "Theme: Seasons of Style.\n"
+                    "Costumes and movements must be decent, respectful, and appropriate.\n"
+                    "Judging considers creativity and overall performance.\n"
+                    "Dangerous props are prohibited; safe props are allowed if they do not damage the stage.\n"
+                    "Vulgar, offensive, or inappropriate songs, movements, and costumes are prohibited.\n"
+                    "Submit the music track and any required backdrop images to the coordinator before the event."
+                ),
                 'faculty_name': 'RANJITHA B K',
                 'faculty_phone': '88615 91085',
                 'student_name': 'SINDHU M R',

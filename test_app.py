@@ -2,6 +2,7 @@ import unittest
 import json
 import os
 import time
+import uuid
 from unittest.mock import patch
 import app as app_module
 from app import app
@@ -818,54 +819,57 @@ class SDATestCase(unittest.TestCase):
         # 5. Check event editing POST updates rules, faculty and student coordinator info
         bgmi_event = database.query_db("SELECT id FROM events WHERE event_name = 'BGMI'", one=True)
         self.assertIsNotNone(bgmi_event)
-        edit_post_res = self.client.post(f"/admin/events/edit/{bgmi_event['id']}", data={
-            'event_name': 'BGMI',
-            'event_type': 'Gaming',
-            'event_date': '25-26-nov-2026',
-            'event_time': '10:00 AM',
-            'venue': 'Computer Lab 3',
-            'max_participants': '100',
-            'is_group': '1',
-            'min_team_size': '4',
-            'max_team_size': '4',
-            'event_fee': '400',
-            'upi_id': Config.DEFAULT_UPI_ID,
-            'description': 'Battle Royale championship at Daksha Infinix.',
-            'rules_text': 'Rule 1: Mobile only, no emulators.\nRule 2: Fair play mandatory.',
-            'faculty_name': 'Prof. Rajesh Kumar',
-            'faculty_phone': '9876543210',
-            'student_name': 'Akash S',
-            'student_phone': '8050774071'
-        }, follow_redirects=True)
-        self.assertEqual(edit_post_res.status_code, 200)
+        bgmi_initial = database.query_db("SELECT description, rules_text FROM events WHERE event_name = 'BGMI'", one=True)
+        try:
+            edit_post_res = self.client.post(f"/admin/events/edit/{bgmi_event['id']}", data={
+                'event_name': 'BGMI',
+                'event_type': 'Gaming',
+                'event_date': '25-26-nov-2026',
+                'event_time': '10:00 AM',
+                'venue': 'Computer Lab 3',
+                'max_participants': '100',
+                'is_group': '1',
+                'min_team_size': '4',
+                'max_team_size': '4',
+                'event_fee': '400',
+                'upi_id': Config.DEFAULT_UPI_ID,
+                'description': 'Battle Royale championship at Daksha Infinix.',
+                'rules_text': 'Rule 1: Mobile only, no emulators.\nRule 2: Fair play mandatory.',
+                'faculty_name': 'Prof. Rajesh Kumar',
+                'faculty_phone': '9876543210',
+                'student_name': 'Akash S',
+                'student_phone': '8050774071'
+            }, follow_redirects=True)
+            self.assertEqual(edit_post_res.status_code, 200)
 
-        # Verify updated values in database
-        ev = database.query_db("SELECT * FROM events WHERE event_name = 'BGMI'", one=True)
-        self.assertEqual(ev['faculty_name'], 'Prof. Rajesh Kumar')
-        self.assertEqual(ev['student_name'], 'Akash S')
-        self.assertIn('Rule 1', ev['rules_text'])
-        self.assertEqual(ev['upi_id'], Config.DEFAULT_UPI_ID)
-        self.assertIsNone(ev['qr_code_image'])
+            # Verify updated values in database
+            ev = database.query_db("SELECT * FROM events WHERE event_name = 'BGMI'", one=True)
+            self.assertEqual(ev['faculty_name'], 'Prof. Rajesh Kumar')
+            self.assertEqual(ev['student_name'], 'Akash S')
+            self.assertIn('Rule 1', ev['rules_text'])
+            self.assertEqual(ev['upi_id'], Config.DEFAULT_UPI_ID)
+            self.assertIsNone(ev['qr_code_image'])
 
-        # 6. Verify attendance view has no inflated 140 fake absence
-        att_res = self.client.get('/admin/attendance')
-        att_html = att_res.data.decode('utf-8')
-        self.assertNotIn('140', att_html)
-        self.assertIn('Awaiting Check-in', att_html)
-
-        # Restore canonical BGMI event details for subsequent tests
-        database.execute_db(
-            """
-            UPDATE events
-            SET description = %s,
-                faculty_name = 'RANJITHA B K',
-                faculty_phone = '88615 91085',
-                student_name = 'SINDHU M R',
-                student_phone = '88922 63116'
-            WHERE event_name = 'BGMI'
-            """,
-            ('A premier battle royale tournament where four-player squads deploy across high-stakes battlegrounds, demonstrating tactical positioning, precision shooting, strategic communication, and relentless survival instincts to claim the ultimate championship.',)
-        )
+            # 6. Verify attendance view has no inflated 140 fake absence
+            att_res = self.client.get('/admin/attendance')
+            att_html = att_res.data.decode('utf-8')
+            self.assertNotIn('140', att_html)
+            self.assertIn('Awaiting Check-in', att_html)
+        finally:
+            # Restore initial BGMI event details for subsequent tests
+            database.execute_db(
+                """
+                UPDATE events
+                SET description = %s,
+                    rules_text = %s,
+                    faculty_name = 'RANJITHA B K',
+                    faculty_phone = '88615 91085',
+                    student_name = 'SINDHU M R',
+                    student_phone = '88922 63116'
+                WHERE event_name = 'BGMI'
+                """,
+                (bgmi_initial['description'], bgmi_initial['rules_text'])
+            )
 
     def test_20_password_required_login_and_navigation_verification(self):
         """Verify public navigation and enforce passwords for staff sign-in."""
@@ -1611,10 +1615,11 @@ class SDATestCase(unittest.TestCase):
         ev = database.query_db("SELECT id FROM events LIMIT 1", one=True)
         self.assertIsNotNone(ev)
 
-        # Create a test registration
+        # Create a test registration (use hex suffix to prevent numeric substring collision in attendance tests)
+        uid_token = uuid.uuid4().hex[:8]
         reg_info = database.create_registration(
             full_name="WhatsApp Test Student",
-            email=f"wa_{int(time.time()*1000)}@example.com",
+            email=f"wa_test_reg_{uid_token}@testdomain.org",
             phone="9876543210",
             college_name="Test College",
             department="PCMB",
@@ -1626,7 +1631,7 @@ class SDATestCase(unittest.TestCase):
             payment_status='paid',
             amount_paid=100,
             payment_method='Online',
-            utr_number=f"UTR{int(time.time()*1000)}",
+            utr_number=f"UTRTEST{uid_token}",
             registered_by=1,
             is_group_event=False
         )
@@ -1634,11 +1639,47 @@ class SDATestCase(unittest.TestCase):
         reg_uid = reg_info['registration_uid']
 
         # Call endpoint
-        res = self.client.get(f'/registration/{reg_uid}/whatsapp-receipt')
-        self.assertEqual(res.status_code, 302)
-        location = res.headers.get('Location', '')
-        self.assertTrue(location.startswith('https://wa.me/919876543210'))
-        self.assertIn(reg_uid, location)
+        try:
+            res = self.client.get(f'/registration/{reg_uid}/whatsapp-receipt')
+            self.assertEqual(res.status_code, 302)
+            location = res.headers.get('Location', '')
+            self.assertTrue(location.startswith('https://wa.me/919876543210'))
+            self.assertIn(reg_uid, location)
+        finally:
+            database.execute_db("DELETE FROM registrations WHERE registration_uid = %s", (reg_uid,))
+            database.execute_db("DELETE FROM participants WHERE email = %s", (f"wa_test_reg_{uid_token}@testdomain.org",))
+
+    def test_pointwise_rules_structure_across_all_events(self):
+        """Verify all 15 events have point-wise rules delimited by newlines, with gaming having extended rules."""
+        events = database.query_db("SELECT event_name, rules_text FROM events")
+        self.assertEqual(len(events), 15)
+
+        for ev in events:
+            rules_text = (ev['rules_text'] or '').strip()
+            self.assertTrue(len(rules_text) > 0, f"Event {ev['event_name']} has empty rules")
+            lines = [line.strip() for line in rules_text.split('\n') if line.strip()]
+            self.assertGreaterEqual(
+                len(lines),
+                4,
+                f"Event {ev['event_name']} rules must be point-wise with at least 4 individual points"
+            )
+
+        # Check gaming specific additions
+        bgmi = database.query_db("SELECT rules_text FROM events WHERE event_name = 'BGMI'", one=True)
+        self.assertIsNotNone(bgmi)
+        bgmi_rules = bgmi['rules_text']
+        self.assertIn('smartphones', bgmi_rules.lower())
+        self.assertIn('emulators', bgmi_rules.lower())
+        self.assertIn('custom room', bgmi_rules.lower())
+        self.assertIn('screenshot', bgmi_rules.lower())
+
+        free_fire = database.query_db("SELECT rules_text FROM events WHERE event_name = 'Free Fire'", one=True)
+        self.assertIsNotNone(free_fire)
+        ff_rules = free_fire['rules_text']
+        self.assertIn('No teaming with other squads', ff_rules)
+        self.assertIn('smartphones', ff_rules.lower())
+        self.assertIn('emulators', ff_rules.lower())
+        self.assertIn('screenshot', ff_rules.lower())
 
 
 if __name__ == '__main__':

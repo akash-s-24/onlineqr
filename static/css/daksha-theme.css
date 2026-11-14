@@ -1236,6 +1236,10 @@ html:not([data-theme="light"]) .event-dialog a:active {
 .event-dialog-eyebrow { margin: 0 0 8px; color: var(--link); font-size: .72rem; font-weight: 800; letter-spacing: .12em; }
 .event-dialog-content { color: var(--text-2); line-height: 1.65; overflow-wrap: anywhere; }
 .event-dialog-content ol { display: grid; gap: 10px; padding-left: 1.4rem; }
+#rulesModal .event-dialog { width: min(100%, 640px); }
+.event-dialog-rules-list { display: flex !important; flex-direction: column !important; gap: 10px !important; padding-left: 1.5rem !important; margin: 12px 0 0 !important; text-align: left !important; }
+.event-dialog-rules-list li { line-height: 1.6 !important; font-size: 0.93rem !important; color: var(--text) !important; padding-left: 4px !important; }
+.event-dialog-rules-list li::marker { font-weight: 700 !important; color: var(--link) !important; }
 .event-dialog-close { position: absolute; top: 14px; right: 14px; display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 50%; background: var(--surface-2); color: var(--text); font-size: 1.5rem; cursor: pointer; }
 .event-contact-person { display: grid; gap: 4px; padding: 14px 0; border-top: 1px solid var(--border); }
 .event-contact-person span { color: var(--text-2); font-size: .8rem; }
