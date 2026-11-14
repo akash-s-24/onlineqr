@@ -1109,7 +1109,8 @@ html.dark body {
 :root[data-theme] .hero-badge-pill .registration-dot { background: #16a34a !important; box-shadow: 0 0 0 3px rgba(22,163,74,.17) !important; }
 :root[data-theme] .stat-card-championship .stat-title-championship { font-size: clamp(1.65rem, 2.4vw, 2rem) !important; line-height: 1.15 !important; }
 :root[data-theme] .stat-card-championship .stat-title-accent { color: #2563eb !important; -webkit-text-fill-color: #2563eb !important; }
-:root[data-theme] .stat-value-events .stat-number-plus { color: #2563eb !important; -webkit-text-fill-color: #2563eb !important; }
+:root[data-theme="dark"] .stat-card-championship .stat-title-accent,
+:root[data-theme="dark"] .stat-value-events .stat-number-plus { color: #93c5fd !important; -webkit-text-fill-color: #93c5fd !important; }
 
 /* Clear the public navigation containers while keeping its active item cue. */
 :root[data-theme] .landing-header #headerNavCenter:not(.open),
@@ -1195,6 +1196,17 @@ html:not([data-theme="light"]) #contact a,
 html:not([data-theme="light"]) #contact a:hover,
 html:not([data-theme="light"]) #contact a:focus-visible,
 html:not([data-theme="light"]) #contact a:active {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+:root[data-theme] .event-dialog a,
+:root[data-theme] .event-dialog a:hover,
+:root[data-theme] .event-dialog a:focus-visible,
+:root[data-theme] .event-dialog a:active,
+html:not([data-theme="light"]) .event-dialog a,
+html:not([data-theme="light"]) .event-dialog a:hover,
+html:not([data-theme="light"]) .event-dialog a:focus-visible,
+html:not([data-theme="light"]) .event-dialog a:active {
   text-decoration: none !important;
   text-decoration-line: none !important;
 }

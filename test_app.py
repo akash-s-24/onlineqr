@@ -701,7 +701,8 @@ class SDATestCase(unittest.TestCase):
 
         championship_card = html.split('class="stat-card stat-card-championship', 1)[1].split('<!-- Card 3: Prize pool -->', 1)[0]
         self.assertIn('<span>General</span> <span class="stat-title-accent">Championship</span>', championship_card)
-        self.assertIn('eligible to compete for the overall fest title.', championship_card)
+        self.assertIn('Eligible colleges compete for the overall fest title.', championship_card)
+        self.assertNotIn('15 competitions', championship_card)
         self.assertNotIn('stat-action-link', championship_card)
         self.assertNotIn('championship-competition-list', championship_card)
         self.assertNotIn('<div class="stat-badge">GENERAL CHAMPIONSHIP</div>', championship_card)
@@ -732,6 +733,8 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('.stat-value-events .stat-number-plus', theme_css)
         self.assertNotIn('.stat-value-events .stat-number,', theme_css)
         self.assertIn('text-decoration-line: none !important', theme_css)
+        self.assertIn(':root[data-theme="dark"] .stat-value-events .stat-number-plus { color: #93c5fd', theme_css)
+        self.assertIn('.event-dialog a:hover', theme_css)
         self.assertIn(':root[data-theme="light"] .registration-success-notice', theme_css)
         self.assertIn(':root[data-theme="dark"] .registration-success-notice', theme_css)
         self.assertIn('.institution-spotlight-heading', theme_css)
