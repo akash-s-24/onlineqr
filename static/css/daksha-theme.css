@@ -989,10 +989,6 @@ html.dark body {
   #registration .track-btn-secondary
 ) a { text-decoration: none !important; }
 
-:root[data-theme] .stat-card-championship { min-height: 0 !important; padding-bottom: 1.5rem !important; }
-:root[data-theme] .stat-card-championship .stat-icon-wrapper { margin-bottom: 14px; }
-:root[data-theme] .stat-card-championship .stat-title { margin: 0 0 .65rem; }
-:root[data-theme] .stat-card-championship .stat-desc { max-width: 32ch; margin: 0 auto; }
 :root[data-theme] .stat-badge-events {
   background: #1d4ed8 !important;
   border: 0 !important;
@@ -1072,14 +1068,8 @@ html.dark body {
   .registration-pass-qr-copy { text-align: center; }
 }
 
-/* Public landing header: keep the desktop nav on the page surface and show one clear active state. */
-.landing-header #headerNavCenter:not(.open) { background: transparent !important; }
-.landing-header #mainBreadcrumb,
-.landing-header .image-like-nav { background: transparent !important; border: 0 !important; box-shadow: none !important; }
-.landing-header .nav-pill-indicator { display: none !important; }
-.landing-header .image-like-nav .nav-link { text-decoration: none !important; transition: color .16s ease, background-color .16s ease !important; }
-.landing-header .image-like-nav .nav-link:hover { color: #2563eb !important; background: rgba(37,99,235,.08) !important; }
-.landing-header .image-like-nav .nav-link.active { color: #1d4ed8 !important; background: rgba(37,99,235,.12) !important; }
+/* Public landing navigation restores the existing pill indicator and surface treatment. */
+.landing-header .image-like-nav .nav-link { text-decoration: none !important; }
 .landing-header .image-like-nav .nav-link::before,
 .landing-header .image-like-nav .nav-link::after { text-decoration: none !important; box-shadow: none !important; }
 .landing-header #themeToggleBtn { width: 38px !important; height: 38px !important; padding: 8px !important; border: 1px solid var(--border) !important; border-radius: 50% !important; background: transparent !important; color: var(--text-2) !important; box-shadow: none !important; }
@@ -1117,10 +1107,9 @@ html.dark body {
 #hero .hero-actions .hero-contact-btn:hover::before,
 .landing-header #headerRegisterBtn:hover::before { transform: scaleX(1); }
 :root[data-theme] .hero-badge-pill .registration-dot { background: #16a34a !important; box-shadow: 0 0 0 3px rgba(22,163,74,.17) !important; }
-:root[data-theme] .stat-card-championship { min-height: 270px !important; background: #101318 !important; border-color: rgba(96,165,250,.48) !important; color: #fff !important; box-shadow: 0 18px 42px rgba(15,23,42,.22), inset 0 1px rgba(255,255,255,.08) !important; }
-:root[data-theme] .stat-card-championship .stat-title-championship { color: #fff !important; }
-:root[data-theme] .stat-card-championship .stat-title-championship span:last-child { color: #60a5fa !important; }
-:root[data-theme] .stat-card-championship .stat-desc { color: #d1d5db !important; }
+:root[data-theme] .stat-card-championship .stat-title-championship { font-size: clamp(1.65rem, 2.4vw, 2rem) !important; line-height: 1.15 !important; }
+:root[data-theme] .stat-value-events .stat-number,
+:root[data-theme] .stat-value-events .stat-number-plus { color: #2563eb !important; -webkit-text-fill-color: #2563eb !important; }
 .event-dialog-backdrop[hidden] { display: none !important; }
 .event-dialog-backdrop { position: fixed; z-index: 3000; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(8,15,25,.64); backdrop-filter: blur(8px); }
 .event-dialog { position: relative; width: min(100%, 520px); max-height: min(82vh, 720px); overflow: auto; padding: 28px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--text); box-shadow: 0 24px 80px rgba(0,0,0,.28); }

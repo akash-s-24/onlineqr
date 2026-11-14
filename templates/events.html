@@ -2339,10 +2339,10 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     text-transform: uppercase;
     }
     .crest-institution-sub {
-    font-size: 0.84rem;
+    font-size: clamp(0.45rem, 1.8vw, 0.84rem);
     color: #94a3b8;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
     margin-top: 3px;
     }
 
@@ -2359,6 +2359,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     .crest-emblem-disc img { display: block !important; visibility: visible !important; opacity: 1 !important; width:
     96% !important; height: 96% !important; object-fit: contain !important; }
     .crest-institution-name { font-size: 1.05rem !important; }
+    .crest-institution-sub { font-size: clamp(0.45rem, 1.8vw, 0.66rem) !important; }
     .principal-message-logo { width: 110px !important; height: 110px !important; margin: -100px auto 16px !important; }
     .principal-message-logo img { display: block !important; visibility: visible !important; opacity: 1 !important;
     width: 96% !important; height: 96% !important; object-fit: contain !important; }
@@ -5980,7 +5981,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     <div class="crest-orbit-ring" aria-hidden="true"></div>
                 </div>
                 <span class="crest-institution-name">SHREE DAKSHA ACADEMY</span>
-                <span class="crest-institution-sub">Govt. of Karnataka · BU · AICTE approved</span>
+                <span class="crest-institution-sub">Recognized by Government of Karnataka, affiliated to Bengaluru University, approved by AICTE.</span>
                 <span class="crest-institution-addr"
                     style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px; letter-spacing: 0.3px; text-align: center; max-width: 600px;">No.596,
                     Andrahalli Main Road, Opp. D.Group Layout Arch, Bengaluru - 560091</span>
@@ -5995,7 +5996,6 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
         <div class="fest-stats-container">
             <!-- Card 1: Competition threshold highlight -->
             <div class="stat-card rv" style="--d: 0.1s;">
-                <div class="stat-badge stat-badge-events">15 COMPETITIONS</div>
                 <div class="stat-icon-wrapper">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -6004,8 +6004,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         </polygon>
                     </svg>
                 </div>
-                <div class="stat-value-row">
-                    <b class="stat-number" data-target="15">15</b>
+                <div class="stat-value-row stat-value-events">
+                    <b class="stat-number" data-target="12">12</b><span class="stat-number-plus" aria-label="plus">+</span>
                 </div>
                 <h3 class="stat-title">Competitions</h3>
                 <p class="stat-desc">Browse the complete lineup of registered competitions below.</p>
@@ -6020,7 +6020,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             </div>
 
             <!-- Card 2: General Championship -->
-            <div class="stat-card stat-card-highlight stat-card-championship rv" style="--d: 0.2s;">
+            <div class="stat-card stat-card-championship rv" style="--d: 0.2s;">
                 <div class="stat-icon-wrapper trophy-icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -6028,7 +6028,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         <path d="M7 6H4v2a4 4 0 0 0 4 4m9-6h3v2a4 4 0 0 1-4 4"></path>
                     </svg>
                 </div>
-                <h3 class="stat-title stat-title-championship"><span>General</span> <span>Championship</span></h3>
+                <h3 class="stat-title stat-title-championship">General Championship</h3>
                 <p class="stat-desc">Colleges registered for all 15 competitions are eligible to compete for the overall fest title.</p>
             </div>
 
@@ -6939,6 +6939,25 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 src="https://maps.google.com/maps?width=100%25&height=440&hl=en&q=Shree%20Daksha%20Academy%2C%20No%20596%2C%20Andrahalli%20Main%20Rd%2C%20Lingadeeranahalli%2C%20Bengaluru%20560091&t=&z=16&ie=UTF8&iwloc=B&output=embed"
                 allowfullscreen="" loading="lazy" title="Campus Location Map">
             </iframe>
+        </div>
+    </section>
+
+    <!-- Contact Us: show coordinator phone numbers without public names. -->
+    <section id="contact" class="map-section">
+        <h2 class="section-title" style="margin-bottom: 22px; text-align: center;">Contact Us</h2>
+        <div class="contact-grid coordinator-phone-grid">
+            <article class="contact-card coordinator-phone-card">
+                <a href="tel:{{ config.EVENT_COORDINATOR_PRIMARY_PHONE|replace(' ', '') }}"
+                    class="streamlined-call-link" aria-label="Call event coordinator">
+                    <span>{{ config.EVENT_COORDINATOR_PRIMARY_PHONE }}</span>
+                </a>
+            </article>
+            <article class="contact-card coordinator-phone-card">
+                <a href="tel:{{ config.EVENT_COORDINATOR_SECONDARY_PHONE|replace(' ', '') }}"
+                    class="streamlined-call-link" aria-label="Call event coordinator">
+                    <span>{{ config.EVENT_COORDINATOR_SECONDARY_PHONE }}</span>
+                </a>
+            </article>
         </div>
     </section>
 

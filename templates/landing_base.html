@@ -1684,7 +1684,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261114_v11">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261114_v12">
  </head>
 
 <body
@@ -1724,7 +1724,7 @@
                     <span class="landing-logo-title"
                         style="font-size: 0.98rem; font-weight: 800; letter-spacing: -0.01em;">SHREE DAKSHA ACADEMY</span>
                     <span class="landing-logo-meta"
-                        style="font-size: 0.7rem; color: #94a3b8; font-weight: 600; letter-spacing: 0.2px;">Government of Karnataka approved by Bengaluru University</span>
+                        style="font-size: 0.7rem; color: #94a3b8; font-weight: 600; letter-spacing: 0.2px;">Government of Karnataka approved by Bengaluru University · AICTE approved</span>
                     <span class="landing-logo-addr" style="font-size: 0.7rem; color: #64748b;">No.596, Andrahalli Main Road, Bengaluru - 560091</span>
                 </div>
             </a>
@@ -1740,7 +1740,7 @@
                     <li><a href="{{ url_for('events_list') }}#registration" class="nav-link" data-section="registration">Procedures</a></li>
                     <li><a href="{{ url_for('events_list') }}#faq" class="nav-link" data-section="faq">FAQ</a></li>
                     <li><a href="{{ url_for('events_list') }}#location" class="nav-link" data-section="location">Map</a></li>
-                    <li><a href="{{ url_for('events_list') }}#events" class="nav-link" data-section="contact">Contact</a></li>
+                    <li><a href="{{ url_for('events_list') }}#contact" class="nav-link" data-section="contact">Contact</a></li>
 
                     {% if session.get('user_id') %}
                     {% if session.get('role') == 'admin' %}
@@ -1963,7 +1963,7 @@
                         </svg>
                         Map
                     </a>
-                    <a href="{{ url_for('events_list') }}#events">
+                    <a href="{{ url_for('events_list') }}#contact">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
