@@ -699,9 +699,9 @@ html.dark body {
 :root[data-theme] :is(.btn-primary, .btn-luxe-primary, .header-cta-classic, .hero-explore-btn, .btn-card-register, .clean-black-submit-btn, .auth-submit, .dashboard-btn.primary, .track-btn-primary, .dock-directions-btn, #submitBtn, #upiPayButton):not(.liquid-btn) { background: var(--primary) !important; border-color: var(--primary) !important; color: var(--on-primary) !important; -webkit-text-fill-color: var(--on-primary) !important; }
 :root[data-theme] :is(.btn-primary, .btn-luxe-primary, .header-cta-classic, .hero-explore-btn, .btn-card-register, .clean-black-submit-btn, .auth-submit, .dashboard-btn.primary, .track-btn-primary, .dock-directions-btn, #submitBtn, #upiPayButton):not(.liquid-btn):hover { background: var(--primary-hover) !important; border-color: var(--primary-hover) !important; color: var(--on-primary) !important; -webkit-text-fill-color: var(--on-primary) !important; }
 :root[data-theme="light"] #hero .hero-actions button.hero-explore-btn:not(.liquid-btn),
-:root[data-theme="dark"] #hero .hero-actions button.hero-explore-btn:not(.liquid-btn) { background: var(--primary) !important; border-color: var(--primary) !important; color: var(--on-primary) !important; -webkit-text-fill-color: var(--on-primary) !important; box-shadow: 0 4px 16px rgba(0,0,0,.18) !important; }
+:root[data-theme="dark"] #hero .hero-actions button.hero-explore-btn:not(.liquid-btn) { background: #ffffff !important; border: 2px solid #2563eb !important; border-color: #2563eb !important; color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; box-shadow: 0 3px 14px rgba(37, 99, 235, 0.16) !important; }
 :root[data-theme="light"] #hero .hero-actions button.hero-explore-btn:not(.liquid-btn):hover,
-:root[data-theme="dark"] #hero .hero-actions button.hero-explore-btn:not(.liquid-btn):hover { background: var(--primary-hover) !important; border-color: var(--primary-hover) !important; box-shadow: 0 6px 20px rgba(0,0,0,.24) !important; }
+:root[data-theme="dark"] #hero .hero-actions button.hero-explore-btn:not(.liquid-btn):hover { background: #2563eb !important; border-color: #1d4ed8 !important; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45) !important; }
 :root[data-theme] #hero .hero-starts-badge { color: var(--text-2) !important; }
 :root[data-theme] #copyUpiBtn { background: var(--surface-2) !important; color: var(--primary) !important; border-color: var(--border) !important; }
 :root[data-theme] #copyUpiBtn:hover { background: var(--primary-light) !important; }
@@ -1080,7 +1080,8 @@ html.dark body {
 #hero .hero-actions .hero-explore-btn:not(.liquid-btn),
 .landing-header #headerRegisterBtn:not(.liquid-btn) {
   position: relative !important; isolation: isolate; overflow: hidden;
-  color: #111827 !important; background: #fff !important; border-color: #d1d5db !important;
+  color: #0f172a !important; background: #ffffff !important; border: 2px solid #2563eb !important; border-color: #2563eb !important;
+  box-shadow: 0 3px 14px rgba(37, 99, 235, 0.16) !important;
   transition: color .2s ease, border-color .2s ease, background-color .2s ease !important;
 }
 #hero .hero-actions .hero-explore-btn:not(.liquid-btn)::before,
@@ -1089,7 +1090,7 @@ html.dark body {
   transform: scaleX(0); transform-origin: left; transition: transform .24s ease;
 }
 #hero .hero-actions .hero-explore-btn:not(.liquid-btn):hover,
-.landing-header #headerRegisterBtn:not(.liquid-btn):hover { color: #fff !important; background: #fff !important; border-color: #2563eb !important; text-decoration: none !important; }
+.landing-header #headerRegisterBtn:not(.liquid-btn):hover { color: #ffffff !important; background: #2563eb !important; border-color: #1d4ed8 !important; text-decoration: none !important; }
 #hero .hero-actions .hero-explore-btn:not(.liquid-btn):hover::before,
 .landing-header #headerRegisterBtn:not(.liquid-btn):hover::before { transform: scaleX(1); }
 :root[data-theme] .hero-badge-pill .registration-dot { background: #16a34a !important; box-shadow: 0 0 0 3px rgba(22,163,74,.17) !important; }

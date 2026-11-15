@@ -427,6 +427,18 @@
 
       renderShape();
 
+      // Manage is-liquid-filled state for seamless text transition:
+      // label turns black on approaching white background, reverts to white once blue liquid finishes covering
+      if (active && targetRadius > 0 && state.radius >= targetRadius * 0.55) {
+        if (!btn.classList.contains('is-liquid-filled')) {
+          btn.classList.add('is-liquid-filled');
+        }
+      } else if (!active || (targetRadius > 0 && state.radius < targetRadius * 0.4)) {
+        if (btn.classList.contains('is-liquid-filled')) {
+          btn.classList.remove('is-liquid-filled');
+        }
+      }
+
       if (active || state.ringPhase > 0 || Math.abs(state.radius) > 0.1) {
         state.frame = window.requestAnimationFrame(tick);
       } else {
@@ -436,6 +448,7 @@
         state.stretch = 1;
         state.speed = 0;
         state.ringPhase = 0;
+        btn.classList.remove('is-liquid-filled');
         renderShape();
       }
     }
@@ -539,6 +552,7 @@
       state.pointerActive = false;
       state.lastPointerTime = 0;
       btn.classList.remove('is-pressed');
+      btn.classList.remove('is-liquid-filled');
       scheduleFrame();
     });
 

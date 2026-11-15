@@ -199,26 +199,99 @@
   fill: #10b981 !important;
 }
 
-/* ── 2. BLUE LIQUID BUTTONS (#3b82f6 rupee & lakh accent) ──
-   • Explore event button: .hero-explore-btn
+/* ── 2A. WHITE-RESTING BLUE-LIQUID BUTTONS (BLACK TEXT AT REST -> WHITE ON LIQUID FINISH) ──
+   • Explore Events: .hero-explore-btn
+   • Register Only Online: .track-footer a.track-btn-primary, .track-btn.track-btn-primary
+*/
+.hero-explore-btn.liquid-btn,
+.track-footer a.track-btn-primary.liquid-btn,
+.track-btn.track-btn-primary.liquid-btn {
+  --liquid-fill: #2563eb !important;
+  --liquid-border: #2563eb !important;
+  --liquid-text: #0f172a !important;
+  --liquid-active-text: #ffffff !important;
+  --liquid-glow: rgba(37, 99, 235, 0.45) !important;
+  background: #ffffff !important;
+  border: 2px solid #2563eb !important;
+  color: #0f172a !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: 0 3px 14px rgba(37, 99, 235, 0.16) !important;
+}
+
+.hero-explore-btn.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
+.track-footer a.track-btn-primary.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
+.track-btn.track-btn-primary.liquid-btn .liquid-btn-svg ellipse.liquid-blob {
+  fill: #2563eb !important;
+}
+
+.hero-explore-btn.liquid-btn .liquid-btn-content,
+.track-footer a.track-btn-primary.liquid-btn .liquid-btn-content,
+.track-btn.track-btn-primary.liquid-btn .liquid-btn-content {
+  color: #0f172a !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0s !important;
+}
+
+.hero-explore-btn.liquid-btn .liquid-btn-content svg,
+.track-footer a.track-btn-primary.liquid-btn .liquid-btn-content svg,
+.track-btn.track-btn-primary.liquid-btn .liquid-btn-content svg {
+  color: #0f172a !important;
+  stroke: #0f172a !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0s, stroke 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0s !important;
+}
+
+.hero-explore-btn.liquid-btn:hover,
+.track-footer a.track-btn-primary.liquid-btn:hover,
+.track-btn.track-btn-primary.liquid-btn:hover {
+  transform: translateY(-1.5px) !important;
+  border-color: #1d4ed8 !important;
+  box-shadow: 0 6px 22px rgba(37, 99, 235, 0.45) !important;
+}
+
+/* Hover: as liquid effect finishes covering, label reverts to white */
+.hero-explore-btn.liquid-btn:hover .liquid-btn-content,
+.track-footer a.track-btn-primary.liquid-btn:hover .liquid-btn-content,
+.track-btn.track-btn-primary.liquid-btn:hover .liquid-btn-content {
+  color: #ffffff !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s !important;
+}
+
+.hero-explore-btn.liquid-btn:hover .liquid-btn-content svg,
+.track-footer a.track-btn-primary.liquid-btn:hover .liquid-btn-content svg,
+.track-btn.track-btn-primary.liquid-btn:hover .liquid-btn-content svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s, stroke 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s !important;
+}
+
+.hero-explore-btn.liquid-btn.is-liquid-filled .liquid-btn-content,
+.track-footer a.track-btn-primary.liquid-btn.is-liquid-filled .liquid-btn-content,
+.track-btn.track-btn-primary.liquid-btn.is-liquid-filled .liquid-btn-content {
+  color: #ffffff !important;
+}
+
+.hero-explore-btn.liquid-btn.is-liquid-filled .liquid-btn-content svg,
+.track-footer a.track-btn-primary.liquid-btn.is-liquid-filled .liquid-btn-content svg,
+.track-btn.track-btn-primary.liquid-btn.is-liquid-filled .liquid-btn-content svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* ── 2B. BLUE LIQUID BUTTONS (#3b82f6 rupee & lakh accent) ──
    • Rules and guidelines: .hero-rules-btn
    • Contact organizers: .hero-contact-btn
    • Rules & Contact in carousel: #discCascadeRules, #discCascadeCall
    • Rules & Contact in grid: .btn-card-rules, .btn-card-contact
-   • Register online only & Campus disc buttons: .track-footer a.track-btn-primary
    • Submit registration with payment proof / pay later: #submitBtn
 */
-.hero-explore-btn.liquid-btn,
 .hero-rules-btn.liquid-btn,
 .hero-contact-btn.liquid-btn,
 .disc-cascade-rules.liquid-btn,
-#discCascadeRules.liquid-btn,
 .disc-cascade-call.liquid-btn,
-#discCascadeCall.liquid-btn,
 .btn-card-rules.liquid-btn,
 .btn-card-contact.liquid-btn,
-.track-footer a.track-btn-primary.liquid-btn,
 .clean-black-submit-btn.liquid-btn,
+.track-btn-secondary.liquid-btn,
 #submitBtn.liquid-btn {
   --liquid-fill: #3b82f6 !important;
   --liquid-border: #3b82f6 !important;
@@ -229,17 +302,14 @@
   overflow: hidden !important;
 }
 
-.hero-explore-btn.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
 .hero-rules-btn.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
 .hero-contact-btn.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
 .disc-cascade-rules.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
-#discCascadeRules.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
 .disc-cascade-call.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
-#discCascadeCall.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
 .btn-card-rules.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
 .btn-card-contact.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
-.track-footer a.track-btn-primary.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
 .clean-black-submit-btn.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
+.track-btn-secondary.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
 #submitBtn.liquid-btn .liquid-btn-svg ellipse.liquid-blob {
   fill: #3b82f6 !important;
 }
@@ -363,11 +433,11 @@
   border-color: #34d399 !important;
 }
 
-/* 5. Hero Explore Button: compact 38px pill with sapphire fluid ink (Fully visible solid blue in dark mode, crisp white in light mode) */
+/* 5. Hero Explore Button: compact 38px pill with sapphire fluid ink (White background initially, Black text -> White once liquid effect finishes) */
 .hero-explore-btn.liquid-btn {
-  --liquid-fill: #1d4ed8 !important;
-  --liquid-border: #3b82f6 !important;
-  --liquid-text: #ffffff !important;
+  --liquid-fill: #2563eb !important;
+  --liquid-border: #2563eb !important;
+  --liquid-text: #0f172a !important;
   --liquid-active-text: #ffffff !important;
   height: 38px !important;
   min-height: 38px !important;
@@ -376,12 +446,12 @@
   font-size: 0.82rem !important;
   font-weight: 700 !important;
   border-radius: 9999px !important;
-  border: 1.5px solid #3b82f6 !important;
-  background: #2563eb !important;
+  border: 2px solid #2563eb !important;
+  background: #ffffff !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.45) !important;
+  color: #0f172a !important;
+  box-shadow: 0 3px 14px rgba(37, 99, 235, 0.16) !important;
   width: auto !important;
   max-width: max-content !important;
   display: inline-flex !important;
@@ -389,18 +459,33 @@
 }
 
 .hero-explore-btn.liquid-btn .liquid-btn-content {
-  color: #ffffff !important;
+  color: #0f172a !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0s !important;
 }
 
 .hero-explore-btn.liquid-btn .liquid-btn-content svg {
-  color: #ffffff !important;
-  stroke: #ffffff !important;
+  color: #0f172a !important;
+  stroke: #0f172a !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0s, stroke 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0s !important;
 }
 
 .hero-explore-btn.liquid-btn:hover {
   transform: translateY(-1.5px) !important;
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.65) !important;
-  border-color: #60a5fa !important;
+  box-shadow: 0 6px 22px rgba(37, 99, 235, 0.45) !important;
+  border-color: #1d4ed8 !important;
+}
+
+.hero-explore-btn.liquid-btn:hover .liquid-btn-content,
+.hero-explore-btn.liquid-btn.is-liquid-filled .liquid-btn-content {
+  color: #ffffff !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s !important;
+}
+
+.hero-explore-btn.liquid-btn:hover .liquid-btn-content svg,
+.hero-explore-btn.liquid-btn.is-liquid-filled .liquid-btn-content svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s, stroke 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s !important;
 }
 
 /* 6. Hero Rules & Contact Buttons: matching 38px pill */
@@ -470,31 +555,38 @@
   color: #0f172a !important;
   width: 100% !important;
   justify-content: center !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0s !important;
 }
 
 .track-footer a.track-btn-primary.liquid-btn .liquid-btn-content svg,
 .track-footer a.track-btn-secondary.liquid-btn .liquid-btn-content svg {
   color: #0f172a !important;
   stroke: #0f172a !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0s, stroke 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0s !important;
 }
 
 .track-footer a.track-btn-primary.liquid-btn:hover,
 .track-footer a.track-btn-secondary.liquid-btn:hover {
   transform: translateY(-1.5px) !important;
   border-color: #1d4ed8 !important;
-  color: #ffffff !important;
   box-shadow: 0px 6px 24px rgba(37, 99, 235, 0.45) !important;
 }
 
 .track-footer a.track-btn-primary.liquid-btn:hover .liquid-btn-content,
-.track-footer a.track-btn-secondary.liquid-btn:hover .liquid-btn-content {
+.track-footer a.track-btn-secondary.liquid-btn:hover .liquid-btn-content,
+.track-footer a.track-btn-primary.liquid-btn.is-liquid-filled .liquid-btn-content,
+.track-footer a.track-btn-secondary.liquid-btn.is-liquid-filled .liquid-btn-content {
   color: #ffffff !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s !important;
 }
 
 .track-footer a.track-btn-primary.liquid-btn:hover .liquid-btn-content svg,
-.track-footer a.track-btn-secondary.liquid-btn:hover .liquid-btn-content svg {
+.track-footer a.track-btn-secondary.liquid-btn:hover .liquid-btn-content svg,
+.track-footer a.track-btn-primary.liquid-btn.is-liquid-filled .liquid-btn-content svg,
+.track-footer a.track-btn-secondary.liquid-btn.is-liquid-filled .liquid-btn-content svg {
   color: #ffffff !important;
   stroke: #ffffff !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s, stroke 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s !important;
 }
 
 /* 8. Registration Page Submit Buttons (White background initially, Black text -> Blue on hover) */
@@ -520,6 +612,7 @@
 #submitBtn.liquid-btn .liquid-btn-content,
 .clean-black-submit-btn.liquid-btn .liquid-btn-content {
   color: #0f172a !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0s !important;
 }
 
 #submitBtn.liquid-btn:hover,
@@ -527,16 +620,14 @@
   transform: translateY(-1.5px) !important;
   box-shadow: 0 8px 26px rgba(37, 99, 235, 0.45) !important;
   border-color: #1d4ed8 !important;
-  color: #ffffff !important;
 }
 
 #submitBtn.liquid-btn:hover .liquid-btn-content,
-.clean-black-submit-btn.liquid-btn:hover .liquid-btn-content {
+.clean-black-submit-btn.liquid-btn:hover .liquid-btn-content,
+#submitBtn.liquid-btn.is-liquid-filled .liquid-btn-content,
+.clean-black-submit-btn.liquid-btn.is-liquid-filled .liquid-btn-content {
   color: #ffffff !important;
-}
-  transform: translateY(-1.5px) !important;
-  box-shadow: 0 8px 26px rgba(59, 130, 246, 0.55) !important;
-  border-color: #60a5fa !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s !important;
 }
 
 /* Responsive adjustments for mobile viewports */
@@ -607,12 +698,16 @@
   border-color: #1d4ed8 !important;
   color: #ffffff !important;
 }
-:root[data-theme="light"] .hero-explore-btn.liquid-btn:hover .liquid-btn-content {
+:root[data-theme="light"] .hero-explore-btn.liquid-btn:hover .liquid-btn-content,
+:root[data-theme="light"] .hero-explore-btn.liquid-btn.is-liquid-filled .liquid-btn-content {
   color: #ffffff !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s !important;
 }
-:root[data-theme="light"] .hero-explore-btn.liquid-btn:hover .liquid-btn-content svg {
+:root[data-theme="light"] .hero-explore-btn.liquid-btn:hover .liquid-btn-content svg,
+:root[data-theme="light"] .hero-explore-btn.liquid-btn.is-liquid-filled .liquid-btn-content svg {
   color: #ffffff !important;
   stroke: #ffffff !important;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s, stroke 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.10s !important;
 }
 
 :root[data-theme="light"] .hero-rules-btn.liquid-btn,

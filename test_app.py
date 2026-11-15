@@ -1903,13 +1903,14 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('background: #2563eb !important;', liquid_css)
         self.assertIn('--liquid-fill: #10b981 !important;', liquid_css)
 
-        # Dark mode explore button: solid blue resting background, white text
+        # Explore button: white resting background, black resting text, white on liquid-filled
         self.assertIn('.hero-explore-btn.liquid-btn', liquid_css)
-        self.assertIn('background: #2563eb !important;', liquid_css)
-        self.assertIn('color: #ffffff !important;', liquid_css)
+        self.assertIn('--liquid-fill: #2563eb !important;', liquid_css)
+        self.assertIn('.hero-explore-btn.liquid-btn.is-liquid-filled .liquid-btn-content', liquid_css)
 
         # Registration procedure track buttons and submit button: white resting background, black text, blue hover
         self.assertIn('.track-footer a.track-btn-primary.liquid-btn', liquid_css)
+        self.assertIn('.track-footer a.track-btn-primary.liquid-btn.is-liquid-filled .liquid-btn-content', liquid_css)
         self.assertIn('.track-btn-secondary.liquid-btn', liquid_css)
         self.assertIn('#submitBtn.liquid-btn', liquid_css)
         self.assertIn('background: #ffffff !important;', liquid_css)
@@ -1928,6 +1929,43 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('background: #eff6ff !important;', theme_css)
         self.assertIn('border: 1.5px solid #2563eb !important;', theme_css)
         self.assertIn('color: #1d4ed8 !important;', theme_css)
+
+    def test_36_explore_and_register_buttons_contrast_and_liquid_states(self):
+        """Verify Explore and Register buttons have white background with black text turning white on liquid fill."""
+        res_events = self.client.get('/events')
+        self.assertEqual(res_events.status_code, 200)
+        events_html = res_events.data.decode('utf-8')
+
+        # Check dark theme override in events.html
+        self.assertIn('html:not([data-theme="light"]) .hero-actions .hero-explore-btn', events_html)
+        self.assertIn('[data-theme="dark"] .hero-actions .hero-explore-btn { background: #ffffff !important; color: #0f172a !important;', events_html)
+
+        # Check DOM elements
+        self.assertIn('hero-explore-btn', events_html)
+        self.assertIn('Register Online Only', events_html)
+        self.assertIn('track-btn track-btn-primary', events_html)
+
+        # Check liquid-button.css rules
+        res_css = self.client.get('/static/css/liquid-button.css')
+        self.assertEqual(res_css.status_code, 200)
+        css = res_css.data.decode('utf-8')
+
+        self.assertIn('.hero-explore-btn.liquid-btn,', css)
+        self.assertIn('.track-footer a.track-btn-primary.liquid-btn,', css)
+        self.assertIn('background: #ffffff !important;', css)
+        self.assertIn('color: #0f172a !important;', css)
+        self.assertIn('--liquid-fill: #2563eb !important;', css)
+        self.assertIn('.hero-explore-btn.liquid-btn:hover .liquid-btn-content', css)
+        self.assertIn('.hero-explore-btn.liquid-btn.is-liquid-filled .liquid-btn-content', css)
+        self.assertIn('.track-footer a.track-btn-primary.liquid-btn.is-liquid-filled .liquid-btn-content', css)
+
+        # Check liquid-button.js dynamic class toggle
+        res_js = self.client.get('/static/js/liquid-button.js')
+        self.assertEqual(res_js.status_code, 200)
+        js = res_js.data.decode('utf-8')
+        self.assertIn("btn.classList.add('is-liquid-filled')", js)
+        self.assertIn("btn.classList.remove('is-liquid-filled')", js)
+        self.assertIn("state.radius >= targetRadius * 0.55", js)
 
 
 if __name__ == '__main__':
