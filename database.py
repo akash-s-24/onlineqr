@@ -240,6 +240,117 @@ def execute_db(query, args=()):
     return query_db(query, args, commit=True)
 
 
+def save_payment_proof_blob(filename, file_bytes, mime_type='image/jpeg'):
+    """Save payment proof binary data into database so it persists across container restarts and redeployments (100% free permanent storage)."""
+    if not filename or not file_bytes:
+        return False
+    conn = get_db()
+    is_sqlite = (DB_MODE == 'sqlite')
+    file_size = len(file_bytes)
+    try:
+        cursor = conn.cursor()
+        if is_sqlite:
+            cursor.execute(
+                """
+                INSERT INTO payment_proofs (filename, mime_type, file_size, file_data)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(filename) DO UPDATE SET
+                    mime_type = excluded.mime_type,
+                    file_size = excluded.file_size,
+                    file_data = excluded.file_data
+                """,
+                (filename, mime_type, file_size, sqlite3.Binary(file_bytes))
+            )
+            conn.commit()
+        else:
+            data_param = psycopg2.Binary(file_bytes) if psycopg2 else file_bytes
+            cursor.execute(
+                """
+                INSERT INTO payment_proofs (filename, mime_type, file_size, file_data)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (filename) DO UPDATE SET
+                    mime_type = EXCLUDED.mime_type,
+                    file_size = EXCLUDED.file_size,
+                    file_data = EXCLUDED.file_data
+                """,
+                (filename, mime_type, file_size, data_param)
+            )
+            conn.commit()
+        cursor.close()
+        return True
+    except Exception as e:
+        print(f"[Save Payment Proof Blob Error] {e}")
+        return False
+    finally:
+        release_db_connection(conn)
+
+
+def get_payment_proof_blob(filename):
+    """Retrieve payment proof binary data from database."""
+    if not filename:
+        return None
+    conn = get_db()
+    is_sqlite = (DB_MODE == 'sqlite')
+    try:
+        cursor = conn.cursor()
+        if is_sqlite:
+            cursor.execute(
+                "SELECT filename, mime_type, file_size, file_data FROM payment_proofs WHERE filename = ?",
+                (filename,)
+            )
+            row = cursor.fetchone()
+            cursor.close()
+            if row:
+                data = row['file_data'] if isinstance(row, sqlite3.Row) else row[3]
+                m_type = row['mime_type'] if isinstance(row, sqlite3.Row) else row[1]
+                size = row['file_size'] if isinstance(row, sqlite3.Row) else row[2]
+                return {
+                    'filename': filename,
+                    'mime_type': m_type,
+                    'file_size': size,
+                    'file_data': bytes(data) if data is not None else None
+                }
+        else:
+            cursor.execute(
+                "SELECT filename, mime_type, file_size, file_data FROM payment_proofs WHERE filename = %s",
+                (filename,)
+            )
+            row = cursor.fetchone()
+            cursor.close()
+            if row:
+                data = row[3]
+                if hasattr(data, 'tobytes'):
+                    data = data.tobytes()
+                elif isinstance(data, memoryview):
+                    data = data.tobytes()
+                elif data is not None:
+                    data = bytes(data)
+                return {
+                    'filename': row[0],
+                    'mime_type': row[1],
+                    'file_size': row[2],
+                    'file_data': data
+                }
+        return None
+    except Exception as e:
+        print(f"[Get Payment Proof Blob Error] {e}")
+        return None
+    finally:
+        release_db_connection(conn)
+
+
+def delete_payment_proof_blob(filename):
+    """Delete a payment proof binary record from the database."""
+    if not filename:
+        return False
+    try:
+        query_db("DELETE FROM payment_proofs WHERE filename = %s", (filename,), commit=True)
+        return True
+    except Exception as e:
+        print(f"[Delete Payment Proof Blob Error] {e}")
+        return False
+
+
 def create_registration(*, full_name, email, phone, college_name, department,
                         semester, event_id, team_name, team_size,
                         team_members, payment_status, amount_paid,
@@ -580,6 +691,16 @@ def create_tables_and_seed():
                 sent_at TIMESTAMP NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS payment_proofs (
+                id SERIAL PRIMARY KEY,
+                filename VARCHAR(255) NOT NULL UNIQUE,
+                mime_type VARCHAR(100) NOT NULL,
+                file_size INTEGER NOT NULL,
+                file_data BYTEA NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
             """
         ]
 
@@ -590,7 +711,7 @@ def create_tables_and_seed():
                 if not is_sqlite:
                     raise RuntimeError(f'PostgreSQL schema initialization failed: {e}') from e
                 if 'SERIAL' in table_sql and is_sqlite:
-                    sqlite_sql = table_sql.replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT')
+                    sqlite_sql = table_sql.replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT').replace('BYTEA', 'BLOB')
                     run_exec(sqlite_sql)
                 else:
                     print(f"[Table Init Error] {e}")

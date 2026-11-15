@@ -2219,6 +2219,84 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('Team Size', csv_content)
         self.assertIn('Team Members', csv_content)
 
+    def test_40_permanent_payment_proof_blob_and_under_1mb_limit(self):
+        """Verify permanent DB blob persistence across ephemeral disk wipes, strict < 1 MB limit, and DB blob lifecycle."""
+        import time
+        import io
+        from PIL import Image
+
+        email = f"perm.proof_{int(time.time()*1000)}@college.edu"
+        ev = database.query_db("SELECT id FROM events WHERE is_group = 0 AND event_fee > 0 LIMIT 1", one=True)
+        ev_id = str(ev['id']) if ev else '1'
+        test_utr = f"UTRPERM{int(time.time())}"
+
+        # Generate a large test image (1600x1200) to verify compression and downscaling
+        img_io = io.BytesIO()
+        large_img = Image.new('RGB', (1600, 1200), color=(14, 165, 233))
+        large_img.save(img_io, format='PNG')
+        img_io.seek(0)
+
+        res = self.client.post('/register', data={
+            'full_name': 'Permanent Proof Student',
+            'email': email,
+            'phone': '9988776655',
+            'college_name': 'Cloud State University',
+            'department': 'Science',
+            'semester': 'I PUC',
+            'event_id': ev_id,
+            'payment_method': 'Online',
+            'utr_number': test_utr,
+            'payment_screenshot': (img_io, 'large_receipt.png')
+        }, content_type='multipart/form-data', follow_redirects=True)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(b'Payment submitted for verification', res.data)
+
+        # 1. Retrieve registration and proof filename
+        reg = database.query_db(
+            "SELECT r.id as reg_id, r.payment_proof, r.payment_status FROM registrations r JOIN participants p ON r.participant_id = p.id WHERE p.email = %s",
+            (email,), one=True
+        )
+        self.assertIsNotNone(reg)
+        proof_filename = reg['payment_proof']
+        self.assertIsNotNone(proof_filename)
+
+        # 2. Verify blob exists in database table 'payment_proofs'
+        blob_record = database.get_payment_proof_blob(proof_filename)
+        self.assertIsNotNone(blob_record, "Blob record must exist in DB table payment_proofs")
+        self.assertEqual(blob_record['mime_type'], 'image/jpeg')
+        self.assertIsNotNone(blob_record['file_data'])
+
+        # 3. Verify strict < 1 MB limit (under 1,048,576 bytes)
+        blob_size = len(blob_record['file_data'])
+        self.assertLess(blob_size, 1024 * 1024, f"Screenshot blob size ({blob_size} bytes) must be strictly under 1 MB")
+        self.assertLess(blob_record['file_size'], 1024 * 1024)
+
+        # 4. Simulate ephemeral disk wipe (e.g. Render restart/redeploy)
+        local_path = os.path.join(app.config['UPLOAD_FOLDER_PAYMENTS'], proof_filename)
+        if os.path.exists(local_path):
+            os.remove(local_path)
+        self.assertFalse(os.path.exists(local_path), "Local cache file was intentionally removed to test ephemeral wipe")
+
+        # 5. Access payment proof URL as admin - should fall back to DB blob and restore local cache file!
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        proof_res = self.client.get(f'/payment-proofs/{proof_filename}')
+        self.assertEqual(proof_res.status_code, 200, "Proof route must return 200 by reading from DB blob")
+        self.assertEqual(proof_res.content_type, 'image/jpeg')
+        self.assertEqual(len(proof_res.data), blob_size)
+
+        # Verify disk cache was repopulated
+        self.assertTrue(os.path.exists(local_path), "Local disk cache should be repopulated after DB read")
+
+        # 6. Delete registration and verify both disk cache and DB blob are removed
+        from app import remove_registration_record
+        remove_ok = remove_registration_record(reg['reg_id'])
+        self.assertTrue(remove_ok)
+
+        # Verify DB blob is deleted
+        self.assertIsNone(database.get_payment_proof_blob(proof_filename), "DB blob record must be removed on registration delete")
+        self.assertFalse(os.path.exists(local_path), "Local cache file must be removed on registration delete")
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1533,7 +1533,7 @@ select.f-select {
                     <div class="f-form-group" style="text-align: left; max-width: 440px; margin: 0 auto;">
                         <label class="f-label" for="payment_screenshot">Payment Screenshot *</label>
                         <input type="file" id="payment_screenshot" name="payment_screenshot" class="f-control" accept="image/png, image/jpeg, image/jpg, image/webp" style="padding: 9px 12px; background: #fafafa;">
-                        <span class="f-hint" style="color: #dc2626; font-weight: 600;">Upload screenshot of completed UPI transfer showing amount and UTR number.</span>
+                        <span class="f-hint" style="color: #dc2626; font-weight: 600;">Upload screenshot of completed UPI transfer (under 10 MB, automatically compressed to &lt; 1 MB for permanent storage).</span>
                     </div>
                 </div>
 
@@ -2236,6 +2236,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 } else {
                     prompt('Copy your UPI ID:', upiText);
+                }
+            }
+        });
+    }
+
+    const proofInput = document.getElementById('payment_screenshot');
+    if (proofInput) {
+        proofInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const maxBytes = 10 * 1024 * 1024;
+                if (this.files[0].size > maxBytes) {
+                    alert('Please select an image smaller than 10 MB.');
+                    this.value = '';
                 }
             }
         });

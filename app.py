@@ -17,7 +17,7 @@ from urllib.parse import urlencode, urlparse
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, UnidentifiedImageError, ImageOps
 import qrcode
 from config import Config
 import database
@@ -152,9 +152,135 @@ def save_image_upload(upload, folder):
     return filename
 
 
+def save_payment_proof_upload(upload, folder):
+    """
+    Validate, downscale, compress, and store payment screenshot strictly under 1 MB.
+    Saves to local disk cache AND persists binary blob in database (100% free permanent storage).
+    """
+    if not upload or not upload.filename:
+        return None
+
+    original_name = secure_filename(upload.filename)
+    extension = os.path.splitext(original_name)[1].lower().lstrip('.')
+    if not original_name or extension not in app.config['ALLOWED_IMAGE_EXTENSIONS']:
+        raise ValueError('Please upload a valid JPG, JPEG, PNG, WEBP, or GIF image.')
+
+    os.makedirs(folder, exist_ok=True)
+    filename = f"{uuid.uuid4().hex}.jpg"
+    destination = os.path.join(folder, filename)
+
+    try:
+        upload_bytes = upload.read()
+        if not upload_bytes:
+            raise ValueError('The uploaded screenshot file is empty.')
+        if len(upload_bytes) > 10 * 1024 * 1024:
+            raise ValueError('Please upload an image smaller than 10 MB.')
+
+        with Image.open(io.BytesIO(upload_bytes)) as img:
+            img.verify()
+
+        with Image.open(io.BytesIO(upload_bytes)) as img:
+            try:
+                img = ImageOps.exif_transpose(img)
+            except Exception:
+                pass
+
+            if img.mode in ('RGBA', 'P', 'LA'):
+                img = img.convert('RGB')
+            elif img.mode != 'RGB':
+                img = img.convert('RGB')
+
+            # Initial target dimensions: max 1280px on longest side
+            # Preserves 100% legibility of UPI transaction ID, bank details, and timestamps
+            max_dim = 1280
+            quality = 82
+            if max(img.width, img.height) > max_dim:
+                img.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
+
+            out_buffer = io.BytesIO()
+            img.save(out_buffer, format='JPEG', quality=quality, optimize=True)
+            compressed_data = out_buffer.getvalue()
+
+            # Progressive compression guarantee: strictly under 1 MB (< 1000 KB)
+            while len(compressed_data) >= 1000 * 1024 and quality > 40:
+                max_dim = int(max_dim * 0.85)
+                quality -= 8
+                img.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
+                out_buffer = io.BytesIO()
+                img.save(out_buffer, format='JPEG', quality=quality, optimize=True)
+                compressed_data = out_buffer.getvalue()
+
+            if len(compressed_data) >= 1024 * 1024:
+                raise ValueError('Unable to compress screenshot under 1 MB limit. Please upload a smaller image.')
+
+            # Write to local cache
+            with open(destination, 'wb') as f:
+                f.write(compressed_data)
+
+        # Store permanently into database blob table (zero cost, survives all Render restarts & redeploys)
+        database.save_payment_proof_blob(
+            filename=filename,
+            file_bytes=compressed_data,
+            mime_type='image/jpeg'
+        )
+
+        return filename
+
+    except ValueError:
+        if os.path.exists(destination):
+            try:
+                os.remove(destination)
+            except Exception:
+                pass
+        raise
+    except (UnidentifiedImageError, OSError):
+        if os.path.exists(destination):
+            try:
+                os.remove(destination)
+            except Exception:
+                pass
+        raise ValueError('The uploaded file is not a valid image.')
+    except Exception as e:
+        if os.path.exists(destination):
+            try:
+                os.remove(destination)
+            except Exception:
+                pass
+        raise ValueError(f'Error processing screenshot: {e}')
+
+
+def sync_disk_proofs_to_db():
+    """Ensure any existing disk-based screenshots are also preserved in the database blob table."""
+    try:
+        folder = app.config.get('UPLOAD_FOLDER_PAYMENTS')
+        if not folder or not os.path.exists(folder):
+            return
+        for fname in os.listdir(folder):
+            if fname.startswith('.') or not os.path.isfile(os.path.join(folder, fname)):
+                continue
+            safe_name = secure_filename(fname)
+            if not safe_name:
+                continue
+            existing = database.get_payment_proof_blob(safe_name)
+            if not existing:
+                try:
+                    fpath = os.path.join(folder, fname)
+                    with open(fpath, 'rb') as f:
+                        data = f.read()
+                    if data and len(data) <= 5 * 1024 * 1024:
+                        ext = os.path.splitext(safe_name)[1].lower().lstrip('.')
+                        m_type = f"image/{'jpeg' if ext in ('jpg', 'jpeg') else ext}"
+                        database.save_payment_proof_blob(safe_name, data, m_type)
+                except Exception:
+                    pass
+    except Exception as e:
+        app.logger.warning(f"Error syncing payment proofs to DB: {e}")
+
+
 # Ensure required directories exist on app startup
 os.makedirs(Config.CERTIFICATE_FOLDER, exist_ok=True)
 database.init_db()
+sync_disk_proofs_to_db()
 
 # ---------------------------------------------------------
 # Context Processors & Decorators
@@ -797,7 +923,19 @@ def serve_payment_proof(filename):
     elif os.path.exists(os.path.join(legacy_dir, safe_name)):
         response = send_from_directory(legacy_dir, safe_name, as_attachment=False)
     else:
-        abort(404)
+        # Fall back to database blob if missing from ephemeral disk (100% free permanent persistence)
+        blob = database.get_payment_proof_blob(safe_name)
+        if blob and blob.get('file_data'):
+            # Repopulate local disk cache for fast future reads
+            try:
+                os.makedirs(primary_dir, exist_ok=True)
+                with open(os.path.join(primary_dir, safe_name), 'wb') as f:
+                    f.write(blob['file_data'])
+            except Exception:
+                pass
+            response = send_file(io.BytesIO(blob['file_data']), mimetype=blob.get('mime_type', 'image/jpeg'), as_attachment=False)
+        else:
+            abort(404)
     response.headers['Cache-Control'] = 'private, no-store'
     return response
 
@@ -1341,7 +1479,7 @@ def register_participant():
                 flash('Please upload your UPI payment screenshot to complete online registration.', 'danger')
                 return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
             try:
-                payment_proof = save_image_upload(screenshot_file, app.config['UPLOAD_FOLDER_PAYMENTS'])
+                payment_proof = save_payment_proof_upload(screenshot_file, app.config['UPLOAD_FOLDER_PAYMENTS'])
             except ValueError as img_err:
                 flash(f'Payment screenshot error: {img_err}', 'danger')
                 return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
@@ -1431,6 +1569,7 @@ def register_participant():
                         os.remove(proof_cleanup)
                     except OSError:
                         pass
+                database.delete_payment_proof_blob(payment_proof)
             reason = registration['reason']
             if reason == 'duplicate_registration':
                 flash('You are already registered for this event. Duplicate registration was prevented.', 'warning')
@@ -2164,12 +2303,22 @@ def export_registrations_csv():
 
 
 def remove_registration_record(registration_id):
-    """Safely delete a registration, its attendance, certificate file/record, and orphan participant."""
-    reg = query_db("SELECT id, participant_id, event_id FROM registrations WHERE id = %s", (registration_id,), one=True)
+    """Safely delete a registration, its attendance, certificate file/record, payment proof (disk + DB blob), and orphan participant."""
+    reg = query_db("SELECT id, participant_id, event_id, payment_proof FROM registrations WHERE id = %s", (registration_id,), one=True)
     if not reg:
         return False
     
     participant_id = reg['participant_id']
+    proof_name = reg.get('payment_proof')
+    if proof_name:
+        database.delete_payment_proof_blob(proof_name)
+        proof_path = os.path.join(app.config['UPLOAD_FOLDER_PAYMENTS'], proof_name)
+        if os.path.exists(proof_path):
+            try:
+                os.remove(proof_path)
+            except Exception:
+                pass
+
     cert = query_db("SELECT file_path FROM certificates WHERE registration_id = %s", (registration_id,), one=True)
     if cert and cert.get('file_path') and os.path.exists(cert['file_path']):
         try:
