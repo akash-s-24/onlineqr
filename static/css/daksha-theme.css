@@ -1128,21 +1128,23 @@ html:not([data-theme="light"]) .landing-header .image-like-nav,
   text-decoration-line: none !important;
 }
 
-/* White-theme Navigation Active Section Highlighting */
-:root[data-theme="light"] .landing-header .image-like-nav .nav-link.active {
-  color: #1d4ed8 !important;
-  font-weight: 750 !important;
-  background: #eff6ff !important;
-  border: 1.5px solid #2563eb !important;
-  border-radius: 9999px !important;
-  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.2) !important;
-}
+/* White-theme Navigation Active Section Highlighting (Desktop horizontal nav only) */
+@media (min-width: 1161px) {
+  :root[data-theme="light"] .landing-header .image-like-nav .nav-link.active {
+    color: #1d4ed8 !important;
+    font-weight: 750 !important;
+    background: #eff6ff !important;
+    border: 1.5px solid #2563eb !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.2) !important;
+  }
 
-:root[data-theme="light"] .landing-header .nav-pill-indicator {
-  display: block !important;
-  background: #eff6ff !important;
-  border: 1.5px solid #2563eb !important;
-  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.22) !important;
+  :root[data-theme="light"] .landing-header .nav-pill-indicator {
+    display: block !important;
+    background: #eff6ff !important;
+    border: 1.5px solid #2563eb !important;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.22) !important;
+  }
 }
 
 /* Links across the public site stay free of underlines in every interaction state. */
@@ -1679,24 +1681,57 @@ body.light-theme .choose-palette-btn .body-moon {
 }
 
 /* Mobile Drawer Left Line Removal & Oval Fix */
-:root[data-theme] .landing-header #headerNavCenter,
-:root[data-theme] .landing-header #headerNavCenter.open {
-  border-left: none !important;
-  border: none !important;
-}
+@media (max-width: 1160px) {
+  :root[data-theme] .landing-header #headerNavCenter,
+  :root[data-theme] .landing-header #headerNavCenter.open,
+  :root[data-theme="light"] .landing-header #headerNavCenter,
+  :root[data-theme="light"] .landing-header #headerNavCenter.open,
+  .header-nav-center,
+  .header-nav-center.open {
+    border-left: none !important;
+    border: none !important;
+    outline: none !important;
+  }
 
-:root[data-theme="light"] .landing-header #headerNavCenter,
-:root[data-theme="light"] .landing-header #headerNavCenter.open {
-  border-left: none !important;
-  border: none !important;
-}
+  /* Completely extinguish sliding pill indicator inside the mobile drawer */
+  :root .landing-header .nav-pill-indicator,
+  :root[data-theme] .landing-header .nav-pill-indicator,
+  :root[data-theme="light"] .landing-header .nav-pill-indicator,
+  :root[data-theme="dark"] .landing-header .nav-pill-indicator,
+  .landing-header .nav-pill-indicator,
+  .nav-pill-indicator {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+  }
 
-:root[data-theme="light"] .landing-header .image-like-nav .nav-link.active,
-:root[data-theme="light"] .landing-header .image-like-nav .nav-link:active {
-  border: none !important;
-  border-radius: 10px !important;
-  box-shadow: none !important;
-  background: rgba(37, 99, 235, 0.1) !important;
+  /* Mobile menu items: clean 10px rounded rectangles without any oval or border */
+  :root[data-theme] .landing-header .image-like-nav .nav-link,
+  :root[data-theme] .landing-header .image-like-nav .nav-link.active,
+  :root[data-theme] .landing-header .image-like-nav .nav-link:active,
+  :root[data-theme="light"] .landing-header .image-like-nav .nav-link,
+  :root[data-theme="light"] .landing-header .image-like-nav .nav-link.active,
+  :root[data-theme="light"] .landing-header .image-like-nav .nav-link:active,
+  :root[data-theme="light"] .landing-header .image-like-nav .nav-link:focus,
+  :root[data-theme="light"] .landing-header .image-like-nav .nav-link:hover {
+    border: none !important;
+    border-left: none !important;
+    outline: none !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+  }
+
+  :root[data-theme="light"] .landing-header .image-like-nav .nav-link.active,
+  :root[data-theme="light"] .landing-header .image-like-nav .nav-link:active {
+    background: rgba(37, 99, 235, 0.08) !important;
+    color: #1d4ed8 !important;
+    font-weight: 700 !important;
+  }
 }
 
 /* Daksha Infinix Style Main Event Name Size */

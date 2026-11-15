@@ -2144,6 +2144,31 @@ class SDATestCase(unittest.TestCase):
         self.assertIn(':root[data-theme] .disc-cascade-head h3', css)
         self.assertIn('font-size: clamp(28px, 4.4vw, 42px) !important;', css)
 
+    def test_38_rules_button_matching_and_mobile_oval_fix(self):
+        """Verify rules button size matches contact button on mobile, and white theme mobile menu oval/line glitch is eliminated."""
+        res_events = self.client.get('/events')
+        self.assertEqual(res_events.status_code, 200)
+        events_html = res_events.data.decode('utf-8')
+
+        # 1. Rules button matches Contact button in mobile styles
+        self.assertIn('.hero-actions .hero-rules-btn {', events_html)
+        self.assertIn('min-height: 40px !important;', events_html)
+        self.assertIn('justify-self: stretch !important;', events_html)
+
+        # 2. Pill indicator explicitly suppressed on mobile to prevent giant oval & blue line
+        res_css = self.client.get('/static/css/daksha-theme.css')
+        self.assertEqual(res_css.status_code, 200)
+        css = res_css.data.decode('utf-8')
+
+        self.assertIn('@media (min-width: 1161px)', css)
+        self.assertIn('@media (max-width: 1160px)', css)
+        self.assertIn('display: none !important;', css)
+        self.assertIn('visibility: hidden !important;', css)
+
+        # 3. JS movePillTo does not run on mobile view (width <= 1160)
+        self.assertIn('window.innerWidth <= 1160', events_html)
+        self.assertIn("pill.style.display = 'none';", events_html)
+
 
 if __name__ == '__main__':
     unittest.main()

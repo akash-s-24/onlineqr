@@ -1352,8 +1352,17 @@
             }
 
             .nav-pill-indicator,
-            [data-theme="light"] .nav-pill-indicator {
+            [data-theme="light"] .nav-pill-indicator,
+            [data-theme="dark"] .nav-pill-indicator,
+            :root .nav-pill-indicator {
                 display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                width: 0 !important;
+                height: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                pointer-events: none !important;
             }
 
             .header-actions.desktop-actions {
@@ -2372,6 +2381,13 @@
 
             function movePillTo(linkEl, animate) {
                 if (!pill || !linkEl) return;
+                // Only operate sliding horizontal pill indicator on desktop navbar (min-width: 1161px)
+                if (window.innerWidth <= 1160) {
+                    pill.classList.remove('visible');
+                    pill.style.display = 'none';
+                    return;
+                }
+                pill.style.display = 'block';
                 const navRect = navContainer.getBoundingClientRect();
                 const linkRect = linkEl.getBoundingClientRect();
                 const offsetX = linkRect.left - navRect.left;
