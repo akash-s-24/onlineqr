@@ -74,7 +74,7 @@
 
   function initLiquidButton(btn, options) {
     if (!btn || btn.hasAttribute('data-no-liquid') || btn.hasAttribute('data-liquid-initialized')) return btn;
-    if (btn.matches && btn.matches('#events .btn-card-rules, #events .btn-card-contact')) return btn;
+    if (btn.closest && btn.closest('.celestial-theme-toggle')) return btn;
     btn.setAttribute('data-liquid-initialized', 'true');
     btn.setAttribute('data-liquid-button', 'true');
     if (!btn.classList.contains('liquid-btn')) {
@@ -180,9 +180,14 @@
     defs.appendChild(clipPath);
     svg.appendChild(defs);
 
+    const isGreen = btn.matches && btn.matches('.btn-card-register, #discCascadeRegister');
+    const defaultFill = isGreen ? '#10b981' : '#3b82f6';
+
     const blob = document.createElementNS(SVG_NS, 'ellipse');
+    blob.setAttribute('class', 'liquid-blob');
     blob.setAttribute('filter', `url(#${filterId})`);
-    blob.setAttribute('fill', 'var(--liquid-fill, #2563eb)');
+    blob.setAttribute('fill', `var(--liquid-fill, ${defaultFill})`);
+    blob.style.fill = `var(--liquid-fill, ${defaultFill})`;
     blob.setAttribute('cx', '0');
     blob.setAttribute('cy', '0');
     blob.setAttribute('rx', '0');
@@ -191,9 +196,11 @@
     svg.appendChild(blob);
 
     const ripple = document.createElementNS(SVG_NS, 'circle');
+    ripple.setAttribute('class', 'liquid-ripple');
     ripple.setAttribute('filter', `url(#${filterId})`);
     ripple.setAttribute('fill', 'none');
     ripple.setAttribute('stroke', 'var(--liquid-active-text, #ffffff)');
+    ripple.style.stroke = 'var(--liquid-active-text, #ffffff)';
     ripple.setAttribute('stroke-width', '2.4px');
     ripple.style.display = 'none';
     svg.appendChild(ripple);
@@ -627,28 +634,27 @@
     return btn;
   }
 
-  // Selectors for automatic button enhancement
+  // Selectors for automatic button enhancement - strictly limited to user-approved buttons:
+  // 1. Explore event button: .hero-explore-btn
+  // 2. Rules and guidelines: .hero-rules-btn
+  // 3. Contact organizers: .hero-contact-btn
+  // 4. Rules and contact button: .btn-card-rules, .btn-card-contact, #discCascadeRules, #discCascadeCall
+  // 5. Register for this event: #discCascadeRegister (Green)
+  // 6. Register (grid section): .btn-card-register (Green)
+  // 7. Register online only button & 8. Campus disc button: .track-footer a.track-btn-primary
+  // 9. Submit registration with payment proof / pay later at college: #submitBtn
   const BUTTON_SELECTORS = [
-    '.liquid-btn',
-    '[data-liquid-button]',
-    '.header-cta-classic',
-    '#headerRegisterBtn',
     '.hero-explore-btn',
     '.hero-rules-btn',
     '.hero-contact-btn',
-    '#discCascadeRegister',
     '#discCascadeRules',
     '#discCascadeCall',
-    '#discCascadeIndexButton',
-    '.btn-card-register',
     '.btn-card-rules',
     '.btn-card-contact',
-    '.clean-black-submit-btn',
-    '#submitBtn',
-    '#upiPayButton',
-    '#copyUpiBtn',
-    '.track-btn-primary',
-    '.track-btn-secondary'
+    '#discCascadeRegister',
+    '.btn-card-register',
+    '.track-footer a.track-btn-primary',
+    '#submitBtn'
   ].join(',');
 
   function initAllLiquidButtons(rootNode) {
@@ -656,9 +662,6 @@
     if (!scope.querySelectorAll) return;
     const targets = scope.querySelectorAll(BUTTON_SELECTORS);
     targets.forEach((elem) => {
-      // Keep legacy effects everywhere except the Events-grid Rules/Contact controls.
-      if (elem.matches && elem.matches('#events .btn-card-rules, #events .btn-card-contact')) return;
-
       // Exclude small icon toggles or explicitly opted-out elements
       if ((elem.closest && elem.closest('.celestial-theme-toggle')) || elem.hasAttribute('data-no-liquid')) {
         return;

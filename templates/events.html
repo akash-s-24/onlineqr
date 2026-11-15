@@ -5969,15 +5969,15 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             </div>
 
             <div class="hero-actions">
-                <button onclick="scrollToSection('events', event)" class="candy-btn hero-explore-btn" data-no-liquid>
+                <button onclick="scrollToSection('events', event)" class="candy-btn hero-explore-btn">
                     <span>Explore Events</span>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
                         <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                 </button>
-                <button onclick="scrollToSection('rules', event)" class="candy-btn hero-rules-btn" data-no-liquid>Rules &amp; Guidelines</button>
-                <button onclick="openContactDialog()" class="candy-btn hero-contact-btn" data-no-liquid>Contact Organizers</button>
+                <button onclick="scrollToSection('rules', event)" class="candy-btn hero-rules-btn">Rules &amp; Guidelines</button>
+                <button onclick="openContactDialog()" class="candy-btn hero-contact-btn">Contact Organizers</button>
             </div>
 
             <a class="scroll-indicator" href="#stats" aria-label="Scroll to highlights">
@@ -6364,16 +6364,16 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </div>
                 </div>
                 <div class="disc-cascade-actions">
-                    <button type="button" id="discCascadeRules" class="disc-cascade-rules" data-no-liquid
+                    <button type="button" id="discCascadeRules" class="disc-cascade-rules"
                         data-event-name="{{ events[0].event_name|default('This event', true)|e if events else 'This event' }}"
                         data-rules="{{ events[0].rules_text|default('', true)|e if events else '' }}">Rules</button>
-                    <button type="button" id="discCascadeCall" class="disc-cascade-call" data-no-liquid
+                    <button type="button" id="discCascadeCall" class="disc-cascade-call"
                         data-contact-event="{{ events[0].event_name|default('This event', true)|e if events else 'This event' }}"
                         data-faculty-name="{{ events[0].faculty_name|default(config.EVENT_COORDINATOR_PRIMARY_NAME, true)|e if events else config.EVENT_COORDINATOR_PRIMARY_NAME|e }}"
                         data-faculty-phone="{{ events[0].faculty_phone|default(config.EVENT_COORDINATOR_PRIMARY_PHONE, true)|e if events else config.EVENT_COORDINATOR_PRIMARY_PHONE|e }}"
                         data-student-name="{{ events[0].student_name|default(config.EVENT_COORDINATOR_SECONDARY_NAME, true)|e if events else config.EVENT_COORDINATOR_SECONDARY_NAME|e }}"
                         data-student-phone="{{ events[0].student_phone|default(config.EVENT_COORDINATOR_SECONDARY_PHONE, true)|e if events else config.EVENT_COORDINATOR_SECONDARY_PHONE|e }}">Contact</button>
-                    <a id="discCascadeRegister" class="disc-cascade-register" data-no-liquid
+                    <a id="discCascadeRegister" class="disc-cascade-register"
                         href="{{ url_for('register_participant') }}{% if events %}?event_id={{ events[0].id }}{% endif %}">Register for this event ↗</a>
                 </div>
                 <div class="disc-cascade-controls">
@@ -6464,9 +6464,9 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
                         <div class="event-card-actions">
                             <div class="event-card-subactions">
-                                <button type="button" class="btn-card-rules" data-no-liquid
+                                <button type="button" class="btn-card-rules"
                                     data-event-name="{{ ev.event_name|e }}" data-rules="{{ ev.rules_text|default('', true)|e }}">Rules</button>
-                                <button type="button" class="btn-card-contact" data-no-liquid
+                                <button type="button" class="btn-card-contact"
                                     data-event-name="{{ ev.event_name|e }}"
                                     data-faculty-name="{{ ev.faculty_name|default(config.EVENT_COORDINATOR_PRIMARY_NAME, true)|e }}"
                                     data-faculty-phone="{{ ev.faculty_phone|default(config.EVENT_COORDINATOR_PRIMARY_PHONE, true)|e }}"
@@ -6474,7 +6474,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                                     data-student-phone="{{ ev.student_phone|default(config.EVENT_COORDINATOR_SECONDARY_PHONE, true)|e }}">Contact</button>
                             </div>
                             <a href="{{ url_for('register_participant') }}?event_id={{ ev.id }}"
-                                class="btn-card-register" data-no-liquid>Register ↗</a>
+                                class="btn-card-register">Register ↗</a>
                         </div>
                     </div>
                 </article>
@@ -6641,7 +6641,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
 
                 <div class="track-footer">
-                    <a href="{{ url_for('register_participant') }}" class="track-btn track-btn-primary" data-no-liquid>
+                    <a href="{{ url_for('register_participant') }}" class="track-btn track-btn-primary">
                         <span>Register Online Only</span>
                     </a>
                 </div>
@@ -6695,7 +6695,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
 
                 <div class="track-footer">
-                    <a href="#location" class="track-btn track-btn-primary" data-no-liquid>
+                    <a href="#location" class="track-btn track-btn-primary">
                         <span>View Campus Desk Location &rarr;</span>
                     </a>
                 </div>

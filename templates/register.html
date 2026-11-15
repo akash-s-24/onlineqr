@@ -1510,7 +1510,7 @@ select.f-select {
                     <img id="upiQrCode" src="{{ url_for('static', filename='images/federal-upi-qr.png') }}" alt="UPI payment QR code" style="width: 190px; height: 190px; margin: 0 auto 14px; display: block; border: 2px solid #000000; border-radius: 12px; padding: 6px; background: #ffffff;">
                     
                     <!-- Primary Single Open UPI App Button -->
-                    <a id="upiPayButton" href="#" class="clean-black-submit-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 340px; margin: 0 auto 14px; text-decoration: none; padding: 13px 22px; font-size: 1rem; font-weight: 700; border-radius: 10px; background: #2563eb; color: #ffffff; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);">
+                    <a id="upiPayButton" href="#" class="clean-black-submit-btn" data-no-liquid style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 340px; margin: 0 auto 14px; text-decoration: none; padding: 13px 22px; font-size: 1rem; font-weight: 700; border-radius: 10px; background: #2563eb; color: #ffffff; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
                         <span>Open UPI App to Pay</span>
                     </a>
@@ -1519,7 +1519,7 @@ select.f-select {
                     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
                         <span style="font-size: 0.9rem; color: #475569;"><strong>UPI ID:</strong></span>
                         <code id="displayUpiId" style="font-family: monospace; font-weight: 700; background: #f4f4f5; padding: 4px 10px; border-radius: 6px; border: 1px solid #d4d4d8; color: #0f172a;">{{ config.DEFAULT_UPI_ID }}</code>
-                        <button type="button" id="copyUpiBtn" style="padding: 5px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; border: 1.5px solid #2563eb; background: #eff6ff; color: #2563eb; cursor: pointer; transition: all 0.2s ease;">📋 Copy ID</button>
+                        <button type="button" id="copyUpiBtn" data-no-liquid style="padding: 5px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; border: 1.5px solid #2563eb; background: #eff6ff; color: #2563eb; cursor: pointer; transition: all 0.2s ease;">📋 Copy ID</button>
                     </div>
 
                     <div class="f-form-group" style="text-align: left; max-width: 440px; margin: 0 auto 18px;">
@@ -2104,6 +2104,16 @@ function togglePaymentMethod() {
     if (onlineCard) onlineCard.classList.remove('active');
     if (offlineCard) offlineCard.classList.remove('active');
 
+    const setSubmitText = (msg) => {
+        if (!submitBtn) return;
+        const targetSpan = submitBtn.querySelector('[data-liquid-content]');
+        if (targetSpan) {
+            targetSpan.textContent = msg;
+        } else {
+            submitBtn.textContent = msg;
+        }
+    };
+
     if (payOnline && payOnline.checked) {
         if (onlineCard) onlineCard.classList.add('active');
         if (upiSection) upiSection.style.display = 'block';
@@ -2112,7 +2122,7 @@ function togglePaymentMethod() {
         if (offlineSection) offlineSection.style.display = 'none';
         if (utrInput) utrInput.required = true;
         if (screenshotInput) screenshotInput.required = true;
-        if (submitBtn) submitBtn.textContent = 'Submit Registration with Payment Proof →';
+        setSubmitText('Submit Registration with Payment Proof →');
     } else if (payOffline && payOffline.checked) {
         if (offlineCard) offlineCard.classList.add('active');
         if (upiSection) upiSection.style.display = 'none';
@@ -2125,13 +2135,13 @@ function togglePaymentMethod() {
             screenshotInput.required = false;
             screenshotInput.value = '';
         }
-        if (submitBtn) submitBtn.textContent = 'Submit Registration (Pay Later at College) →';
+        setSubmitText('Submit Registration (Pay Later at College) →');
     } else {
         if (upiSection) upiSection.style.display = 'none';
         if (offlineSection) offlineSection.style.display = 'none';
         if (utrInput) utrInput.required = false;
         if (screenshotInput) screenshotInput.required = false;
-        if (submitBtn) submitBtn.textContent = 'Submit Registration →';
+        setSubmitText('Submit Registration →');
     }
 }
 
@@ -2280,7 +2290,12 @@ document.getElementById('eventRegistrationForm').addEventListener('submit', func
     if (submitBtn) {
         submitBtn.style.pointerEvents = 'none';
         submitBtn.style.opacity = '0.8';
-        submitBtn.innerHTML = '⏳ Submitting registration, please wait...';
+        const targetSpan = submitBtn.querySelector('[data-liquid-content]');
+        if (targetSpan) {
+            targetSpan.innerHTML = '⏳ Submitting registration, please wait...';
+        } else {
+            submitBtn.innerHTML = '⏳ Submitting registration, please wait...';
+        }
     }
 });
 </script>

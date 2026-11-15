@@ -1795,6 +1795,81 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('box-shadow: 4px 4px 0px 0px #0f172a !important;', theme_css)
         self.assertIn('box-shadow: 4px 4px 0px 0px #2563eb !important;', theme_css)
 
+    def test_selective_liquid_button_enhancement(self):
+        """Verify liquid animation is applied strictly and exclusively to the approved buttons with proper green/blue highlights."""
+        import os
+
+        # 1. Verify React component source code exists
+        self.assertTrue(os.path.exists("components/ui/liquid-button.tsx"))
+        with open("components/ui/liquid-button.tsx", "r", encoding="utf-8") as f:
+            react_code = f.read()
+            self.assertIn("export const liquidButtonVariants", react_code)
+            self.assertIn("export default LiquidButton;", react_code)
+
+        # 2. Verify static JS selector restrictions
+        with open("static/js/liquid-button.js", "r", encoding="utf-8") as f:
+            js_code = f.read()
+            # Allowed buttons
+            self.assertIn(".hero-explore-btn", js_code)
+            self.assertIn(".hero-rules-btn", js_code)
+            self.assertIn(".hero-contact-btn", js_code)
+            self.assertIn("#discCascadeRules", js_code)
+            self.assertIn("#discCascadeCall", js_code)
+            self.assertIn(".btn-card-rules", js_code)
+            self.assertIn(".btn-card-contact", js_code)
+            self.assertIn("#discCascadeRegister", js_code)
+            self.assertIn(".btn-card-register", js_code)
+            self.assertIn(".track-footer a.track-btn-primary", js_code)
+            self.assertIn("#submitBtn", js_code)
+
+            # Excluded buttons in BUTTON_SELECTORS
+            self.assertNotIn("'.header-cta-classic'", js_code)
+            self.assertNotIn("'#headerRegisterBtn'", js_code)
+            self.assertNotIn("'#upiPayButton'", js_code)
+            self.assertNotIn("'#copyUpiBtn'", js_code)
+
+        # 3. Verify CSS colors: Green for the two register buttons, Blue (#3b82f6) for all others
+        with open("static/css/liquid-button.css", "r", encoding="utf-8") as f:
+            css_code = f.read()
+            # Green buttons
+            self.assertIn(".btn-card-register.liquid-btn", css_code)
+            self.assertIn("#discCascadeRegister.liquid-btn", css_code)
+            self.assertIn("--liquid-fill: #10b981 !important;", css_code)
+
+            # Blue buttons (#3b82f6)
+            self.assertIn(".hero-explore-btn.liquid-btn", css_code)
+            self.assertIn(".hero-rules-btn.liquid-btn", css_code)
+            self.assertIn(".hero-contact-btn.liquid-btn", css_code)
+            self.assertIn("#discCascadeRules.liquid-btn", css_code)
+            self.assertIn("#discCascadeCall.liquid-btn", css_code)
+            self.assertIn(".btn-card-rules.liquid-btn", css_code)
+            self.assertIn(".btn-card-contact.liquid-btn", css_code)
+            self.assertIn(".track-footer a.track-btn-primary.liquid-btn", css_code)
+            self.assertIn("#submitBtn.liquid-btn", css_code)
+            self.assertIn("--liquid-fill: #3b82f6 !important;", css_code)
+
+        # 4. Verify templates/events.html has active buttons without data-no-liquid
+        res_events = self.client.get('/events')
+        events_html = res_events.data.decode('utf-8')
+        self.assertIn('class="candy-btn hero-explore-btn"', events_html)
+        self.assertIn('class="candy-btn hero-rules-btn"', events_html)
+        self.assertIn('class="candy-btn hero-contact-btn"', events_html)
+        self.assertIn('id="discCascadeRules" class="disc-cascade-rules"', events_html)
+        self.assertIn('id="discCascadeCall" class="disc-cascade-call"', events_html)
+        self.assertIn('id="discCascadeRegister" class="disc-cascade-register"', events_html)
+        self.assertIn('class="btn-card-rules"', events_html)
+        self.assertIn('class="btn-card-contact"', events_html)
+        self.assertIn('class="btn-card-register"', events_html)
+        self.assertNotIn('class="btn-card-register" data-no-liquid', events_html)
+        self.assertNotIn('id="discCascadeRegister" class="disc-cascade-register" data-no-liquid', events_html)
+
+        # 5. Verify register.html targets
+        res_reg = self.client.get('/register')
+        reg_html = res_reg.data.decode('utf-8')
+        self.assertIn('id="submitBtn" class="clean-black-submit-btn"', reg_html)
+        self.assertIn('id="upiPayButton" href="#" class="clean-black-submit-btn" data-no-liquid', reg_html)
+        self.assertIn('id="copyUpiBtn" data-no-liquid', reg_html)
+
 
 if __name__ == '__main__':
     unittest.main()

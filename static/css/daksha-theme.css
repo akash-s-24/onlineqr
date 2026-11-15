@@ -1233,12 +1233,12 @@ body.event-dialog-open { overflow: hidden; }
   font-weight: 700 !important;
   text-decoration: none !important;
   cursor: pointer !important;
-  overflow: visible !important;
-  transform: translate(0, 0) !important;
+  overflow: hidden !important;
+  transform: translate(0, 0);
   transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
 }
 
-/* Remove pseudo-elements so no sliding backgrounds disrupt original colors */
+/* Remove pseudo-elements so no sliding backgrounds disrupt liquid layers */
 :root :is(
   #hero .hero-actions .hero-rules-btn,
   #hero .hero-actions .hero-contact-btn,
@@ -1329,66 +1329,7 @@ body.event-dialog-open { overflow: hidden; }
   box-shadow: 4px 4px 0px 0px #2563eb !important;
 }
 
-/* Hover State: translate(4px, 4px) and shadow: none (keeping original colors) */
-:root[data-theme="light"] :is(
-  #hero .hero-actions .hero-rules-btn,
-  #hero .hero-actions .hero-contact-btn,
-  #events .btn-card-rules,
-  #events .btn-card-contact,
-  #events #discCascadeRules,
-  #events #discCascadeCall,
-  .hero-rules-btn,
-  .hero-contact-btn,
-  .btn-card-rules,
-  .btn-card-contact,
-  .disc-cascade-rules,
-  .disc-cascade-call
-):hover {
-  background: #ffffff !important;
-  color: #0f172a !important;
-  -webkit-text-fill-color: #0f172a !important;
-  border-color: #0f172a !important;
-  transform: translate(4px, 4px) !important;
-  box-shadow: 0px 0px 0px 0px transparent !important;
-}
-
-:root:not([data-theme="light"]) :is(
-  #hero .hero-actions .hero-rules-btn,
-  #hero .hero-actions .hero-contact-btn,
-  #events .btn-card-rules,
-  #events .btn-card-contact,
-  #events #discCascadeRules,
-  #events #discCascadeCall,
-  .hero-rules-btn,
-  .hero-contact-btn,
-  .btn-card-rules,
-  .btn-card-contact,
-  .disc-cascade-rules,
-  .disc-cascade-call
-):hover,
-:root[data-theme="dark"] :is(
-  #hero .hero-actions .hero-rules-btn,
-  #hero .hero-actions .hero-contact-btn,
-  #events .btn-card-rules,
-  #events .btn-card-contact,
-  #events #discCascadeRules,
-  #events #discCascadeCall,
-  .hero-rules-btn,
-  .hero-contact-btn,
-  .btn-card-rules,
-  .btn-card-contact,
-  .disc-cascade-rules,
-  .disc-cascade-call
-):hover {
-  background: rgba(15, 23, 42, 0.85) !important;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  border-color: #2563eb !important;
-  transform: translate(4px, 4px) !important;
-  box-shadow: 0px 0px 0px 0px transparent !important;
-}
-
-/* Active State: Pressed down (translate 4px, 4px; shadow: none) */
+/* Hover State */
 :root :is(
   #hero .hero-actions .hero-rules-btn,
   #hero .hero-actions .hero-contact-btn,
@@ -1402,7 +1343,35 @@ body.event-dialog-open { overflow: hidden; }
   .btn-card-contact,
   .disc-cascade-rules,
   .disc-cascade-call
-):active {
+):not(.liquid-btn):hover {
   transform: translate(4px, 4px) !important;
   box-shadow: 0px 0px 0px 0px transparent !important;
+}
+
+/* Active State */
+:root :is(
+  #hero .hero-actions .hero-rules-btn,
+  #hero .hero-actions .hero-contact-btn,
+  #events .btn-card-rules,
+  #events .btn-card-contact,
+  #events #discCascadeRules,
+  #events #discCascadeCall,
+  .hero-rules-btn,
+  .hero-contact-btn,
+  .btn-card-rules,
+  .btn-card-contact,
+  .disc-cascade-rules,
+  .disc-cascade-call
+):not(.liquid-btn):active {
+  transform: translate(4px, 4px) !important;
+  box-shadow: 0px 0px 0px 0px transparent !important;
+}
+
+/* Liquid button hover and active states handled smoothly */
+:root .liquid-btn:hover {
+  transform: translateY(-1.5px) !important;
+}
+
+:root .liquid-btn:active {
+  transform: scale(0.97) translateY(0) !important;
 }
