@@ -310,11 +310,45 @@
   border-color: #60a5fa !important;
 }
 
-/* 4. Carousel Register Action (Green Liquid): 38px height */
+/* 4. Carousel Register Action: compact 32px pill */
 #discCascadeRegister.liquid-btn,
 .disc-cascade-register.liquid-btn {
   --liquid-fill: #059669 !important;
   --liquid-border: #10b981 !important;
+  --liquid-text: #ffffff !important;
+  --liquid-active-text: #ffffff !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  padding: 0 14px !important;
+  font-family: 'DM Mono', monospace, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  border-radius: 9999px !important;
+  border: 1.5px solid #10b981 !important;
+  background: rgba(6, 78, 59, 0.45) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.25) !important;
+  width: auto !important;
+  max-width: max-content !important;
+  display: inline-flex !important;
+}
+
+#discCascadeRegister.liquid-btn:hover,
+.disc-cascade-register.liquid-btn:hover {
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45) !important;
+  border-color: #34d399 !important;
+}
+
+/* 5. Hero Explore Button: compact 38px pill with sapphire fluid ink */
+.hero-explore-btn.liquid-btn {
+  --liquid-fill: #2563eb !important;
+  --liquid-border: #3b82f6 !important;
   --liquid-text: #ffffff !important;
   --liquid-active-text: #ffffff !important;
   height: 38px !important;
@@ -323,63 +357,37 @@
   padding: 0 18px !important;
   font-size: 0.82rem !important;
   font-weight: 700 !important;
-  border-radius: 8px !important;
-  border: 1.5px solid #10b981 !important;
-  background: rgba(6, 78, 59, 0.45) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 12px rgba(16, 185, 129, 0.3) !important;
-  width: auto !important;
-}
-
-#discCascadeRegister.liquid-btn:hover,
-.disc-cascade-register.liquid-btn:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 22px rgba(16, 185, 129, 0.6) !important;
-  border-color: #34d399 !important;
-}
-
-/* 5. Hero Explore Button: elegant 42px pill with sapphire fluid ink */
-.hero-explore-btn.liquid-btn {
-  --liquid-fill: #2563eb !important;
-  --liquid-border: #3b82f6 !important;
-  --liquid-text: #ffffff !important;
-  --liquid-active-text: #ffffff !important;
-  height: 42px !important;
-  min-height: 42px !important;
-  max-height: 42px !important;
-  padding: 0 24px !important;
-  font-size: 0.88rem !important;
-  font-weight: 700 !important;
   border-radius: 9999px !important;
   border: 1.5px solid #3b82f6 !important;
   background: rgba(37, 99, 235, 0.28) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.4) !important;
+  box-shadow: 0 3px 14px rgba(37, 99, 235, 0.35) !important;
   width: auto !important;
+  max-width: max-content !important;
+  display: inline-flex !important;
+  gap: 6px !important;
 }
 
 .hero-explore-btn.liquid-btn:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 28px rgba(37, 99, 235, 0.7) !important;
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.55) !important;
   border-color: #60a5fa !important;
 }
 
-/* 6. Hero Rules & Contact Buttons: elegant 42px pill with midnight electric flood */
+/* 6. Hero Rules & Contact Buttons: matching 38px pill */
 .hero-rules-btn.liquid-btn,
 .hero-contact-btn.liquid-btn {
   --liquid-fill: #1d4ed8 !important;
   --liquid-border: #3b82f6 !important;
   --liquid-text: #e2e8f0 !important;
   --liquid-active-text: #ffffff !important;
-  height: 42px !important;
-  min-height: 42px !important;
-  max-height: 42px !important;
-  padding: 0 20px !important;
-  font-size: 0.88rem !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  padding: 0 16px !important;
+  font-size: 0.82rem !important;
   font-weight: 700 !important;
   border-radius: 9999px !important;
   border: 1.5px solid rgba(59, 130, 246, 0.65) !important;
@@ -387,42 +395,48 @@
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   color: #e2e8f0 !important;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.4) !important;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.35) !important;
   width: auto !important;
+  max-width: max-content !important;
+  display: inline-flex !important;
 }
 
 .hero-rules-btn.liquid-btn:hover,
 .hero-contact-btn.liquid-btn:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 22px rgba(37, 99, 235, 0.5) !important;
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 5px 18px rgba(37, 99, 235, 0.45) !important;
   border-color: #60a5fa !important;
 }
 
-/* 7. Track Primary Buttons: 48px rounded-rect with electric blue fluid */
+/* 7. Track Primary Buttons: compact 38px rounded-rect with electric blue fluid */
 .track-footer a.track-btn-primary.liquid-btn {
   --liquid-fill: #005FD6 !important;
   --liquid-border: #54A1FD !important;
   --liquid-text: #ffffff !important;
   --liquid-active-text: #ffffff !important;
-  min-height: 48px !important;
-  padding: 12px 24px !important;
-  font-size: 0.92rem !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  padding: 0 20px !important;
+  font-size: 0.84rem !important;
   font-weight: 700 !important;
-  border-radius: 12px !important;
+  border-radius: 10px !important;
   border: 1.5px solid #54A1FD !important;
   background: rgba(0, 95, 214, 0.35) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   color: #ffffff !important;
-  box-shadow: 0px 4px 28px -6px #1187FF !important;
-  width: 100% !important;
+  box-shadow: 0px 3px 20px -6px #1187FF !important;
+  width: auto !important;
+  max-width: max-content !important;
+  display: inline-flex !important;
   box-sizing: border-box !important;
 }
 
 .track-footer a.track-btn-primary.liquid-btn:hover {
-  transform: translateY(-2px) !important;
+  transform: translateY(-1.5px) !important;
   border-color: #ffffff !important;
-  box-shadow: 0px 8px 36px -4px #1187FF !important;
+  box-shadow: 0px 6px 26px -4px #1187FF !important;
 }
 
 /* 8. Registration Page Submit Button: 50px rounded-rect */
@@ -449,20 +463,46 @@
 /* Responsive adjustments for mobile viewports */
 @media (max-width: 639px) {
   .hero-explore-btn.liquid-btn {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: 46px !important;
-    min-height: 46px !important;
+    width: auto !important;
+    max-width: max-content !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    padding: 0 14px !important;
+    font-size: 0.80rem !important;
+    flex: 0 0 auto !important;
   }
   .hero-rules-btn.liquid-btn,
   .hero-contact-btn.liquid-btn {
-    flex: 1 1 calc(50% - 5px) !important;
-    max-width: calc(50% - 4px) !important;
-    padding: 0 8px !important;
-    font-size: 0.72rem !important;
-    height: 42px !important;
-    min-height: 42px !important;
+    width: auto !important;
+    max-width: max-content !important;
+    padding: 0 12px !important;
+    font-size: 0.78rem !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
     letter-spacing: -0.01em !important;
+    flex: 0 0 auto !important;
+  }
+  #discCascadeRegister.liquid-btn,
+  .disc-cascade-register.liquid-btn {
+    width: auto !important;
+    max-width: max-content !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    padding: 0 12px !important;
+    font-size: 10.5px !important;
+    flex: 0 0 auto !important;
+  }
+  .track-footer a.track-btn-primary.liquid-btn {
+    width: auto !important;
+    max-width: max-content !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    padding: 0 16px !important;
+    font-size: 0.82rem !important;
   }
 }
 

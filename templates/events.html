@@ -53,15 +53,15 @@ box-sizing: border-box !important;
 #hero .hero-actions .hero-explore-btn,
 #hero .hero-actions button.hero-explore-btn,
 .hero-actions .hero-explore-btn {
-width: 100% !important;
-flex: 1 1 100% !important;
-min-width: 0 !important;
-min-height: 46px !important;
-height: 46px !important;
-font-size: 0.92rem !important;
+width: auto !important;
+max-width: max-content !important;
+flex: 0 0 auto !important;
+min-height: 36px !important;
+height: 36px !important;
+font-size: 0.82rem !important;
 font-weight: 700 !important;
-border-radius: 12px !important;
-gap: 8px !important;
+border-radius: 9999px !important;
+gap: 6px !important;
 display: inline-flex !important;
 align-items: center !important;
 justify-content: center !important;
@@ -75,24 +75,22 @@ touch-action: manipulation !important;
 #hero .hero-actions button.hero-contact-btn,
 .hero-actions .hero-rules-btn,
 .hero-actions .hero-contact-btn {
-flex: 1 1 calc(50% - 5px) !important;
-max-width: calc(50% - 4px) !important;
-min-width: 0 !important;
-min-height: 42px !important;
-height: 42px !important;
-font-size: 0.70rem !important;
+width: auto !important;
+max-width: max-content !important;
+flex: 0 0 auto !important;
+min-height: 36px !important;
+height: 36px !important;
+font-size: 0.80rem !important;
 font-weight: 700 !important;
 letter-spacing: -0.01em !important;
-padding: 0 4px !important;
-border-radius: 10px !important;
+padding: 0 14px !important;
+border-radius: 9999px !important;
 white-space: nowrap !important;
 display: inline-flex !important;
 align-items: center !important;
 justify-content: center !important;
 box-sizing: border-box !important;
 touch-action: manipulation !important;
-overflow: hidden !important;
-text-overflow: ellipsis !important;
 }
 
 #hero .hero-date-line {
@@ -2143,26 +2141,26 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     box-shadow: none !important;
     }
     .disc-cascade-register {
-    flex: 1 1 100% !important;
-    width: 100% !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: max-content !important;
     order: 2 !important;
-    min-height: 46px !important;
-    height: 46px !important;
-    font-size: 12.5px !important;
-    font-weight: 800 !important;
-    border-radius: 10px !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    max-height: 32px !important;
+    font-family: 'DM Mono', monospace !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    border-radius: 9999px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.35) !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 18px rgba(124, 58, 237, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
-    padding: 0 16px !important;
+    padding: 0 14px !important;
     white-space: nowrap !important;
     text-align: center !important;
     touch-action: manipulation !important;
-    letter-spacing: 0.03em !important;
     }
     .disc-cascade-register:hover {
     background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%) !important;
@@ -4000,18 +3998,26 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
     .track-footer {
     margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 16px;
     }
 
     .track-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    width: 100%;
-    padding: 14px 20px;
-    border-radius: 14px;
+    width: auto;
+    max-width: max-content;
+    height: 38px;
+    min-height: 38px;
+    max-height: 38px;
+    padding: 0 20px;
+    border-radius: 10px;
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.92rem;
+    font-size: 0.85rem;
     font-weight: 700;
     text-decoration: none;
     transition: all 0.25s ease;

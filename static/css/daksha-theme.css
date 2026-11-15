@@ -832,7 +832,7 @@ html.dark body {
   #events #discCascadeRegister,
   #registration .track-btn-primary,
   #registration .track-btn-secondary
-) {
+):not(.liquid-btn) {
   --daksha-button-spread: #dbeafe;
   --daksha-button-hover-ink: #111111;
   position: relative !important;
@@ -848,12 +848,12 @@ html.dark body {
   filter: none !important;
   transition: color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease !important;
 }
-:root[data-theme] #hero .hero-actions .hero-explore-btn {
+:root[data-theme] #hero .hero-actions .hero-explore-btn:not(.liquid-btn) {
   position: relative !important;
   isolation: isolate;
   overflow: hidden !important;
 }
-:root[data-theme] #hero .hero-actions .hero-explore-btn::before {
+:root[data-theme] #hero .hero-actions .hero-explore-btn:not(.liquid-btn)::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -863,11 +863,11 @@ html.dark body {
   transform-origin: left center;
   transition: transform 220ms ease;
 }
-:root[data-theme] #hero .hero-actions .hero-explore-btn > * { position: relative; z-index: 1; }
-:root[data-theme] #hero .hero-actions .hero-explore-btn:hover::before,
-:root[data-theme] #hero .hero-actions .hero-explore-btn:focus-visible::before { transform: scaleX(1); }
-:root[data-theme] #hero .hero-actions .hero-explore-btn:hover,
-:root[data-theme] #hero .hero-actions .hero-explore-btn:focus-visible {
+:root[data-theme] #hero .hero-actions .hero-explore-btn:not(.liquid-btn) > * { position: relative; z-index: 1; }
+:root[data-theme] #hero .hero-actions .hero-explore-btn:not(.liquid-btn):hover::before,
+:root[data-theme] #hero .hero-actions .hero-explore-btn:not(.liquid-btn):focus-visible::before { transform: scaleX(1); }
+:root[data-theme] #hero .hero-actions .hero-explore-btn:not(.liquid-btn):hover,
+:root[data-theme] #hero .hero-actions .hero-explore-btn:not(.liquid-btn):focus-visible {
   background: #1d4ed8 !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
@@ -876,7 +876,7 @@ html.dark body {
   #events #discCascadeRegister,
   #registration .track-btn-primary,
   #registration .track-btn-secondary
-)::before {
+):not(.liquid-btn)::before {
   content: "";
   position: absolute;
   z-index: -1;
@@ -892,46 +892,46 @@ html.dark body {
   #events #discCascadeRegister,
   #registration .track-btn-primary,
   #registration .track-btn-secondary
-) > * { position: relative; z-index: 1; text-decoration: none !important; }
+):not(.liquid-btn) > * { position: relative; z-index: 1; text-decoration: none !important; }
 :root[data-theme] :is(
   #events #discCascadeRegister
-):hover::before,
+):not(.liquid-btn):hover::before,
 :root[data-theme] :is(
   #events #discCascadeRegister
-):focus-visible::before { transform: scaleX(1); }
+):not(.liquid-btn):focus-visible::before { transform: scaleX(1); }
 :root[data-theme] :is(
   #events #discCascadeRegister
-):hover,
+):not(.liquid-btn):hover,
 :root[data-theme] :is(
   #events #discCascadeRegister
-):focus-visible {
+):not(.liquid-btn):focus-visible {
   color: #111111 !important;
   -webkit-text-fill-color: #111111 !important;
   border-color: #93b4de !important;
   box-shadow: 0 5px 15px rgba(59, 130, 246, .18) !important;
   transform: translateY(-1px) !important;
 }
-:root[data-theme] :is(#events #discCascadeRegister) {
+:root[data-theme] :is(#events #discCascadeRegister:not(.liquid-btn)) {
   --daksha-button-spread: #dcfce7;
 }
-:root[data-theme] :is(#events #discCascadeRegister):hover::before,
-:root[data-theme] :is(#events #discCascadeRegister):focus-visible::before { transform: scaleX(1); }
-:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary) {
+:root[data-theme] :is(#events #discCascadeRegister:not(.liquid-btn)):hover::before,
+:root[data-theme] :is(#events #discCascadeRegister:not(.liquid-btn)):focus-visible::before { transform: scaleX(1); }
+:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):not(.liquid-btn) {
   --daksha-button-spread: #2f75b5;
   --daksha-button-hover-ink: #ffffff;
 }
-:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):hover::before,
-:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):focus-visible::before { transform: scaleX(1); }
-:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):hover,
-:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):focus-visible {
+:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):not(.liquid-btn):hover::before,
+:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):not(.liquid-btn):focus-visible::before { transform: scaleX(1); }
+:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):not(.liquid-btn):hover,
+:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):not(.liquid-btn):focus-visible {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
   border-color: #2f75b5 !important;
   box-shadow: 0 5px 16px rgba(47, 117, 181, .22) !important;
   transform: translateY(-1px) !important;
 }
-:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):active,
-:root[data-theme] #events :is(#discCascadeRegister):active {
+:root[data-theme] #registration :is(.track-btn-primary, .track-btn-secondary):not(.liquid-btn):active,
+:root[data-theme] #events :is(#discCascadeRegister):not(.liquid-btn):active {
   transform: translateY(1px) !important;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, .16) !important;
 }
@@ -939,12 +939,12 @@ html.dark body {
   #events #discCascadeRegister,
   #registration .track-btn-primary,
   #registration .track-btn-secondary
-)::after { content: none !important; display: none !important; }
+):not(.liquid-btn)::after { content: none !important; display: none !important; }
 :root[data-theme] :is(
   #events #discCascadeRegister,
   #registration .track-btn-primary,
   #registration .track-btn-secondary
-) a { text-decoration: none !important; }
+):not(.liquid-btn) a { text-decoration: none !important; }
 
 :root[data-theme] .stat-badge-events {
   background: #1d4ed8 !important;
