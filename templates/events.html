@@ -37,6 +37,36 @@ opacity: 0.15 !important;
 animation: none !important;
 }
 .hero-title { font-size: clamp(3.0rem, 13vw, 4.4rem) !important; font-weight: 900 !important; letter-spacing: -0.04em !important; margin-top: 0 !important; margin-bottom: 14px !important; line-height: 1.04 !important; color: #ffffff !important; text-wrap: balance; max-width: 95vw !important; }
+@media (max-width: 768px) {
+  .hero-title {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 0.95 !important;
+    gap: 0px !important;
+  }
+  .hero-title-daksha {
+    display: block !important;
+    font-size: clamp(3.3rem, 14.5vw, 4.8rem) !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.035em !important;
+    line-height: 1 !important;
+    margin-bottom: 0 !important;
+  }
+  .hero-title-infinix {
+    display: block !important;
+    font-size: clamp(2.6rem, 11.5vw, 3.8rem) !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.03em !important;
+    line-height: 1 !important;
+    margin-top: -8px !important;
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(37, 99, 235, 0.25));
+  }
+}
 .hero-subtitle { font-size: clamp(0.92rem, 3.2vw, 1.06rem) !important; max-width: 92vw !important; line-height: 1.5 !important; margin: 0 auto 16px auto !important; text-wrap: balance; }
 
 /* Strictly enforce top-to-bottom layout sequence for mobile hero */
@@ -46,6 +76,48 @@ animation: none !important;
 #hero .hero-countdown-block { order: 3 !important; margin: 0 auto 20px auto !important; }
 #hero .hero-actions { order: 4 !important; }
 #hero .scroll-indicator { order: 5 !important; }
+
+#hero .hero-date-line,
+.hero-date-line {
+  white-space: nowrap !important;
+  margin: 0 auto 14px auto !important;
+  text-align: center !important;
+}
+
+#hero .hero-date-pill,
+.hero-date-pill {
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 6px 14px !important;
+  border-radius: 9999px !important;
+  font-size: clamp(0.72rem, 3.2vw, 0.88rem) !important;
+  letter-spacing: -0.01em !important;
+  background: rgba(37, 99, 235, 0.08) !important;
+  border: 1px solid rgba(96, 165, 250, 0.35) !important;
+  box-shadow: 0 0 16px rgba(37, 99, 235, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  animation: subtle-date-glow 4s ease-in-out infinite alternate !important;
+}
+
+@keyframes subtle-date-glow {
+  0% {
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-color: rgba(96, 165, 250, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: rgba(147, 197, 253, 0.55);
+  }
+}
+
+#hero .hero-date-highlight,
+.hero-date-highlight {
+  white-space: nowrap !important;
+  font-weight: 700 !important;
+}
 
 .hero-actions {
 width: 100% !important;
@@ -63,15 +135,15 @@ box-sizing: border-box !important;
 #hero .hero-actions button.hero-explore-btn,
 .hero-actions .hero-explore-btn {
 grid-column: 1 / -1 !important;
-justify-self: center !important;
-width: auto !important;
-max-width: max-content !important;
-min-height: 38px !important;
-height: 38px !important;
-font-size: 0.82rem !important;
+justify-self: stretch !important;
+width: 100% !important;
+max-width: 100% !important;
+min-height: 44px !important;
+height: 44px !important;
+font-size: 0.86rem !important;
 font-weight: 700 !important;
 border-radius: 9999px !important;
-gap: 6px !important;
+gap: 8px !important;
 display: inline-flex !important;
 align-items: center !important;
 justify-content: center !important;
@@ -1585,8 +1657,8 @@ padding:6px 12px; border-radius:9999px; border:1.5px solid #05df72 !important; b
 !important; color:#05df72 !important; font:800 11.5px 'DM Mono',monospace; letter-spacing:.06em;
 text-transform:uppercase; text-shadow:0 0 10px rgba(5, 223, 114, 0.8) !important; box-shadow:0 0 16px rgba(5, 223, 114,
 0.35), inset 0 0 8px rgba(5, 223, 114, 0.15) !important; }
-.disc-cascade-actions { position:absolute; left:26px; bottom:22px; z-index:20; display:flex; align-items:center;
-gap:8px; flex-wrap:wrap; max-width:calc(100% - 52px); }
+.disc-cascade-actions { position:absolute; left:50% !important; transform:translateX(-50%) !important; bottom:22px; z-index:20; display:flex; align-items:center;
+justify-content:center; gap:10px; flex-wrap:wrap; width:auto; max-width:calc(100% - 240px); text-align:center; }
 .disc-cascade-rules,
 .disc-cascade-call {
 border: 2px solid #2563eb !important;
@@ -1716,7 +1788,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 .disc-cascade-head h3 { font-size: clamp(26px, 4vw, 36px); }
 .disc-cascade-track { top: 54%; --dcc-size: min(44vw, 290px) !important; }
 .disc-cascade-reviews { bottom: 84px; width: min(520px, calc(100% - 48px)); }
-.disc-cascade-actions { left: 24px; bottom: 20px; }
+.disc-cascade-actions { left: 50% !important; transform: translateX(-50%) !important; bottom: 20px; }
 .disc-cascade-controls { right: 24px; bottom: 20px; }
 }
 
@@ -2127,17 +2199,24 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     /* At Bottom: Action Buttons (Two-Row Hierarchy: Secondary Options + Full-Width Primary Register CTA) */
     .disc-cascade-actions {
     position: absolute !important;
-    left: 16px !important;
-    right: 16px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
     bottom: 14px !important;
+    width: calc(100% - 32px) !important;
+    max-width: 380px !important;
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 8px !important;
+    justify-content: center !important;
+    align-items: center !important;
     z-index: 15 !important;
+    margin: 0 auto !important;
     }
     .disc-cascade-rules,
     .disc-cascade-call {
-    flex: 1 1 calc(50% - 4px) !important;
+    flex: 1 1 calc(50% - 6px) !important;
+    max-width: calc(50% - 4px) !important;
     order: 1 !important;
     min-height: 38px !important;
     height: 38px !important;
@@ -2147,6 +2226,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    text-align: center !important;
     background: rgba(15, 23, 42, 0.85) !important;
     border: 2px solid #2563eb !important;
     box-shadow: 4px 4px 0px #2563eb !important;
@@ -4269,6 +4349,29 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     transform: none !important;
     }
 
+    /* ── Continuous Scroll Fade In / Fade Out Transitions ── */
+    .scroll-fade-item {
+      transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.55s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      will-change: opacity, transform;
+    }
+
+    .scroll-fade-item.scroll-in,
+    .scroll-fade-item.visible.in {
+      opacity: 1 !important;
+      transform: translateY(0) scale(1) !important;
+    }
+
+    .scroll-fade-item.scroll-out {
+      opacity: 0.18 !important;
+      transform: translateY(22px) scale(0.985) !important;
+    }
+
+    #hero, .hero-section, .hero-wrapper, .hero-actions {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
     /* ── Mobile Responsive Overrides ── */
     @media (max-width: 900px) {
     .fest-stats-container {
@@ -5925,8 +6028,10 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             </a>
 
             <div class="hero-title-wrap">
-                <h1 class="hero-title" style="margin: 0; line-height: 1.15;">
-                    Daksha Infinix</h1>
+                <h1 class="hero-title" style="margin: 0; line-height: 1.15;" aria-label="Daksha Infinix">
+                    <span class="hero-title-daksha">Daksha</span>
+                    <span class="hero-title-infinix">Infinix</span>
+                </h1>
             </div>
 
             <p class="hero-subtitle">
@@ -7764,31 +7869,48 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 }
             })();
 
-            // ── Scroll Reveal for .rv Elements ──
-            (function initRvScroll() {
-                const rvElements = document.querySelectorAll('.rv');
-                if (!rvElements.length) return;
+            // ── Scroll Reveal & Fade-In/Fade-Out for Mobile and Desktop ──
+            (function initScrollFadeAnimations() {
+                const scrollTargets = document.querySelectorAll(`
+                    .rv,
+                    #stats .stat-card,
+                    .about-text-col,
+                    .principal-card-col,
+                    .rule-card,
+                    .procedure-track-card,
+                    .faq-item,
+                    .dock-card
+                `);
+                if (!scrollTargets.length) return;
 
-                if ('IntersectionObserver' in window) {
-                    const rvObserver = new IntersectionObserver((entries, observer) => {
+                if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    const scrollObserver = new IntersectionObserver((entries) => {
                         entries.forEach(entry => {
                             if (entry.isIntersecting) {
-                                entry.target.classList.add('visible', 'in');
-                                observer.unobserve(entry.target);
+                                entry.target.classList.add('visible', 'in', 'scroll-in');
+                                entry.target.classList.remove('scroll-out');
+                            } else {
+                                const rect = entry.boundingClientRect;
+                                if (rect.top > window.innerHeight || rect.bottom < 0) {
+                                    entry.target.classList.remove('scroll-in');
+                                    entry.target.classList.add('scroll-out');
+                                }
                             }
                         });
-                    }, { rootMargin: '0px 0px -40px 0px', threshold: 0.05 });
+                    }, { rootMargin: '40px 0px -40px 0px', threshold: 0.08 });
 
-                    rvElements.forEach(el => {
+                    scrollTargets.forEach(el => {
+                        el.classList.add('scroll-fade-item');
                         const rect = el.getBoundingClientRect();
                         if (rect.top < window.innerHeight && rect.bottom > 0) {
-                            el.classList.add('visible', 'in');
+                            el.classList.add('visible', 'in', 'scroll-in');
                         } else {
-                            rvObserver.observe(el);
+                            el.classList.add('scroll-out');
                         }
+                        scrollObserver.observe(el);
                     });
                 } else {
-                    rvElements.forEach(el => el.classList.add('visible', 'in'));
+                    scrollTargets.forEach(el => el.classList.add('visible', 'in', 'scroll-in'));
                 }
             })();
 

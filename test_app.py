@@ -2062,6 +2062,45 @@ class SDATestCase(unittest.TestCase):
         self.assertTrue(os.path.exists('components/ui/sun-moon-theme-toggle.tsx'), "sun-moon-theme-toggle.tsx missing")
         self.assertTrue(os.path.exists('components/ui/demo.tsx'), "demo.tsx missing")
 
+    def test_39_mobile_refinements_and_circular_sun_moon_toggle(self):
+        """Verify circular sun/moon toggle, mobile title hierarchy, single-line date, full-width explore, centered CD carousel, and scroll animations."""
+        # 1. Circular button with no visible palette text in templates
+        res = self.client.get('/events')
+        self.assertEqual(res.status_code, 200)
+        html = res.data.decode('utf-8')
+
+        self.assertNotIn('<span class="palette-label">', html)
+        self.assertIn('aria-label="Choose your palette"', html)
+
+        # 2. Daksha and Infinix structure
+        self.assertIn('class="hero-title-daksha"', html)
+        self.assertIn('class="hero-title-infinix"', html)
+        self.assertIn('Starts on 25th, 26th November 2026, Bengaluru.', html)
+
+        # 3. CSS checks for circular toggle and mobile layout
+        res_css = self.client.get('/static/css/daksha-theme.css')
+        self.assertEqual(res_css.status_code, 200)
+        css = res_css.data.decode('utf-8')
+
+        self.assertIn('.choose-palette-btn', css)
+        self.assertIn('border-radius: 50% !important;', css)
+        self.assertIn('.choose-palette-btn .palette-label {', css)
+        self.assertIn('display: none !important;', css)
+
+        # 4. Mobile explore button spans full width matching rules/contact
+        self.assertIn('justify-self: stretch !important;', html)
+        self.assertIn('width: 100% !important;', html)
+
+        # 5. CD Carousel centered buttons
+        self.assertIn('.disc-cascade-actions { position:absolute; left:50% !important;', html)
+        self.assertIn('transform:translateX(-50%) !important;', html)
+
+        # 6. Scroll fade-in/fade-out animations
+        self.assertIn('initScrollFadeAnimations', html)
+        self.assertIn('.scroll-fade-item', html)
+        self.assertIn('.scroll-fade-item.scroll-in', html)
+        self.assertIn('.scroll-fade-item.scroll-out', html)
+
 
 if __name__ == '__main__':
     unittest.main()
