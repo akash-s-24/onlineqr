@@ -1967,6 +1967,46 @@ class SDATestCase(unittest.TestCase):
         self.assertIn("btn.classList.remove('is-liquid-filled')", js)
         self.assertIn("state.radius >= targetRadius * 0.55", js)
 
+    def test_37_mobile_layout_hierarchy_and_button_sizing(self):
+        """Verify mobile hero layout order, title sizing, and cascade register button dimensions."""
+        res_events = self.client.get('/events')
+        self.assertEqual(res_events.status_code, 200)
+        events_html = res_events.data.decode('utf-8')
+
+        # Mobile hero title enlarged font-size
+        self.assertIn('font-size: clamp(3.0rem, 13vw, 4.4rem) !important;', events_html)
+
+        # Mobile hero layout order sequence
+        self.assertIn('#hero .hero-title-wrap { order: 1 !important;', events_html)
+        self.assertIn('#hero .hero-subtitle { order: 2 !important;', events_html)
+        self.assertIn('#hero .hero-countdown-block { order: 3 !important;', events_html)
+        self.assertIn('#hero .hero-actions { order: 4 !important;', events_html)
+
+        # Mobile hero actions 2-row layout with explore on top and rules/contact below
+        self.assertIn('grid-template-columns: 1fr 1fr !important;', events_html)
+        self.assertIn('grid-column: 1 / -1 !important;', events_html)
+
+        # Mobile disc cascade action buttons: rules/call side-by-side, register full-width larger
+        self.assertIn('.disc-cascade-register {', events_html)
+        self.assertIn('flex: 1 1 100% !important;', events_html)
+        self.assertIn('min-height: 46px !important;', events_html)
+
+        # Verify daksha-theme.css mobile ordering and title sizing
+        res_theme = self.client.get('/static/css/daksha-theme.css')
+        self.assertEqual(res_theme.status_code, 200)
+        theme_css = res_theme.data.decode('utf-8')
+        self.assertIn(':root[data-theme] .hero-subtitle { order: 2 !important;', theme_css)
+        self.assertIn(':root[data-theme] .hero-countdown-block { order: 3 !important;', theme_css)
+        self.assertIn('font-size: clamp(3.0rem, 13vw, 4.4rem) !important;', theme_css)
+
+        # Verify liquid-button.css mobile full-width register button
+        res_liquid = self.client.get('/static/css/liquid-button.css')
+        self.assertEqual(res_liquid.status_code, 200)
+        liquid_css = res_liquid.data.decode('utf-8')
+        self.assertIn('#discCascadeRegister.liquid-btn,', liquid_css)
+        self.assertIn('height: 46px !important;', liquid_css)
+        self.assertIn('flex: 1 1 100% !important;', liquid_css)
+
 
 if __name__ == '__main__':
     unittest.main()

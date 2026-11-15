@@ -36,16 +36,25 @@ max-width: 85vw !important;
 opacity: 0.15 !important;
 animation: none !important;
 }
-.hero-title { font-size: clamp(2.6rem, 11vw, 3.6rem) !important; font-weight: 800 !important; letter-spacing: -0.03em !important; margin-top: 0 !important; margin-bottom: 16px !important; line-height: 1.08 !important; color: #ffffff !important; text-wrap: balance; max-width: 95vw !important; }
-.hero-subtitle { font-size: clamp(0.88rem, 2.6vw, 1.05rem) !important; max-width: 92vw !important; line-height: 1.5 !important; margin: 0 auto 18px auto !important; text-wrap: balance; }
+.hero-title { font-size: clamp(3.0rem, 13vw, 4.4rem) !important; font-weight: 900 !important; letter-spacing: -0.04em !important; margin-top: 0 !important; margin-bottom: 14px !important; line-height: 1.04 !important; color: #ffffff !important; text-wrap: balance; max-width: 95vw !important; }
+.hero-subtitle { font-size: clamp(0.92rem, 3.2vw, 1.06rem) !important; max-width: 92vw !important; line-height: 1.5 !important; margin: 0 auto 16px auto !important; text-wrap: balance; }
+
+/* Strictly enforce top-to-bottom layout sequence for mobile hero */
+#hero .hero-badge-pill { order: 0 !important; margin-bottom: 8px !important; }
+#hero .hero-title-wrap { order: 1 !important; margin-bottom: 10px !important; }
+#hero .hero-subtitle { order: 2 !important; margin: 0 auto 16px auto !important; }
+#hero .hero-countdown-block { order: 3 !important; margin: 0 auto 20px auto !important; }
+#hero .hero-actions { order: 4 !important; }
+#hero .scroll-indicator { order: 5 !important; }
 
 .hero-actions {
 width: 100% !important;
-max-width: min(340px, 92vw) !important;
-display: flex !important;
-flex-wrap: wrap !important;
-gap: 8px !important;
-justify-content: center !important;
+max-width: min(340px, 94vw) !important;
+display: grid !important;
+grid-template-columns: 1fr 1fr !important;
+gap: 10px 8px !important;
+justify-items: center !important;
+align-items: center !important;
 padding: 0 !important;
 margin: 0 auto 20px auto !important;
 box-sizing: border-box !important;
@@ -53,11 +62,12 @@ box-sizing: border-box !important;
 #hero .hero-actions .hero-explore-btn,
 #hero .hero-actions button.hero-explore-btn,
 .hero-actions .hero-explore-btn {
+grid-column: 1 / -1 !important;
+justify-self: center !important;
 width: auto !important;
 max-width: max-content !important;
-flex: 0 0 auto !important;
-min-height: 36px !important;
-height: 36px !important;
+min-height: 38px !important;
+height: 38px !important;
 font-size: 0.82rem !important;
 font-weight: 700 !important;
 border-radius: 9999px !important;
@@ -65,25 +75,44 @@ gap: 6px !important;
 display: inline-flex !important;
 align-items: center !important;
 justify-content: center !important;
-padding: 0 16px !important;
+padding: 0 18px !important;
 box-sizing: border-box !important;
 touch-action: manipulation !important;
 }
 #hero .hero-actions .hero-rules-btn,
-#hero .hero-actions .hero-contact-btn,
 #hero .hero-actions button.hero-rules-btn,
-#hero .hero-actions button.hero-contact-btn,
-.hero-actions .hero-rules-btn,
-.hero-actions .hero-contact-btn {
+.hero-actions .hero-rules-btn {
+grid-column: 1 !important;
+justify-self: end !important;
 width: auto !important;
-max-width: max-content !important;
-flex: 0 0 auto !important;
-min-height: 36px !important;
-height: 36px !important;
-font-size: 0.80rem !important;
+max-width: 100% !important;
+min-height: 34px !important;
+height: 34px !important;
+font-size: 0.78rem !important;
 font-weight: 700 !important;
 letter-spacing: -0.01em !important;
-padding: 0 14px !important;
+padding: 0 12px !important;
+border-radius: 9999px !important;
+white-space: nowrap !important;
+display: inline-flex !important;
+align-items: center !important;
+justify-content: center !important;
+box-sizing: border-box !important;
+touch-action: manipulation !important;
+}
+#hero .hero-actions .hero-contact-btn,
+#hero .hero-actions button.hero-contact-btn,
+.hero-actions .hero-contact-btn {
+grid-column: 2 !important;
+justify-self: start !important;
+width: auto !important;
+max-width: 100% !important;
+min-height: 34px !important;
+height: 34px !important;
+font-size: 0.78rem !important;
+font-weight: 700 !important;
+letter-spacing: -0.01em !important;
+padding: 0 12px !important;
 border-radius: 9999px !important;
 white-space: nowrap !important;
 display: inline-flex !important;
@@ -2100,7 +2129,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     position: absolute !important;
     left: 16px !important;
     right: 16px !important;
-    bottom: 16px !important;
+    bottom: 14px !important;
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 8px !important;
@@ -2110,8 +2139,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     .disc-cascade-call {
     flex: 1 1 calc(50% - 4px) !important;
     order: 1 !important;
-    min-height: 40px !important;
-    height: 40px !important;
+    min-height: 38px !important;
+    height: 38px !important;
     font-size: 11px !important;
     font-weight: 700 !important;
     border-radius: 8px !important;
@@ -2141,23 +2170,25 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     box-shadow: none !important;
     }
     .disc-cascade-register {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    max-width: max-content !important;
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
     order: 2 !important;
-    min-height: 32px !important;
-    height: 32px !important;
-    max-height: 32px !important;
+    min-height: 46px !important;
+    height: 46px !important;
+    max-height: 46px !important;
     font-family: 'DM Mono', monospace !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.04em !important;
-    border-radius: 9999px !important;
+    letter-spacing: 0.05em !important;
+    border-radius: 12px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    padding: 0 14px !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
     white-space: nowrap !important;
     text-align: center !important;
     touch-action: manipulation !important;

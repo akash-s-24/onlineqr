@@ -648,22 +648,37 @@
     max-width: max-content !important;
     padding: 0 12px !important;
     font-size: 0.78rem !important;
-    height: 36px !important;
-    min-height: 36px !important;
-    max-height: 36px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
     letter-spacing: -0.01em !important;
     flex: 0 0 auto !important;
   }
   #discCascadeRegister.liquid-btn,
   .disc-cascade-register.liquid-btn {
-    width: auto !important;
-    max-width: max-content !important;
-    height: 32px !important;
-    min-height: 32px !important;
-    max-height: 32px !important;
-    padding: 0 12px !important;
-    font-size: 10.5px !important;
-    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+    padding: 0 16px !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
+    flex: 1 1 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+  }
+  #discCascadeRegister.liquid-btn .liquid-btn-content,
+  .disc-cascade-register.liquid-btn .liquid-btn-content {
+    width: 100% !important;
+    justify-content: center !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
   }
   .track-footer a.track-btn-primary.liquid-btn {
     width: 100% !important;
