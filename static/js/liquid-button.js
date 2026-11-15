@@ -34,40 +34,10 @@
   }
 
   function cloneInvertedContent(source, dest) {
-    const fragment = document.createDocumentFragment();
-    source.childNodes.forEach((node) => {
-      const clone = node.cloneNode ? node.cloneNode(true) : (node.data ? document.createTextNode(node.data) : node);
-      if (clone.nodeType === 1) {
-        clone.removeAttribute('id');
-        if (clone.querySelectorAll) {
-          clone.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
-        }
-      }
-      fragment.appendChild(clone);
-    });
-
-    if (fragment.normalize) fragment.normalize();
-    if (fragment.querySelectorAll) {
-      fragment.querySelectorAll('svg title, svg desc').forEach((el) => el.remove());
+    // Disabled duplicate text cloning to guarantee button labels/icons render strictly once
+    if (dest && dest.replaceChildren) {
+      dest.replaceChildren();
     }
-
-    const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT);
-    const textNodes = [];
-    while (walker.nextNode()) textNodes.push(walker.currentNode);
-    for (const text of textNodes) {
-      const isInsideSvg = (typeof SVGElement !== 'undefined' && text.parentNode instanceof SVGElement) ||
-        (text.parentNode && text.parentNode.namespaceURI === SVG_NS);
-      if (!text.data.trim() || isInsideSvg) continue;
-      const label = document.createElement('span');
-      label.setAttribute('data-liquid-text', text.data);
-      if (text.replaceWith) {
-        text.replaceWith(label);
-      } else if (text.parentNode) {
-        text.parentNode.replaceChild(label, text);
-      }
-    }
-
-    dest.replaceChildren(fragment);
   }
 
   let idCounter = 0;
@@ -118,6 +88,11 @@
     invertedEl.style.display = 'none';
     invertedEl.style.opacity = '0';
     invertedEl.style.visibility = 'hidden';
+    invertedEl.style.position = 'absolute';
+    invertedEl.style.pointerEvents = 'none';
+    invertedEl.style.width = '0px';
+    invertedEl.style.height = '0px';
+    invertedEl.style.overflow = 'hidden';
     btn.style.removeProperty('-webkit-clip-path');
     btn.style.removeProperty('clip-path');
 

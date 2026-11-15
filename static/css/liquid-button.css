@@ -125,15 +125,32 @@
   transform: scale(0.98);
 }
 
-/* Inverted Layer (Hidden to guarantee zero duplicate text/icons across browsers) */
-.liquid-btn-inverted {
+/* Inverted Layer (Permanently hidden and sized to zero to guarantee zero duplicate text/icons across all browsers) */
+.liquid-btn-inverted,
+[data-liquid-inverted] {
   display: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
-  position: absolute;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
   clip-path: var(--liquid-clip);
   -webkit-clip-path: var(--liquid-clip);
+}
+
+.liquid-btn-inverted *,
+[data-liquid-inverted] * {
+  display: none !important;
+}
+
+.liquid-btn-inverted [data-liquid-text]::before,
+[data-liquid-inverted] [data-liquid-text]::before {
+  content: none !important;
+  display: none !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -395,6 +412,26 @@
   transform: translateY(-1.5px) !important;
   box-shadow: 0 8px 26px rgba(59, 130, 246, 0.55) !important;
   border-color: #60a5fa !important;
+}
+
+/* Responsive adjustments for mobile viewports */
+@media (max-width: 639px) {
+  .hero-explore-btn.liquid-btn {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 46px !important;
+    min-height: 46px !important;
+  }
+  .hero-rules-btn.liquid-btn,
+  .hero-contact-btn.liquid-btn {
+    flex: 1 1 calc(50% - 5px) !important;
+    max-width: calc(50% - 4px) !important;
+    padding: 0 8px !important;
+    font-size: 0.72rem !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    letter-spacing: -0.01em !important;
+  }
 }
 
 /* Reduced Motion Mode */
