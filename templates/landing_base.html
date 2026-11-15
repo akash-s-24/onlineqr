@@ -20,13 +20,15 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Futuristic Color-Palette Design System -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}?v=20261111_v1">
     <!-- High-Craft Liquid Fluid Buttons -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-button.css') }}?v=20261115_v19">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-button.css') }}?v=20261115_v20">
 
     <!-- Theme Initializer (Anti-Flicker & shadcn sync) -->
     <script>
@@ -611,12 +613,26 @@
             width: auto;
         }
 
-        .candy-btn, .pop-btn {
-            position: relative; display: inline-flex; align-items: center; justify-content: center;
-            min-height: 48px; padding: 0.7rem 1.4rem; font: 650 0.95rem/1.35 'DM Sans', sans-serif;
-            text-align: center; text-decoration: none; cursor: pointer; touch-action: manipulation;
+        .candy-btn,
+        .pop-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0.7rem 1.4rem;
+            font: 650 0.95rem/1.35 'DM Sans', sans-serif;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            touch-action: manipulation;
         }
-        .candy-btn::after, .pop-btn::after { content: none !important; display: none !important; }
+
+        .candy-btn::after,
+        .pop-btn::after {
+            content: none !important;
+            display: none !important;
+        }
 
         /* ═══ SCROLL CONTENT ═══ */
         .scroll-content {
@@ -1502,15 +1518,15 @@
             }
 
             [data-theme="light"] .image-like-nav .nav-link.active {
-                color: #1E3A8A !important;
-                font-weight: 750 !important;
+                color: #1d4ed8 !important;
+                font-weight: 800 !important;
                 background: transparent !important;
             }
 
             [data-theme="light"] .nav-pill-indicator {
-                background: #FFFFFF !important;
-                border: 1px solid #CBD5E1 !important;
-                box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08) !important;
+                background: #eff6ff !important;
+                border: 1.5px solid #2563eb !important;
+                box-shadow: 0 2px 10px rgba(37, 99, 235, 0.18) !important;
             }
         }
 
@@ -1664,7 +1680,13 @@
             color: #52525b !important;
         }
 
-            {% block extra_css %}{% endblock %}
+            {
+            % block extra_css %
+        }
+
+            {
+            % endblock %
+        }
 
         @media (max-width: 1023px) {
 
@@ -1684,8 +1706,8 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261115_v19">
- </head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261115_v20">
+</head>
 
 <body
     class="{% if session.get('role') in ('admin', 'member') %}authenticated-view{% endif %} {% block body_class %}{% endblock %}">
@@ -1732,15 +1754,23 @@
             <nav class="header-nav-center" id="headerNavCenter">
                 <!-- Standard Navigation -->
                 <ul class="image-like-nav" id="mainBreadcrumb">
-                    <li><a href="{{ url_for('events_list') }}#hero" class="nav-link active" data-section="hero">Home</a></li>
-                    <li><a href="{{ url_for('events_list') }}#stats" class="nav-link" data-section="stats">Highlights</a></li>
-                    <li><a href="{{ url_for('events_list') }}#about" class="nav-link" data-section="about">About us</a></li>
-                    <li><a href="{{ url_for('events_list') }}#events" class="nav-link" data-section="events">Event</a></li>
-                    <li><a href="{{ url_for('events_list') }}#rules" class="nav-link" data-section="rules">Rules</a></li>
-                    <li><a href="{{ url_for('events_list') }}#registration" class="nav-link" data-section="registration">Procedures</a></li>
+                    <li><a href="{{ url_for('events_list') }}#hero" class="nav-link active" data-section="hero">Home</a>
+                    </li>
+                    <li><a href="{{ url_for('events_list') }}#stats" class="nav-link"
+                            data-section="stats">Highlights</a></li>
+                    <li><a href="{{ url_for('events_list') }}#about" class="nav-link" data-section="about">About us</a>
+                    </li>
+                    <li><a href="{{ url_for('events_list') }}#events" class="nav-link" data-section="events">Event</a>
+                    </li>
+                    <li><a href="{{ url_for('events_list') }}#rules" class="nav-link" data-section="rules">Rules</a>
+                    </li>
+                    <li><a href="{{ url_for('events_list') }}#registration" class="nav-link"
+                            data-section="registration">Procedures</a></li>
                     <li><a href="{{ url_for('events_list') }}#faq" class="nav-link" data-section="faq">FAQ</a></li>
-                    <li><a href="{{ url_for('events_list') }}#location" class="nav-link" data-section="location">Map</a></li>
-                    <li><a href="{{ url_for('events_list') }}#contact" class="nav-link" data-section="contact">Contact</a></li>
+                    <li><a href="{{ url_for('events_list') }}#location" class="nav-link" data-section="location">Map</a>
+                    </li>
+                    <li><a href="{{ url_for('events_list') }}#contact" class="nav-link"
+                            data-section="contact">Contact</a></li>
 
                     {% if session.get('user_id') %}
                     {% if session.get('role') == 'admin' %}
@@ -1761,7 +1791,11 @@
                     <button type="button" class="mobile-theme-switch-btn" id="themeToggleBtnMobile"
                         onclick="toggleSiteTheme(event)" aria-label="Choose appearance" aria-haspopup="dialog"
                         aria-controls="appearancePanel" aria-expanded="false">
-                        <svg class="appearance-mobile-mark" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17"/></svg>
+                        <svg class="appearance-mobile-mark" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="8.5" />
+                            <path d="M12 3.5v17" />
+                        </svg>
                         <span>Appearance</span>
                     </button>
                     {% if session.get('user_id') %}
@@ -1786,8 +1820,7 @@
                     {% endif %}
                     <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
                     {% else %}
-                    <a href="#events" class="header-cta-classic"
-                        data-no-liquid
+                    <a href="#events" class="header-cta-classic" data-no-liquid
                         onclick="window.closeMobileNav && window.closeMobileNav();"
                         style="margin-top:16px; width:100%;">
                         <span>Register for Event &rarr;</span>
@@ -1800,7 +1833,11 @@
                 <button type="button" class="appearance-trigger-icon" id="themeToggleBtn"
                     onclick="toggleSiteTheme(event)" aria-label="Choose appearance" aria-haspopup="dialog"
                     aria-controls="appearancePanel" aria-expanded="false" title="Choose appearance">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17"/></svg>
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="8.5" />
+                        <path d="M12 3.5v17" />
+                    </svg>
                 </button>
                 {% if session.get('user_id') %}
                 <div class="header-user-name"
@@ -1834,14 +1871,20 @@
     </header>
     <section class="appearance-panel" id="appearancePanel" role="dialog" aria-label="Choose appearance" hidden>
         <div class="appearance-panel-heading">
-            <div><h2>Choose your palette</h2>
-                <p>Set the campus mood for this device.</p></div>
-            <button type="button" class="appearance-close" aria-label="Close appearance panel"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m5 5 10 10M15 5 5 15"/></svg></button>
+            <div>
+                <h2>Choose your palette</h2>
+                <p>Set the campus mood for this device.</p>
+            </div>
+            <button type="button" class="appearance-close" aria-label="Close appearance panel"><svg aria-hidden="true"
+                    viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                    <path d="m5 5 10 10M15 5 5 15" />
+                </svg></button>
         </div>
         <div class="appearance-options" role="group" aria-label="Color themes">
             <button type="button" class="appearance-choice" data-theme-choice="light" aria-pressed="false">
                 <span class="appearance-choice-top"><strong>Daylight</strong><span>Light</span></span>
-                <span class="appearance-preview appearance-preview-light" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="appearance-preview appearance-preview-light"
+                    aria-hidden="true"><i></i><i></i><i></i></span>
                 <span class="appearance-choice-note">Clear, calm, and open</span>
             </button>
             <button type="button" class="appearance-choice" data-theme-choice="dark" aria-pressed="false">
@@ -2071,8 +2114,17 @@
                 <div style="display: flex; gap: 20px; align-items: center;">
                     <button type="button" id="footerThemeToggle" class="footer-theme-toggle"
                         onclick="toggleFooterTheme()" aria-label="Switch to dark theme" title="Switch to dark theme">
-                        <svg class="theme-icon theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.9 13A8.5 8.5 0 0 1 11 3.1 8.5 8.5 0 1 0 20.9 13Z"/><path d="M16 3v4M14 5h4"/></svg>
-                        <svg class="theme-icon theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+                        <svg class="theme-icon theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.9 13A8.5 8.5 0 0 1 11 3.1 8.5 8.5 0 1 0 20.9 13Z" />
+                            <path d="M16 3v4M14 5h4" />
+                        </svg>
+                        <svg class="theme-icon theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="4" />
+                            <path
+                                d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
+                        </svg>
                         <span>Theme</span>
                     </button>
                     <a href="#hero" class="footer-back-to-top">Back to
@@ -2519,7 +2571,7 @@
     </script>
 
     <!-- Liquid Button Engine -->
-    <script src="{{ url_for('static', filename='js/liquid-button.js') }}?v=20261115_v19"></script>
+    <script src="{{ url_for('static', filename='js/liquid-button.js') }}?v=20261115_v20"></script>
 
     {% block extra_js %}{% endblock %}
 </body>

@@ -215,7 +215,7 @@ class SDATestCase(unittest.TestCase):
 
         # 1. Event Dates & Hero Subtitle
         self.assertIn('Daksha Infinix', data)
-        self.assertIn('Registration Open &bull; Daksha Infinix', data)
+        self.assertIn('Registrations Open &bull; Daksha Infinix', data)
         self.assertNotIn('Daksha Infinitx', data)
         self.assertNotIn('Daksha Infinitix', data)
         self.assertNotIn('SDA 2026-27', data)
@@ -262,7 +262,7 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('Registration Procedures & Payment Details', data)
         self.assertIn('ONLINE COMPETITIONS', data)
         self.assertIn('OFFLINE & SPOT ENTRIES', data)
-        self.assertIn('Important Payment & Receipt Terms', data)
+        self.assertIn('Is a physical hard copy of the payment receipt required for entry?', data)
 
         # 5. FAQ Section
         self.assertIn('id="faq"', data)
@@ -1056,7 +1056,7 @@ class SDATestCase(unittest.TestCase):
         html = res.data.decode('utf-8')
 
         # 1. Top Hero action buttons and countdown
-        self.assertIn('Starts in', html)
+        self.assertIn('Starts on 25th, 26th November 2026, Bengaluru.', html)
         self.assertIn('Explore Events', html)
         self.assertIn('Rules &amp; Guidelines', html)
         self.assertIn('Contact Organizers', html)
