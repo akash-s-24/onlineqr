@@ -13,7 +13,7 @@
   --liquid-green-glow: rgba(16, 185, 129, 0.45);
 }
 
-/* Base Liquid Button Container */
+/* Base Liquid Button Container - preserving each button's native dimensions */
 .liquid-btn,
 [data-liquid-button] {
   --liquid-fill: #3b82f6;
@@ -27,7 +27,6 @@
   align-items: center;
   justify-content: center;
   overflow: hidden !important;
-  border-radius: 9999px;
   font-family: inherit;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -57,7 +56,6 @@
 .liquid-btn:hover,
 [data-liquid-button]:hover {
   transform: translateY(-1.5px) !important;
-  box-shadow: 0 10px 24px -10px var(--liquid-blue-glow);
 }
 
 .liquid-btn.is-pressed,
@@ -65,7 +63,6 @@
 [data-liquid-button].is-pressed,
 [data-liquid-button]:active {
   transform: scale(0.97) translateY(0) !important;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
   transition-duration: 0.08s;
 }
 
@@ -92,7 +89,8 @@
   z-index: 1;
   width: 100%;
   height: 100%;
-  overflow: visible;
+  overflow: hidden;
+  border-radius: inherit;
 }
 
 .liquid-btn-svg ellipse.liquid-blob,
@@ -104,22 +102,22 @@
   stroke: var(--liquid-active-text, #ffffff) !important;
 }
 
-/* Content Container (Normal View) */
+/* Content Container (Normal View) - perfectly aligned without extra padding/stretching */
 .liquid-btn-content {
   pointer-events: none;
   position: relative;
-  z-index: 10;
+  z-index: 5;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   color: inherit;
   opacity: 1 !important;
   visibility: visible !important;
   transition: transform 0.1s ease-out;
-  width: 100%;
-  height: 100%;
   box-sizing: border-box;
+  width: auto;
+  height: auto;
 }
 
 .liquid-btn.is-pressed .liquid-btn-content,
@@ -127,45 +125,15 @@
   transform: scale(0.98);
 }
 
-/* Inverted Layer (Clipped View by Liquid Blob) */
+/* Inverted Layer (Hidden to guarantee zero duplicate text/icons across browsers) */
 .liquid-btn-inverted {
-  pointer-events: none;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
   position: absolute;
-  inset: 0;
-  z-index: 20;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: inherit;
-  color: var(--liquid-active-text, #ffffff) !important;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.12s ease-out;
   clip-path: var(--liquid-clip);
   -webkit-clip-path: var(--liquid-clip);
-  box-sizing: border-box;
-}
-
-.liquid-btn.is-hovered .liquid-btn-inverted,
-.liquid-btn:hover .liquid-btn-inverted,
-.liquid-btn:active .liquid-btn-inverted,
-[data-liquid-button].is-hovered .liquid-btn-inverted,
-[data-liquid-button]:hover .liquid-btn-inverted,
-[data-liquid-button]:active .liquid-btn-inverted {
-  opacity: 1;
-  visibility: visible;
-}
-
-.liquid-btn.is-pressed .liquid-btn-inverted,
-[data-liquid-button].is-pressed .liquid-btn-inverted {
-  transform: scale(0.98);
-}
-
-/* Pseudo element text rendering to avoid duplicate DOM accessibility nodes */
-.liquid-btn-inverted [data-liquid-text]::before {
-  content: attr(data-liquid-text);
-  display: inline;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -184,6 +152,9 @@
   --liquid-text: #ffffff !important;
   --liquid-active-text: #ffffff !important;
   --liquid-glow: rgba(16, 185, 129, 0.45) !important;
+  background: #059669 !important;
+  border: 1.5px solid #10b981 !important;
+  color: #ffffff !important;
   position: relative !important;
   overflow: hidden !important;
 }
@@ -192,14 +163,6 @@
 .disc-cascade-register.liquid-btn .liquid-btn-svg ellipse.liquid-blob,
 #discCascadeRegister.liquid-btn .liquid-btn-svg ellipse.liquid-blob {
   fill: #10b981 !important;
-}
-
-.btn-card-register.liquid-btn:hover,
-.disc-cascade-register.liquid-btn:hover,
-#discCascadeRegister.liquid-btn:hover {
-  transform: translateY(-1.5px) !important;
-  border-color: #10b981 !important;
-  box-shadow: 0 10px 24px -6px rgba(16, 185, 129, 0.5) !important;
 }
 
 /* ── 2. BLUE LIQUID BUTTONS (#3b82f6 rupee & lakh accent) ──
@@ -247,83 +210,194 @@
   fill: #3b82f6 !important;
 }
 
-/* Individual button layout & elevation refinement */
-.hero-explore-btn.liquid-btn {
-  border-radius: 9999px !important;
-  box-shadow: 0 4px 18px rgba(59, 130, 246, 0.45) !important;
-}
+/* ═══════════════════════════════════════════════════════════════
+   PRECISE, BALANCED DIMENSIONS FOR EACH TARGET GROUP
+   ═══════════════════════════════════════════════════════════════ */
 
-.hero-explore-btn.liquid-btn:hover {
-  transform: translateY(-1.5px) !important;
-  box-shadow: 0 10px 24px -4px rgba(59, 130, 246, 0.6) !important;
-}
-
-.hero-rules-btn.liquid-btn,
-.hero-contact-btn.liquid-btn {
-  border-radius: 9999px !important;
-  border: 2px solid #3b82f6 !important;
-  background: rgba(15, 23, 42, 0.85) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.hero-rules-btn.liquid-btn:hover,
-.hero-contact-btn.liquid-btn:hover {
-  transform: translateY(-1.5px) !important;
-  border-color: #3b82f6 !important;
-  box-shadow: 0 8px 24px -4px rgba(59, 130, 246, 0.5) !important;
-}
-
-#discCascadeRules.liquid-btn,
-#discCascadeCall.liquid-btn {
+/* 1. Grid Card Rules & Contact Actions: compact 34px height */
+.btn-card-rules.liquid-btn,
+.btn-card-contact.liquid-btn {
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 12px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
   border-radius: 8px !important;
   border: 1.5px solid #3b82f6 !important;
   background: rgba(15, 23, 42, 0.85) !important;
-}
-
-#discCascadeRules.liquid-btn:hover,
-#discCascadeCall.liquid-btn:hover {
-  transform: translateY(-1.5px) !important;
-  box-shadow: 0 6px 18px -2px rgba(59, 130, 246, 0.45) !important;
-}
-
-.btn-card-rules.liquid-btn,
-.btn-card-contact.liquid-btn {
-  border-radius: 8px !important;
-  border: 2px solid #3b82f6 !important;
-  background: rgba(15, 23, 42, 0.85) !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25) !important;
+  width: auto !important;
 }
 
 .btn-card-rules.liquid-btn:hover,
 .btn-card-contact.liquid-btn:hover {
   transform: translateY(-1.5px) !important;
-  box-shadow: 0 8px 20px -2px rgba(59, 130, 246, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.45) !important;
+  border-color: #60a5fa !important;
 }
 
-.track-footer a.track-btn-primary.liquid-btn {
+/* 2. Grid Card Register Action (Green): compact 34px height */
+.btn-card-register.liquid-btn {
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #10b981 !important;
+  background: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3) !important;
+  width: auto !important;
+}
+
+.btn-card-register.liquid-btn:hover {
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.5) !important;
+  border-color: #34d399 !important;
+}
+
+/* 3. Carousel Rules & Call Actions: 38px height */
+#discCascadeRules.liquid-btn,
+#discCascadeCall.liquid-btn,
+.disc-cascade-rules.liquid-btn,
+.disc-cascade-call.liquid-btn {
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  padding: 0 16px !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #3b82f6 !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25) !important;
+  width: auto !important;
+}
+
+#discCascadeRules.liquid-btn:hover,
+#discCascadeCall.liquid-btn:hover,
+.disc-cascade-rules.liquid-btn:hover,
+.disc-cascade-call.liquid-btn:hover {
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.45) !important;
+  border-color: #60a5fa !important;
+}
+
+/* 4. Carousel Register Action (Green): 38px height */
+#discCascadeRegister.liquid-btn,
+.disc-cascade-register.liquid-btn {
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  padding: 0 18px !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #10b981 !important;
+  background: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35) !important;
+  width: auto !important;
+}
+
+#discCascadeRegister.liquid-btn:hover,
+.disc-cascade-register.liquid-btn:hover {
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.55) !important;
+  border-color: #34d399 !important;
+}
+
+/* 5. Hero Explore Button: elegant 42px pill */
+.hero-explore-btn.liquid-btn {
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  padding: 0 24px !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
   border-radius: 9999px !important;
+  border: 1.5px solid #3b82f6 !important;
+  background: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4) !important;
+  width: auto !important;
+}
+
+.hero-explore-btn.liquid-btn:hover {
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.6) !important;
+  border-color: #60a5fa !important;
+}
+
+/* 6. Hero Rules & Contact Buttons: elegant 42px pill */
+.hero-rules-btn.liquid-btn,
+.hero-contact-btn.liquid-btn {
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  padding: 0 20px !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  border-radius: 9999px !important;
+  border: 1.5px solid #3b82f6 !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25) !important;
+  width: auto !important;
+}
+
+.hero-rules-btn.liquid-btn:hover,
+.hero-contact-btn.liquid-btn:hover {
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45) !important;
+  border-color: #60a5fa !important;
+}
+
+/* 7. Track Primary Buttons: 48px rounded-rect */
+.track-footer a.track-btn-primary.liquid-btn {
+  min-height: 48px !important;
+  padding: 12px 24px !important;
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
   border: 1.5px solid #54A1FD !important;
-  box-shadow: 0px 4px 36px -8px #1187FF !important;
+  background: radial-gradient(95% 60% at 50% 75%, #005FD6 0%, #209BFF 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0px 4px 32px -8px #1187FF !important;
 }
 
 .track-footer a.track-btn-primary.liquid-btn:hover {
   transform: translateY(-1.5px) !important;
-  box-shadow: 0px 8px 44px -6px #1187FF !important;
+  box-shadow: 0px 8px 40px -6px #1187FF !important;
 }
 
+/* 8. Registration Page Submit Button: 50px rounded-rect */
 #submitBtn.liquid-btn {
+  min-height: 50px !important;
+  padding: 14px 28px !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
   border-radius: 12px !important;
   border: 1.5px solid #3b82f6 !important;
+  background: #2563eb !important;
+  color: #ffffff !important;
   box-shadow: 0 4px 18px rgba(59, 130, 246, 0.35) !important;
+  width: 100% !important;
+  margin-top: 24px;
 }
 
 #submitBtn.liquid-btn:hover {
   transform: translateY(-1.5px) !important;
-  box-shadow: 0 10px 26px -4px rgba(59, 130, 246, 0.55) !important;
+  box-shadow: 0 8px 26px rgba(59, 130, 246, 0.55) !important;
+  border-color: #60a5fa !important;
 }
 
-/* Smooth Reduced Motion */
+/* Reduced Motion Mode */
 @media (prefers-reduced-motion: reduce) {
   .liquid-btn,
   [data-liquid-button] {

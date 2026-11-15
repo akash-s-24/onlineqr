@@ -115,6 +115,7 @@
     invertedEl.style.setProperty('--liquid-clip', `url(#${clipPathId})`);
     invertedEl.style.setProperty('clip-path', `url(#${clipPathId})`);
     invertedEl.style.setProperty('-webkit-clip-path', `url(#${clipPathId})`);
+    invertedEl.style.display = 'none';
     invertedEl.style.opacity = '0';
     invertedEl.style.visibility = 'hidden';
     btn.style.removeProperty('-webkit-clip-path');
@@ -284,13 +285,12 @@
 
       if (state.radius <= 0.05 && state.ringPhase === 0) {
         blob.style.display = 'none';
-        invertedEl.style.opacity = '0';
-        invertedEl.style.visibility = 'hidden';
       } else {
         blob.style.display = 'block';
-        invertedEl.style.opacity = '1';
-        invertedEl.style.visibility = 'visible';
       }
+      invertedEl.style.display = 'none';
+      invertedEl.style.opacity = '0';
+      invertedEl.style.visibility = 'hidden';
 
       const axisScale = Math.sqrt(state.stretch);
       const rx = state.radius * axisScale;

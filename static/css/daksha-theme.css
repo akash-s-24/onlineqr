@@ -220,8 +220,8 @@ p { text-wrap: pretty; }
 .f-control:focus, .form-control:focus, input:focus, select:focus, textarea:focus { border-color: var(--focus); }
 
 /* Theme-aware mechanical candy press, scoped only to the Events-grid Rules/Contact actions. */
-#events .btn-card-rules,
-#events .btn-card-contact {
+#events .btn-card-rules:not(.liquid-btn),
+#events .btn-card-contact:not(.liquid-btn) {
   min-height: 44px !important;
   border: 1px solid var(--border) !important;
   border-radius: 13px !important;
@@ -233,22 +233,22 @@ p { text-wrap: pretty; }
   transition: transform 105ms cubic-bezier(.2,.8,.2,1), box-shadow 105ms ease, background 140ms ease, border-color 140ms ease !important;
   touch-action: manipulation;
 }
-#events .btn-card-rules:hover,
-#events .btn-card-contact:hover {
+#events .btn-card-rules:not(.liquid-btn):hover,
+#events .btn-card-contact:not(.liquid-btn):hover {
   background: var(--primary-hover) !important;
   border-color: var(--primary-hover) !important;
   color: var(--on-primary) !important;
   transform: translateY(0) !important;
   box-shadow: 0 4px 0 var(--event-button-edge), 0 7px 16px rgba(0,0,0,.10), inset 0 1px 0 var(--button-highlight) !important;
 }
-#events .btn-card-rules:active,
-#events .btn-card-contact:active { transform: translateY(3px) !important; box-shadow: 0 1px 0 var(--event-button-edge), inset 0 1px 2px rgba(0,0,0,.16) !important; }
-#events .btn-card-rules:focus-visible,
-#events .btn-card-contact:focus-visible { outline: 2px solid var(--focus) !important; outline-offset: 3px !important; }
-@media (max-width: 640px) { #events .btn-card-rules, #events .btn-card-contact { min-height: 46px !important; } }
+#events .btn-card-rules:not(.liquid-btn):active,
+#events .btn-card-contact:not(.liquid-btn):active { transform: translateY(3px) !important; box-shadow: 0 1px 0 var(--event-button-edge), inset 0 1px 2px rgba(0,0,0,.16) !important; }
+#events .btn-card-rules:not(.liquid-btn):focus-visible,
+#events .btn-card-contact:not(.liquid-btn):focus-visible { outline: 2px solid var(--focus) !important; outline-offset: 3px !important; }
+@media (max-width: 640px) { #events .btn-card-rules:not(.liquid-btn), #events .btn-card-contact:not(.liquid-btn) { min-height: 46px !important; } }
 @media (prefers-reduced-motion: reduce) {
-  #events .btn-card-rules, #events .btn-card-contact { transition: none !important; }
-  #events .btn-card-rules:active, #events .btn-card-contact:active { transform: none !important; }
+  #events .btn-card-rules:not(.liquid-btn), #events .btn-card-contact:not(.liquid-btn) { transition: none !important; }
+  #events .btn-card-rules:not(.liquid-btn):active, #events .btn-card-contact:not(.liquid-btn):active { transform: none !important; }
 }
 
 /* Workspace chrome follows the same campus palette without changing nav structure. */
@@ -1224,7 +1224,7 @@ body.event-dialog-open { overflow: hidden; }
   .btn-card-contact,
   .disc-cascade-rules,
   .disc-cascade-call
-) {
+):not(.liquid-btn) {
   position: relative !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -1285,7 +1285,7 @@ body.event-dialog-open { overflow: hidden; }
   .btn-card-contact,
   .disc-cascade-rules,
   .disc-cascade-call
-) {
+):not(.liquid-btn) {
   background: #ffffff !important;
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
@@ -1307,7 +1307,7 @@ body.event-dialog-open { overflow: hidden; }
   .btn-card-contact,
   .disc-cascade-rules,
   .disc-cascade-call
-),
+):not(.liquid-btn),
 :root[data-theme="dark"] :is(
   #hero .hero-actions .hero-rules-btn,
   #hero .hero-actions .hero-contact-btn,
@@ -1321,7 +1321,7 @@ body.event-dialog-open { overflow: hidden; }
   .btn-card-contact,
   .disc-cascade-rules,
   .disc-cascade-call
-) {
+):not(.liquid-btn) {
   background: rgba(15, 23, 42, 0.85) !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
