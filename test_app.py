@@ -2169,6 +2169,16 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('window.innerWidth <= 1160', events_html)
         self.assertIn("pill.style.display = 'none';", events_html)
 
+        # 4. style.css and base.html do not have mobile border-left on header-nav-center
+        res_style = self.client.get('/static/css/style.css')
+        self.assertEqual(res_style.status_code, 200)
+        style_css = res_style.data.decode('utf-8')
+        self.assertNotIn('border-left: 1px solid #e2e8f0 !important;', style_css)
+        self.assertIn('border-left: none !important;', style_css)
+
+        # 5. Body class synchronization for theme switching
+        self.assertIn("document.body.classList.toggle('light-theme', next === 'light')", events_html)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1711,9 +1711,11 @@ body.light-theme .choose-palette-btn .body-moon {
   }
 
   /* Mobile menu items: clean 10px rounded rectangles without any oval or border */
+  :root[data-theme] .landing-header .image-like-nav li,
   :root[data-theme] .landing-header .image-like-nav .nav-link,
   :root[data-theme] .landing-header .image-like-nav .nav-link.active,
   :root[data-theme] .landing-header .image-like-nav .nav-link:active,
+  :root[data-theme="light"] .landing-header .image-like-nav li,
   :root[data-theme="light"] .landing-header .image-like-nav .nav-link,
   :root[data-theme="light"] .landing-header .image-like-nav .nav-link.active,
   :root[data-theme="light"] .landing-header .image-like-nav .nav-link:active,
