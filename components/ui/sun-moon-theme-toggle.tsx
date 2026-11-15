@@ -337,4 +337,3 @@ export function SunMoonThemeToggle({
 }
 
 export default SunMoonThemeToggle;
-

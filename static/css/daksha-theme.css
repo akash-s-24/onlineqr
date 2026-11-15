@@ -1070,8 +1070,8 @@ html.dark body {
 .landing-header .image-like-nav .nav-link { text-decoration: none !important; }
 .landing-header .image-like-nav .nav-link::before,
 .landing-header .image-like-nav .nav-link::after { text-decoration: none !important; box-shadow: none !important; }
-.landing-header #themeToggleBtn { width: 38px !important; height: 38px !important; padding: 8px !important; border: 1px solid var(--border) !important; border-radius: 50% !important; background: transparent !important; color: var(--text-2) !important; box-shadow: none !important; }
-.landing-header #themeToggleBtn:hover { background: var(--surface-2) !important; color: var(--link) !important; }
+.landing-header #themeToggleBtn:not(.choose-palette-btn) { width: 38px !important; height: 38px !important; padding: 8px !important; border: 1px solid var(--border) !important; border-radius: 50% !important; background: transparent !important; color: var(--text-2) !important; box-shadow: none !important; }
+.landing-header #themeToggleBtn:not(.choose-palette-btn):hover { background: var(--surface-2) !important; color: var(--link) !important; }
 .landing-header #headerRegisterBtn,
 .landing-header .header-cta-classic,
 .landing-header .landing-logo,
@@ -1433,4 +1433,227 @@ body.event-dialog-open { overflow: hidden; }
 
 :root .liquid-btn:active {
   transform: scale(0.97) translateY(0) !important;
+}
+
+
+/* ==========================================================================
+   Choose Your Palette — Sun/Moon Celestial Theme Toggle
+   ========================================================================== */
+.choose-palette-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  position: relative !important;
+  padding: 6px 14px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  box-sizing: border-box !important;
+  border-radius: 9999px !important;
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  text-decoration: none !important;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.35s cubic-bezier(0.65, 0, 0.35, 1),
+              border-color 0.35s cubic-bezier(0.65, 0, 0.35, 1),
+              box-shadow 0.35s cubic-bezier(0.65, 0, 0.35, 1),
+              color 0.35s cubic-bezier(0.65, 0, 0.35, 1) !important;
+}
+
+.choose-palette-btn:hover {
+  transform: translateY(-1.5px) !important;
+}
+
+.choose-palette-btn:active {
+  transform: translateY(0.5px) scale(0.98) !important;
+}
+
+/* Dark mode (resting black theme): crisp dark surface with subtle glow */
+:root[data-theme="dark"] .choose-palette-btn,
+body.dark-theme .choose-palette-btn {
+  background: rgba(15, 23, 42, 0.78) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.16) !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+:root[data-theme="dark"] .choose-palette-btn:hover,
+body.dark-theme .choose-palette-btn:hover {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: rgba(96, 165, 250, 0.5) !important;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+/* Light mode (white theme): crisp white/light surface with subtle shadow */
+:root[data-theme="light"] .choose-palette-btn,
+body.light-theme .choose-palette-btn {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(203, 213, 225, 0.9) !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+:root[data-theme="light"] .choose-palette-btn:hover,
+body.light-theme .choose-palette-btn:hover {
+  background: #f8fafc !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15) !important;
+  color: #1d4ed8 !important;
+}
+
+/* Text label */
+.choose-palette-btn .palette-label {
+  display: inline-block !important;
+  white-space: nowrap !important;
+  font-size: 0.84rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+/* Celestial Toggle Orb (matching sun-moon-theme-toggle) */
+.choose-palette-btn .celestial-toggle-orb {
+  position: relative !important;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  min-height: 26px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25), inset 0 0 4px rgba(0, 0, 0, 0.2) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+/* Skies inside the orb */
+.choose-palette-btn .celestial-sky {
+  position: absolute !important;
+  inset: 0 !important;
+  border-radius: 50% !important;
+  pointer-events: none !important;
+  transition: opacity 0.5s cubic-bezier(0.65, 0, 0.35, 1) !important;
+}
+
+.choose-palette-btn .sky-night {
+  background: linear-gradient(180deg, #090f2a 0%, #16204b 60%, #2a2f66 100%) !important;
+  opacity: 1;
+}
+
+.choose-palette-btn .sky-day {
+  background: linear-gradient(180deg, #4ea8ff 0%, #9fd3ff 60%, #e3f3ff 100%) !important;
+  opacity: 0;
+}
+
+/* Stars in night sky */
+.choose-palette-btn .celestial-star {
+  position: absolute !important;
+  background: #ffffff !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.9) !important;
+}
+
+.choose-palette-btn .star-1 { width: 1.8px; height: 1.8px; top: 22%; left: 24%; }
+.choose-palette-btn .star-2 { width: 1.3px; height: 1.3px; top: 18%; left: 68%; }
+.choose-palette-btn .star-3 { width: 1.6px; height: 1.6px; top: 68%; left: 32%; }
+.choose-palette-btn .star-4 { width: 1.4px; height: 1.4px; top: 72%; left: 74%; }
+
+/* Celestial Bodies (Moon & Sun) */
+.choose-palette-btn .celestial-body,
+.choose-palette-btn .celestial-body.theme-icon {
+  position: absolute !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1),
+              opacity 0.5s cubic-bezier(0.65, 0, 0.35, 1) !important;
+}
+
+.choose-palette-btn .body-moon svg {
+  color: #fbbf24 !important;
+  fill: currentColor !important;
+  filter: drop-shadow(0 0 3px rgba(251, 191, 36, 0.75)) !important;
+}
+
+.choose-palette-btn .body-sun svg {
+  color: #f59e0b !important;
+  filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.9)) !important;
+}
+
+/* When theme is Dark (Moon active, Sun stored away) */
+:root[data-theme="dark"] .choose-palette-btn .sky-night,
+body.dark-theme .choose-palette-btn .sky-night {
+  opacity: 1 !important;
+}
+
+:root[data-theme="dark"] .choose-palette-btn .sky-day,
+body.dark-theme .choose-palette-btn .sky-day {
+  opacity: 0 !important;
+}
+
+:root[data-theme="dark"] .choose-palette-btn .body-moon,
+body.dark-theme .choose-palette-btn .body-moon {
+  transform: translate(0, 0) rotate(0deg) !important;
+  opacity: 1 !important;
+  display: flex !important;
+}
+
+:root[data-theme="dark"] .choose-palette-btn .body-sun,
+body.dark-theme .choose-palette-btn .body-sun {
+  transform: translate(115%, 115%) rotate(120deg) !important;
+  opacity: 0 !important;
+  display: flex !important;
+}
+
+/* When theme is Light (Sun active, Moon stored away) */
+:root[data-theme="light"] .choose-palette-btn .sky-night,
+body.light-theme .choose-palette-btn .sky-night {
+  opacity: 0 !important;
+}
+
+:root[data-theme="light"] .choose-palette-btn .sky-day,
+body.light-theme .choose-palette-btn .sky-day {
+  opacity: 1 !important;
+}
+
+:root[data-theme="light"] .choose-palette-btn .body-sun,
+body.light-theme .choose-palette-btn .body-sun {
+  transform: translate(0, 0) rotate(0deg) !important;
+  opacity: 1 !important;
+  display: flex !important;
+}
+
+:root[data-theme="light"] .choose-palette-btn .body-moon,
+body.light-theme .choose-palette-btn .body-moon {
+  transform: translate(-115%, 115%) rotate(-25deg) !important;
+  opacity: 0 !important;
+  display: flex !important;
+}
+
+/* Ensure footer button variant aligns perfectly with footer */
+.l-footer .choose-palette-btn,
+.footer-bottom .choose-palette-btn {
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 4px 14px !important;
+}
+
+/* Ensure mobile header button variant fits comfortably */
+.mobile-theme-switch-btn.choose-palette-btn {
+  margin: 8px 0 !important;
+  width: 100% !important;
+  justify-content: space-between !important;
+  padding: 8px 16px !important;
 }

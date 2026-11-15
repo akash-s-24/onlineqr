@@ -1706,7 +1706,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261115_v23">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261115_v24">
 </head>
 
 <body
@@ -1788,15 +1788,30 @@
                 </ul>
 
                 <div class="header-actions mobile-visible">
-                    <button type="button" class="mobile-theme-switch-btn" id="themeToggleBtnMobile"
-                        onclick="toggleSiteTheme(event)" aria-label="Choose appearance" aria-haspopup="dialog"
-                        aria-controls="appearancePanel" aria-expanded="false">
-                        <svg class="appearance-mobile-mark" aria-hidden="true" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="8.5" />
-                            <path d="M12 3.5v17" />
-                        </svg>
-                        <span>Appearance</span>
+                    <button type="button" class="choose-palette-btn celestial-theme-toggle mobile-theme-switch-btn" id="themeToggleBtnMobile"
+                        onclick="toggleSiteTheme(event)" aria-label="Choose your palette" title="Choose your palette" data-no-liquid>
+                        <span class="palette-label">Choose your palette</span>
+                        <span class="celestial-toggle-orb" aria-hidden="true">
+                            <span class="celestial-sky sky-night">
+                                <span class="celestial-star star-1"></span>
+                                <span class="celestial-star star-2"></span>
+                                <span class="celestial-star star-3"></span>
+                                <span class="celestial-star star-4"></span>
+                            </span>
+                            <span class="celestial-sky sky-day"></span>
+                            <span class="celestial-body body-moon theme-icon theme-icon-moon">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.9 13A8.5 8.5 0 0 1 11 3.1 8.5 8.5 0 1 0 20.9 13Z"/>
+                                    <path d="M16 3v4M14 5h4"/>
+                                </svg>
+                            </span>
+                            <span class="celestial-body body-sun theme-icon theme-icon-sun">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="4"/>
+                                    <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>
+                                </svg>
+                            </span>
+                        </span>
                     </button>
                     {% if session.get('user_id') %}
                     <div class="header-user-name"
@@ -1830,14 +1845,30 @@
             </nav>
 
             <div class="header-actions desktop-actions">
-                <button type="button" class="appearance-trigger-icon" id="themeToggleBtn"
-                    onclick="toggleSiteTheme(event)" aria-label="Choose appearance" aria-haspopup="dialog"
-                    aria-controls="appearancePanel" aria-expanded="false" title="Choose appearance">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="8.5" />
-                        <path d="M12 3.5v17" />
-                    </svg>
+                <button type="button" class="choose-palette-btn celestial-theme-toggle" id="themeToggleBtn"
+                    onclick="toggleSiteTheme(event)" aria-label="Choose your palette" title="Choose your palette" data-no-liquid>
+                    <span class="palette-label">Choose your palette</span>
+                    <span class="celestial-toggle-orb" aria-hidden="true">
+                        <span class="celestial-sky sky-night">
+                            <span class="celestial-star star-1"></span>
+                            <span class="celestial-star star-2"></span>
+                            <span class="celestial-star star-3"></span>
+                            <span class="celestial-star star-4"></span>
+                        </span>
+                        <span class="celestial-sky sky-day"></span>
+                        <span class="celestial-body body-moon theme-icon theme-icon-moon">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.9 13A8.5 8.5 0 0 1 11 3.1 8.5 8.5 0 1 0 20.9 13Z"/>
+                                <path d="M16 3v4M14 5h4"/>
+                            </svg>
+                        </span>
+                        <span class="celestial-body body-sun theme-icon theme-icon-sun">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="4"/>
+                                <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>
+                            </svg>
+                        </span>
+                    </span>
                 </button>
                 {% if session.get('user_id') %}
                 <div class="header-user-name"
@@ -2112,20 +2143,30 @@
             <div class="footer-bottom">
                 <div>&copy; 2026 Shree Daksha Academy. All rights reserved.</div>
                 <div style="display: flex; gap: 20px; align-items: center;">
-                    <button type="button" id="footerThemeToggle" class="footer-theme-toggle"
-                        onclick="toggleFooterTheme()" aria-label="Switch to dark theme" title="Switch to dark theme">
-                        <svg class="theme-icon theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20.9 13A8.5 8.5 0 0 1 11 3.1 8.5 8.5 0 1 0 20.9 13Z" />
-                            <path d="M16 3v4M14 5h4" />
-                        </svg>
-                        <svg class="theme-icon theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="4" />
-                            <path
-                                d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
-                        </svg>
-                        <span>Theme</span>
+                    <button type="button" id="footerThemeToggle" class="choose-palette-btn celestial-theme-toggle footer-theme-toggle"
+                        onclick="toggleFooterTheme()" aria-label="Choose your palette" title="Choose your palette" data-no-liquid>
+                        <span class="palette-label">Choose your palette</span>
+                        <span class="celestial-toggle-orb" aria-hidden="true">
+                            <span class="celestial-sky sky-night">
+                                <span class="celestial-star star-1"></span>
+                                <span class="celestial-star star-2"></span>
+                                <span class="celestial-star star-3"></span>
+                                <span class="celestial-star star-4"></span>
+                            </span>
+                            <span class="celestial-sky sky-day"></span>
+                            <span class="celestial-body body-moon theme-icon theme-icon-moon">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.9 13A8.5 8.5 0 0 1 11 3.1 8.5 8.5 0 1 0 20.9 13Z"/>
+                                    <path d="M16 3v4M14 5h4"/>
+                                </svg>
+                            </span>
+                            <span class="celestial-body body-sun theme-icon theme-icon-sun">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="4"/>
+                                    <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>
+                                </svg>
+                            </span>
+                        </span>
                     </button>
                     <a href="#hero" class="footer-back-to-top">Back to
                         Top &uarr;</a>
@@ -2456,20 +2497,15 @@
             }
 
             function updateThemeLabels() {
-                ['themeToggleBtn', 'themeToggleBtnMobile'].forEach(id => {
+                const current = document.documentElement.getAttribute('data-theme') || 'dark';
+                const nextTheme = current === 'dark' ? 'white' : 'black';
+                ['themeToggleBtn', 'themeToggleBtnMobile', 'footerThemeToggle'].forEach(id => {
                     const trigger = document.getElementById(id);
                     if (trigger) {
-                        trigger.setAttribute('aria-label', 'Choose appearance');
-                        trigger.setAttribute('title', 'Choose appearance');
+                        trigger.setAttribute('aria-label', `Choose your palette (${nextTheme} theme)`);
+                        trigger.setAttribute('title', `Choose your palette (${nextTheme} theme)`);
                     }
                 });
-                const footerToggle = document.getElementById('footerThemeToggle');
-                if (footerToggle) {
-                    const current = document.documentElement.getAttribute('data-theme') || 'light';
-                    const target = current === 'dark' ? 'light' : 'dark';
-                    footerToggle.setAttribute('aria-label', `Switch to ${target} theme`);
-                    footerToggle.setAttribute('title', `Switch to ${target} theme`);
-                }
             }
 
             window.setSiteTheme = function (theme) {
@@ -2500,25 +2536,16 @@
                 return true;
             };
             window.toggleFooterTheme = function () {
-                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                const current = document.documentElement.getAttribute('data-theme') || 'dark';
                 window.setSiteTheme(current === 'dark' ? 'light' : 'dark');
             };
             window.toggleSiteTheme = function (event) {
-                const panel = document.getElementById('appearancePanel');
-                if (!panel) return;
-                const opening = panel.hidden;
-                panel.hidden = !opening;
-                document.querySelectorAll('#themeToggleBtn, #themeToggleBtnMobile').forEach(trigger => {
-                    trigger.setAttribute('aria-expanded', String(opening));
-                });
-                if (opening) {
-                    if (event && event.currentTarget) panel.dataset.openerId = event.currentTarget.id;
-                    const current = document.documentElement.getAttribute('data-theme') || 'light';
-                    const selected = panel.querySelector(`[data-theme-choice="${current}"]`);
-                    if (selected) selected.focus();
-                } else if (event && event.currentTarget) {
-                    event.currentTarget.focus();
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
+                const current = document.documentElement.getAttribute('data-theme') || 'dark';
+                window.setSiteTheme(current === 'dark' ? 'light' : 'dark');
             };
 
             document.addEventListener('DOMContentLoaded', () => {

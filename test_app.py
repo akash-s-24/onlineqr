@@ -2007,6 +2007,61 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('height: 46px !important;', liquid_css)
         self.assertIn('flex: 1 1 100% !important;', liquid_css)
 
+    def test_38_choose_your_palette_sun_moon_toggle(self):
+        """Verify the 'Choose your palette' sun/moon celestial toggle is integrated across mobile and desktop, upper and lower sections."""
+        # 1. Check landing page (templates/landing_base.html)
+        res = self.client.get('/events')
+        self.assertEqual(res.status_code, 200)
+        html = res.data.decode('utf-8')
+
+        # Upper desktop header
+        self.assertIn('id="themeToggleBtn"', html)
+        self.assertIn('class="choose-palette-btn celestial-theme-toggle"', html)
+
+        # Upper mobile drawer
+        self.assertIn('id="themeToggleBtnMobile"', html)
+        self.assertIn('class="choose-palette-btn celestial-theme-toggle mobile-theme-switch-btn"', html)
+
+        # Lower footer
+        self.assertIn('id="footerThemeToggle"', html)
+
+        # "Choose your palette" label present in toggles
+        self.assertIn('Choose your palette', html)
+
+        # Sun and Moon celestial bodies and sky present
+        self.assertIn('theme-icon-moon', html)
+        self.assertIn('theme-icon-sun', html)
+        self.assertIn('celestial-toggle-orb', html)
+        self.assertIn('sky-night', html)
+        self.assertIn('sky-day', html)
+
+        # Direct theme switching without opening popup
+        self.assertIn('window.toggleSiteTheme = function (event)', html)
+        self.assertIn('window.toggleFooterTheme = function ()', html)
+
+        # 2. Check base template (templates/base.html)
+        res_login = self.client.get('/login')
+        self.assertEqual(res_login.status_code, 200)
+        login_html = res_login.data.decode('utf-8')
+        self.assertIn('id="baseThemeToggle"', login_html)
+        self.assertIn('class="choose-palette-btn celestial-theme-toggle footer-theme-toggle"', login_html)
+        self.assertIn('Choose your palette', login_html)
+
+        # 3. Check CSS theme rules in daksha-theme.css
+        res_css = self.client.get('/static/css/daksha-theme.css')
+        self.assertEqual(res_css.status_code, 200)
+        css = res_css.data.decode('utf-8')
+
+        self.assertIn('.choose-palette-btn', css)
+        self.assertIn('.celestial-toggle-orb', css)
+        self.assertIn(':root[data-theme="dark"] .choose-palette-btn .body-moon', css)
+        self.assertIn(':root[data-theme="light"] .choose-palette-btn .body-sun', css)
+
+        # 4. Check React components existence
+        import os
+        self.assertTrue(os.path.exists('components/ui/sun-moon-theme-toggle.tsx'), "sun-moon-theme-toggle.tsx missing")
+        self.assertTrue(os.path.exists('components/ui/demo.tsx'), "demo.tsx missing")
+
 
 if __name__ == '__main__':
     unittest.main()
