@@ -28,7 +28,7 @@
     <!-- Futuristic Color-Palette Design System -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}?v=20261111_v1">
     <!-- High-Craft Liquid Fluid Buttons -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-button.css') }}?v=20261115_v20">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-button.css') }}?v=20261115_v21">
 
     <!-- Theme Initializer (Anti-Flicker & shadcn sync) -->
     <script>
@@ -1686,13 +1686,7 @@
             color: #52525b !important;
         }
 
-            {
-            % block extra_css %
-        }
-
-            {
-            % endblock %
-        }
+        {% block extra_css %}{% endblock %}
 
         @media (max-width: 1023px) {
 
@@ -1712,7 +1706,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261115_v20">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/daksha-theme.css') }}?v=20261115_v21">
 </head>
 
 <body
@@ -2577,7 +2571,7 @@
     </script>
 
     <!-- Liquid Button Engine -->
-    <script src="{{ url_for('static', filename='js/liquid-button.js') }}?v=20261115_v20"></script>
+    <script src="{{ url_for('static', filename='js/liquid-button.js') }}?v=20261115_v21"></script>
 
     {% block extra_js %}{% endblock %}
 </body>
