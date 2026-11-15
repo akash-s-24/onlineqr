@@ -111,18 +111,30 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  color: var(--liquid-text, #ffffff);
+  color: var(--liquid-text, inherit) !important;
   opacity: 1 !important;
   visibility: visible !important;
   transition: color 0.18s ease, transform 0.1s ease-out;
   box-sizing: border-box;
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
+}
+
+.liquid-btn-content svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+  transition: stroke 0.18s ease, color 0.18s ease;
 }
 
 .liquid-btn:hover .liquid-btn-content,
 [data-liquid-button]:hover .liquid-btn-content {
   color: var(--liquid-active-text, #ffffff) !important;
+}
+
+.liquid-btn:hover .liquid-btn-content svg,
+[data-liquid-button]:hover .liquid-btn-content svg {
+  color: var(--liquid-active-text, #ffffff) !important;
+  stroke: currentColor !important;
 }
 
 .liquid-btn.is-pressed .liquid-btn-content,
@@ -328,11 +340,13 @@
   text-transform: uppercase !important;
   border-radius: 9999px !important;
   border: 1.5px solid #10b981 !important;
-  background: rgba(6, 78, 59, 0.45) !important;
+  background: #059669 !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
   color: #ffffff !important;
-  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.25) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35) !important;
   width: auto !important;
   max-width: max-content !important;
   display: inline-flex !important;
@@ -408,35 +422,45 @@
   border-color: #60a5fa !important;
 }
 
-/* 7. Track Primary Buttons: compact 38px rounded-rect with electric blue fluid */
+/* 7. Track Primary Buttons: full-width 44px rounded-rect with electric blue fluid */
 .track-footer a.track-btn-primary.liquid-btn {
-  --liquid-fill: #005FD6 !important;
-  --liquid-border: #54A1FD !important;
+  --liquid-fill: #1d4ed8 !important;
+  --liquid-border: #2563eb !important;
   --liquid-text: #ffffff !important;
   --liquid-active-text: #ffffff !important;
-  height: 38px !important;
-  min-height: 38px !important;
-  max-height: 38px !important;
-  padding: 0 20px !important;
-  font-size: 0.84rem !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  padding: 12px 20px !important;
+  font-size: 0.90rem !important;
   font-weight: 700 !important;
-  border-radius: 10px !important;
-  border: 1.5px solid #54A1FD !important;
-  background: rgba(0, 95, 214, 0.35) !important;
+  border-radius: 12px !important;
+  border: 1.5px solid #3b82f6 !important;
+  background: #2563eb !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   color: #ffffff !important;
-  box-shadow: 0px 3px 20px -6px #1187FF !important;
-  width: auto !important;
-  max-width: max-content !important;
-  display: inline-flex !important;
+  box-shadow: 0px 4px 18px rgba(37, 99, 235, 0.35) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: 1 1 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   box-sizing: border-box !important;
+  text-align: center !important;
+}
+
+.track-footer a.track-btn-primary.liquid-btn .liquid-btn-content {
+  color: #ffffff !important;
+  width: 100% !important;
+  justify-content: center !important;
 }
 
 .track-footer a.track-btn-primary.liquid-btn:hover {
   transform: translateY(-1.5px) !important;
-  border-color: #ffffff !important;
-  box-shadow: 0px 6px 26px -4px #1187FF !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0px 6px 24px rgba(37, 99, 235, 0.55) !important;
 }
 
 /* 8. Registration Page Submit Button: 50px rounded-rect */
@@ -496,54 +520,158 @@
     flex: 0 0 auto !important;
   }
   .track-footer a.track-btn-primary.liquid-btn {
-    width: auto !important;
-    max-width: max-content !important;
-    height: 38px !important;
-    min-height: 38px !important;
-    max-height: 38px !important;
-    padding: 0 16px !important;
-    font-size: 0.82rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    padding: 12px 16px !important;
+    font-size: 0.88rem !important;
   }
 }
 
-/* Light Appearance Palette Adjustments */
+/* Light Appearance Palette Adjustments — High Contrast, Instant Visibility */
 :root[data-theme="light"] .hero-explore-btn.liquid-btn {
-  background: rgba(37, 99, 235, 0.12) !important;
-  border-color: #2563eb !important;
-  color: #1d4ed8 !important;
+  --liquid-fill: #2563eb !important;
+  --liquid-border: #2563eb !important;
+  --liquid-text: #0f172a !important;
+  --liquid-active-text: #ffffff !important;
+  background: #ffffff !important;
+  border: 2px solid #2563eb !important;
+  color: #0f172a !important;
+  box-shadow: 0 3px 12px rgba(37, 99, 235, 0.18) !important;
+}
+:root[data-theme="light"] .hero-explore-btn.liquid-btn .liquid-btn-content {
+  color: #0f172a !important;
+}
+:root[data-theme="light"] .hero-explore-btn.liquid-btn .liquid-btn-content svg {
+  color: #0f172a !important;
+  stroke: #0f172a !important;
 }
 :root[data-theme="light"] .hero-explore-btn.liquid-btn:hover {
+  border-color: #1d4ed8 !important;
   color: #ffffff !important;
+}
+:root[data-theme="light"] .hero-explore-btn.liquid-btn:hover .liquid-btn-content {
+  color: #ffffff !important;
+}
+:root[data-theme="light"] .hero-explore-btn.liquid-btn:hover .liquid-btn-content svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 :root[data-theme="light"] .hero-rules-btn.liquid-btn,
 :root[data-theme="light"] .hero-contact-btn.liquid-btn {
-  background: rgba(15, 23, 42, 0.06) !important;
-  border-color: #2563eb !important;
-  color: #1e3a8a !important;
+  --liquid-fill: #2563eb !important;
+  --liquid-border: #0f172a !important;
+  --liquid-text: #0f172a !important;
+  --liquid-active-text: #ffffff !important;
+  background: #ffffff !important;
+  border: 2px solid #0f172a !important;
+  color: #0f172a !important;
+  box-shadow: 3px 3px 0px #0f172a !important;
+}
+:root[data-theme="light"] .hero-rules-btn.liquid-btn .liquid-btn-content,
+:root[data-theme="light"] .hero-contact-btn.liquid-btn .liquid-btn-content {
+  color: #0f172a !important;
 }
 :root[data-theme="light"] .hero-rules-btn.liquid-btn:hover,
 :root[data-theme="light"] .hero-contact-btn.liquid-btn:hover {
   color: #ffffff !important;
+  border-color: #1d4ed8 !important;
+}
+:root[data-theme="light"] .hero-rules-btn.liquid-btn:hover .liquid-btn-content,
+:root[data-theme="light"] .hero-contact-btn.liquid-btn:hover .liquid-btn-content {
+  color: #ffffff !important;
+}
+
+:root[data-theme="light"] #discCascadeRules.liquid-btn,
+:root[data-theme="light"] #discCascadeCall.liquid-btn,
+:root[data-theme="light"] .disc-cascade-rules.liquid-btn,
+:root[data-theme="light"] .disc-cascade-call.liquid-btn,
+:root[data-theme="light"] .btn-card-rules.liquid-btn,
+:root[data-theme="light"] .btn-card-contact.liquid-btn {
+  --liquid-fill: #2563eb !important;
+  --liquid-border: #0f172a !important;
+  --liquid-text: #0f172a !important;
+  --liquid-active-text: #ffffff !important;
+  background: #ffffff !important;
+  border: 1.5px solid #0f172a !important;
+  color: #0f172a !important;
+  box-shadow: 2px 2px 0px rgba(15, 23, 42, 0.15) !important;
+}
+:root[data-theme="light"] #discCascadeRules.liquid-btn .liquid-btn-content,
+:root[data-theme="light"] #discCascadeCall.liquid-btn .liquid-btn-content,
+:root[data-theme="light"] .disc-cascade-rules.liquid-btn .liquid-btn-content,
+:root[data-theme="light"] .disc-cascade-call.liquid-btn .liquid-btn-content,
+:root[data-theme="light"] .btn-card-rules.liquid-btn .liquid-btn-content,
+:root[data-theme="light"] .btn-card-contact.liquid-btn .liquid-btn-content {
+  color: #0f172a !important;
+}
+:root[data-theme="light"] #discCascadeRules.liquid-btn:hover,
+:root[data-theme="light"] #discCascadeCall.liquid-btn:hover,
+:root[data-theme="light"] .disc-cascade-rules.liquid-btn:hover,
+:root[data-theme="light"] .disc-cascade-call.liquid-btn:hover,
+:root[data-theme="light"] .btn-card-rules.liquid-btn:hover,
+:root[data-theme="light"] .btn-card-contact.liquid-btn:hover {
+  color: #ffffff !important;
+  border-color: #1d4ed8 !important;
+}
+:root[data-theme="light"] #discCascadeRules.liquid-btn:hover .liquid-btn-content,
+:root[data-theme="light"] #discCascadeCall.liquid-btn:hover .liquid-btn-content,
+:root[data-theme="light"] .disc-cascade-rules.liquid-btn:hover .liquid-btn-content,
+:root[data-theme="light"] .disc-cascade-call.liquid-btn:hover .liquid-btn-content,
+:root[data-theme="light"] .btn-card-rules.liquid-btn:hover .liquid-btn-content,
+:root[data-theme="light"] .btn-card-contact.liquid-btn:hover .liquid-btn-content {
+  color: #ffffff !important;
 }
 
 :root[data-theme="light"] #discCascadeRegister.liquid-btn,
-:root[data-theme="light"] .disc-cascade-register.liquid-btn {
-  background: rgba(16, 185, 129, 0.12) !important;
-  border-color: #059669 !important;
-  color: #047857 !important;
+:root[data-theme="light"] .disc-cascade-register.liquid-btn,
+:root[data-theme="light"] .btn-card-register.liquid-btn {
+  --liquid-fill: #047857 !important;
+  --liquid-border: #059669 !important;
+  --liquid-text: #ffffff !important;
+  --liquid-active-text: #ffffff !important;
+  background: #059669 !important;
+  border: 1.5px solid #047857 !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: 0 2px 10px rgba(5, 150, 105, 0.35) !important;
+}
+:root[data-theme="light"] #discCascadeRegister.liquid-btn .liquid-btn-content,
+:root[data-theme="light"] .disc-cascade-register.liquid-btn .liquid-btn-content,
+:root[data-theme="light"] .btn-card-register.liquid-btn .liquid-btn-content {
+  color: #ffffff !important;
 }
 :root[data-theme="light"] #discCascadeRegister.liquid-btn:hover,
-:root[data-theme="light"] .disc-cascade-register.liquid-btn:hover {
+:root[data-theme="light"] .disc-cascade-register.liquid-btn:hover,
+:root[data-theme="light"] .btn-card-register.liquid-btn:hover {
+  background: #047857 !important;
+  border-color: #065f46 !important;
   color: #ffffff !important;
 }
 
 :root[data-theme="light"] .track-footer a.track-btn-primary.liquid-btn {
-  background: rgba(0, 95, 214, 0.12) !important;
-  border-color: #005FD6 !important;
-  color: #005FD6 !important;
+  background: #2563eb !important;
+  border: 1.5px solid #1d4ed8 !important;
+  color: #ffffff !important;
+  --liquid-text: #ffffff !important;
+  --liquid-active-text: #ffffff !important;
+  --liquid-fill: #1d4ed8 !important;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 44px !important;
+  min-height: 44px !important;
+}
+:root[data-theme="light"] .track-footer a.track-btn-primary.liquid-btn .liquid-btn-content {
+  color: #ffffff !important;
 }
 :root[data-theme="light"] .track-footer a.track-btn-primary.liquid-btn:hover {
+  background: #1d4ed8 !important;
+  border-color: #1e40af !important;
   color: #ffffff !important;
 }
 

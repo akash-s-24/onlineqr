@@ -36,7 +36,7 @@ max-width: 85vw !important;
 opacity: 0.15 !important;
 animation: none !important;
 }
-.hero-title { font-size: clamp(1.85rem, 8vw, 3.2rem) !important; margin-top: 0 !important; margin-bottom: 16px !important; line-height: 1.15 !important; color: #ffffff !important; text-wrap: balance; max-width: 95vw !important; }
+.hero-title { font-size: clamp(2.6rem, 11vw, 3.6rem) !important; font-weight: 800 !important; letter-spacing: -0.03em !important; margin-top: 0 !important; margin-bottom: 16px !important; line-height: 1.08 !important; color: #ffffff !important; text-wrap: balance; max-width: 95vw !important; }
 .hero-subtitle { font-size: clamp(0.88rem, 2.6vw, 1.05rem) !important; max-width: 92vw !important; line-height: 1.5 !important; margin: 0 auto 18px auto !important; text-wrap: balance; }
 
 .hero-actions {
@@ -3998,29 +3998,28 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
     .track-footer {
     margin-top: auto;
+    width: 100% !important;
+    padding-top: 18px;
     display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding-top: 16px;
     }
 
     .track-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     gap: 8px;
-    width: auto;
-    max-width: max-content;
-    height: 38px;
-    min-height: 38px;
-    max-height: 38px;
-    padding: 0 20px;
-    border-radius: 10px;
+    width: 100% !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 12px 20px !important;
+    border-radius: 12px;
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.90rem;
     font-weight: 700;
     text-decoration: none;
     transition: all 0.25s ease;
+    box-sizing: border-box !important;
+    text-align: center !important;
     }
 
     .track-btn-primary {
@@ -5946,8 +5945,20 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 
             <!-- Event Timing & Countdown Module -->
             <div class="hero-countdown-block" id="heroCountdownBlock" aria-label="Daksha Infinix timing and countdown">
-                <p class="hero-date-line"><span class="hero-starts-badge" style="display:inline-block; margin-right:4px; font-weight:700; color:#60a5fa; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.04em;">Starts in</span> <span class="hero-date-highlight">25–26 November 2026</span> &bull; <span
-                        class="hero-date-highlight">Bangalore</span></p>
+                <p class="hero-date-line">
+                    <span class="hero-date-pill">
+                        <span class="hero-starts-badge" style="font-weight:700; color:#60a5fa; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.04em; margin-right:4px;">Starts in</span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; color:#60a5fa;">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span class="hero-date-highlight">25–26 November 2026</span>
+                        <span style="opacity:0.6; margin: 0 4px;">&bull;</span>
+                        <span class="hero-date-highlight"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:2px; color:#60a5fa;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>Bengaluru</span>
+                    </span>
+                </p>
 
                 <div class="hero-timer-capsule" id="symposiumCountdown" aria-label="Countdown to 25th November 2026">
                     <div class="timer-digits-strip" id="timerDigitsStrip">
@@ -6518,7 +6529,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <ol class="rule-list">
                     <li>Participation is open exclusively to bona fide PUC students (I PUC & II PUC) from recognized institutions.</li>
                     <li>Every participant must carry a valid physical college ID card or Principal's bonafide certificate on the day of the event.</li>
-                    <li>Registration is mandatory for all participants and visitors; carry your Gate Pass with QR code and submit a hard copy of the receipt to the event coordinator.</li>
+                    <li>Registration is mandatory for all participants and visitors; carry your digital Gate Pass with QR code, or present a screenshot/photo of your payment receipt to the event coordinator before entry (no physical hard copy of the receipt is required).</li>
                     <li>Solo events allow unlimited entries, but all team members in group events must belong to the same institution.</li>
                     <li>Colleges registered for all 15 competitions are eligible to compete for the General Championship, determined by cumulative points.</li>
                 </ol>
@@ -6658,8 +6669,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 <div class="track-header">
                     <span class="track-tag offline-tag">OFFLINE & SPOT ENTRIES</span>
                     <h3>On-Campus Spot Registration</h3>
-                    <p>Spot registration may be available at the registration desk. Confirm the schedule and
-                        availability with the organizers.</p>
+                    <p>Spot registrations are open at the registration desk for remaining slots. UPI QR and instant digital passes are supported at the counter.</p>
                 </div>
 
                 <div class="track-steps">
@@ -6686,7 +6696,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         <div class="step-content">
                             <h4>Desk Payment (Cash or Counter UPI)</h4>
                             <p>Pay the exact event entry fee at the counter in Cash or by scanning the authorized desk
-                                UPI terminal. Collect your official stamped physical receipt.</p>
+                                UPI QR terminal. Digital confirmation and entry pass are provided instantly; no physical hard copy is required.</p>
                         </div>
                     </div>
 
@@ -6701,7 +6711,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
 
                 <div class="track-footer">
-                    <a href="#location" onclick="scrollToSection('location', event)" class="track-btn track-btn-primary">
+                    <a href="#location" onclick="scrollToSection('location', event)" class="track-btn track-btn-primary track-btn-secondary">
                         <span>View Campus Desk Location &rarr;</span>
                     </a>
                 </div>
@@ -6721,10 +6731,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             <div class="policy-text">
                 <h4>Important Payment & Receipt Terms</h4>
                 <ul>
-                    <li><strong>Payment receipt:</strong> Use the payment QR provided by organizers and submit a hard
-                        copy of the receipt to the event coordinator before participating.</li>
-                    <li><strong>Payment options:</strong> The brochure allows QR payment both at the desk and away
-                        from the desk. Confirm current payment instructions with the organizers.</li>
+                    <li><strong>Digital Verification (No Hard Copy Required):</strong> No physical printout or hard copy is required. Participants can simply present their digital QR pass, payment screenshot, or a clear photo of the payment receipt to the coordinator before venue entry.</li>
+                    <li><strong>Instant QR Payment (Online & On-Campus):</strong> Official UPI QR payments are supported both online during pre-registration and on-campus at the helpdesk. Confirmation and gate passes are delivered immediately via WhatsApp and email.</li>
                 </ul>
             </div>
         </div>
