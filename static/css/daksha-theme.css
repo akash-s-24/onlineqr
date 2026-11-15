@@ -1647,14 +1647,80 @@ body.light-theme .choose-palette-btn .body-moon {
 }
 
 /* Ensure mobile header button variant fits comfortably as a pure circle */
-.mobile-theme-switch-btn.choose-palette-btn {
-  margin: 0 !important;
-  width: 40px !important;
-  height: 40px !important;
-  min-width: 40px !important;
-  min-height: 40px !important;
+.mobile-theme-switch-btn.choose-palette-btn,
+#themeToggleBtnMobile {
+  margin: 6px auto !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
   border-radius: 50% !important;
   padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+  background: rgba(15, 23, 42, 0.7) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+:root[data-theme="light"] .mobile-theme-switch-btn.choose-palette-btn,
+:root[data-theme="light"] #themeToggleBtnMobile {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08) !important;
+}
+
+#themeToggleBtnMobile * {
+  pointer-events: none !important;
+}
+
+/* Mobile Drawer Left Line Removal & Oval Fix */
+:root[data-theme] .landing-header #headerNavCenter,
+:root[data-theme] .landing-header #headerNavCenter.open {
+  border-left: none !important;
+  border: none !important;
+}
+
+:root[data-theme="light"] .landing-header #headerNavCenter,
+:root[data-theme="light"] .landing-header #headerNavCenter.open {
+  border-left: none !important;
+  border: none !important;
+}
+
+:root[data-theme="light"] .landing-header .image-like-nav .nav-link.active,
+:root[data-theme="light"] .landing-header .image-like-nav .nav-link:active {
+  border: none !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  background: rgba(37, 99, 235, 0.1) !important;
+}
+
+/* Daksha Infinix Style Main Event Name Size */
+:root[data-theme] .disc-cascade-head h3,
+:root[data-theme] #discCascadeTitle {
+  font-size: clamp(28px, 4.4vw, 42px) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.035em !important;
+}
+
+@media (max-width: 768px) {
+  :root[data-theme] .disc-cascade-head h3,
+  :root[data-theme] #discCascadeTitle {
+    font-size: clamp(28px, 8.4vw, 40px) !important;
+    line-height: 1.08 !important;
+    font-weight: 900 !important;
+  }
+}
+
+:root[data-theme] #hero .hero-date-line,
+:root[data-theme] .hero-date-line {
+  margin: 0 auto 14px auto !important;
+  text-align: center !important;
+  justify-content: center !important;
 }
 
 /* Continuous Scroll Fade In / Fade Out */

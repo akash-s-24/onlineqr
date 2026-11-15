@@ -221,7 +221,7 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('SDA 2026-27', data)
         self.assertNotIn('2026-27', data)
         self.assertNotIn('Annual Symposium 2026-27', data)
-        self.assertIn('Starts on 25th, 26th November 2026, Bengaluru.', data)
+        self.assertIn('Starts on 25, 26 November 2026, Bengaluru', data)
         self.assertTrue('Bengaluru' in data or 'Bangalore' in data)
         self.assertIn('hero-date-highlight', data)
         self.assertNotIn('November 19th', data)
@@ -1058,7 +1058,7 @@ class SDATestCase(unittest.TestCase):
         html = res.data.decode('utf-8')
 
         # 1. Top Hero action buttons and countdown
-        self.assertIn('Starts on 25th, 26th November 2026, Bengaluru.', html)
+        self.assertIn('Starts on 25, 26 November 2026, Bengaluru', html)
         self.assertIn('Explore Events', html)
         self.assertIn('Rules &amp; Guidelines', html)
         self.assertIn('Contact Organizers', html)
@@ -1879,7 +1879,7 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(res_events.status_code, 200)
         events_html = res_events.data.decode('utf-8')
 
-        self.assertIn('Starts on 25th, 26th November 2026, Bengaluru.', events_html)
+        self.assertIn('Starts on 25, 26 November 2026, Bengaluru', events_html)
         self.assertIn('Registrations Open &bull; Daksha Infinix', events_html)
         self.assertNotIn('Important Payment & Receipt Terms', events_html)
         self.assertIn('No physical hard copy receipt is required', events_html)
@@ -2075,7 +2075,7 @@ class SDATestCase(unittest.TestCase):
         # 2. Daksha and Infinix structure
         self.assertIn('class="hero-title-daksha"', html)
         self.assertIn('class="hero-title-infinix"', html)
-        self.assertIn('Starts on 25th, 26th November 2026, Bengaluru.', html)
+        self.assertIn('Starts on 25, 26 November 2026, Bengaluru', html)
 
         # 3. CSS checks for circular toggle and mobile layout
         res_css = self.client.get('/static/css/daksha-theme.css')
@@ -2100,6 +2100,49 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('.scroll-fade-item', html)
         self.assertIn('.scroll-fade-item.scroll-in', html)
         self.assertIn('.scroll-fade-item.scroll-out', html)
+
+    def test_37_mobile_view_and_coordinator_refinements(self):
+        """Verify mobile hero date, contact redirection, faculty-only coordinator modal, 3-dot menu and theme toggle refinements."""
+        res_events = self.client.get('/events')
+        self.assertEqual(res_events.status_code, 200)
+        events_html = res_events.data.decode('utf-8')
+
+        # 1. Date text format
+        self.assertIn('Starts on 25, 26 November 2026, Bengaluru', events_html)
+        self.assertNotIn('Starts on 25th, 26th November 2026, Bengaluru.', events_html)
+
+        # 2. Hero Contact Organizers button redirects to #contact section
+        self.assertIn('onclick="scrollToSection(\'contact\', event)" class="candy-btn hero-contact-btn"', events_html)
+
+        # 3. Contact modal: faculty coordinators only, 2 phone numbers, student coordinator removed
+        self.assertIn('// Faculty coordinators only - student coordinator section removed per requirements', events_html)
+        self.assertIn('const primaryFaculty = data.facultyName', events_html)
+        self.assertIn('const primaryPhone = data.facultyPhone', events_html)
+        self.assertIn('const secondaryFaculty = ', events_html)
+        self.assertIn('const secondaryPhone = ', events_html)
+
+        # 4. Mobile 3-dot menu: left line removed and oval active background fixed
+        res_css = self.client.get('/static/css/daksha-theme.css')
+        self.assertEqual(res_css.status_code, 200)
+        css = res_css.data.decode('utf-8')
+
+        self.assertIn(':root[data-theme] .landing-header #headerNavCenter.open', css)
+        self.assertIn('border-left: none !important;', css)
+        self.assertIn(':root[data-theme="light"] .landing-header .image-like-nav .nav-link.active', css)
+        self.assertIn('border-radius: 10px !important;', css)
+
+        # 5. Mobile theme button: small circular button without full-box border, 44px
+        self.assertIn('#themeToggleBtnMobile', css)
+        self.assertIn('width: 44px !important;', css)
+        self.assertIn('height: 44px !important;', css)
+
+        # 6. Smooth theme switching without lag (theme-transitioning class)
+        self.assertIn('html.theme-transitioning', events_html)
+        self.assertIn("root.classList.add('theme-transitioning');", events_html)
+
+        # 7. Daksha Infinix Style main event name enlarged
+        self.assertIn(':root[data-theme] .disc-cascade-head h3', css)
+        self.assertIn('font-size: clamp(28px, 4.4vw, 42px) !important;', css)
 
 
 if __name__ == '__main__':

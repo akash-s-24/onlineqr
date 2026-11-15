@@ -48,7 +48,7 @@ animation: none !important;
   }
   .hero-title-daksha {
     display: block !important;
-    font-size: clamp(3.3rem, 14.5vw, 4.8rem) !important;
+    font-size: clamp(3.6rem, 16vw, 5.2rem) !important;
     font-weight: 900 !important;
     letter-spacing: -0.035em !important;
     line-height: 1 !important;
@@ -56,7 +56,7 @@ animation: none !important;
   }
   .hero-title-infinix {
     display: block !important;
-    font-size: clamp(2.6rem, 11.5vw, 3.8rem) !important;
+    font-size: clamp(2.9rem, 13vw, 4.2rem) !important;
     font-weight: 800 !important;
     letter-spacing: -0.03em !important;
     line-height: 1 !important;
@@ -179,12 +179,12 @@ grid-column: 2 !important;
 justify-self: start !important;
 width: auto !important;
 max-width: 100% !important;
-min-height: 34px !important;
-height: 34px !important;
-font-size: 0.78rem !important;
+min-height: 40px !important;
+height: 40px !important;
+font-size: 0.86rem !important;
 font-weight: 700 !important;
 letter-spacing: -0.01em !important;
-padding: 0 12px !important;
+padding: 0 16px !important;
 border-radius: 9999px !important;
 white-space: nowrap !important;
 display: inline-flex !important;
@@ -1542,7 +1542,7 @@ font-weight:600; }
 .disc-cascade-menu-item:hover, .disc-cascade-menu-item.active { background:rgba(37, 99, 235, 0.22);
 border-color:#2563eb; color:#ffffff; }
 .disc-cascade-head { position:absolute; top:80px; left:26px; z-index:5; width:min(290px,28cqw); pointer-events:none; }
-.disc-cascade-head h3 { margin:0 0 12px; font:400 clamp(22px,3cqw,36px)/.98 'Space Grotesk',sans-serif;
+.disc-cascade-head h3 { margin:0 0 12px; font:900 clamp(26px,3.8cqw,44px)/.98 'Space Grotesk',sans-serif;
 letter-spacing:-.04em; text-transform:uppercase; }
 .disc-cascade-meta { margin:0; }
 .disc-cascade-meta-row { display:flex; justify-content:space-between; gap:14px; padding:6px 0; border-top:1px solid
@@ -1785,7 +1785,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
 .disc-cascade-stage { height: 760px; min-height: 760px; max-width: 820px; }
 .disc-cascade-topbar { top: 18px; left: 24px; right: 24px; }
 .disc-cascade-head { top: 68px; left: 24px; width: min(340px, 45cqw); }
-.disc-cascade-head h3 { font-size: clamp(26px, 4vw, 36px); }
+.disc-cascade-head h3 { font-size: clamp(28px, 4.4vw, 42px); font-weight: 900; }
 .disc-cascade-track { top: 54%; --dcc-size: min(44vw, 290px) !important; }
 .disc-cascade-reviews { bottom: 84px; width: min(520px, calc(100% - 48px)); }
 .disc-cascade-actions { left: 50% !important; transform: translateX(-50%) !important; bottom: 20px; }
@@ -2020,11 +2020,11 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     }
     .disc-cascade-head h3 {
     margin: 0 0 8px !important;
-    font-size: clamp(25px, 7.2vw, 34px) !important;
-    line-height: 1.1 !important;
-    font-weight: 800 !important;
+    font-size: clamp(28px, 8.4vw, 40px) !important;
+    line-height: 1.08 !important;
+    font-weight: 900 !important;
     color: #ffffff !important;
-    letter-spacing: -0.02em !important;
+    letter-spacing: -0.03em !important;
     white-space: normal !important;
     word-break: break-word !important;
     text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95) !important;
@@ -6049,7 +6049,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                             <line x1="8" y1="2" x2="8" y2="6"></line>
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
-                        <span class="hero-date-highlight">Starts on 25th, 26th November 2026, Bengaluru.</span>
+                        <span class="hero-date-highlight">Starts on 25, 26 November 2026, Bengaluru</span>
                     </span>
                 </p>
 
@@ -6087,7 +6087,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     </svg>
                 </button>
                 <button onclick="scrollToSection('rules', event)" class="candy-btn hero-rules-btn">Rules &amp; Guidelines</button>
-                <button onclick="openContactDialog()" class="candy-btn hero-contact-btn">Contact Organizers</button>
+                <button onclick="scrollToSection('contact', event)" class="candy-btn hero-contact-btn">Contact Organizers</button>
             </div>
 
             <a class="scroll-indicator" href="#stats" aria-label="Scroll to highlights">
@@ -7165,33 +7165,51 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 const title = document.getElementById('contactModalTitle');
                 const content = document.getElementById('contactModalContent');
                 const eventName = data.eventName || 'Event';
-                if (title) title.textContent = `${eventName} coordinators`;
+                if (title) title.textContent = `${eventName} Coordinators`;
                 if (content) {
                     content.replaceChildren();
-                    [[data.facultyName, data.facultyPhone, 'Faculty coordinator'], [data.studentName, data.studentPhone, 'Student coordinator']]
-                        .filter(([name, phone]) => name || phone)
-                        .forEach(([name, phone, role]) => {
-                            const card = document.createElement('article'); card.className = 'event-contact-person';
-                            const label = document.createElement('span'); label.textContent = role;
-                            const person = document.createElement('strong'); person.textContent = name || role;
-                            card.append(label, person);
-                            if (phone) { const link = document.createElement('a'); link.href = `tel:${String(phone).replace(/[^+\d]/g, '')}`; link.textContent = phone; card.append(link); }
-                            content.append(card);
-                        });
+                    // Faculty coordinators only - student coordinator section removed per requirements
+                    const primaryFaculty = data.facultyName || {{ config.EVENT_COORDINATOR_PRIMARY_NAME|tojson }};
+                    const primaryPhone = data.facultyPhone || {{ config.EVENT_COORDINATOR_PRIMARY_PHONE|tojson }};
+                    const secondaryFaculty = {{ config.COORDINATOR_SECONDARY_NAME|tojson }};
+                    const secondaryPhone = {{ config.CONTACT_PHONE_SECONDARY|tojson }};
+                    const leadFaculty = {{ config.COORDINATOR_PRIMARY_NAME|tojson }};
+                    const leadPhone = {{ config.CONTACT_PHONE_PRIMARY|tojson }};
+
+                    const facultyList = [
+                        { role: 'Faculty Coordinator', name: primaryFaculty, phone: primaryPhone }
+                    ];
+                    if (secondaryFaculty && secondaryPhone && secondaryPhone !== primaryPhone) {
+                        facultyList.push({ role: 'Faculty Coordinator', name: secondaryFaculty, phone: secondaryPhone });
+                    } else if (leadFaculty && leadPhone && leadPhone !== primaryPhone) {
+                        facultyList.push({ role: 'Faculty Coordinator', name: leadFaculty, phone: leadPhone });
+                    }
+
+                    facultyList.forEach(({ name, phone, role }) => {
+                        const card = document.createElement('article'); card.className = 'event-contact-person';
+                        const label = document.createElement('span'); label.textContent = role;
+                        const person = document.createElement('strong'); person.textContent = name || role;
+                        card.append(label, person);
+                        if (phone) {
+                            const link = document.createElement('a');
+                            link.href = `tel:${String(phone).replace(/[^+\d]/g, '')}`;
+                            link.textContent = `📞 ${phone}`;
+                            card.append(link);
+                        }
+                        content.append(card);
+                    });
                 }
                 showDialog(contactDialog, opener);
             }
             window.openContactDialog = (opener = document.activeElement) => openContactDialog({
                 eventName: 'Event',
                 facultyName: {{ config.EVENT_COORDINATOR_PRIMARY_NAME|tojson }},
-                facultyPhone: {{ config.EVENT_COORDINATOR_PRIMARY_PHONE|tojson }},
-                studentName: {{ config.EVENT_COORDINATOR_SECONDARY_NAME|tojson }},
-                studentPhone: {{ config.EVENT_COORDINATOR_SECONDARY_PHONE|tojson }}
+                facultyPhone: {{ config.EVENT_COORDINATOR_PRIMARY_PHONE|tojson }}
             }, opener);
             document.querySelectorAll('.btn-card-rules, #discCascadeRules').forEach(button => button.addEventListener('click', () =>
                 openRulesDialog(button.dataset.eventName || 'Event', button.dataset.rules || '', button)));
             document.querySelectorAll('.btn-card-contact, #discCascadeCall').forEach(button => button.addEventListener('click', () =>
-                openContactDialog({ eventName: button.dataset.eventName || button.dataset.contactEvent, facultyName: button.dataset.facultyName, facultyPhone: button.dataset.facultyPhone, studentName: button.dataset.studentName, studentPhone: button.dataset.studentPhone }, button)));
+                openContactDialog({ eventName: button.dataset.eventName || button.dataset.contactEvent, facultyName: button.dataset.facultyName, facultyPhone: button.dataset.facultyPhone }, button)));
             [rulesDialog, contactDialog].forEach(dialog => {
                 dialog?.querySelector('.event-dialog-close')?.addEventListener('click', hideDialogs);
                 dialog?.addEventListener('click', event => { if (event.target === dialog) hideDialogs(); });
@@ -7328,7 +7346,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     const contactButton = document.getElementById('discCascadeCall');
                     if (contactButton) {
                         contactButton.dataset.contactEvent = data.title || 'Event';
-                        ['facultyName', 'facultyPhone', 'studentName', 'studentPhone'].forEach(key => { contactButton.dataset[key] = data[key] || ''; });
+                        ['facultyName', 'facultyPhone'].forEach(key => { contactButton.dataset[key] = data[key] || ''; });
                     }
                     setText('discCascadeCount', `${active + 1} / ${total}`);
                     const prevBtn = document.getElementById('discCascadePrev');
