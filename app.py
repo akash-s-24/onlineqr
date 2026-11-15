@@ -2126,7 +2126,7 @@ def export_registrations_csv():
     # Query all participants/registrations
     records = query_db("""
         SELECT r.registration_uid, p.full_name, p.email, p.phone, p.college_name, p.department,
-               e.event_name, r.payment_status, r.amount_paid, r.registration_date, r.utr_number
+               e.event_name, r.team_name, r.team_size, r.team_members, r.payment_status, r.amount_paid, r.registration_date, r.utr_number
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
         JOIN events e ON r.event_id = e.id
@@ -2135,7 +2135,7 @@ def export_registrations_csv():
     
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['Registration UID', 'Full Name', 'Email', 'Phone', 'College', 'Department', 'Event', 'Payment Status', 'Amount Paid', 'Registration Date', 'UTR'])
+    writer.writerow(['Registration UID', 'Full Name', 'Email', 'Phone', 'College', 'Department', 'Event', 'Team Name', 'Team Size', 'Team Members', 'Payment Status', 'Amount Paid', 'Registration Date', 'UTR'])
     
     if records:
         for row in records:
@@ -2147,6 +2147,9 @@ def export_registrations_csv():
                 row.get('college_name', ''),
                 row.get('department', ''),
                 row.get('event_name', ''),
+                row.get('team_name', '') or '',
+                row.get('team_size', 1),
+                row.get('team_members', '') or '',
                 row.get('payment_status', ''),
                 row.get('amount_paid', ''),
                 row.get('registration_date', ''),
@@ -2296,7 +2299,8 @@ def export_selected_registrations():
     placeholders = ', '.join(['%s'] * len(valid_ids))
     records = query_db(f"""
         SELECT r.registration_uid, p.full_name, p.email, p.phone, p.college_name, p.department,
-               COALESCE(e.event_name, 'Event N/A') as event_name, r.payment_status, r.amount_paid, r.registration_date, r.utr_number
+               COALESCE(e.event_name, 'Event N/A') as event_name, r.team_name, r.team_size, r.team_members,
+               r.payment_status, r.amount_paid, r.registration_date, r.utr_number
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
         LEFT JOIN events e ON r.event_id = e.id
@@ -2306,7 +2310,7 @@ def export_selected_registrations():
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['Registration UID', 'Full Name', 'Email', 'Phone', 'College', 'Department', 'Event', 'Payment Status', 'Amount Paid', 'Registration Date', 'UTR'])
+    writer.writerow(['Registration UID', 'Full Name', 'Email', 'Phone', 'College', 'Department', 'Event', 'Team Name', 'Team Size', 'Team Members', 'Payment Status', 'Amount Paid', 'Registration Date', 'UTR'])
 
     if records:
         for row in records:
@@ -2318,6 +2322,9 @@ def export_selected_registrations():
                 row.get('college_name', ''),
                 row.get('department', ''),
                 row.get('event_name', ''),
+                row.get('team_name', '') or '',
+                row.get('team_size', 1),
+                row.get('team_members', '') or '',
                 row.get('payment_status', ''),
                 row.get('amount_paid', ''),
                 row.get('registration_date', ''),

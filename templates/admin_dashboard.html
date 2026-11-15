@@ -588,6 +588,9 @@
                                     {% if reg.team_name %}
                                     <br><span class="dash-muted">{{ reg.team_name }} · {{ reg.team_size }}
                                         members</span>
+                                    {% if reg.team_members %}
+                                    <br><span style="font-size: 0.76rem; color: #475569; display: inline-block; max-width: 260px; line-height: 1.25;" title="{{ reg.team_members }}"><strong>Members:</strong> {{ reg.team_members }}</span>
+                                    {% endif %}
                                     {% endif %}
                                 </td>
                                 <td>
@@ -660,6 +663,12 @@
                                 </td>
                                 <td>
                                     {{ reg.event_name }}
+                                    {% if reg.team_name %}
+                                    <br><span class="dash-muted">{{ reg.team_name }} · {{ reg.team_size }} members</span>
+                                    {% if reg.team_members %}
+                                    <br><span style="font-size: 0.76rem; color: #475569; display: inline-block; max-width: 260px; line-height: 1.25;" title="{{ reg.team_members }}"><strong>Members:</strong> {{ reg.team_members }}</span>
+                                    {% endif %}
+                                    {% endif %}
                                 </td>
                                 <td>
                                     {% if reg.payment_status == 'paid' %}

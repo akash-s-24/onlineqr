@@ -2179,6 +2179,46 @@ class SDATestCase(unittest.TestCase):
         # 5. Body class synchronization for theme switching
         self.assertIn("document.body.classList.toggle('light-theme', next === 'light')", events_html)
 
+    def test_39_awards_cert_text_and_mobile_submit_button_and_dashboard_white_theme(self):
+        """Verify 5th point in Awards & Certification updated, registration button wording reduced, team members shown, and base locked to light theme."""
+        # 1. Awards and Certification rule 05 update
+        res_events = self.client.get('/events')
+        self.assertEqual(res_events.status_code, 200)
+        events_html = res_events.data.decode('utf-8')
+        self.assertIn('Official digital certificates are sent directly to participants via WhatsApp and email.', events_html)
+        self.assertNotIn('Digital certificates can be downloaded from the official portal', events_html)
+
+        # 2. Registration submit button reduced text and wrap styles
+        res_reg = self.client.get('/register')
+        self.assertEqual(res_reg.status_code, 200)
+        reg_html = res_reg.data.decode('utf-8')
+        self.assertIn("setSubmitText('Submit with Payment Proof →');", reg_html)
+        self.assertIn("setSubmitText('Submit (Pay at College) →');", reg_html)
+        self.assertNotIn("setSubmitText('Submit Registration with Payment Proof →');", reg_html)
+        self.assertNotIn("setSubmitText('Submit Registration (Pay Later at College) →');", reg_html)
+
+        # 3. Base layout locked to white/light theme
+        res_login = self.client.get('/login')
+        self.assertEqual(res_login.status_code, 200)
+        login_html = res_login.data.decode('utf-8')
+        self.assertIn("document.documentElement.setAttribute('data-theme','light');", login_html)
+        self.assertIn("#headerThemeToggle,\n        #baseThemeToggle,", login_html)
+
+        # 4. Admin dashboard templates contain team members display
+        with open('templates/admin_dashboard.html', 'r') as f:
+            admin_tmpl = f.read()
+        self.assertIn('<strong>Members:</strong> {{ reg.team_members }}', admin_tmpl)
+
+        # 5. CSV export includes team members columns
+        password = Config.ADMIN_PASSWORD
+        self.client.post('/login', data={'username': 'admin', 'password': password}, follow_redirects=True)
+        res_csv = self.client.get('/admin/export/registrations-csv')
+        self.assertEqual(res_csv.status_code, 200)
+        csv_content = res_csv.data.decode('utf-8')
+        self.assertIn('Team Name', csv_content)
+        self.assertIn('Team Size', csv_content)
+        self.assertIn('Team Members', csv_content)
+
 
 if __name__ == '__main__':
     unittest.main()

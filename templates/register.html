@@ -766,6 +766,8 @@ select.f-select {
     text-align: center;
     position: relative;
     overflow: hidden;
+    white-space: normal !important;
+    line-height: 1.3 !important;
     color: #ffffff !important;
     font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif !important;
     font-size: 1.05rem !important;
@@ -1083,7 +1085,7 @@ select.f-select {
     .payment-method-card { width: 100%; min-height: 52px; padding: 12px 14px; }
     #upiPaymentDetails, #offlinePaymentDetails { padding: 16px !important; }
     #upiQrCode { width: 168px !important; height: 168px !important; }
-    .clean-black-submit-btn { min-height: 50px; padding: 14px 16px; font-size: .92rem !important; }
+    .clean-black-submit-btn { min-height: 48px; padding: 10px 14px; font-size: clamp(0.82rem, 3.5vw, 0.92rem) !important; line-height: 1.25 !important; }
     .cert-assurance-note { padding: 12px 14px; font-size: .78rem; }
 }
 {% endblock %}
@@ -2122,7 +2124,7 @@ function togglePaymentMethod() {
         if (offlineSection) offlineSection.style.display = 'none';
         if (utrInput) utrInput.required = true;
         if (screenshotInput) screenshotInput.required = true;
-        setSubmitText('Submit Registration with Payment Proof →');
+        setSubmitText('Submit with Payment Proof →');
     } else if (payOffline && payOffline.checked) {
         if (offlineCard) offlineCard.classList.add('active');
         if (upiSection) upiSection.style.display = 'none';
@@ -2135,7 +2137,7 @@ function togglePaymentMethod() {
             screenshotInput.required = false;
             screenshotInput.value = '';
         }
-        setSubmitText('Submit Registration (Pay Later at College) →');
+        setSubmitText('Submit (Pay at College) →');
     } else {
         if (upiSection) upiSection.style.display = 'none';
         if (offlineSection) offlineSection.style.display = 'none';
