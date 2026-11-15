@@ -692,16 +692,16 @@ html.dark body {
 
 
 /* Existing button fills inherit the selected campus palette in both appearances. */
-:root[data-theme] .candy-btn,
-:root[data-theme] .pop-btn { background: var(--primary) !important; border-color: var(--primary) !important; color: var(--on-primary) !important; -webkit-text-fill-color: var(--on-primary) !important; }
-:root[data-theme] .candy-btn:hover,
-:root[data-theme] .pop-btn:hover { background: var(--primary-hover) !important; border-color: var(--primary-hover) !important; color: var(--on-primary) !important; }
-:root[data-theme] :is(.btn-primary, .btn-luxe-primary, .header-cta-classic, .hero-explore-btn, .btn-card-register, .clean-black-submit-btn, .auth-submit, .dashboard-btn.primary, .track-btn-primary, .dock-directions-btn, #submitBtn, #upiPayButton) { background: var(--primary) !important; border-color: var(--primary) !important; color: var(--on-primary) !important; -webkit-text-fill-color: var(--on-primary) !important; }
-:root[data-theme] :is(.btn-primary, .btn-luxe-primary, .header-cta-classic, .hero-explore-btn, .btn-card-register, .clean-black-submit-btn, .auth-submit, .dashboard-btn.primary, .track-btn-primary, .dock-directions-btn, #submitBtn, #upiPayButton):hover { background: var(--primary-hover) !important; border-color: var(--primary-hover) !important; color: var(--on-primary) !important; -webkit-text-fill-color: var(--on-primary) !important; }
-:root[data-theme="light"] #hero .hero-actions button.hero-explore-btn,
-:root[data-theme="dark"] #hero .hero-actions button.hero-explore-btn { background: var(--primary) !important; border-color: var(--primary) !important; color: var(--on-primary) !important; -webkit-text-fill-color: var(--on-primary) !important; box-shadow: 0 4px 16px rgba(0,0,0,.18) !important; }
-:root[data-theme="light"] #hero .hero-actions button.hero-explore-btn:hover,
-:root[data-theme="dark"] #hero .hero-actions button.hero-explore-btn:hover { background: var(--primary-hover) !important; border-color: var(--primary-hover) !important; box-shadow: 0 6px 20px rgba(0,0,0,.24) !important; }
+:root[data-theme] .candy-btn:not(.liquid-btn),
+:root[data-theme] .pop-btn:not(.liquid-btn) { background: var(--primary) !important; border-color: var(--primary) !important; color: var(--on-primary) !important; -webkit-text-fill-color: var(--on-primary) !important; }
+:root[data-theme] .candy-btn:not(.liquid-btn):hover,
+:root[data-theme] .pop-btn:not(.liquid-btn):hover { background: var(--primary-hover) !important; border-color: var(--primary-hover) !important; color: var(--on-primary) !important; }
+:root[data-theme] :is(.btn-primary, .btn-luxe-primary, .header-cta-classic, .hero-explore-btn, .btn-card-register, .clean-black-submit-btn, .auth-submit, .dashboard-btn.primary, .track-btn-primary, .dock-directions-btn, #submitBtn, #upiPayButton):not(.liquid-btn) { background: var(--primary) !important; border-color: var(--primary) !important; color: var(--on-primary) !important; -webkit-text-fill-color: var(--on-primary) !important; }
+:root[data-theme] :is(.btn-primary, .btn-luxe-primary, .header-cta-classic, .hero-explore-btn, .btn-card-register, .clean-black-submit-btn, .auth-submit, .dashboard-btn.primary, .track-btn-primary, .dock-directions-btn, #submitBtn, #upiPayButton):not(.liquid-btn):hover { background: var(--primary-hover) !important; border-color: var(--primary-hover) !important; color: var(--on-primary) !important; -webkit-text-fill-color: var(--on-primary) !important; }
+:root[data-theme="light"] #hero .hero-actions button.hero-explore-btn:not(.liquid-btn),
+:root[data-theme="dark"] #hero .hero-actions button.hero-explore-btn:not(.liquid-btn) { background: var(--primary) !important; border-color: var(--primary) !important; color: var(--on-primary) !important; -webkit-text-fill-color: var(--on-primary) !important; box-shadow: 0 4px 16px rgba(0,0,0,.18) !important; }
+:root[data-theme="light"] #hero .hero-actions button.hero-explore-btn:not(.liquid-btn):hover,
+:root[data-theme="dark"] #hero .hero-actions button.hero-explore-btn:not(.liquid-btn):hover { background: var(--primary-hover) !important; border-color: var(--primary-hover) !important; box-shadow: 0 6px 20px rgba(0,0,0,.24) !important; }
 :root[data-theme] #hero .hero-starts-badge { color: var(--text-2) !important; }
 :root[data-theme] #copyUpiBtn { background: var(--surface-2) !important; color: var(--primary) !important; border-color: var(--border) !important; }
 :root[data-theme] #copyUpiBtn:hover { background: var(--primary-light) !important; }
@@ -709,7 +709,7 @@ html.dark body {
 :root[data-theme] :is(.btn-secondary, .btn-outline-secondary, .btn-outline, .dashboard-btn:not(.primary), .header-btn, .back-btn-ghost, .change-event-btn, .help-guide-btn, .footer-social-btn):hover { background-color: var(--surface-2) !important; border-color: var(--border-hover) !important; color: var(--text) !important; -webkit-text-fill-color: var(--text) !important; }
 
 /* Event Rules and Contact controls keep a visible, theme-aware resting state. */
-:root[data-theme] #events :is(.btn-card-rules, .btn-card-contact, .disc-cascade-rules, .disc-cascade-call) {
+:root[data-theme] #events :is(.btn-card-rules, .btn-card-contact, .disc-cascade-rules, .disc-cascade-call):not(.liquid-btn) {
   background: var(--primary) !important;
   border: 1px solid var(--primary) !important;
   color: var(--on-primary) !important;

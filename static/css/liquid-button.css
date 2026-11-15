@@ -89,7 +89,7 @@
   z-index: 1;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: visible;
   border-radius: inherit;
 }
 
@@ -111,13 +111,18 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  color: inherit;
+  color: var(--liquid-text, #ffffff);
   opacity: 1 !important;
   visibility: visible !important;
-  transition: transform 0.1s ease-out;
+  transition: color 0.18s ease, transform 0.1s ease-out;
   box-sizing: border-box;
   width: auto;
   height: auto;
+}
+
+.liquid-btn:hover .liquid-btn-content,
+[data-liquid-button]:hover .liquid-btn-content {
+  color: var(--liquid-active-text, #ffffff) !important;
 }
 
 .liquid-btn.is-pressed .liquid-btn-content,
@@ -305,9 +310,13 @@
   border-color: #60a5fa !important;
 }
 
-/* 4. Carousel Register Action (Green): 38px height */
+/* 4. Carousel Register Action (Green Liquid): 38px height */
 #discCascadeRegister.liquid-btn,
 .disc-cascade-register.liquid-btn {
+  --liquid-fill: #059669 !important;
+  --liquid-border: #10b981 !important;
+  --liquid-text: #ffffff !important;
+  --liquid-active-text: #ffffff !important;
   height: 38px !important;
   min-height: 38px !important;
   max-height: 38px !important;
@@ -316,21 +325,27 @@
   font-weight: 700 !important;
   border-radius: 8px !important;
   border: 1.5px solid #10b981 !important;
-  background: #059669 !important;
+  background: rgba(6, 78, 59, 0.45) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
   color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 2px 12px rgba(16, 185, 129, 0.3) !important;
   width: auto !important;
 }
 
 #discCascadeRegister.liquid-btn:hover,
 .disc-cascade-register.liquid-btn:hover {
-  transform: translateY(-1.5px) !important;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.55) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 22px rgba(16, 185, 129, 0.6) !important;
   border-color: #34d399 !important;
 }
 
-/* 5. Hero Explore Button: elegant 42px pill */
+/* 5. Hero Explore Button: elegant 42px pill with sapphire fluid ink */
 .hero-explore-btn.liquid-btn {
+  --liquid-fill: #2563eb !important;
+  --liquid-border: #3b82f6 !important;
+  --liquid-text: #ffffff !important;
+  --liquid-active-text: #ffffff !important;
   height: 42px !important;
   min-height: 42px !important;
   max-height: 42px !important;
@@ -339,21 +354,27 @@
   font-weight: 700 !important;
   border-radius: 9999px !important;
   border: 1.5px solid #3b82f6 !important;
-  background: #2563eb !important;
+  background: rgba(37, 99, 235, 0.28) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4) !important;
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.4) !important;
   width: auto !important;
 }
 
 .hero-explore-btn.liquid-btn:hover {
-  transform: translateY(-1.5px) !important;
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.6) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 28px rgba(37, 99, 235, 0.7) !important;
   border-color: #60a5fa !important;
 }
 
-/* 6. Hero Rules & Contact Buttons: elegant 42px pill */
+/* 6. Hero Rules & Contact Buttons: elegant 42px pill with midnight electric flood */
 .hero-rules-btn.liquid-btn,
 .hero-contact-btn.liquid-btn {
+  --liquid-fill: #1d4ed8 !important;
+  --liquid-border: #3b82f6 !important;
+  --liquid-text: #e2e8f0 !important;
+  --liquid-active-text: #ffffff !important;
   height: 42px !important;
   min-height: 42px !important;
   max-height: 42px !important;
@@ -361,36 +382,47 @@
   font-size: 0.88rem !important;
   font-weight: 700 !important;
   border-radius: 9999px !important;
-  border: 1.5px solid #3b82f6 !important;
-  background: rgba(15, 23, 42, 0.85) !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25) !important;
+  border: 1.5px solid rgba(59, 130, 246, 0.65) !important;
+  background: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.4) !important;
   width: auto !important;
 }
 
 .hero-rules-btn.liquid-btn:hover,
 .hero-contact-btn.liquid-btn:hover {
-  transform: translateY(-1.5px) !important;
-  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 22px rgba(37, 99, 235, 0.5) !important;
   border-color: #60a5fa !important;
 }
 
-/* 7. Track Primary Buttons: 48px rounded-rect */
+/* 7. Track Primary Buttons: 48px rounded-rect with electric blue fluid */
 .track-footer a.track-btn-primary.liquid-btn {
+  --liquid-fill: #005FD6 !important;
+  --liquid-border: #54A1FD !important;
+  --liquid-text: #ffffff !important;
+  --liquid-active-text: #ffffff !important;
   min-height: 48px !important;
   padding: 12px 24px !important;
   font-size: 0.92rem !important;
   font-weight: 700 !important;
   border-radius: 12px !important;
   border: 1.5px solid #54A1FD !important;
-  background: radial-gradient(95% 60% at 50% 75%, #005FD6 0%, #209BFF 100%) !important;
+  background: rgba(0, 95, 214, 0.35) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   color: #ffffff !important;
-  box-shadow: 0px 4px 32px -8px #1187FF !important;
+  box-shadow: 0px 4px 28px -6px #1187FF !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .track-footer a.track-btn-primary.liquid-btn:hover {
-  transform: translateY(-1.5px) !important;
-  box-shadow: 0px 8px 40px -6px #1187FF !important;
+  transform: translateY(-2px) !important;
+  border-color: #ffffff !important;
+  box-shadow: 0px 8px 36px -4px #1187FF !important;
 }
 
 /* 8. Registration Page Submit Button: 50px rounded-rect */
@@ -432,6 +464,47 @@
     min-height: 42px !important;
     letter-spacing: -0.01em !important;
   }
+}
+
+/* Light Appearance Palette Adjustments */
+:root[data-theme="light"] .hero-explore-btn.liquid-btn {
+  background: rgba(37, 99, 235, 0.12) !important;
+  border-color: #2563eb !important;
+  color: #1d4ed8 !important;
+}
+:root[data-theme="light"] .hero-explore-btn.liquid-btn:hover {
+  color: #ffffff !important;
+}
+
+:root[data-theme="light"] .hero-rules-btn.liquid-btn,
+:root[data-theme="light"] .hero-contact-btn.liquid-btn {
+  background: rgba(15, 23, 42, 0.06) !important;
+  border-color: #2563eb !important;
+  color: #1e3a8a !important;
+}
+:root[data-theme="light"] .hero-rules-btn.liquid-btn:hover,
+:root[data-theme="light"] .hero-contact-btn.liquid-btn:hover {
+  color: #ffffff !important;
+}
+
+:root[data-theme="light"] #discCascadeRegister.liquid-btn,
+:root[data-theme="light"] .disc-cascade-register.liquid-btn {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: #059669 !important;
+  color: #047857 !important;
+}
+:root[data-theme="light"] #discCascadeRegister.liquid-btn:hover,
+:root[data-theme="light"] .disc-cascade-register.liquid-btn:hover {
+  color: #ffffff !important;
+}
+
+:root[data-theme="light"] .track-footer a.track-btn-primary.liquid-btn {
+  background: rgba(0, 95, 214, 0.12) !important;
+  border-color: #005FD6 !important;
+  color: #005FD6 !important;
+}
+:root[data-theme="light"] .track-footer a.track-btn-primary.liquid-btn:hover {
+  color: #ffffff !important;
 }
 
 /* Reduced Motion Mode */
