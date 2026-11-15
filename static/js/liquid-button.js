@@ -156,8 +156,8 @@
     defs.appendChild(clipPath);
     svg.appendChild(defs);
 
-    const isGreen = btn.matches && btn.matches('.btn-card-register, #discCascadeRegister, .disc-cascade-register');
-    const defaultFill = isGreen ? '#10b981' : '#2563eb';
+    const isGreen = btn.matches && btn.matches('.btn-card-register, #discCascadeRegister');
+    const defaultFill = isGreen ? '#10b981' : '#3b82f6';
 
     const blob = document.createElementNS(SVG_NS, 'ellipse');
     blob.setAttribute('class', 'liquid-blob');
@@ -614,10 +614,10 @@
   // 2. Rules and guidelines: .hero-rules-btn
   // 3. Contact organizers: .hero-contact-btn
   // 4. Rules and contact button: .btn-card-rules, .btn-card-contact, #discCascadeRules, #discCascadeCall
-  // 5. Register for this event: #discCascadeRegister, .disc-cascade-register (Blue resting, Green liquid hover)
-  // 6. Register (grid section): .btn-card-register (Blue resting, Green liquid hover)
-  // 7. Register online only button & 8. Campus disc button: .track-footer a.track-btn-primary, .track-footer a.track-btn-secondary
-  // 9. Submit registration with payment proof / pay later at college: #submitBtn, .clean-black-submit-btn
+  // 5. Register for this event: #discCascadeRegister (Green)
+  // 6. Register (grid section): .btn-card-register (Green)
+  // 7. Register online only button & 8. Campus disc button: .track-footer a.track-btn-primary
+  // 9. Submit registration with payment proof / pay later at college: #submitBtn
   const BUTTON_SELECTORS = [
     '.hero-explore-btn',
     '.hero-rules-btn',
@@ -627,12 +627,9 @@
     '.btn-card-rules',
     '.btn-card-contact',
     '#discCascadeRegister',
-    '.disc-cascade-register',
     '.btn-card-register',
     '.track-footer a.track-btn-primary',
-    '.track-footer a.track-btn-secondary',
-    '#submitBtn',
-    '.clean-black-submit-btn'
+    '#submitBtn'
   ].join(',');
 
   function initAllLiquidButtons(rootNode) {

@@ -808,12 +808,15 @@ html.dark body {
 :root[data-theme] .timer-val,
 :root[data-theme] .timer-sec-val,
 :root[data-theme] .timer-lbl,
-:root[data-theme] .timer-colon,
-:root[data-theme] .fest-live-badge { color: var(--text-2) !important; text-shadow: none !important; }
+:root[data-theme] .timer-colon { color: var(--text-2) !important; text-shadow: none !important; }
+:root[data-theme="dark"] .fest-live-badge,
+:root[data-theme="dark"] .fest-live-text { color: #4ade80 !important; text-shadow: 0 0 12px rgba(74, 222, 128, 0.45) !important; font-weight: 700 !important; }
+:root[data-theme="light"] .fest-live-badge,
+:root[data-theme="light"] .fest-live-text { color: #15803d !important; text-shadow: none !important; font-weight: 700 !important; }
 :root[data-theme] .hero-timer-capsule { background: var(--surface) !important; border-color: var(--border) !important; box-shadow: var(--shadow-card) !important; }
 :root[data-theme] .registration-dot,
-:root[data-theme] .hero-dates-dot,
-:root[data-theme] .fest-live-dot { background: var(--primary) !important; box-shadow: 0 0 0 3px var(--primary-light) !important; }
+:root[data-theme] .hero-dates-dot { background: var(--primary) !important; box-shadow: 0 0 0 3px var(--primary-light) !important; }
+:root[data-theme] .fest-live-dot { background: #22c55e !important; box-shadow: 0 0 10px #22c55e, 0 0 20px rgba(34, 197, 94, 0.8) !important; }
 :root[data-theme] .event-card-number,
 :root[data-theme] .event-card-fee,
 :root[data-theme] .event-pill-category,
@@ -844,17 +847,7 @@ html.dark body {
   border: 0 !important;
   box-shadow: none !important;
 }
-:root[data-theme="dark"] .landing-header .nav-pill-indicator { border: 0 !important; box-shadow: none !important; }
-:root[data-theme="light"] .landing-header .nav-pill-indicator {
-  background: #eff6ff !important;
-  border: 1.5px solid #2563eb !important;
-  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.18) !important;
-  opacity: 1 !important;
-}
-:root[data-theme="light"] .landing-header .image-like-nav .nav-link.active {
-  color: #1d4ed8 !important;
-  font-weight: 800 !important;
-}
+:root[data-theme] .landing-header .nav-pill-indicator { border: 0 !important; box-shadow: none !important; }
 
 /* Give the event header enough room for its brand, navigation, theme switch, and CTA. */
 .landing-header .landing-logo { flex: 0 1 auto; min-width: 0; }
@@ -1084,21 +1077,21 @@ html.dark body {
 .landing-header .landing-logo *,
 #events .btn-card-register,
 #events .stat-action-link { text-decoration: none !important; }
-:root[data-theme="light"] #hero .hero-actions .hero-explore-btn:not(.liquid-btn),
-.landing-header #headerRegisterBtn {
+#hero .hero-actions .hero-explore-btn:not(.liquid-btn),
+.landing-header #headerRegisterBtn:not(.liquid-btn) {
   position: relative !important; isolation: isolate; overflow: hidden;
   color: #111827 !important; background: #fff !important; border-color: #d1d5db !important;
   transition: color .2s ease, border-color .2s ease, background-color .2s ease !important;
 }
-:root[data-theme="light"] #hero .hero-actions .hero-explore-btn:not(.liquid-btn)::before,
-.landing-header #headerRegisterBtn::before {
+#hero .hero-actions .hero-explore-btn:not(.liquid-btn)::before,
+.landing-header #headerRegisterBtn:not(.liquid-btn)::before {
   content: ""; position: absolute; z-index: -1; inset: 0; background: #2563eb;
   transform: scaleX(0); transform-origin: left; transition: transform .24s ease;
 }
-:root[data-theme="light"] #hero .hero-actions .hero-explore-btn:not(.liquid-btn):hover,
-.landing-header #headerRegisterBtn:hover { color: #fff !important; background: #fff !important; border-color: #2563eb !important; text-decoration: none !important; }
-:root[data-theme="light"] #hero .hero-actions .hero-explore-btn:not(.liquid-btn):hover::before,
-.landing-header #headerRegisterBtn:hover::before { transform: scaleX(1); }
+#hero .hero-actions .hero-explore-btn:not(.liquid-btn):hover,
+.landing-header #headerRegisterBtn:not(.liquid-btn):hover { color: #fff !important; background: #fff !important; border-color: #2563eb !important; text-decoration: none !important; }
+#hero .hero-actions .hero-explore-btn:not(.liquid-btn):hover::before,
+.landing-header #headerRegisterBtn:not(.liquid-btn):hover::before { transform: scaleX(1); }
 :root[data-theme] .hero-badge-pill .registration-dot { background: #16a34a !important; box-shadow: 0 0 0 3px rgba(22,163,74,.17) !important; }
 :root[data-theme] .stat-card-championship .stat-title-championship { font-size: clamp(1.65rem, 2.4vw, 2rem) !important; line-height: 1.15 !important; }
 :root[data-theme] .stat-card-championship .stat-title-accent { color: #2563eb !important; -webkit-text-fill-color: #2563eb !important; }
@@ -1131,6 +1124,23 @@ html:not([data-theme="light"]) .landing-header .image-like-nav,
   border: 0 !important;
   text-decoration: none !important;
   text-decoration-line: none !important;
+}
+
+/* White-theme Navigation Active Section Highlighting */
+:root[data-theme="light"] .landing-header .image-like-nav .nav-link.active {
+  color: #1d4ed8 !important;
+  font-weight: 750 !important;
+  background: #eff6ff !important;
+  border: 1.5px solid #2563eb !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.2) !important;
+}
+
+:root[data-theme="light"] .landing-header .nav-pill-indicator {
+  display: block !important;
+  background: #eff6ff !important;
+  border: 1.5px solid #2563eb !important;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.22) !important;
 }
 
 /* Links across the public site stay free of underlines in every interaction state. */

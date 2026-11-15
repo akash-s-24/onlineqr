@@ -221,7 +221,7 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('SDA 2026-27', data)
         self.assertNotIn('2026-27', data)
         self.assertNotIn('Annual Symposium 2026-27', data)
-        self.assertIn('25–26 November 2026', data)
+        self.assertIn('Starts on 25th, 26th November 2026, Bengaluru.', data)
         self.assertTrue('Bengaluru' in data or 'Bangalore' in data)
         self.assertIn('hero-date-highlight', data)
         self.assertNotIn('November 19th', data)
@@ -262,7 +262,7 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('Registration Procedures & Payment Details', data)
         self.assertIn('ONLINE COMPETITIONS', data)
         self.assertIn('OFFLINE & SPOT ENTRIES', data)
-        self.assertIn('Is a physical hard copy of the payment receipt required for entry?', data)
+        self.assertNotIn('Important Payment & Receipt Terms', data)
 
         # 5. FAQ Section
         self.assertIn('id="faq"', data)
@@ -270,6 +270,8 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('Who is eligible to participate', data)
         self.assertIn('Can students from different colleges form a combined team', data)
         self.assertIn('Will participants receive a certificate?', data)
+        self.assertIn('What are the payment options and is a physical hard copy receipt required?', data)
+        self.assertIn('No physical hard copy receipt is required', data)
 
     def test_10_header_ordering_and_theme_switch(self):
         """Verify the exact 9-item header navigation sequence and dark/bright theme switcher"""
@@ -1073,7 +1075,7 @@ class SDATestCase(unittest.TestCase):
 
         # 3. Registration procedure buttons
         self.assertIn('Register Online Only', html)
-        self.assertIn('View Campus Desk Location', html)
+        self.assertIn('View Campus Location', html)
         self.assertIn('track-btn-primary', html)
         self.assertIn('track-btn-secondary', html)
 
@@ -1869,6 +1871,63 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('id="submitBtn" class="clean-black-submit-btn"', reg_html)
         self.assertIn('id="upiPayButton" href="#" class="clean-black-submit-btn" data-no-liquid', reg_html)
         self.assertIn('id="copyUpiBtn" data-no-liquid', reg_html)
+
+    def test_35_refined_liquid_buttons_and_countdown_live_state(self):
+        """Verify button styling palettes, dark mode explore visibility, active nav pill highlight, and Fest is Live timer."""
+        # 1. Check /events template copy updates
+        res_events = self.client.get('/events')
+        self.assertEqual(res_events.status_code, 200)
+        events_html = res_events.data.decode('utf-8')
+
+        self.assertIn('Starts on 25th, 26th November 2026, Bengaluru.', events_html)
+        self.assertIn('Registrations Open &bull; Daksha Infinix', events_html)
+        self.assertNotIn('Important Payment & Receipt Terms', events_html)
+        self.assertIn('No physical hard copy receipt is required', events_html)
+        self.assertIn('View Campus Location', events_html)
+
+        # 2. Verify countdown timer logic for 'Fest is Live'
+        self.assertIn('if (diff <= 0) {', events_html)
+        self.assertIn('fest-live-badge', events_html)
+        self.assertIn('fest-live-dot', events_html)
+        self.assertIn('Fest is Live', events_html)
+        self.assertIn("capsule.classList.add('is-live');", events_html)
+
+        # 3. Verify liquid-button.css styles
+        res_css = self.client.get('/static/css/liquid-button.css')
+        self.assertEqual(res_css.status_code, 200)
+        liquid_css = res_css.data.decode('utf-8')
+
+        # Register buttons: blue background, green liquid on hover
+        self.assertIn('.btn-card-register.liquid-btn', liquid_css)
+        self.assertIn('#discCascadeRegister.liquid-btn', liquid_css)
+        self.assertIn('background: #2563eb !important;', liquid_css)
+        self.assertIn('--liquid-fill: #10b981 !important;', liquid_css)
+
+        # Dark mode explore button: solid blue resting background, white text
+        self.assertIn('.hero-explore-btn.liquid-btn', liquid_css)
+        self.assertIn('background: #2563eb !important;', liquid_css)
+        self.assertIn('color: #ffffff !important;', liquid_css)
+
+        # Registration procedure track buttons and submit button: white resting background, black text, blue hover
+        self.assertIn('.track-footer a.track-btn-primary.liquid-btn', liquid_css)
+        self.assertIn('.track-btn-secondary.liquid-btn', liquid_css)
+        self.assertIn('#submitBtn.liquid-btn', liquid_css)
+        self.assertIn('background: #ffffff !important;', liquid_css)
+        self.assertIn('color: #0f172a !important;', liquid_css)
+
+        # 4. Verify daksha-theme.css light theme active navigation highlight and live badge
+        res_theme = self.client.get('/static/css/daksha-theme.css')
+        self.assertEqual(res_theme.status_code, 200)
+        theme_css = res_theme.data.decode('utf-8')
+
+        self.assertIn('.fest-live-badge', theme_css)
+        self.assertIn('.fest-live-dot', theme_css)
+        self.assertIn('.fest-live-text', theme_css)
+        self.assertIn(':root[data-theme="light"] .landing-header .image-like-nav .nav-link.active', theme_css)
+        self.assertIn(':root[data-theme="light"] .landing-header .nav-pill-indicator', theme_css)
+        self.assertIn('background: #eff6ff !important;', theme_css)
+        self.assertIn('border: 1.5px solid #2563eb !important;', theme_css)
+        self.assertIn('color: #1d4ed8 !important;', theme_css)
 
 
 if __name__ == '__main__':
