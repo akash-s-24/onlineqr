@@ -16,6 +16,9 @@
         </button>
         <a href="{{ url_for('attendance_manager') }}" class="candy-btn"
             style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">&larr; Back to Attendance Tracker</a>
+        <a href="{{ url_for('download_all_teams_certificates_zip') }}" class="candy-btn"
+            style="padding: 0.6rem 1.2rem; font-size: 0.95rem; background: #6366f1; color: #ffffff;"
+            title="Download certificates for all teams in a single ZIP file">📦 Download All Teams ZIP</a>
         <form method="POST" action="{{ url_for('generate_bulk_certificates') }}" style="display: inline;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="candy-btn candy-btn-success"
@@ -190,7 +193,10 @@
                 <tr data-event-name="{{ row.event_name }}">
                     <td>{{ loop.index }}</td>
                     <td>
-                        {% if row.recipient_name and row.recipient_name != row.full_name %}
+                        {% if row.is_group and row.team_name %}
+                        <strong style="color: #0f172a; font-size: 0.95rem;">🏆 {{ row.team_name }}</strong>
+                        <div style="font-size: 0.76rem; color: #2563eb; font-weight: 600;">👥 Team Certificate (Lead: {{ row.full_name }})</div>
+                        {% elif row.recipient_name and row.recipient_name != row.full_name %}
                         <strong style="color: #0f172a; font-size: 0.95rem;">{{ row.recipient_name }}</strong>
                         <div style="font-size: 0.76rem; color: #2563eb; font-weight: 600;">👥 Team Member (Lead: {{ row.full_name }})</div>
                         {% else %}
@@ -279,11 +285,11 @@
                                 title="Attach certificate image file directly to WhatsApp / Apps">📎 Attach</button>
 
                             <!-- Download Team ZIP if group event -->
-                            {% if row.is_group and row.team_members %}
+                            {% if row.is_group and (row.team_name or row.team_members) %}
                             <a href="{{ url_for('download_team_certificates_zip', reg_id=row.registration_id) }}"
                                 class="candy-btn"
                                 style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; background: #4f46e5; color: #ffffff;"
-                                title="Download all team members' certificates in a ZIP package">📦 Team ZIP</a>
+                                title="Download team certificate package in ZIP format">📦 Team ZIP</a>
                             {% endif %}
 
                             {% else %}

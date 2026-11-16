@@ -963,13 +963,13 @@ def create_tables_and_seed():
                 'max_participants': 100,
                 'is_group': 1,
                 'min_team_size': 4,
-                'max_team_size': 4,
+                'max_team_size': 8,
                 'banner_image': '89e73e3fb00545329bed5ddb69478ea6.webp',
                 'event_fee': 400,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': (
-                    "Each team must have 4 players.\n"
+                    "Each team must have 4 to 8 players.\n"
                     "Only handheld mobile smartphones (Android / iOS) are permitted; emulators, iPads, tablets, triggers, and external controllers are strictly prohibited.\n"
                     "Hacking and cheating are strictly prohibited; using third-party GFX tools, config files, aimbot, or ESP leads to instant team disqualification.\n"
                     "No teaming with other squads.\n"
@@ -996,13 +996,13 @@ def create_tables_and_seed():
                 'max_participants': 100,
                 'is_group': 1,
                 'min_team_size': 4,
-                'max_team_size': 4,
+                'max_team_size': 8,
                 'banner_image': 'freefire.jpeg',
                 'event_fee': 400,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': (
-                    "Each team must have 4 players.\n"
+                    "Each team must have 4 to 8 players.\n"
                     "Only mobile smartphones are permitted; emulators, PC clients, tablets, iPads, external controllers, and macro triggers are strictly prohibited.\n"
                     "Hacking and cheating are strictly prohibited; scripts, auto-aim, wall hacks, and glitch exploits will result in immediate disqualification.\n"
                     "No teaming with other squads.\n"
@@ -1527,15 +1527,159 @@ def create_tables_and_seed():
             (Config.DEFAULT_UPI_ID,)
         )
 
+        # Update group event team bounds (BGMI & Free Fire 4-8 members)
+        run_exec(
+            """
+            UPDATE events
+            SET min_team_size = 4, max_team_size = 8
+            WHERE LOWER(TRIM(event_name)) IN ('bgmi', 'pubg', 'free fire', 'freefire')
+            """
+        )
+
         conn.commit()
         _DB_INITIALIZED = True
     finally:
         cursor.close()
         release_db_connection(conn)
 
-    # Seed Sample Participants if none exist
-    # (Disabled per user request to start with a completely clean slate)
-    pass
+    # Seed sample competition teams (4 to 8 teams with 4 to 8 members each) if fewer than 8 exist
+    try:
+        group_cnt = query_db("SELECT COUNT(*) as c FROM registrations WHERE is_group = 1 OR team_name IS NOT NULL", one=True)
+        if not group_cnt or group_cnt.get('c', 0) < 8:
+            seed_sample_teams()
+    except Exception as e:
+        print(f"[Seed Teams Notice] {e}")
+
+
+def seed_sample_teams(force=False):
+    """
+    Seeds 8 standard competition teams across group events with 4 to 8 members each,
+    ensuring all teams have approved status, present attendance, and valid registration records.
+    """
+    sample_teams = [
+        {
+            'team_name': 'Alpha Squad',
+            'event_keyword': 'bgmi',
+            'members': ['Rohan Verma', 'Sameer Khan', 'Vivek Nair', 'Arjun Das'],
+            'lead_name': 'Rohan Verma',
+            'lead_email': 'rohan.alpha@sda-fest.edu',
+            'lead_phone': '9876543201',
+            'college': 'Shree Daksha Academy'
+        },
+        {
+            'team_name': 'Cyber Knights',
+            'event_keyword': 'bgmi',
+            'members': ['Aditya Rao', 'Karthik S', 'Rahul Nair', 'Manish Kumar', 'Snehith Reddy'],
+            'lead_name': 'Aditya Rao',
+            'lead_email': 'aditya.cyber@sda-fest.edu',
+            'lead_phone': '9876543202',
+            'college': 'BMS College'
+        },
+        {
+            'team_name': 'Phoenix Warriors',
+            'event_keyword': 'free fire',
+            'members': ['Sanjay Gowda', 'Darshan K', 'Chethan M', 'Harsha Vardhan'],
+            'lead_name': 'Sanjay Gowda',
+            'lead_email': 'sanjay.phoenix@sda-fest.edu',
+            'lead_phone': '9876543203',
+            'college': 'PES University'
+        },
+        {
+            'team_name': 'Shadow Hunters',
+            'event_keyword': 'free fire',
+            'members': ['Pradeep Kumar', 'Varun Teja', 'Manoj Gowda', 'Vignesh V', 'Kiran Raj', 'Naveen S'],
+            'lead_name': 'Pradeep Kumar',
+            'lead_email': 'pradeep.shadow@sda-fest.edu',
+            'lead_phone': '9876543204',
+            'college': 'RV College'
+        },
+        {
+            'team_name': 'Rhythm Squad',
+            'event_keyword': 'group dance',
+            'members': ['Ananya Sharma', 'Sneha Reddy', 'Pooja Hegde', 'Divya Rao', 'Meghana K', 'Kavya Suresh', 'Tanvi Patel', 'Ritu Sen'],
+            'lead_name': 'Ananya Sharma',
+            'lead_email': 'ananya.rhythm@sda-fest.edu',
+            'lead_phone': '9876543205',
+            'college': 'Mount Carmel College'
+        },
+        {
+            'team_name': 'Daksha Titans',
+            'event_keyword': 'group dance',
+            'members': ['Tarun Raj', 'Surya Prakash', 'Abhishek Gowda', 'Charan Teja', 'Vinay Kumar', 'Sandeep Gowda', 'Likith Gowda', 'Bharath Kumar'],
+            'lead_name': 'Tarun Raj',
+            'lead_email': 'tarun.titans@sda-fest.edu',
+            'lead_phone': '9876543206',
+            'college': 'Shree Daksha Academy'
+        },
+        {
+            'team_name': 'Vortex Strikers',
+            'event_keyword': 'mad ads',
+            'members': ['Gautham Menon', 'Nihal Ahmed', 'Sachin Pai', 'Shreyas Bhat', 'Rohan Kulkarni', 'Tejas Rao', 'Yashwant Reddy', 'Akhil Nair'],
+            'lead_name': 'Gautham Menon',
+            'lead_email': 'gautham.vortex@sda-fest.edu',
+            'lead_phone': '9876543207',
+            'college': 'Christ University'
+        },
+        {
+            'team_name': 'Seasons of Style',
+            'event_keyword': 'fashion walk',
+            'members': ['Isha Kapoor', 'Natasha Dsouza', 'Simran Kaur', 'Alisha Khan', 'Anjali Nair', 'Rhea Chakraborty', 'Diya Shetty', 'Meera Joshi'],
+            'lead_name': 'Isha Kapoor',
+            'lead_email': 'isha.style@sda-fest.edu',
+            'lead_phone': '9876543208',
+            'college': 'St. Josephs College'
+        }
+    ]
+
+    for item in sample_teams:
+        try:
+            existing = query_db("SELECT id FROM registrations WHERE team_name = %s", (item['team_name'],), one=True)
+            if existing and not force:
+                continue
+
+            ev = query_db(
+                "SELECT id FROM events WHERE LOWER(event_name) LIKE %s LIMIT 1",
+                (f"%{item['event_keyword']}%",),
+                one=True
+            )
+            if not ev:
+                ev = query_db("SELECT id FROM events WHERE is_group = 1 LIMIT 1", one=True)
+            if not ev:
+                continue
+
+            ev_id = ev['id']
+            members_str = ", ".join(item['members'])
+            team_size = len(item['members'])
+
+            reg_info = create_registration(
+                full_name=item['lead_name'],
+                email=item['lead_email'],
+                phone=item['lead_phone'],
+                college_name=item['college'],
+                department='PCMC',
+                semester='Second PUC',
+                event_id=ev_id,
+                team_name=item['team_name'],
+                team_size=team_size,
+                team_members=members_str,
+                payment_status='paid',
+                amount_paid=400,
+                payment_method='Online',
+                utr_number=f"UTR{secrets.token_hex(4).upper()}",
+                registered_by=1,
+                is_group_event=True
+            )
+
+            if reg_info and reg_info.get('ok'):
+                reg_id = reg_info['registration_id']
+                query_db("UPDATE registrations SET status = 'approved', payment_status = 'paid' WHERE id = %s", (reg_id,), commit=True)
+                att = query_db("SELECT id FROM attendance WHERE registration_id = %s", (reg_id,), one=True)
+                if att:
+                    query_db("UPDATE attendance SET status = 'present' WHERE id = %s", (att['id'],), commit=True)
+                else:
+                    query_db("INSERT INTO attendance (registration_id, status) VALUES (%s, 'present')", (reg_id,), commit=True)
+        except Exception as e:
+            print(f"[Seed Team Error {item.get('team_name')}] {e}")
 
 if __name__ == '__main__':
     init_db()

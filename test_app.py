@@ -2367,7 +2367,7 @@ class SDATestCase(unittest.TestCase):
         remove_registration_record(reg_id)
 
     def test_43_team_certificates_generation_and_team_zip(self):
-        """Verify team events generate individual certificates for all team members and can be downloaded as ZIP."""
+        """Verify team events generate a single certificate per team with team name and can be downloaded as ZIP."""
         # Find or create a group event
         ev = database.query_db("SELECT id, event_name FROM events WHERE is_group = 1 LIMIT 1", one=True)
         if not ev:
@@ -2382,11 +2382,11 @@ class SDATestCase(unittest.TestCase):
             department="ISE",
             semester="6",
             event_id=ev['id'],
-            team_name="Alpha Squad",
-            team_size=3,
-            team_members="Lead Captain, Alex Rider, Priya Sharma",
+            team_name="Alpha Squad Test",
+            team_size=4,
+            team_members="Lead Captain, Alex Rider, Priya Sharma, Rohan Verma",
             payment_status='paid',
-            amount_paid=300,
+            amount_paid=400,
             payment_method='Online',
             utr_number=f"UTR{uid_token}",
             registered_by=1,
@@ -2395,43 +2395,38 @@ class SDATestCase(unittest.TestCase):
         self.assertTrue(reg_info.get('ok'))
         reg_id = reg_info['registration_id']
 
-        # Login as admin and generate certificates for this registration
+        # Login as admin and generate certificate for this team registration
         self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
         gen_res = self.client.post(f'/admin/certificates/generate/{reg_id}', follow_redirects=True)
         self.assertEqual(gen_res.status_code, 200)
 
-        # Check database: 3 certificates should be created
+        # Check database: exactly 1 single certificate created with team name
         certs = database.query_db(
             "SELECT * FROM certificates WHERE registration_id = %s ORDER BY id ASC",
             (reg_id,)
         )
-        self.assertEqual(len(certs), 3, "All 3 team members must have a certificate record")
-
-        recipients = [c['recipient_name'] for c in certs]
-        self.assertIn('Lead Captain', recipients)
-        self.assertIn('Alex Rider', recipients)
-        self.assertIn('Priya Sharma', recipients)
+        self.assertEqual(len(certs), 1, "Exactly one certificate per team must be generated")
+        self.assertEqual(certs[0]['recipient_name'], 'Alpha Squad Test')
 
         # Test team-zip download
         res_zip = self.client.get(f'/admin/certificates/team-zip/{reg_id}')
         self.assertEqual(res_zip.status_code, 200)
         self.assertEqual(res_zip.content_type, 'application/zip')
-        self.assertIn('Alpha_Squad_Certificates.zip', res_zip.headers.get('Content-Disposition', ''))
+        self.assertIn('Alpha_Squad_Test_Certificates.zip', res_zip.headers.get('Content-Disposition', ''))
 
         # Inspect ZIP content
         import io, zipfile
         zf = zipfile.ZipFile(io.BytesIO(res_zip.data))
         zip_namelist = zf.namelist()
-        self.assertEqual(len(zip_namelist), 3)
+        self.assertTrue(any(n.endswith('.png') for n in zip_namelist))
+        self.assertTrue(any(n.endswith('.pdf') for n in zip_namelist))
 
         # Clean up
         for c in certs:
-            if c.get('certificate_pdf') and os.path.exists(c['certificate_pdf']):
-                try: os.remove(c['certificate_pdf'])
+            if c.get('file_path') and os.path.exists(c['file_path']):
+                try: os.remove(c['file_path'])
                 except OSError: pass
-            if c.get('certificate_image') and os.path.exists(c['certificate_image']):
-                try: os.remove(c['certificate_image'])
-                except OSError: pass
+        database.query_db("DELETE FROM certificates WHERE registration_id = %s", (reg_id,), commit=True)
         from app import remove_registration_record
         remove_registration_record(reg_id)
 
@@ -2507,6 +2502,22 @@ class SDATestCase(unittest.TestCase):
         # Check /scanner route as well
         res2 = self.client.get('/scanner')
         self.assertEqual(res2.status_code, 200)
+
+    def test_46_all_teams_zip_download(self):
+        """Verify downloading the all-teams certificates ZIP packages PNG and PDF for all teams."""
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        res_zip = self.client.get('/admin/certificates/teams-zip')
+        self.assertEqual(res_zip.status_code, 200)
+        self.assertEqual(res_zip.content_type, 'application/zip')
+        self.assertIn('SDA_Team_Certificates.zip', res_zip.headers.get('Content-Disposition', ''))
+
+        import io, zipfile
+        zf = zipfile.ZipFile(io.BytesIO(res_zip.data))
+        names = zf.namelist()
+        self.assertGreaterEqual(len(names), 8, "Expected certificates for all 4 to 8 teams")
+        self.assertTrue(any('Alpha_Squad' in n for n in names))
+        self.assertTrue(any(n.endswith('.png') for n in names))
+        self.assertTrue(any(n.endswith('.pdf') for n in names))
 
 
 if __name__ == '__main__':

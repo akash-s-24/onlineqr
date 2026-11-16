@@ -1,5 +1,6 @@
 import os
 import io
+import re
 import zipfile
 import math
 import uuid
@@ -399,14 +400,21 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
     elif place_text.lower() == 'participation':
         place_text = "Merit"
 
+    # Sanitize name to guarantee only the candidate name or team name appears (no 'Team:' prefix)
+    clean_p_name = p_name
+    if clean_p_name.lower().startswith('team:'):
+        clean_p_name = clean_p_name[5:].strip()
+    elif clean_p_name.lower().startswith('team '):
+        clean_p_name = clean_p_name[5:].strip()
+
     if has_custom_template:
-        # User constraint: ONLY the participant's name should appear in the placeholder dash,
-        # formatted larger, bold, in solid black to match the certificate style and stand out clearly.
+        # User constraint: ONLY the participant's or team's name should appear in the placeholder dash,
+        # formatted dramatically enlarged, bold, in solid black to match the certificate style and stand out clearly.
         name_color = (10, 10, 10)  # Pure deep black
 
         coords = {
             'name_x': 1573,
-            'name_y': 870
+            'name_y': 835
         }
         coords_path = os.path.join(
             "static", "uploads", "cert_coordinates.json")
@@ -421,19 +429,19 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
             except Exception:
                 pass
 
-        # Dynamic font scaling starting at size 110 for prominent, clear visibility
-        font_size = 110
+        # Dynamic font scaling starting at size 165 for dramatic, bold prominence
+        font_size = 165
         font_candidate = get_font_by_name("georgiab.ttf", font_size)
-        bbox = draw.textbbox((0, 0), p_name, font=font_candidate)
+        bbox = draw.textbbox((0, 0), clean_p_name, font=font_candidate)
         text_w = bbox[2] - bbox[0]
-        while text_w > 1300 and font_size > 44:
+        while text_w > 1280 and font_size > 48:
             font_size -= 2
             font_candidate = get_font_by_name("georgiab.ttf", font_size)
-            bbox = draw.textbbox((0, 0), p_name, font=font_candidate)
+            bbox = draw.textbbox((0, 0), clean_p_name, font=font_candidate)
             text_w = bbox[2] - bbox[0]
 
-        # Draw the prominent participant name centered above the placeholder dash
-        draw.text((coords['name_x'], coords['name_y']), p_name,
+        # Draw the dramatically enlarged name centered above the placeholder dash
+        draw.text((coords['name_x'], coords.get('name_y', 835)), clean_p_name,
                   fill=name_color, font=font_candidate, anchor="mm")
 
     else:
@@ -444,21 +452,21 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         y_l1 = 610
         l1_prefix = "This is to Certify that Mr. / Ms. "
         name_color = (10, 10, 10)  # Bold black
-        f_name_prominent = get_font_by_name("georgiab.ttf", 64)
+        f_name_prominent = get_font_by_name("georgiab.ttf", 96)
         w_l1_pre = draw.textbbox((0, 0), l1_prefix, font=f_body)[2]
-        w_l1_name = draw.textbbox((0, 0), p_name, font=f_name_prominent)[2]
-        fill_name_w = max(360, w_l1_name + 40)
+        w_l1_name = draw.textbbox((0, 0), clean_p_name, font=f_name_prominent)[2]
+        fill_name_w = max(420, w_l1_name + 40)
         total_l1_w = w_l1_pre + fill_name_w
         start_x1 = width // 2 - total_l1_w // 2
 
         # Draw Line 1 Prefix
         draw.text((start_x1, y_l1), l1_prefix, fill=(51, 65, 85), font=f_body)
 
-        # Draw Candidate Name & Underline
+        # Draw Candidate / Team Name & Underline
         name_x = start_x1 + w_l1_pre + 15
-        draw.text((name_x + (fill_name_w - w_l1_name) // 2 - 15, y_l1 - 18),
-                  p_name, fill=name_color, font=f_name_prominent)
-        draw.line([(name_x, y_l1 + 45), (name_x + fill_name_w, y_l1 + 45)],
+        draw.text((name_x + (fill_name_w - w_l1_name) // 2 - 15, y_l1 - 25),
+                  clean_p_name, fill=name_color, font=f_name_prominent)
+        draw.line([(name_x, y_l1 + 60), (name_x + fill_name_w, y_l1 + 60)],
                   fill=(148, 163, 184), width=2)
 
         # ----------------------------------------------------
@@ -546,13 +554,6 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
 
         draw.text((cur_x3, y_l3), l3_suf, fill=(51, 65, 85), font=f_body)
 
-        # Optional team mention if group event
-        if team_name:
-            y_team = 965
-            team_display = f"(Team: {team_name})"
-            draw.text((width // 2, y_team), team_display, fill=(71, 85, 105),
-                      font=get_font_by_name("georgiai.ttf", 28), anchor="mm")
-
     # 9. Bottom-Right Corner: Colorful silhouettes & paint splashes of students in sports & extracurriculars
     if not has_custom_template:
         draw_student_silhouettes(draw, width - 590, height - 380)
@@ -596,14 +597,6 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         draw.text((sig3_x, sig_y + 60), "Shree Daksha Academy",
                   fill=(100, 116, 139), font=f_sig_sub, anchor="mm")
 
-        # 11. Event Date Details (Bottom-Left Corner)
-        f_v1 = get_font_by_name("arial.ttf", 13)
-        f_v2 = get_font_by_name("arialbd.ttf", 14)
-        draw.text((115, height - 212), "Awarded On:",
-                  fill=(100, 116, 139), font=f_v1)
-        draw.text((115, height - 190),
-                  f"{event_date}", fill=border_navy, font=f_v2)
-
     # Save to certificates directory
     os.makedirs(Config.CERTIFICATE_FOLDER, exist_ok=True)
     filename = f"{cert_code}.png"
@@ -629,50 +622,97 @@ if __name__ == '__main__':
 
 def generate_team_certificates_zip(team_members_str, event_name, event_date, college_name=None, cert_code_base=None, department="PCMC", semester="Second PUC", team_name=None):
     """
-    Generates a PDF certificate for each member in the team_members_str,
-    and returns a ZIP file containing all PDFs as raw bytes.
+    Generates a single certificate for the team (using the team name),
+    and returns a ZIP file containing the certificate as raw bytes.
     """
-    if not team_members_str:
-        return b""
+    target_name = (team_name or team_members_str or 'Team').strip()
+    if target_name.lower().startswith('team:'):
+        target_name = target_name[5:].strip()
+    elif target_name.lower().startswith('team '):
+        target_name = target_name[5:].strip()
 
-    members = [m.strip() for m in team_members_str.split(',') if m.strip()]
     if not cert_code_base:
-        cert_code_base = "GRP" + uuid.uuid4().hex[:8].upper()
+        cert_code_base = "TEAM-" + uuid.uuid4().hex[:8].upper()
 
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
-        for idx, member in enumerate(members):
-            # Generate the PNG file
-            member_cert_code = f"{cert_code_base}_{idx+1}"
+        _, png_filepath, _ = generate_certificate(
+            participant_name=target_name,
+            event_name=event_name,
+            event_date=event_date,
+            college_name=college_name,
+            cert_code=cert_code_base,
+            department=department,
+            semester=semester
+        )
+
+        safe_name = re.sub(r'[^A-Za-z0-9._-]+', '_', target_name).strip('._') or "Team"
+        safe_ev = re.sub(r'[^A-Za-z0-9._-]+', '_', str(event_name or 'Event')).strip('._') or "Event"
+
+        try:
+            with open(png_filepath, 'rb') as f:
+                zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.png", f.read())
+        except Exception:
+            pass
+
+        try:
+            with Image.open(png_filepath) as img:
+                pdf_buffer = io.BytesIO()
+                img.convert('RGB').save(pdf_buffer, format='PDF', resolution=100.0)
+                zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.pdf", pdf_buffer.getvalue())
+        except Exception as e:
+            print(f"Error converting cert for {target_name}: {e}")
+
+    return zip_buffer.getvalue()
+
+
+def generate_all_teams_certificates_zip(teams_data):
+    """
+    Generates a high-resolution PNG & PDF certificate for each team (single certificate per team,
+    with ONLY the team name displayed), and packages them into a clean ZIP file.
+    teams_data: list of dicts with keys: team_name, event_name, event_date, college_name, cert_code, etc.
+    """
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+        for idx, t in enumerate(teams_data or []):
+            raw_team = t.get('team_name') or t.get('full_name') or f"Team_{idx+1}"
+            clean_team = raw_team.strip()
+            if clean_team.lower().startswith('team:'):
+                clean_team = clean_team[5:].strip()
+            elif clean_team.lower().startswith('team '):
+                clean_team = clean_team[5:].strip()
+
+            ev_name = t.get('event_name') or 'Event'
+            ev_date = t.get('event_date') or '25-26 Nov 2026'
+            cert_code = t.get('cert_code') or t.get('certificate_code') or f"SDA-2026-TEAM-{uuid.uuid4().hex[:6].upper()}"
+
             _, png_filepath, _ = generate_certificate(
-                participant_name=member,
-                event_name=event_name,
-                event_date=event_date,
-                college_name=college_name,
-                cert_code=member_cert_code,
-                department=department,
-                semester=semester,
-                team_name=team_name
+                participant_name=clean_team,
+                event_name=ev_name,
+                event_date=ev_date,
+                college_name=t.get('college_name'),
+                cert_code=cert_code,
+                department=t.get('department') or 'PCMC',
+                semester=t.get('semester') or 'Second PUC'
             )
 
-            # Convert PNG to PDF in memory using Pillow
+            safe_team = re.sub(r'[^A-Za-z0-9._-]+', '_', clean_team).strip('._') or f"Team_{idx+1}"
+            safe_ev = re.sub(r'[^A-Za-z0-9._-]+', '_', str(ev_name)).strip('._') or "Event"
+
+            # Add PNG to ZIP
             try:
-                img = Image.open(png_filepath)
-                pdf_buffer = io.BytesIO()
-                img.convert('RGB').save(
-                    pdf_buffer, format='PDF', resolution=100.0)
-                pdf_bytes = pdf_buffer.getvalue()
-
-                # Add to ZIP with strict path-traversal and filename sanitization (SEC-03)
-                import re
-                safe_name = re.sub(r'[^A-Za-z0-9._-]+', '_', member).strip('._') or f"Member_{idx+1}"
-                safe_ev = re.sub(r'[^A-Za-z0-9._-]+', '_', str(event_name or 'Event')).strip('._') or "Event"
-                zip_file.writestr(
-                    f"{safe_name}_{safe_ev}_Certificate.pdf", pdf_bytes)
-
-                # Optionally delete the temporary PNG to save space, but we might want to keep the leader's PNG
-                # We'll just leave it since the user's disk has space and it might be used.
+                with open(png_filepath, 'rb') as f:
+                    zip_file.writestr(f"{safe_team}_{safe_ev}_Certificate.png", f.read())
             except Exception as e:
-                print(f"Error converting cert for {member}: {e}")
+                print(f"Error reading PNG for {clean_team}: {e}")
+
+            # Add PDF to ZIP
+            try:
+                with Image.open(png_filepath) as img:
+                    pdf_buffer = io.BytesIO()
+                    img.convert('RGB').save(pdf_buffer, format='PDF', resolution=100.0)
+                    zip_file.writestr(f"{safe_team}_{safe_ev}_Certificate.pdf", pdf_buffer.getvalue())
+            except Exception as e:
+                print(f"Error converting cert to PDF for {clean_team}: {e}")
 
     return zip_buffer.getvalue()
