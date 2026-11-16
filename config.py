@@ -73,6 +73,11 @@ class Config:
     COLLEGE_SUBTITLE = os.environ.get('COLLEGE_SUBTITLE', 'Recognized by the Government of Karnataka, affiliated to Bengaluru University, approved by AICTE.')
     EVENT_TITLE = os.environ.get('EVENT_TITLE', 'Daksha Infinix').strip() or 'Daksha Infinix'
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '').strip()
+    ADMIN_USERNAMES = [
+        u.strip().lower()
+        for u in os.environ.get('ADMIN_USERNAMES', 'admin,adminsda1,adminsda2').split(',')
+        if u.strip()
+    ]
     MEMBER_PASSWORD = os.environ.get('MEMBER_PASSWORD', '').strip()
     PAYMENT_MODE = os.environ.get('PAYMENT_MODE', 'live').strip().lower() or 'live'
     DEFAULT_UPI_ID = os.environ.get('DEFAULT_UPI_ID', '919980846695@federal').strip() or '919980846695@federal'

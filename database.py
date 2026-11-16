@@ -910,16 +910,39 @@ def create_tables_and_seed():
             admin_pass = generate_password_hash(Config.ADMIN_PASSWORD)
             member_raw_pass = getattr(Config, 'MEMBER_PASSWORD', '') or Config.ADMIN_PASSWORD
             member_pass = generate_password_hash(member_raw_pass)
-            users_to_seed = [
-                ('admin', 'admin@shreedakshaacademyedu.in', 'admin', 'admin', admin_pass),
-                ('admin1', 'admin1@shreedakshaacademyedu.in', 'admin', 'admin SDA1', admin_pass),
-                ('admin2', 'admin2@shreedakshaacademyedu.in', 'admin', 'admin SDA2', admin_pass)
-            ]
+
+            configured_admins = getattr(Config, 'ADMIN_USERNAMES', ['admin', 'adminsda1', 'adminsda2'])
+            # Ensure admin, adminsda1, adminsda2 (plus legacy aliases admin1, admin2) are seeded
+            all_admin_names = list(dict.fromkeys([
+                *configured_admins,
+                'admin',
+                'adminsda1',
+                'adminsda2',
+                'admin1',
+                'admin2'
+            ]))
+
+            users_to_seed = []
+            for un in all_admin_names:
+                un_clean = un.strip().lower()
+                if not un_clean:
+                    continue
+                if '1' in un_clean:
+                    fn = 'admin SDA1'
+                elif '2' in un_clean:
+                    fn = 'admin SDA2'
+                elif un_clean == 'admin':
+                    fn = 'admin'
+                else:
+                    fn = f"admin {un_clean.upper()}"
+                em = f"{un_clean}@shreedakshaacademyedu.in"
+                users_to_seed.append((un_clean, em, 'admin', fn, admin_pass))
+
             for i in range(1, 11):
                 users_to_seed.append((f'member{i}', f'member{i}@shreedakshaacademyedu.in', 'member', f'Team Member {i}', member_pass))
 
             for un, em, role, fn, pwd_hash in users_to_seed:
-                existing = run_query("SELECT id FROM users WHERE username = %s", (un,), one=True)
+                existing = run_query("SELECT id FROM users WHERE LOWER(username) = LOWER(%s)", (un,), one=True)
                 if not existing:
                     run_exec(
                         "INSERT INTO users (username, email, password_hash, role, full_name) VALUES (%s, %s, %s, %s, %s)",
@@ -927,8 +950,8 @@ def create_tables_and_seed():
                     )
                 else:
                     run_exec(
-                        "UPDATE users SET password_hash = %s, role = %s, full_name = %s, email = %s WHERE username = %s",
-                        (pwd_hash, role, fn, em, un)
+                        "UPDATE users SET password_hash = %s, role = %s, full_name = %s, email = %s WHERE id = %s",
+                        (pwd_hash, role, fn, em, existing['id'])
                     )
             print("[DB Seed] Synced configured admin and team member accounts")
         else:

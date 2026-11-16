@@ -191,7 +191,7 @@ class SDATestCase(unittest.TestCase):
             self.assertIn(b'Certificates Hub', hub_res.data)
 
     def test_08_admin1_and_admin2_access(self):
-        """Test admin1 and admin2 access and formatting as admin SDA1 and admin SDA2"""
+        """Test admin1, admin2, adminsda1, and adminsda2 access and formatting as admin SDA1 and admin SDA2"""
         if not Config.ADMIN_PASSWORD:
             self.skipTest('Set ADMIN_PASSWORD to seed test administrators.')
         password = Config.ADMIN_PASSWORD
@@ -208,6 +208,18 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(r2.status_code, 200)
         self.assertIn(b'admin SDA2', r2.data)
         self.assertNotIn(b'Welcome back', r2.data)
+
+        # adminsda1 test
+        client_sda1 = self.app.test_client()
+        r_sda1 = client_sda1.post('/login', data={'username': 'adminsda1', 'password': password}, follow_redirects=True)
+        self.assertEqual(r_sda1.status_code, 200)
+        self.assertIn(b'admin SDA1', r_sda1.data)
+
+        # adminsda2 test
+        client_sda2 = self.app.test_client()
+        r_sda2 = client_sda2.post('/login', data={'username': 'adminsda2', 'password': password}, follow_redirects=True)
+        self.assertEqual(r_sda2.status_code, 200)
+        self.assertIn(b'admin SDA2', r_sda2.data)
 
     def test_09_symposium_portal_sections(self):
         """Test the newly added countdown, stats, rules, registration, and FAQ sections on /events"""
@@ -2731,6 +2743,24 @@ class SDATestCase(unittest.TestCase):
             )
             self.assertTrue(ok)
             self.assertIn("Certificate successfully dispatched", msg)
+
+    def test_53_admin_usernames_configuration_and_login(self):
+        """Verify Config.ADMIN_USERNAMES contains admin, adminsda1, adminsda2 and all can authenticate successfully."""
+        password = Config.ADMIN_PASSWORD
+        if not password:
+            self.skipTest('Set ADMIN_PASSWORD to test admin logins.')
+
+        self.assertIn('admin', Config.ADMIN_USERNAMES)
+        self.assertIn('adminsda1', Config.ADMIN_USERNAMES)
+        self.assertIn('adminsda2', Config.ADMIN_USERNAMES)
+
+        for username in ('admin', 'adminsda1', 'adminsda2', 'AdminSDA1', 'AdminSDA2'):
+            client = self.app.test_client()
+            res = client.post('/login', data={'username': username, 'password': password}, follow_redirects=True)
+            self.assertEqual(res.status_code, 200, f"Failed login for username: {username}")
+            with client.session_transaction() as sess:
+                self.assertIsNotNone(sess.get('user_id'), f"user_id missing in session for {username}")
+                self.assertEqual(sess.get('role'), 'admin', f"role is not admin for {username}")
 
 
 if __name__ == '__main__':
