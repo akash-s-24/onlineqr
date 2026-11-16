@@ -8,6 +8,7 @@ from flask import (
 )
 import csv
 import io
+import zipfile
 import re
 import uuid
 import secrets
@@ -2008,6 +2009,13 @@ def generate_bulk_certificates():
 
             code_suffix = f"-M{idx+1}" if len(members) > 1 else ""
             cert_code = existing['certificate_code'] if existing else f"SDA-2026-{prefix}-{uuid.uuid4().hex[:6].upper()}{code_suffix}"
+            expected_file_path = os.path.join(Config.CERTIFICATE_FOLDER, f"{cert_code}.png")
+
+            # Optimization to prevent 502 Bad Gateway timeouts on Render:
+            # If certificate already exists in DB and valid PNG is already on disk, skip re-rendering
+            if existing and os.path.exists(expected_file_path) and os.path.getsize(expected_file_path) > 1000:
+                count += 1
+                continue
 
             new_code, file_path, rel_url = generate_certificate(
                 participant_name=clean_member,
@@ -2031,8 +2039,11 @@ def generate_bulk_certificates():
                 """, (new_code, reg['registration_id'], reg['participant_id'], reg['event_id'], reg['event_date'], file_path, 'pending', clean_member))
             count += 1
 
+    import gc
+    gc.collect()
+
     if count > 0:
-        flash(f"Successfully generated {count} certificate(s) for all participants and team players!", 'success')
+        flash(f"Successfully processed {count} certificate(s) for all participants and team players!", 'success')
     else:
         flash("All registrations already have valid certificates generated.", 'info')
 
@@ -2317,21 +2328,30 @@ def toggle_smtp_mode():
 # ---------------------------------------------------------
 
 @app.route('/certificates/<path:filename>')
+@app.route('/certificate/download/<path:filename>')
+@app.route('/certificates/download/<path:filename>')
 def download_certificate_file(filename):
     safe_filename = secure_filename(os.path.basename(filename))
-    if safe_filename != filename or not safe_filename.lower().endswith('.png'):
+    if safe_filename != filename:
         abort(404)
-    filename = safe_filename
-    file_path = os.path.join(Config.CERTIFICATE_FOLDER, filename)
-    if not os.path.exists(file_path):
-        # On-demand regeneration if file missing on disk
-        code = os.path.splitext(filename)[0]
+
+    is_pdf = safe_filename.lower().endswith('.pdf')
+    is_png = safe_filename.lower().endswith('.png')
+    if not (is_pdf or is_png):
+        abort(404)
+
+    code = os.path.splitext(safe_filename)[0]
+    png_filename = f"{code}.png"
+    png_path = os.path.join(Config.CERTIFICATE_FOLDER, png_filename)
+
+    if not os.path.exists(png_path) or os.path.getsize(png_path) < 100:
+        # On-demand regeneration if file missing on disk (e.g. Render restart/ephemeral disk)
         cert = query_db("""
             SELECT c.*, p.full_name, p.college_name, p.department, p.semester,
-                   e.event_name, e.event_date, r.team_name
+                   e.event_name, e.event_date, r.team_name, r.participant_id as reg_p_id
             FROM certificates c
             JOIN registrations r ON c.registration_id = r.id
-            JOIN participants p ON c.participant_id = p.id
+            JOIN participants p ON COALESCE(c.participant_id, r.participant_id) = p.id
             JOIN events e ON c.event_id = e.id
             WHERE c.certificate_code = %s
         """, (code,), one=True)
@@ -2346,7 +2366,29 @@ def download_certificate_file(filename):
                 semester=cert.get('semester') or 'Second PUC',
                 team_name=cert.get('team_name')
             )
-    return send_from_directory(Config.CERTIFICATE_FOLDER, filename, as_attachment=False)
+
+    if not os.path.exists(png_path):
+        abort(404)
+
+    if is_pdf:
+        # Generate PDF on the fly and serve as download
+        try:
+            with Image.open(png_path) as im:
+                pdf_io = io.BytesIO()
+                im.convert('RGB').save(pdf_io, format='PDF', resolution=100.0)
+                pdf_io.seek(0)
+                return send_file(
+                    pdf_io,
+                    mimetype='application/pdf',
+                    as_attachment=True,
+                    download_name=safe_filename
+                )
+        except Exception as e:
+            app.logger.error(f"Error converting certificate {png_filename} to PDF: {e}")
+            abort(500)
+
+    as_att = request.args.get('download') == '1'
+    return send_from_directory(Config.CERTIFICATE_FOLDER, png_filename, as_attachment=as_att)
 
 
 @app.route('/admin/certificates/team-zip/<int:reg_id>')
@@ -2363,17 +2405,53 @@ def download_team_certificates_zip(reg_id):
         flash('Registration record not found.', 'warning')
         return redirect(url_for('certificates_manager'))
 
-    members_str = reg.get('team_members') or reg.get('full_name') or 'Team'
-    zip_bytes = generate_team_certificates_zip(
-        team_members_str=members_str,
-        event_name=reg['event_name'],
-        event_date=reg['event_date'],
-        college_name=reg['college_name'],
-        cert_code_base=f"TEAM-{reg['registration_uid']}",
-        department=reg.get('department') or 'PCMC',
-        semester=reg.get('semester') or 'Second PUC',
-        team_name=reg.get('team_name')
+    existing_certs = query_db(
+        "SELECT * FROM certificates WHERE registration_id = %s ORDER BY id ASC",
+        (reg_id,)
     )
+
+    if existing_certs:
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+            for idx, c in enumerate(existing_certs):
+                rec_name = c.get('recipient_name') or reg.get('full_name') or f"Member_{idx+1}"
+                png_file = os.path.join(Config.CERTIFICATE_FOLDER, f"{c['certificate_code']}.png")
+                if not os.path.exists(png_file) or os.path.getsize(png_file) < 100:
+                    generate_certificate(
+                        participant_name=rec_name,
+                        event_name=reg['event_name'],
+                        event_date=reg['event_date'],
+                        college_name=reg['college_name'],
+                        cert_code=c['certificate_code'],
+                        department=reg.get('department') or 'PCMC',
+                        semester=reg.get('semester') or 'Second PUC'
+                    )
+                safe_name = re.sub(r'[^A-Za-z0-9._-]+', '_', rec_name).strip('._') or f"Member_{idx+1}"
+                safe_ev = re.sub(r'[^A-Za-z0-9._-]+', '_', str(reg['event_name'] or 'Event')).strip('._') or "Event"
+
+                if os.path.exists(png_file):
+                    with open(png_file, 'rb') as f:
+                        zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.png", f.read())
+                    try:
+                        with Image.open(png_file) as im:
+                            pdf_buf = io.BytesIO()
+                            im.convert('RGB').save(pdf_buf, format='PDF', resolution=100.0)
+                            zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.pdf", pdf_buf.getvalue())
+                    except Exception as e:
+                        app.logger.warning(f"Could not convert {png_file} to PDF: {e}")
+        zip_bytes = zip_buffer.getvalue()
+    else:
+        members_str = reg.get('team_members') or reg.get('full_name') or 'Team'
+        zip_bytes = generate_team_certificates_zip(
+            team_members_str=members_str,
+            event_name=reg['event_name'],
+            event_date=reg['event_date'],
+            college_name=reg['college_name'],
+            cert_code_base=f"TEAM-{reg['registration_uid']}",
+            department=reg.get('department') or 'PCMC',
+            semester=reg.get('semester') or 'Second PUC',
+            team_name=reg.get('team_name')
+        )
     safe_team = secure_filename(reg.get('team_name') or reg.get('full_name') or 'Team') or 'Team'
     response = make_response(zip_bytes)
     response.headers['Content-Type'] = 'application/zip'

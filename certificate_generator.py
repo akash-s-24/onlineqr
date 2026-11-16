@@ -9,6 +9,37 @@ from PIL import Image, ImageDraw, ImageFont
 from config import Config
 
 
+_CACHED_BASE_TEMPLATE = None
+_CACHED_BASE_TEMPLATE_MTIME = 0
+
+
+def get_base_template(width=2480, height=1754):
+    """
+    Singleton cache for the base template image.
+    Resizes once in memory, avoiding repeated LANCZOS interpolation and eliminating 502 timeouts.
+    """
+    global _CACHED_BASE_TEMPLATE, _CACHED_BASE_TEMPLATE_MTIME
+    custom_template_path = os.path.join(
+        "static", "uploads", "certificate_template.png")
+    if os.path.exists(custom_template_path):
+        try:
+            mtime = os.path.getmtime(custom_template_path)
+            if _CACHED_BASE_TEMPLATE is not None and _CACHED_BASE_TEMPLATE_MTIME == mtime:
+                return _CACHED_BASE_TEMPLATE.copy(), True
+
+            img = Image.open(custom_template_path)
+            if img.size != (width, height):
+                img = img.resize((width, height), Image.LANCZOS)
+            img = img.convert("RGB")
+            _CACHED_BASE_TEMPLATE = img
+            _CACHED_BASE_TEMPLATE_MTIME = mtime
+            return _CACHED_BASE_TEMPLATE.copy(), True
+        except Exception as e:
+            print(f"Error loading custom template: {e}")
+
+    return Image.new("RGB", (width, height), (255, 255, 255)), False
+
+
 def get_font_by_name(font_name, size, index=0):
     """Load system font from standard directories or default fallback."""
     paths_to_check = [
@@ -237,25 +268,8 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
 
     # Canvas Dimensions: High-Res A4 Landscape (2480 x 1754 at 300 DPI equivalent)
     width, height = 2480, 1754
-    bg_color = (255, 255, 255)  # Clean white background
 
-    custom_template_path = os.path.join(
-        "static", "uploads", "certificate_template.png")
-    has_custom_template = os.path.exists(custom_template_path)
-
-    if has_custom_template:
-        try:
-            img = Image.open(custom_template_path)
-            if img.size != (width, height):
-                img = img.resize((width, height), Image.LANCZOS)
-            img = img.convert("RGB")
-        except Exception as e:
-            print(f"Error loading custom template: {e}")
-            has_custom_template = False
-            img = Image.new("RGB", (width, height), bg_color)
-    else:
-        img = Image.new("RGB", (width, height), bg_color)
-
+    img, has_custom_template = get_base_template(width, height)
     draw = ImageDraw.Draw(img)
 
     if not has_custom_template:
@@ -597,11 +611,13 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         draw.text((sig3_x, sig_y + 60), "Shree Daksha Academy",
                   fill=(100, 116, 139), font=f_sig_sub, anchor="mm")
 
-    # Save to certificates directory
+    # Save to certificates directory with fast compression
     os.makedirs(Config.CERTIFICATE_FOLDER, exist_ok=True)
     filename = f"{cert_code}.png"
     filepath = os.path.join(Config.CERTIFICATE_FOLDER, filename)
-    img.save(filepath, "PNG", quality=95)
+    img.save(filepath, "PNG", compress_level=1)
+    img.close()
+    del img
 
     relative_url = f"/certificates/{filename}"
     return cert_code, filepath, relative_url
@@ -651,15 +667,19 @@ def generate_team_certificates_zip(team_members_str, event_name, event_date, col
 
             member_code = f"{cert_code_base}-{idx+1}"
 
-            _, png_filepath, _ = generate_certificate(
-                participant_name=clean_member,
-                event_name=event_name,
-                event_date=event_date,
-                college_name=college_name,
-                cert_code=member_code,
-                department=department,
-                semester=semester
-            )
+            expected_file = os.path.join(Config.CERTIFICATE_FOLDER, f"{member_code}.png")
+            if os.path.exists(expected_file) and os.path.getsize(expected_file) > 1000:
+                png_filepath = expected_file
+            else:
+                _, png_filepath, _ = generate_certificate(
+                    participant_name=clean_member,
+                    event_name=event_name,
+                    event_date=event_date,
+                    college_name=college_name,
+                    cert_code=member_code,
+                    department=department,
+                    semester=semester
+                )
 
             safe_name = re.sub(r'[^A-Za-z0-9._-]+', '_', clean_member).strip('._') or f"Member_{idx+1}"
             safe_ev = re.sub(r'[^A-Za-z0-9._-]+', '_', str(event_name or 'Event')).strip('._') or "Event"

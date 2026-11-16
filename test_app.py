@@ -2545,6 +2545,71 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('openPreviewModal', html)
         self.assertIn('shareTeamZip', html)
 
+    def test_48_certificate_download_routes_png_and_pdf(self):
+        """Verify /certificate/download/... and /certificates/... serve PNG and PDF reliably."""
+        from certificate_generator import generate_certificate
+        code, file_path, rel = generate_certificate(
+            participant_name="Download Test Player",
+            event_name="Binary Brains",
+            event_date="25-26 Nov 2026",
+            cert_code="SDA-2026-BB-TESTDL"
+        )
+        self.assertTrue(os.path.exists(file_path))
+
+        # 1. /certificate/download/<code_or_file>.png
+        res1 = self.client.get(f'/certificate/download/{code}.png')
+        self.assertEqual(res1.status_code, 200)
+        self.assertEqual(res1.mimetype, 'image/png')
+        self.assertGreater(len(res1.data), 1000)
+
+        # 2. /certificate/download/<code_or_file>.pdf
+        res2 = self.client.get(f'/certificate/download/{code}.pdf')
+        self.assertEqual(res2.status_code, 200)
+        self.assertEqual(res2.mimetype, 'application/pdf')
+        self.assertTrue(res2.data.startswith(b'%PDF'))
+
+        # 3. /certificates/download/<code_or_file>.png
+        res3 = self.client.get(f'/certificates/download/{code}.png')
+        self.assertEqual(res3.status_code, 200)
+        self.assertEqual(res3.mimetype, 'image/png')
+
+        # 4. /certificates/download/<code_or_file>.pdf
+        res4 = self.client.get(f'/certificates/download/{code}.pdf')
+        self.assertEqual(res4.status_code, 200)
+        self.assertEqual(res4.mimetype, 'application/pdf')
+        self.assertTrue(res4.data.startswith(b'%PDF'))
+
+        # 5. /certificates/<code_or_file>.pdf
+        res5 = self.client.get(f'/certificates/{code}.pdf')
+        self.assertEqual(res5.status_code, 200)
+        self.assertEqual(res5.mimetype, 'application/pdf')
+        self.assertTrue(res5.data.startswith(b'%PDF'))
+
+        # Clean up
+        if os.path.exists(file_path):
+            try: os.remove(file_path)
+            except OSError: pass
+
+    def test_49_whatsapp_direct_redirect_and_instant_zip(self):
+        """Verify WhatsApp action provides direct redirect anchor and triggers instant ZIP download."""
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        res_ui = self.client.get('/admin/certificates')
+        self.assertEqual(res_ui.status_code, 200)
+        html = res_ui.data.decode('utf-8')
+
+        # Ensure direct anchor link to WhatsApp redirect endpoint with target="_blank"
+        self.assertIn('/admin/certificates/team-whatsapp/', html)
+        self.assertIn('target="_blank"', html)
+        self.assertIn('triggerZipDownload', html)
+
+    def test_50_fast_bulk_certificate_generation_without_502(self):
+        """Verify bulk certificate generation processes smoothly with template caching and skipping existing files."""
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        res = self.client.post('/admin/certificates/generate-bulk', follow_redirects=True)
+        self.assertEqual(res.status_code, 200)
+        html = res.data.decode('utf-8')
+        self.assertTrue('Successfully processed' in html or 'already have valid certificates' in html)
+
 
 if __name__ == '__main__':
     unittest.main()

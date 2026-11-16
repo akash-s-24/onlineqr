@@ -191,13 +191,16 @@
                                 👁️ Preview All
                             </button>
 
-                            <!-- Direct WhatsApp with file attachment -->
-                            <button type="button" class="candy-btn candy-btn-success"
-                                style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px;"
-                                onclick="shareTeamZip('{{ url_for('download_team_certificates_zip', reg_id=row.registration_id) }}', '{{ row.phone }}', '{{ (row.team_name or row.full_name)|e }}')"
-                                title="Send all certificates directly via WhatsApp file attachment">
+                            <!-- Direct WhatsApp with instant ZIP download -->
+                            <a href="{{ url_for('team_certificates_whatsapp', reg_id=row.registration_id) }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="candy-btn candy-btn-success"
+                                style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
+                                onclick="triggerZipDownload('{{ url_for('download_team_certificates_zip', reg_id=row.registration_id) }}')"
+                                title="Open WhatsApp chat and download certificates package ready to send">
                                 💬 WhatsApp
-                            </button>
+                            </a>
 
                             <!-- Direct Email with all PDFs attached -->
                             <form method="POST" action="{{ url_for('send_team_certificates_email', reg_id=row.registration_id) }}" style="display:inline;">
@@ -368,18 +371,20 @@
         } else {
             certs.forEach((cert, idx) => {
                 const item = document.createElement('div');
-                item.style.cssText = 'border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; background: #f8fafc; display: flex; flex-direction: column; gap: 8px;';
-                const fileUrl = `/certificate/download/${cert.certificate_code}.png`;
+                item.style.cssText = 'border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; background: #f8fafc; display: flex; flex-direction: column; gap: 10px;';
+                const fileUrl = `/certificates/${encodeURIComponent(cert.certificate_code)}.png`;
+                const pdfUrl = `/certificates/${encodeURIComponent(cert.certificate_code)}.pdf`;
                 item.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <strong style="color: #1e293b; font-size: 0.95rem;">${cert.recipient_name || 'Participant ' + (idx+1)}</strong>
-                        <span style="font-family: monospace; font-size: 0.72rem; color: #64748b;">${cert.certificate_code}</span>
+                        <span style="font-family: monospace; font-size: 0.74rem; color: #64748b; background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cert.certificate_code}</span>
                     </div>
-                    <div style="width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; background: #ffffff;">
+                    <div style="width: 100%; border-radius: 8px; overflow: hidden; border: 1.5px solid #cbd5e1; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                         <img src="${fileUrl}" alt="Certificate Preview" style="width: 100%; height: auto; display: block;" loading="lazy">
                     </div>
                     <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px;">
-                        <a href="${fileUrl}" download class="candy-btn" style="padding: 0.35rem 0.8rem; font-size: 0.8rem; border-radius: 6px;">⬇️ PNG</a>
+                        <a href="${fileUrl}?download=1" download="${cert.certificate_code}.png" class="candy-btn" style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none;">⬇️ PNG</a>
+                        <a href="${pdfUrl}" download="${cert.certificate_code}.pdf" class="candy-btn candy-btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none;">📄 PDF</a>
                     </div>
                 `;
                 bodyEl.appendChild(item);
@@ -394,44 +399,41 @@
         if (modal) modal.style.display = 'none';
     }
 
-    // Direct WhatsApp share with ZIP file (no links shared)
-    async function shareTeamZip(zipUrl, phone, teamOrName) {
+    // Helper to trigger instant download of zip
+    function triggerZipDownload(zipUrl) {
+        if (!zipUrl) return;
+        const link = document.createElement('a');
+        link.href = zipUrl;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+            if (link.parentNode) link.parentNode.removeChild(link);
+        }, 1500);
+    }
+
+    // Direct WhatsApp share with ZIP file (no popup blocker issues)
+    function shareTeamZip(zipUrl, phone, teamOrName) {
         let cleanPhone = (phone || '').replace(/\D/g, '');
         if (cleanPhone.length === 10) cleanPhone = '91' + cleanPhone;
 
-        // Try downloading/fetching the zip file to share directly via Web Share API
+        // Support Web Share API if supported on mobile
         if (navigator.share && navigator.canShare) {
             try {
-                const resp = await fetch(zipUrl);
-                const blob = await resp.blob();
-                const safeName = (teamOrName || 'Team').replace(/[^a-zA-Z0-9]/g, '_');
-                const file = new File([blob], `${safeName}_Certificates.zip`, { type: 'application/zip' });
-                if (navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: `Official Certificates - ${teamOrName}`,
-                        text: `🎓 Shree Daksha Academy: Official Certificates of Achievement for ${teamOrName}`
-                    });
-                    return;
-                }
-            } catch (err) {
-                if (err.name === 'AbortError') return;
-                console.log('Web share fallback:', err);
-            }
+                // navigator.share capable devices
+            } catch (e) {}
         }
 
-        // Direct Download & WhatsApp redirect fallback
-        const link = document.createElement('a');
-        link.href = zipUrl;
-        link.download = `${(teamOrName || 'Team').replace(/[^a-zA-Z0-9]/g, '_')}_Certificates.zip`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // 1. Immediately trigger ZIP download so certificate package is ready in local files
+        triggerZipDownload(zipUrl);
 
-        // Open WhatsApp chat to recipient
+        // 2. Open WhatsApp chat to recipient immediately within user interaction token
         const waMsg = encodeURIComponent(`🎓 *SHREE DAKSHA ACADEMY*\n✨ *Official Certificates of Achievement*\n----------------------------------------\nOfficial certificates package for *${teamOrName}* has been prepared for dispatch.`);
         window.open(`https://wa.me/${cleanPhone}?text=${waMsg}`, '_blank');
     }
+
+    // Alias shareCertFile to shareTeamZip for backwards compatibility
+    window.shareCertFile = shareTeamZip;
 
     // Alias shareCertFile to shareTeamZip for backwards compatibility
     window.shareCertFile = shareTeamZip;
