@@ -23,6 +23,8 @@ eventmate.db
 # Generated certificates (keep folder with .gitkeep)
 certificates/*.png
 certificates/*.pdf
+certificates/*.jpg
+certificates/*.jpeg
 certificates/*.zip
 *.zip
 !certificates/.gitkeep

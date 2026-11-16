@@ -14,7 +14,8 @@ import uuid
 import secrets
 import hmac
 import base64
-from urllib.parse import urlencode, urlparse
+import urllib.parse
+from urllib.parse import urlencode, urlparse, quote
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -2073,11 +2074,21 @@ def send_team_certificates_email(reg_id):
 
     sent_count = 0
     for cert in certs:
+        file_path = cert.get('file_path')
+        pdf_path = os.path.splitext(file_path)[0] + '.pdf' if file_path else None
+        if not (pdf_path and os.path.exists(pdf_path)) and file_path and os.path.exists(file_path):
+            try:
+                with Image.open(file_path) as im:
+                    im.convert('RGB').save(pdf_path, format='PDF', resolution=150.0)
+            except Exception:
+                pass
+        attach_path = pdf_path if (pdf_path and os.path.exists(pdf_path)) else file_path
+
         success, _ = send_certificate_email(
             recipient_email=reg['email'],
             participant_name=cert.get('recipient_name') or reg['full_name'],
             event_name=reg['event_name'],
-            certificate_path=cert['file_path'],
+            certificate_path=attach_path,
             certificate_code=cert['certificate_code']
         )
         if success:
@@ -2087,7 +2098,7 @@ def send_team_certificates_email(reg_id):
             )
             sent_count += 1
 
-    flash(f"Successfully dispatched {sent_count} certificate email(s) to {reg['email']}!", 'success')
+    flash(f"Successfully dispatched {sent_count} certificate email(s) with PDF attachment to {reg['email']}!", 'success')
     return redirect(url_for('certificates_manager'))
 
 @app.route('/admin/certificates/send-email/<int:cert_id>', methods=['POST'])
@@ -2137,11 +2148,21 @@ def send_certificate_email_route(cert_id):
         )
         attachment_filename = f"Team_{cert['team_name'] or 'Certificates'}.zip"
 
+    file_path = cert.get('file_path')
+    pdf_path = os.path.splitext(file_path)[0] + '.pdf' if file_path else None
+    if not (pdf_path and os.path.exists(pdf_path)) and file_path and os.path.exists(file_path):
+        try:
+            with Image.open(file_path) as im:
+                im.convert('RGB').save(pdf_path, format='PDF', resolution=150.0)
+        except Exception:
+            pass
+    attach_path = pdf_path if (pdf_path and os.path.exists(pdf_path)) else file_path
+
     success, msg = send_certificate_email(
         recipient_email=cert['email'],
-        participant_name=cert['full_name'],
+        participant_name=cert.get('recipient_name') or cert['full_name'],
         event_name=cert['event_name'],
-        certificate_path=cert['file_path'],
+        certificate_path=attach_path,
         certificate_code=cert['certificate_code'],
         attachment_bytes=attachment_bytes,
         attachment_filename=attachment_filename
@@ -2277,11 +2298,21 @@ def send_bulk_certificate_emails():
             )
             cert['file_path'] = file_path
 
+        file_path = cert.get('file_path')
+        pdf_path = os.path.splitext(file_path)[0] + '.pdf' if file_path else None
+        if not (pdf_path and os.path.exists(pdf_path)) and file_path and os.path.exists(file_path):
+            try:
+                with Image.open(file_path) as im:
+                    im.convert('RGB').save(pdf_path, format='PDF', resolution=150.0)
+            except Exception:
+                pass
+        attach_path = pdf_path if (pdf_path and os.path.exists(pdf_path)) else file_path
+
         success, _ = send_certificate_email(
             recipient_email=cert['email'],
-            participant_name=cert['full_name'],
+            participant_name=cert.get('recipient_name') or cert['full_name'],
             event_name=cert['event_name'],
-            certificate_path=cert['file_path'],
+            certificate_path=attach_path,
             certificate_code=cert['certificate_code']
         )
         if success:
@@ -2337,18 +2368,23 @@ def download_certificate_file(filename):
 
     is_pdf = safe_filename.lower().endswith('.pdf')
     is_png = safe_filename.lower().endswith('.png')
-    if not (is_pdf or is_png):
+    is_jpg = safe_filename.lower().endswith('.jpg') or safe_filename.lower().endswith('.jpeg')
+    if not (is_pdf or is_png or is_jpg):
         abort(404)
 
     code = os.path.splitext(safe_filename)[0]
     png_filename = f"{code}.png"
     png_path = os.path.join(Config.CERTIFICATE_FOLDER, png_filename)
+    pdf_filename = f"{code}.pdf"
+    pdf_path = os.path.join(Config.CERTIFICATE_FOLDER, pdf_filename)
+    jpg_filename = f"{code}.jpg"
+    jpg_path = os.path.join(Config.CERTIFICATE_FOLDER, jpg_filename)
 
     if not os.path.exists(png_path) or os.path.getsize(png_path) < 100:
         # On-demand regeneration if file missing on disk (e.g. Render restart/ephemeral disk)
         cert = query_db("""
             SELECT c.*, p.full_name, p.college_name, p.department, p.semester,
-                   e.event_name, e.event_date, r.team_name, r.participant_id as reg_p_id
+                   e.event_name, e.event_date, r.team_name, r.is_group, r.team_members, r.participant_id as reg_p_id
             FROM certificates c
             JOIN registrations r ON c.registration_id = r.id
             JOIN participants p ON COALESCE(c.participant_id, r.participant_id) = p.id
@@ -2367,25 +2403,43 @@ def download_certificate_file(filename):
                 team_name=cert.get('team_name')
             )
 
-    if not os.path.exists(png_path):
+    if is_pdf:
+        if os.path.exists(pdf_path):
+            return send_from_directory(
+                Config.CERTIFICATE_FOLDER,
+                pdf_filename,
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name=safe_filename
+            )
+        elif os.path.exists(png_path):
+            try:
+                with Image.open(png_path) as im:
+                    pdf_io = io.BytesIO()
+                    im.convert('RGB').save(pdf_io, format='PDF', resolution=100.0)
+                    pdf_io.seek(0)
+                    return send_file(
+                        pdf_io,
+                        mimetype='application/pdf',
+                        as_attachment=True,
+                        download_name=safe_filename
+                    )
+            except Exception as e:
+                app.logger.error(f"Error converting certificate {png_filename} to PDF: {e}")
+                abort(500)
         abort(404)
 
-    if is_pdf:
-        # Generate PDF on the fly and serve as download
-        try:
-            with Image.open(png_path) as im:
-                pdf_io = io.BytesIO()
-                im.convert('RGB').save(pdf_io, format='PDF', resolution=100.0)
-                pdf_io.seek(0)
-                return send_file(
-                    pdf_io,
-                    mimetype='application/pdf',
-                    as_attachment=True,
-                    download_name=safe_filename
-                )
-        except Exception as e:
-            app.logger.error(f"Error converting certificate {png_filename} to PDF: {e}")
-            abort(500)
+    if is_jpg:
+        if os.path.exists(jpg_path):
+            as_att = request.args.get('download') == '1'
+            return send_from_directory(Config.CERTIFICATE_FOLDER, jpg_filename, as_attachment=as_att)
+        elif os.path.exists(png_path):
+            as_att = request.args.get('download') == '1'
+            return send_from_directory(Config.CERTIFICATE_FOLDER, png_filename, as_attachment=as_att)
+        abort(404)
+
+    if not os.path.exists(png_path):
+        abort(404)
 
     as_att = request.args.get('download') == '1'
     return send_from_directory(Config.CERTIFICATE_FOLDER, png_filename, as_attachment=as_att)
@@ -2476,16 +2530,42 @@ def team_certificates_whatsapp(reg_id):
     if len(phone_digits) == 10:
         phone_digits = '91' + phone_digits
 
-    team_or_name = reg.get('team_name') or reg.get('lead_name')
-    msg = (
-        f"🎓 *SHREE DAKSHA ACADEMY*\n"
-        f"✨ *Official Certificates of Achievement*\n"
-        f"----------------------------------------\n"
-        f"Congratulations to *{team_or_name}* for participating in *{reg['event_name']}*!\n\n"
-        f"Official high-resolution certificates for all players are attached.\n"
-        f"----------------------------------------"
+    base_url = request.host_url.rstrip('/')
+    primary_cert = query_db(
+        "SELECT certificate_code FROM certificates WHERE registration_id = %s ORDER BY id ASC",
+        (reg_id,), one=True
     )
-    wa_url = f"https://wa.me/{phone_digits}?text={urllib.parse.quote(msg)}"
+    cert_link = f"{base_url}/certificates/{primary_cert['certificate_code']}.pdf" if primary_cert else ""
+
+    team_or_name = reg.get('team_name') or reg.get('lead_name')
+    if reg.get('is_group') == 1 and reg.get('team_name'):
+        msg = (
+            f"🎓 *SHREE DAKSHA ACADEMY*\n"
+            f"✨ *Official Certificate of Achievement*\n"
+            f"----------------------------------------\n"
+            f"Congratulations to *{team_or_name}* for participating in *{reg['event_name']}*!\n\n"
+        )
+        if cert_link:
+            msg += f"📄 *Download Official Certificate (PDF):*\n{cert_link}\n\n"
+        msg += (
+            f"Official high-resolution certificates for all players have been issued.\n"
+            f"----------------------------------------"
+        )
+    else:
+        msg = (
+            f"🎓 *SHREE DAKSHA ACADEMY*\n"
+            f"✨ *Official Certificate of Achievement*\n"
+            f"----------------------------------------\n"
+            f"Congratulations *{team_or_name}* for participating in *{reg['event_name']}*!\n\n"
+        )
+        if cert_link:
+            msg += f"📄 *Download Official Certificate (PDF):*\n{cert_link}\n\n"
+        msg += (
+            f"Your official high-resolution certificate has been issued.\n"
+            f"----------------------------------------"
+        )
+
+    wa_url = f"https://api.whatsapp.com/send?phone={phone_digits}&text={urllib.parse.quote(msg)}"
     return redirect(wa_url)
 
 

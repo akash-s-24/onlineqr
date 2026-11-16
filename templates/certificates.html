@@ -191,27 +191,43 @@
                                 👁️ Preview All
                             </button>
 
-                            <!-- Direct WhatsApp with instant ZIP download -->
+                            <!-- Direct WhatsApp chat window (Opens directly without zip download intercept) -->
                             <a href="{{ url_for('team_certificates_whatsapp', reg_id=row.registration_id) }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="candy-btn candy-btn-success"
                                 style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
-                                onclick="triggerZipDownload('{{ url_for('download_team_certificates_zip', reg_id=row.registration_id) }}')"
-                                title="Open WhatsApp chat and download certificates package ready to send">
+                                title="Open WhatsApp chat window to participant">
                                 💬 WhatsApp
                             </a>
 
-                            <!-- Direct Email with all PDFs attached -->
+                            <!-- Direct Email with all PDFs attached automatically -->
                             <form method="POST" action="{{ url_for('send_team_certificates_email', reg_id=row.registration_id) }}" style="display:inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="candy-btn"
                                     style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px;"
-                                    title="Email all certificate PDFs to recipient"
-                                    onclick="return confirm('Email all certificate PDFs to {{ row.email }}?');">
+                                    title="Email certificate PDF(s) to recipient with file attached"
+                                    onclick="return confirm('Email certificate PDF(s) to {{ row.email }}?');">
                                     ✉️ Email
                                 </button>
                             </form>
+
+                            <!-- Direct Download: ZIP for teams, PDF for solo -->
+                            {% if row.is_group %}
+                            <a href="{{ url_for('download_team_certificates_zip', reg_id=row.registration_id) }}"
+                                class="candy-btn candy-btn-secondary"
+                                style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
+                                title="Download team certificates ZIP package">
+                                📦 ZIP
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('download_certificate_file', filename=row.primary_cert_code ~ '.pdf') }}"
+                                class="candy-btn candy-btn-secondary"
+                                style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
+                                title="Download official certificate PDF">
+                                📄 PDF
+                            </a>
+                            {% endif %}
 
                             {% else %}
                             {% if row.att_status == 'present' %}

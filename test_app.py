@@ -15,6 +15,8 @@ class SDATestCase(unittest.TestCase):
         self.client = self.app.test_client()
         self.app.config['TESTING'] = True
         self.app.config['WTF_CSRF_ENABLED'] = False
+        os.environ['FLASK_TESTING'] = 'True'
+        os.environ['TESTING'] = 'True'
 
     def test_01_homepage_redirect(self):
         """Test home page redirects to events for guests"""
@@ -2668,6 +2670,67 @@ class SDATestCase(unittest.TestCase):
 
         # Test seed_sample_teams runs cleanly without any Seed Team Error
         seed_sample_teams(force=False)
+
+    def test_52_certificate_typography_whatsapp_and_email_attachment(self):
+        """Verify bundled TrueType font loading, compact file sizes, WhatsApp direct chat link, and email PDF attachment."""
+        from certificate_generator import get_font_by_name, generate_certificate
+        from mailer import send_certificate_email
+
+        # 1. Bundled TrueType font loads with requested size > 100
+        f_bold = get_font_by_name("georgiab.ttf", 160)
+        self.assertGreaterEqual(getattr(f_bold, 'size', 0), 100, "Font must be genuine TrueType scalable font, not 10px default")
+
+        # 2. Solo certificate generation & compact sizes
+        cert_code, file_path, rel_url = generate_certificate(
+            participant_name="Rohan Verma",
+            event_name="Debate",
+            event_date="25–26 Nov 2026",
+            college_name="Some Other College"
+        )
+        self.assertTrue(os.path.exists(file_path))
+        pdf_path = file_path.replace('.png', '.pdf')
+        jpg_path = file_path.replace('.png', '.jpg')
+        self.assertTrue(os.path.exists(pdf_path), "Compact PDF certificate must be pre-generated")
+        self.assertTrue(os.path.exists(jpg_path), "Lightweight JPG certificate must be pre-generated")
+
+        pdf_size_kb = os.path.getsize(pdf_path) / 1024
+        jpg_size_kb = os.path.getsize(jpg_path) / 1024
+        self.assertLess(pdf_size_kb, 500, f"PDF certificate size ({pdf_size_kb:.1f} KB) must be under 500 KB")
+        self.assertLess(jpg_size_kb, 700, f"JPG certificate size ({jpg_size_kb:.1f} KB) must be under 700 KB")
+
+        # 3. Team certificate generation with lead + members
+        team_code, team_png, _ = generate_certificate(
+            participant_name="Cyber Knights",
+            event_name="BGMI",
+            event_date="25–26 Nov 2026",
+            college_name="Engineering College",
+            team_name="Cyber Knights",
+            team_lead="Lead Player",
+            team_members="Lead Player, Player Two, Player Three, Player Four"
+        )
+        self.assertTrue(os.path.exists(team_png))
+
+        # 4. WhatsApp redirect link contains recipient phone and certificate link
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        reg = database.query_db("SELECT r.id, p.phone FROM registrations r JOIN participants p ON r.participant_id = p.id LIMIT 1", one=True)
+        if reg:
+            res_wa = self.client.get(f"/admin/certificates/team-whatsapp/{reg['id']}")
+            self.assertEqual(res_wa.status_code, 302)
+            wa_loc = res_wa.headers['Location']
+            self.assertTrue('whatsapp.com' in wa_loc or 'wa.me' in wa_loc)
+            self.assertIn('SHREE%20DAKSHA%20ACADEMY', wa_loc)
+
+        # 5. Email dispatch with PDF attachment
+        with self.app.app_context():
+            ok, msg = send_certificate_email(
+                recipient_email="test_cert_attach@example.com",
+                participant_name="Rohan Verma",
+                event_name="Debate",
+                certificate_path=pdf_path,
+                certificate_code=cert_code
+            )
+            self.assertTrue(ok)
+            self.assertIn("Certificate successfully dispatched", msg)
 
 
 if __name__ == '__main__':

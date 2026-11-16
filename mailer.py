@@ -177,7 +177,7 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
         subject_event_name = _sanitize_header_value(event_name)
         subject_line = f"Congratulations! Your Certificate of Participation for {subject_event_name} - Shree Daksha Academy"
 
-        msg = MIMEMultipart('alternative')
+        msg = MIMEMultipart()  # Mixed container for HTML body + file attachments
         msg['From'] = f"{_sanitize_header_value(Config.COLLEGE_NAME)} <{smtp_sender}>"
         msg['To'] = clean_recipient
         msg['Subject'] = subject_line
@@ -209,9 +209,10 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
                 <div class="content">
                     <h2>Hello {safe_participant_name},</h2>
                     <p>Thank you for attending <strong>{safe_event_name}</strong>!</p>
+                    <p>Your official Certificate of Achievement has been issued and is attached directly to this email.</p>
                     
                     <div class="highlight-box">
-                        <p style="margin: 0 0 8px 0;"><strong>Status:</strong> Verified</p>
+                        <p style="margin: 0 0 8px 0;"><strong>Status:</strong> Verified & Issued</p>
                         <p style="margin: 0;"><strong>Issue Date:</strong> {datetime.date.today().strftime('%B %d, %Y')}</p>
                     </div>
                 </div>
@@ -229,7 +230,8 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
 
         # Attach Certificate File if exists
         if attachment_bytes and safe_attach_name:
-            part = MIMEBase("application", "octet-stream")
+            is_pdf = safe_attach_name.lower().endswith('.pdf')
+            part = MIMEBase("application", "pdf" if is_pdf else "octet-stream")
             part.set_payload(attachment_bytes)
             encoders.encode_base64(part)
             part.add_header(
@@ -239,7 +241,8 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
             msg.attach(part)
         elif certificate_path and os.path.exists(certificate_path):
             with open(certificate_path, "rb") as attachment:
-                part = MIMEBase("application", "octet-stream")
+                is_pdf = certificate_path.lower().endswith('.pdf')
+                part = MIMEBase("application", "pdf" if is_pdf else "octet-stream")
                 part.set_payload(attachment.read())
             encoders.encode_base64(part)
             part.add_header(

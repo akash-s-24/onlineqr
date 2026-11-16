@@ -41,27 +41,46 @@ def get_base_template(width=2480, height=1754):
 
 
 def get_font_by_name(font_name, size, index=0):
-    """Load system font from standard directories or default fallback."""
+    """Load system font from bundled project fonts, system directories, or default fallback."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    bundled_fonts_dir = os.path.join(base_dir, 'static', 'fonts')
+
+    mac_alternatives = {
+        "georgiab.ttf": "Georgia-Bold.ttf",
+        "georgia.ttf": "Georgia.ttf",
+        "georgiai.ttf": "Georgia.ttf",
+        "arialbd.ttf": "Georgia-Bold.ttf",
+        "arial.ttf": "Georgia.ttf",
+        "timesbd.ttf": "Georgia-Bold.ttf",
+        "segoescb.ttf": "Georgia-Bold.ttf",
+        "Nirmala.ttc": "Georgia-Bold.ttf"
+    }
+
+    # Priority 1: Check bundled TrueType fonts in project (guarantees identical bold serif look across Linux/Render, Mac, Windows)
+    bundled_candidates = [
+        os.path.join(bundled_fonts_dir, font_name),
+        os.path.join(bundled_fonts_dir, mac_alternatives.get(font_name.lower(), '')),
+        os.path.join(bundled_fonts_dir, "Georgia-Bold.ttf"),
+        os.path.join(bundled_fonts_dir, "Georgia.ttf"),
+    ]
+    for p in bundled_candidates:
+        if p and os.path.exists(p):
+            try:
+                return ImageFont.truetype(p, size)
+            except Exception:
+                pass
+
+    # Priority 2: System directories
     paths_to_check = [
         font_name,
         os.path.join(os.environ.get('WINDIR', 'C:\\Windows'),
                      'Fonts', font_name),
         os.path.join('/Library/Fonts', font_name),
         os.path.join('/System/Library/Fonts', font_name),
-        os.path.join('/System/Library/Fonts/Supplemental', font_name)
+        os.path.join('/System/Library/Fonts/Supplemental', font_name),
+        os.path.join('/usr/share/fonts', font_name),
+        os.path.join('/usr/share/fonts/truetype', font_name)
     ]
-
-    # Handle Mac font name differences
-    mac_alternatives = {
-        "arialbd.ttf": "Arial Bold.ttf",
-        "arial.ttf": "Arial.ttf",
-        "timesbd.ttf": "Times New Roman Bold.ttf",
-        "georgiab.ttf": "Georgia Bold.ttf",
-        "georgiai.ttf": "Georgia Italic.ttf",
-        "georgia.ttf": "Georgia.ttf",
-        "segoescb.ttf": "Brush Script MT.ttf",
-        "Nirmala.ttc": "Arial Unicode.ttf"
-    }
 
     if font_name in mac_alternatives:
         alt_name = mac_alternatives[font_name]
@@ -79,6 +98,14 @@ def get_font_by_name(font_name, size, index=0):
             return ImageFont.truetype(p, size)
         except Exception:
             continue
+
+    # Priority 3: Fallback to bundled Georgia-Bold
+    fallback_bundled = os.path.join(bundled_fonts_dir, "Georgia-Bold.ttf")
+    if os.path.exists(fallback_bundled):
+        try:
+            return ImageFont.truetype(fallback_bundled, size)
+        except Exception:
+            pass
 
     # Ultimate fallback
     try:
@@ -257,7 +284,7 @@ def draw_student_silhouettes(draw, x_start, y_start):
                  (f5_x - 9, f5_y + 10), (f5_x - 9, f5_y - 4)], fill=(147, 197, 253))
 
 
-def generate_certificate(participant_name, event_name, event_date, college_name=None, cert_code=None, rank="1st", department="PCMC", semester="Second PUC", team_name=None):
+def generate_certificate(participant_name, event_name, event_date, college_name=None, cert_code=None, rank="1st", department="PCMC", semester="Second PUC", team_name=None, team_lead=None, team_members=None):
     """
     Generate a high-quality, professional Certificate of Achievement inspired by the prompt.
     Returns: (cert_code, file_path, relative_url)
@@ -424,12 +451,12 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
     if has_custom_template:
         # User constraint: ONLY the participant's or team's name should appear in the placeholder dash,
         # formatted dramatically enlarged, bold, in solid black to match the certificate style and stand out clearly.
-        name_color = (10, 10, 10)  # Pure deep black
+        # NEVER render college name on the certificate!
+        name_color = (15, 23, 42)  # Pure deep black/slate
+        line_y = 930
+        cx = 1574
+        max_w = 1250
 
-        coords = {
-            'name_x': 1573,
-            'name_y': 825
-        }
         coords_path = os.path.join(
             "static", "uploads", "cert_coordinates.json")
         if os.path.exists(coords_path):
@@ -438,25 +465,61 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
                 with open(coords_path, 'r') as f:
                     custom_coords = json.load(f)
                     if 'name_x' in custom_coords and 'name_y' in custom_coords:
-                        coords['name_x'] = int(custom_coords['name_x'])
-                        coords['name_y'] = int(custom_coords['name_y'])
+                        cx = int(custom_coords['name_x'])
+                        line_y = int(custom_coords['name_y'])
             except Exception:
                 pass
 
-        # Dynamic font scaling starting at size 180 for maximum prominent visibility
-        font_size = 180
-        font_candidate = get_font_by_name("georgiab.ttf", font_size)
-        bbox = draw.textbbox((0, 0), clean_p_name, font=font_candidate)
-        text_w = bbox[2] - bbox[0]
-        while text_w > 1280 and font_size > 48:
-            font_size -= 2
-            font_candidate = get_font_by_name("georgiab.ttf", font_size)
-            bbox = draw.textbbox((0, 0), clean_p_name, font=font_candidate)
-            text_w = bbox[2] - bbox[0]
+        def fit_text_font(text_str, font_file, max_size, min_size=32):
+            cur_s = max_size
+            f = get_font_by_name(font_file, cur_s)
+            b = draw.textbbox((0, 0), text_str, font=f)
+            while (b[2] - b[0]) > max_w and cur_s > min_size:
+                cur_s -= 2
+                f = get_font_by_name(font_file, cur_s)
+                b = draw.textbbox((0, 0), text_str, font=f)
+            return f, cur_s
 
-        # Draw the dramatically enlarged name centered above the placeholder dash
-        draw.text((coords['name_x'], coords.get('name_y', 825)), clean_p_name,
-                  fill=name_color, font=font_candidate, anchor="mm")
+        # Determine if this certificate is for a team with lead + members or solo
+        parsed_members = []
+        if isinstance(team_members, list):
+            parsed_members = [str(m).strip() for m in team_members if str(m).strip()]
+        elif team_members:
+            parsed_members = [m.strip() for m in str(team_members).split(',') if m.strip()]
+
+        effective_lead = (team_lead or (clean_p_name if parsed_members else '')).strip()
+        if effective_lead.lower().startswith('team:'):
+            effective_lead = effective_lead[5:].strip()
+        elif effective_lead.lower().startswith('team '):
+            effective_lead = effective_lead[5:].strip()
+
+        other_members = [m for m in parsed_members if m.lower() != effective_lead.lower() and not m.lower().startswith('team:')]
+
+        if effective_lead and other_members:
+            # Team Layout: Team lead on line 1, members on line 2 (and 3 if >4 members)
+            lead_display = f"{effective_lead} (Team Lead)" if not effective_lead.lower().endswith('(team lead)') and not effective_lead.lower().endswith('(lead)') else effective_lead
+            f_lead, _ = fit_text_font(lead_display, "georgiab.ttf", 105, 42)
+
+            if len(other_members) <= 4:
+                mem_display = " • ".join(other_members)
+                f_mem, _ = fit_text_font(mem_display, "georgia.ttf", 60, 30)
+
+                draw.text((cx, line_y - 80), lead_display, fill=name_color, font=f_lead, anchor="mb")
+                draw.text((cx, line_y - 15), mem_display, fill=(30, 41, 59), font=f_mem, anchor="mb")
+            else:
+                mid = (len(other_members) + 1) // 2
+                mem_line1 = " • ".join(other_members[:mid])
+                mem_line2 = " • ".join(other_members[mid:])
+                f_mem1, _ = fit_text_font(mem_line1, "georgia.ttf", 52, 26)
+                f_mem2, _ = fit_text_font(mem_line2, "georgia.ttf", 52, 26)
+
+                draw.text((cx, line_y - 100), lead_display, fill=name_color, font=f_lead, anchor="mb")
+                draw.text((cx, line_y - 52), mem_line1, fill=(30, 41, 59), font=f_mem1, anchor="mb")
+                draw.text((cx, line_y - 12), mem_line2, fill=(30, 41, 59), font=f_mem2, anchor="mb")
+        else:
+            # Solo Participant: Prominently displayed enlarged name sitting right above the line
+            f_solo, _ = fit_text_font(clean_p_name, "georgiab.ttf", 160, 48)
+            draw.text((cx, line_y - 15), clean_p_name, fill=name_color, font=f_solo, anchor="mb")
 
     else:
 
@@ -611,11 +674,27 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         draw.text((sig3_x, sig_y + 60), "Shree Daksha Academy",
                   fill=(100, 116, 139), font=f_sig_sub, anchor="mm")
 
-    # Save to certificates directory with fast compression
+    # Save to certificates directory with optimized compression
     os.makedirs(Config.CERTIFICATE_FOLDER, exist_ok=True)
     filename = f"{cert_code}.png"
     filepath = os.path.join(Config.CERTIFICATE_FOLDER, filename)
-    img.save(filepath, "PNG", compress_level=1)
+    img.save(filepath, "PNG", compress_level=6)
+
+    # Pre-generate compact, printable PDF (~360 KB) and lightweight JPG (~500 KB)
+    pdf_filename = f"{cert_code}.pdf"
+    pdf_filepath = os.path.join(Config.CERTIFICATE_FOLDER, pdf_filename)
+    try:
+        img.save(pdf_filepath, "PDF", resolution=150.0)
+    except Exception as e:
+        print(f"Error saving PDF {pdf_filename}: {e}")
+
+    jpg_filename = f"{cert_code}.jpg"
+    jpg_filepath = os.path.join(Config.CERTIFICATE_FOLDER, jpg_filename)
+    try:
+        img.save(jpg_filepath, "JPEG", quality=90, optimize=True)
+    except Exception as e:
+        print(f"Error saving JPG {jpg_filename}: {e}")
+
     img.close()
     del img
 
@@ -657,7 +736,7 @@ def generate_team_certificates_zip(team_members_str, event_name, event_date, col
         raw_members = [(team_name or 'Team Member').strip()]
 
     zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as zip_file:
         for idx, member in enumerate(raw_members):
             clean_member = member.strip()
             if clean_member.lower().startswith('team:'):
@@ -692,13 +771,21 @@ def generate_team_certificates_zip(team_members_str, event_name, event_date, col
                 print(f"Error reading PNG for {clean_member}: {e}")
 
             # Add PDF to ZIP
-            try:
-                with Image.open(png_filepath) as img:
-                    pdf_buffer = io.BytesIO()
-                    img.convert('RGB').save(pdf_buffer, format='PDF', resolution=100.0)
-                    zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.pdf", pdf_buffer.getvalue())
-            except Exception as e:
-                print(f"Error converting cert for {clean_member}: {e}")
+            pdf_path = png_filepath.replace('.png', '.pdf')
+            if os.path.exists(pdf_path):
+                try:
+                    with open(pdf_path, 'rb') as f:
+                        zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.pdf", f.read())
+                except Exception as e:
+                    print(f"Error reading PDF for {clean_member}: {e}")
+            else:
+                try:
+                    with Image.open(png_filepath) as img:
+                        pdf_buffer = io.BytesIO()
+                        img.convert('RGB').save(pdf_buffer, format='PDF', resolution=100.0)
+                        zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.pdf", pdf_buffer.getvalue())
+                except Exception as e:
+                    print(f"Error converting cert for {clean_member}: {e}")
 
     return zip_buffer.getvalue()
 
@@ -710,7 +797,7 @@ def generate_all_teams_certificates_zip(teams_data):
     teams_data: list of dicts with keys: team_name, event_name, event_date, college_name, cert_code, etc.
     """
     zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as zip_file:
         for idx, t in enumerate(teams_data or []):
             raw_team = t.get('team_name') or t.get('full_name') or f"Team_{idx+1}"
             clean_team = raw_team.strip()
@@ -744,12 +831,20 @@ def generate_all_teams_certificates_zip(teams_data):
                 print(f"Error reading PNG for {clean_team}: {e}")
 
             # Add PDF to ZIP
-            try:
-                with Image.open(png_filepath) as img:
-                    pdf_buffer = io.BytesIO()
-                    img.convert('RGB').save(pdf_buffer, format='PDF', resolution=100.0)
-                    zip_file.writestr(f"{safe_team}_{safe_ev}_Certificate.pdf", pdf_buffer.getvalue())
-            except Exception as e:
-                print(f"Error converting cert to PDF for {clean_team}: {e}")
+            pdf_path = png_filepath.replace('.png', '.pdf')
+            if os.path.exists(pdf_path):
+                try:
+                    with open(pdf_path, 'rb') as f:
+                        zip_file.writestr(f"{safe_team}_{safe_ev}_Certificate.pdf", f.read())
+                except Exception as e:
+                    print(f"Error reading PDF for {clean_team}: {e}")
+            else:
+                try:
+                    with Image.open(png_filepath) as img:
+                        pdf_buffer = io.BytesIO()
+                        img.convert('RGB').save(pdf_buffer, format='PDF', resolution=100.0)
+                        zip_file.writestr(f"{safe_team}_{safe_ev}_Certificate.pdf", pdf_buffer.getvalue())
+                except Exception as e:
+                    print(f"Error converting cert to PDF for {clean_team}: {e}")
 
     return zip_buffer.getvalue()
