@@ -2610,6 +2610,65 @@ class SDATestCase(unittest.TestCase):
         html = res.data.decode('utf-8')
         self.assertTrue('Successfully processed' in html or 'already have valid certificates' in html)
 
+    def test_51_create_registration_boolean_is_group_postgres_compatibility(self):
+        """Verify create_registration accepts boolean is_group_event and stores strictly as integer 1/0."""
+        from database import create_registration, query_db, seed_sample_teams
+        import secrets
+        
+        ev = query_db("SELECT id FROM events LIMIT 1", one=True)
+        ev_id = ev['id'] if ev else 1
+
+        # Test with is_group_event=True (boolean expression)
+        reg_true = create_registration(
+            full_name="Postgres Bool Test Lead",
+            email=f"lead_{secrets.token_hex(4)}@test.com",
+            phone="9988776655",
+            college_name="Test College",
+            department="PCMC",
+            semester="Second PUC",
+            event_id=ev_id,
+            team_name=f"BoolTeam_{secrets.token_hex(3)}",
+            team_size=4,
+            team_members="Lead, Member 2, Member 3, Member 4",
+            payment_status="paid",
+            amount_paid=400,
+            payment_method="Online",
+            utr_number=f"UTR{secrets.token_hex(4).upper()}",
+            registered_by=1,
+            is_group_event=True  # Python boolean
+        )
+        self.assertTrue(reg_true['ok'])
+        row_true = query_db("SELECT is_group FROM registrations WHERE id = %s", (reg_true['registration_id'],), one=True)
+        self.assertEqual(row_true['is_group'], 1)
+        self.assertIsInstance(row_true['is_group'], int)
+
+        # Test with is_group_event=False (boolean expression)
+        reg_false = create_registration(
+            full_name="Postgres Bool Test Solo",
+            email=f"solo_{secrets.token_hex(4)}@test.com",
+            phone="9988776654",
+            college_name="Test College",
+            department="PCMC",
+            semester="Second PUC",
+            event_id=ev_id,
+            team_name=None,
+            team_size=1,
+            team_members=None,
+            payment_status="paid",
+            amount_paid=100,
+            payment_method="Cash",
+            utr_number=None,
+            registered_by=1,
+            is_group_event=False  # Python boolean
+        )
+        self.assertTrue(reg_false['ok'])
+        row_false = query_db("SELECT is_group FROM registrations WHERE id = %s", (reg_false['registration_id'],), one=True)
+        self.assertEqual(row_false['is_group'], 0)
+        self.assertIsInstance(row_false['is_group'], int)
+
+        # Test seed_sample_teams runs cleanly without any Seed Team Error
+        seed_sample_teams(force=False)
+
 
 if __name__ == '__main__':
     unittest.main()

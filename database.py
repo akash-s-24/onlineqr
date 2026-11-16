@@ -483,22 +483,29 @@ def create_registration(*, full_name, email, phone, college_name, department,
                  payment_status, status, amount_paid, payment_method, utr_number, payment_proof)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
+        # Ensure is_group is strictly an integer (1 or 0) to avoid PostgreSQL error:
+        # column "is_group" is of type integer but expression is of type boolean
+        is_group_int = 1 if is_group_event else 0
+        reg_by = int(registered_by) if registered_by else None
+        t_size = int(team_size) if team_size else 1
+        amt_paid = int(amount_paid) if amount_paid else 0
+
         if is_sqlite:
             execute(
                 registration_query,
-                (registration_uid, participant_id, event_id, registered_by,
-                 is_group_event, team_name, team_size, team_members,
-                 payment_status, 'approved' if registered_by else 'pending',
-                 amount_paid, payment_method, utr_number, payment_proof)
+                (registration_uid, participant_id, event_id, reg_by,
+                 is_group_int, team_name, t_size, team_members,
+                 payment_status, 'approved' if reg_by else 'pending',
+                 amt_paid, payment_method, utr_number, payment_proof)
             )
             registration_id = cursor.lastrowid
         else:
             execute(
                 registration_query + ' RETURNING id',
-                (registration_uid, participant_id, event_id, registered_by,
-                 is_group_event, team_name, team_size, team_members,
-                 payment_status, 'approved' if registered_by else 'pending',
-                 amount_paid, payment_method, utr_number, payment_proof)
+                (registration_uid, participant_id, event_id, reg_by,
+                 is_group_int, team_name, t_size, team_members,
+                 payment_status, 'approved' if reg_by else 'pending',
+                 amt_paid, payment_method, utr_number, payment_proof)
             )
             registration_id = cursor.fetchone()['id']
 
@@ -1433,7 +1440,7 @@ def create_tables_and_seed():
                     """,
                     (
                         ev['event_name'], ev['event_type'], ev['event_date'], ev['event_time'], ev['venue'], ev['description'],
-                        ev['max_participants'], ev['is_group'], ev['min_team_size'], ev['max_team_size'],
+                        ev['max_participants'], int(ev.get('is_group') or 0), ev['min_team_size'], ev['max_team_size'],
                         ev['banner_image'], ev['event_fee'], ev['upi_id'], ev['qr_code_image'], ev['rules_text'],
                         ev['faculty_name'], ev['faculty_phone'], ev['student_name'], ev['student_phone']
                     )
@@ -1452,7 +1459,7 @@ def create_tables_and_seed():
                     WHERE event_name = %s
                     """,
                     (
-                        ev['event_name'], ev['event_type'], ev['is_group'], ev['min_team_size'], ev['max_team_size'],
+                        ev['event_name'], ev['event_type'], int(ev.get('is_group') or 0), ev['min_team_size'], ev['max_team_size'],
                         ev['event_fee'], Config.DEFAULT_UPI_ID, ev['description'], ev['rules_text'], ev['banner_image'],
                         ev['faculty_name'], ev['faculty_phone'], ev['student_name'], ev['student_phone'],
                         existing_name
@@ -1667,7 +1674,7 @@ def seed_sample_teams(force=False):
                 payment_method='Online',
                 utr_number=f"UTR{secrets.token_hex(4).upper()}",
                 registered_by=1,
-                is_group_event=True
+                is_group_event=1
             )
 
             if reg_info and reg_info.get('ok'):
