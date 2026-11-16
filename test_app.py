@@ -69,7 +69,7 @@ class SDATestCase(unittest.TestCase):
             'full_name': 'Test Participant',
             'email': test_email,
             'phone': '9988776655',
-            'college_name': 'Shree Daksha Academy PU College',
+            'college_name': 'Shree Daksha Academy',
             'department': 'PCMC',
             'semester': 'II PUC',
             'event_id': target_event_id,
@@ -89,7 +89,7 @@ class SDATestCase(unittest.TestCase):
             'full_name': 'Test Participant',
             'email': test_email,
             'phone': '9988776655',
-            'college_name': 'Shree Daksha Academy PU College',
+            'college_name': 'Shree Daksha Academy',
             'department': 'PCMC',
             'semester': 'II PUC',
             'event_id': target_event_id,
@@ -2201,7 +2201,7 @@ class SDATestCase(unittest.TestCase):
         res_login = self.client.get('/login')
         self.assertEqual(res_login.status_code, 200)
         login_html = res_login.data.decode('utf-8')
-        self.assertIn("document.documentElement.setAttribute('data-theme','light');", login_html)
+        self.assertIn("document.documentElement.setAttribute('data-theme', 'light');", login_html)
         self.assertIn("#headerThemeToggle,\n        #baseThemeToggle,", login_html)
 
         # 4. Admin dashboard templates contain team members display
@@ -2296,6 +2296,217 @@ class SDATestCase(unittest.TestCase):
         # Verify DB blob is deleted
         self.assertIsNone(database.get_payment_proof_blob(proof_filename), "DB blob record must be removed on registration delete")
         self.assertFalse(os.path.exists(local_path), "Local cache file must be removed on registration delete")
+
+    def test_41_whatsapp_receipt_and_college_name_no_pu_college(self):
+        """Verify WhatsApp receipts and templates contain 'Shree Daksha Academy' and ZERO reference to 'PU College'."""
+        from mailer import format_whatsapp_receipt
+        receipt_text = format_whatsapp_receipt(
+            participant_name='Aarav Patel',
+            event_name='BGMI Tournament',
+            payment_method='Online UPI',
+            amount_paid=200,
+            utr_number='UTR12345678',
+            registration_uid='REG-TEST-RECEIPT1',
+            base_url="https://shreedaksha.example.com"
+        )
+        self.assertIn("SHREE DAKSHA ACADEMY", receipt_text)
+        self.assertNotIn("PU COLLEGE", receipt_text)
+        self.assertNotIn("PU College", receipt_text)
+        self.assertIn("https://shreedaksha.example.com/payment-status/REG-TEST-RECEIPT1", receipt_text)
+        self.assertIn("REG-TEST-RECEIPT1", receipt_text)
+        self.assertIn("Aarav Patel", receipt_text)
+
+    def test_42_gate_pass_and_receipt_aliases(self):
+        """Verify /pass/<uid>, /receipt/<uid>, and /ticket/<uid> aliases work identically and case-insensitively."""
+        ev = database.query_db("SELECT id FROM events LIMIT 1", one=True)
+        uid_token = uuid.uuid4().hex[:8]
+        reg_info = database.create_registration(
+            full_name="Alias Route Tester",
+            email=f"alias_{uid_token}@testdomain.org",
+            phone="9876500001",
+            college_name="Test Institute",
+            department="CSE",
+            semester="5",
+            event_id=ev['id'],
+            team_name=None,
+            team_size=1,
+            team_members=None,
+            payment_status='paid',
+            amount_paid=100,
+            payment_method='Cash',
+            utr_number=None,
+            registered_by=1,
+            is_group_event=False
+        )
+        self.assertTrue(reg_info.get('ok'))
+        reg_id = reg_info['registration_id']
+        reg_uid = reg_info['registration_uid']
+
+        # Test canonical URL
+        res_canon = self.client.get(f'/payment-status/{reg_uid}')
+        self.assertEqual(res_canon.status_code, 200)
+        self.assertIn('Alias Route Tester', res_canon.data.decode('utf-8'))
+
+        # Test /pass/<uid> alias
+        res_pass = self.client.get(f'/pass/{reg_uid}')
+        self.assertEqual(res_pass.status_code, 200)
+        self.assertIn('Alias Route Tester', res_pass.data.decode('utf-8'))
+
+        # Test case-insensitivity with lowercase
+        res_pass_lower = self.client.get(f'/pass/{reg_uid.lower()}')
+        self.assertEqual(res_pass_lower.status_code, 200)
+        self.assertIn('Alias Route Tester', res_pass_lower.data.decode('utf-8'))
+
+        # Test /receipt/<uid> alias
+        res_receipt = self.client.get(f'/receipt/{reg_uid}')
+        self.assertEqual(res_receipt.status_code, 200)
+        self.assertIn('Alias Route Tester', res_receipt.data.decode('utf-8'))
+
+        # Clean up
+        from app import remove_registration_record
+        remove_registration_record(reg_id)
+
+    def test_43_team_certificates_generation_and_team_zip(self):
+        """Verify team events generate individual certificates for all team members and can be downloaded as ZIP."""
+        # Find or create a group event
+        ev = database.query_db("SELECT id, event_name FROM events WHERE is_group = 1 LIMIT 1", one=True)
+        if not ev:
+            ev = database.query_db("SELECT id, event_name FROM events LIMIT 1", one=True)
+
+        uid_token = uuid.uuid4().hex[:8]
+        reg_info = database.create_registration(
+            full_name="Lead Captain",
+            email=f"captain_{uid_token}@team.com",
+            phone="9876500002",
+            college_name="Engineering Academy",
+            department="ISE",
+            semester="6",
+            event_id=ev['id'],
+            team_name="Alpha Squad",
+            team_size=3,
+            team_members="Lead Captain, Alex Rider, Priya Sharma",
+            payment_status='paid',
+            amount_paid=300,
+            payment_method='Online',
+            utr_number=f"UTR{uid_token}",
+            registered_by=1,
+            is_group_event=True
+        )
+        self.assertTrue(reg_info.get('ok'))
+        reg_id = reg_info['registration_id']
+
+        # Login as admin and generate certificates for this registration
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        gen_res = self.client.post(f'/admin/certificates/generate/{reg_id}', follow_redirects=True)
+        self.assertEqual(gen_res.status_code, 200)
+
+        # Check database: 3 certificates should be created
+        certs = database.query_db(
+            "SELECT * FROM certificates WHERE registration_id = %s ORDER BY id ASC",
+            (reg_id,)
+        )
+        self.assertEqual(len(certs), 3, "All 3 team members must have a certificate record")
+
+        recipients = [c['recipient_name'] for c in certs]
+        self.assertIn('Lead Captain', recipients)
+        self.assertIn('Alex Rider', recipients)
+        self.assertIn('Priya Sharma', recipients)
+
+        # Test team-zip download
+        res_zip = self.client.get(f'/admin/certificates/team-zip/{reg_id}')
+        self.assertEqual(res_zip.status_code, 200)
+        self.assertEqual(res_zip.content_type, 'application/zip')
+        self.assertIn('Alpha_Squad_Certificates.zip', res_zip.headers.get('Content-Disposition', ''))
+
+        # Inspect ZIP content
+        import io, zipfile
+        zf = zipfile.ZipFile(io.BytesIO(res_zip.data))
+        zip_namelist = zf.namelist()
+        self.assertEqual(len(zip_namelist), 3)
+
+        # Clean up
+        for c in certs:
+            if c.get('certificate_pdf') and os.path.exists(c['certificate_pdf']):
+                try: os.remove(c['certificate_pdf'])
+                except OSError: pass
+            if c.get('certificate_image') and os.path.exists(c['certificate_image']):
+                try: os.remove(c['certificate_image'])
+                except OSError: pass
+        from app import remove_registration_record
+        remove_registration_record(reg_id)
+
+    def test_44_whatsapp_certificate_link_and_share_buttons(self):
+        """Verify certificate WhatsApp redirect and certificate management UI controls."""
+        ev = database.query_db("SELECT id, event_name FROM events LIMIT 1", one=True)
+        uid_token = uuid.uuid4().hex[:8]
+        reg_info = database.create_registration(
+            full_name="Certificate Share Student",
+            email=f"share_{uid_token}@example.com",
+            phone="9876500003",
+            college_name="Tech Campus",
+            department="ECE",
+            semester="4",
+            event_id=ev['id'],
+            team_name=None,
+            team_size=1,
+            team_members=None,
+            payment_status='paid',
+            amount_paid=150,
+            payment_method='Online',
+            utr_number=f"UTR{uid_token}",
+            registered_by=1,
+            is_group_event=False
+        )
+        self.assertTrue(reg_info.get('ok'))
+        reg_id = reg_info['registration_id']
+
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        gen_res = self.client.post(f'/admin/certificates/generate/{reg_id}', follow_redirects=True)
+        self.assertEqual(gen_res.status_code, 200)
+
+        cert = database.query_db("SELECT * FROM certificates WHERE registration_id = %s LIMIT 1", (reg_id,), one=True)
+        self.assertIsNotNone(cert)
+        cert_code = cert['certificate_code']
+
+        # Test WhatsApp redirect endpoint
+        res_wa = self.client.get(f'/certificate/{cert_code}/whatsapp')
+        self.assertEqual(res_wa.status_code, 302)
+        wa_redirect = res_wa.headers['Location']
+        self.assertIn('919876500003', wa_redirect)
+        self.assertIn(cert_code, wa_redirect)
+        self.assertIn('SHREE%20DAKSHA%20ACADEMY', wa_redirect)
+
+        # Test certificates admin UI contains Web Share and Team ZIP logic
+        res_ui = self.client.get('/admin/certificates')
+        self.assertEqual(res_ui.status_code, 200)
+        ui_html = res_ui.data.decode('utf-8')
+        self.assertIn('shareCertFile', ui_html)
+        self.assertIn('navigator.share', ui_html)
+
+        # Clean up
+        if cert.get('certificate_pdf') and os.path.exists(cert['certificate_pdf']):
+            try: os.remove(cert['certificate_pdf'])
+            except OSError: pass
+        if cert.get('certificate_image') and os.path.exists(cert['certificate_image']):
+            try: os.remove(cert['certificate_image'])
+            except OSError: pass
+        from app import remove_registration_record
+        remove_registration_record(reg_id)
+
+    def test_45_qr_scanner_enlarged_viewport(self):
+        """Verify QR scanner template features enlarged camera viewport and dynamic qrbox calculation."""
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        res = self.client.get('/admin/scanner')
+        self.assertEqual(res.status_code, 200)
+        scanner_html = res.data.decode('utf-8')
+        self.assertIn('max-width: 620px', scanner_html)
+        self.assertIn('min-height: 380px', scanner_html)
+        self.assertIn('qrbox', scanner_html)
+        self.assertIn('fps: 15', scanner_html)
+
+        # Check /scanner route as well
+        res2 = self.client.get('/scanner')
+        self.assertEqual(res2.status_code, 200)
 
 
 if __name__ == '__main__':

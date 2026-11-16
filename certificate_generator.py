@@ -401,8 +401,8 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
 
     if has_custom_template:
         # User constraint: ONLY the participant's name should appear in the placeholder dash,
-        # perfectly aligned in dark blue (#123066). No event name, title, rank, date, or other text.
-        blue_ink = (18, 48, 102)  # Rich academic dark blue matching the template crest and ribbon
+        # formatted larger, bold, in solid black to match the certificate style and stand out clearly.
+        name_color = (10, 10, 10)  # Pure deep black
 
         coords = {
             'name_x': 1573,
@@ -421,20 +421,20 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
             except Exception:
                 pass
 
-        # Dynamic font scaling to guarantee candidate name never overflows the dash line
-        font_size = 72
+        # Dynamic font scaling starting at size 110 for prominent, clear visibility
+        font_size = 110
         font_candidate = get_font_by_name("georgiab.ttf", font_size)
         bbox = draw.textbbox((0, 0), p_name, font=font_candidate)
         text_w = bbox[2] - bbox[0]
-        while text_w > 1150 and font_size > 36:
+        while text_w > 1300 and font_size > 44:
             font_size -= 2
             font_candidate = get_font_by_name("georgiab.ttf", font_size)
             bbox = draw.textbbox((0, 0), p_name, font=font_candidate)
             text_w = bbox[2] - bbox[0]
 
-        # Draw ONLY the participant name centered above the placeholder dash
+        # Draw the prominent participant name centered above the placeholder dash
         draw.text((coords['name_x'], coords['name_y']), p_name,
-                  fill=blue_ink, font=font_candidate, anchor="mm")
+                  fill=name_color, font=font_candidate, anchor="mm")
 
     else:
 
@@ -443,8 +443,10 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         # ----------------------------------------------------
         y_l1 = 610
         l1_prefix = "This is to Certify that Mr. / Ms. "
+        name_color = (10, 10, 10)  # Bold black
+        f_name_prominent = get_font_by_name("georgiab.ttf", 64)
         w_l1_pre = draw.textbbox((0, 0), l1_prefix, font=f_body)[2]
-        w_l1_name = draw.textbbox((0, 0), p_name, font=f_handwriting_name)[2]
+        w_l1_name = draw.textbbox((0, 0), p_name, font=f_name_prominent)[2]
         fill_name_w = max(360, w_l1_name + 40)
         total_l1_w = w_l1_pre + fill_name_w
         start_x1 = width // 2 - total_l1_w // 2
@@ -454,8 +456,8 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
 
         # Draw Candidate Name & Underline
         name_x = start_x1 + w_l1_pre + 15
-        draw.text((name_x + (fill_name_w - w_l1_name) // 2 - 15, y_l1 - 10),
-                  p_name, fill=blue_ink, font=f_handwriting_name)
+        draw.text((name_x + (fill_name_w - w_l1_name) // 2 - 15, y_l1 - 18),
+                  p_name, fill=name_color, font=f_name_prominent)
         draw.line([(name_x, y_l1 + 45), (name_x + fill_name_w, y_l1 + 45)],
                   fill=(148, 163, 184), width=2)
 

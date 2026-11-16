@@ -682,14 +682,15 @@ def create_tables_and_seed():
             CREATE TABLE IF NOT EXISTS certificates (
                 id SERIAL PRIMARY KEY,
                 certificate_code VARCHAR(50) NOT NULL UNIQUE,
-                registration_id INTEGER NOT NULL UNIQUE,
+                registration_id INTEGER NOT NULL,
                 participant_id INTEGER NOT NULL,
                 event_id INTEGER NOT NULL,
                 issue_date VARCHAR(30) NOT NULL,
                 file_path VARCHAR(255) NOT NULL,
                 email_status VARCHAR(20) DEFAULT 'pending',
                 sent_at TIMESTAMP NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                recipient_name VARCHAR(150) NULL
             );
             """,
             """
@@ -772,6 +773,7 @@ def create_tables_and_seed():
             ("events", "faculty_phone", "VARCHAR(20) NULL"),
             ("events", "student_name", "VARCHAR(100) NULL"),
             ("events", "student_phone", "VARCHAR(20) NULL"),
+            ("certificates", "recipient_name", "VARCHAR(150) NULL"),
         ]
         table_columns = {}
         for table_name in {table for table, _, _ in migration_columns}:
@@ -810,6 +812,43 @@ def create_tables_and_seed():
             "CREATE UNIQUE INDEX IF NOT EXISTS registrations_uid_unique "
             "ON registrations (registration_uid)"
         )
+
+        # Allow multiple certificates per registration for team event members
+        if not is_sqlite:
+            try:
+                run_exec("ALTER TABLE certificates DROP CONSTRAINT IF EXISTS certificates_registration_id_key;")
+            except Exception:
+                pass
+        else:
+            try:
+                cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='certificates'")
+                cert_schema = cursor.fetchone()
+                table_sql = cert_schema['sql'] if cert_schema and isinstance(cert_schema, sqlite3.Row) else (cert_schema[0] if cert_schema else '')
+                if 'registration_id INTEGER NOT NULL UNIQUE' in table_sql or 'registration_id INTEGER UNIQUE' in table_sql:
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS certificates_v2 (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            certificate_code VARCHAR(50) NOT NULL UNIQUE,
+                            registration_id INTEGER NOT NULL,
+                            participant_id INTEGER NOT NULL,
+                            event_id INTEGER NOT NULL,
+                            issue_date VARCHAR(30) NOT NULL,
+                            file_path VARCHAR(255) NOT NULL,
+                            email_status VARCHAR(20) DEFAULT 'pending',
+                            sent_at TIMESTAMP NULL,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            recipient_name VARCHAR(150) NULL
+                        )
+                    """)
+                    cursor.execute("""
+                        INSERT INTO certificates_v2 (id, certificate_code, registration_id, participant_id, event_id, issue_date, file_path, email_status, sent_at, created_at, recipient_name)
+                        SELECT id, certificate_code, registration_id, participant_id, event_id, issue_date, file_path, email_status, sent_at, created_at, recipient_name FROM certificates
+                    """)
+                    cursor.execute("DROP TABLE certificates")
+                    cursor.execute("ALTER TABLE certificates_v2 RENAME TO certificates")
+                    conn.commit()
+            except Exception as e:
+                print(f"[Certificates Migration Warning] {e}")
 
         # Backfill event copy
         event_descriptions = {

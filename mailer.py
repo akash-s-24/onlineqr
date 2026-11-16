@@ -296,18 +296,49 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
         return False, 'SMTP delivery failed; the certificate remains queued for retry.'
 
 
-def format_whatsapp_receipt(participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None):
+def get_effective_base_url(custom_base=None):
+    """
+    Resolve the live, reachable external base URL for links in emails and WhatsApp messages.
+    Prefers:
+    1. custom_base argument if provided.
+    2. Active Flask request context host_url (e.g. https://onlineqr.onrender.com).
+    3. RENDER_EXTERNAL_URL from environment.
+    4. Config.BASE_URL if it is not a dummy/broken domain.
+    5. Fallback to https://onlineqr.onrender.com or http://127.0.0.1:5000.
+    """
+    if custom_base:
+        return str(custom_base).rstrip('/')
+
+    try:
+        from flask import has_request_context, request
+        if has_request_context() and request.host_url:
+            return request.host_url.rstrip('/')
+    except Exception:
+        pass
+
+    render_url = os.environ.get('RENDER_EXTERNAL_URL', '').strip()
+    if render_url:
+        return render_url.rstrip('/')
+
+    cfg_url = (os.environ.get('BASE_URL') or getattr(Config, 'BASE_URL', '')).strip()
+    if cfg_url and 'shreedakshaacademyedu.in' not in cfg_url and 'example.com' not in cfg_url:
+        return cfg_url.rstrip('/')
+
+    return 'https://onlineqr.onrender.com'
+
+
+def format_whatsapp_receipt(participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None, base_url=None):
     """
     Format a clean, official WhatsApp receipt message for Daksha Udbhav 2026.
     """
-    base_url = getattr(Config, 'BASE_URL', 'https://shreedakshaacademyedu.in')
-    pass_link = f"{base_url}/payment-status/{registration_uid}" if registration_uid else base_url
+    base = get_effective_base_url(base_url)
+    pass_link = f"{base}/payment-status/{registration_uid}" if registration_uid else base
 
     utr_text = f"\n💳 *Transaction / UTR:* {utr_number}" if utr_number else ""
     uid_text = f"\n🆔 *Registration ID:* {registration_uid}" if registration_uid else ""
 
     message = (
-        f"🎓 *SHREE DAKSHA ACADEMY PU COLLEGE*\n"
+        f"🎓 *SHREE DAKSHA ACADEMY*\n"
         f"✨ *Daksha Udbhav 2026 - Official Payment Receipt*\n"
         f"----------------------------------------\n"
         f"✅ *Status:* Confirmed & Verified\n\n"
@@ -328,7 +359,95 @@ def format_whatsapp_receipt(participant_name, event_name, payment_method, amount
     return message
 
 
-def send_whatsapp_receipt(recipient_phone, participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None):
+def format_whatsapp_certificate(participant_name, event_name, certificate_code, base_url=None):
+    """
+    Format an official WhatsApp message with a direct download link for the Certificate of Participation.
+    """
+    base = get_effective_base_url(base_url)
+    cert_download_url = f"{base}/certificates/{certificate_code}.png"
+
+    message = (
+        f"🎓 *SHREE DAKSHA ACADEMY*\n"
+        f"🏆 *Daksha Udbhav 2026 - Certificate of Participation*\n"
+        f"----------------------------------------\n"
+        f"Dear *{participant_name}*,\n\n"
+        f"Congratulations on your outstanding participation in *{event_name}*!\n\n"
+        f"📜 *Certificate ID:* {certificate_code}\n\n"
+        f"📥 *Download Your Official High-Resolution Certificate:*\n"
+        f"{cert_download_url}\n\n"
+        f"Please save and keep this certificate for your academic and extracurricular records.\n"
+        f"----------------------------------------\n"
+        f"Shree Daksha Academy, Bengaluru"
+    )
+    return message
+
+
+def send_whatsapp_certificate(recipient_phone, participant_name, event_name, certificate_code, certificate_path=None, base_url=None):
+    """
+    Dispatches a certificate download link/attachment to the participant via WhatsApp.
+    Supports Cloud API media dispatch (sending direct image) as well as wa.me click-to-chat.
+    """
+    load_dotenv(override=True)
+    is_demo, demo_reason = is_demo_mode()
+
+    raw_digits = re.sub(r'\D', '', str(recipient_phone or ''))
+    if not raw_digits:
+        raw_digits = "919980846695"
+    elif len(raw_digits) == 10:
+        raw_digits = "91" + raw_digits
+    elif len(raw_digits) == 11 and raw_digits.startswith('0'):
+        raw_digits = "91" + raw_digits[1:]
+
+    cert_text = format_whatsapp_certificate(
+        participant_name=participant_name,
+        event_name=event_name,
+        certificate_code=certificate_code,
+        base_url=base_url
+    )
+
+    wa_url = f"https://wa.me/{raw_digits}?text={urllib.parse.quote(cert_text)}"
+
+    base = get_effective_base_url(base_url)
+    cert_download_url = f"{base}/certificates/{certificate_code}.png"
+
+    wa_token = os.environ.get('WHATSAPP_API_TOKEN', getattr(Config, 'WHATSAPP_API_TOKEN', '')).strip()
+    wa_phone_id = os.environ.get('WHATSAPP_PHONE_NUMBER_ID', getattr(Config, 'WHATSAPP_PHONE_NUMBER_ID', '')).strip()
+
+    if is_demo or not (wa_token and wa_phone_id):
+        return True, f"Certificate prepared for WhatsApp (+{raw_digits})", wa_url
+
+    # Cloud API direct image message dispatch
+    try:
+        api_url = f"https://graph.facebook.com/v19.0/{wa_phone_id}/messages"
+        payload = {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": raw_digits,
+            "type": "image",
+            "image": {
+                "link": cert_download_url,
+                "caption": f"🎓 Official Certificate of Participation - {participant_name} ({event_name})"
+            }
+        }
+        req = urllib.request.Request(
+            api_url,
+            data=json.dumps(payload).encode('utf-8'),
+            headers={
+                "Authorization": f"Bearer {wa_token}",
+                "Content-Type": "application/json"
+            },
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            if 200 <= resp.status < 300:
+                return True, f"Certificate image delivered via WhatsApp to +{raw_digits}.", wa_url
+    except Exception as e:
+        print(f"[WhatsApp Certificate API Error] {e}")
+
+    return True, f"Certificate link prepared for WhatsApp (+{raw_digits}).", wa_url
+
+
+def send_whatsapp_receipt(recipient_phone, participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None, base_url=None):
     """
     Dispatches a payment receipt to the participant via WhatsApp.
     Supports:
@@ -355,7 +474,8 @@ def send_whatsapp_receipt(recipient_phone, participant_name, event_name, payment
         payment_method=payment_method,
         amount_paid=amount_paid,
         utr_number=utr_number,
-        registration_uid=registration_uid
+        registration_uid=registration_uid,
+        base_url=base_url
     )
 
     wa_url = f"https://wa.me/{raw_digits}?text={urllib.parse.quote(receipt_text)}"
@@ -478,7 +598,7 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
         subject_event_name = _sanitize_header_value(event_name)
         msg['Subject'] = f"Payment Receipt: Registration Confirmed for {subject_event_name} - Shree Daksha Academy"
 
-        base_url = getattr(Config, 'BASE_URL', 'https://shreedakshaacademyedu.in')
+        base_url = get_effective_base_url()
         pass_link = f"{base_url}/payment-status/{registration_uid}" if registration_uid else base_url
 
         payment_details = f"<strong>Payment Mode:</strong> {safe_payment_method}"

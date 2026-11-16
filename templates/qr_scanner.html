@@ -45,15 +45,16 @@
             <span id="cameraStatusBadge" class="badge" style="background: #f1f5f9; color: #64748b; font-size: 0.75rem;">Idle</span>
         </div>
 
-        <div id="reader" style="width: 100%; max-width: 380px; border-radius: 10px; overflow: hidden; background: #0f172a; min-height: 260px; display: flex; align-items: center; justify-content: center; position: relative;">
-            <div id="readerPlaceholder" style="color: #94a3b8; text-align: center; padding: 2rem;">
-                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📸</div>
-                <p style="margin: 0; font-size: 0.9rem;">Tap button below to launch device camera</p>
+        <div id="reader" style="width: 100%; max-width: 620px; border-radius: 14px; overflow: hidden; background: #0b1528; border: 2.5px solid #2563eb; min-height: 380px; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);">
+            <div id="readerPlaceholder" style="color: #94a3b8; text-align: center; padding: 2.5rem 1.5rem;">
+                <div style="font-size: 3.5rem; margin-bottom: 0.75rem;">📸</div>
+                <h4 style="color: #f8fafc; font-size: 1.15rem; margin: 0 0 6px; font-weight: 700;">Camera Viewfinder Ready</h4>
+                <p style="margin: 0; font-size: 0.9rem; color: #94a3b8;">Tap the button below to activate your camera and start instant scanning.</p>
             </div>
         </div>
 
-        <button id="startScanBtn" class="btn btn-primary" style="margin-top: 1.25rem; width: 100%; max-width: 380px; padding: 0.75rem; font-size: 0.95rem; font-weight: 700;">
-            ⚡ Start Camera Scanner
+        <button id="startScanBtn" class="btn btn-primary" style="margin-top: 1.25rem; width: 100%; max-width: 620px; padding: 0.9rem; font-size: 1.05rem; font-weight: 800; border-radius: 10px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);">
+            ⚡ Start Camera Scanner (Large Viewfinder)
         </button>
         <p style="margin: 0.5rem 0 0; font-size: 0.78rem; color: #64748b; text-align: center;">
             Point your mobile camera at the participant's QR Gate Pass.
@@ -159,6 +160,41 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+#reader {
+    width: 100% !important;
+}
+#reader video {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 360px !important;
+    max-height: 480px !important;
+    object-fit: cover !important;
+    border-radius: 12px !important;
+}
+#reader__scan_region {
+    background: transparent !important;
+}
+#reader__dashboard_section_csr {
+    padding: 10px 0 !important;
+}
+#reader__dashboard_section_csr button {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    margin: 6px 4px !important;
+    cursor: pointer !important;
+}
+#reader__dashboard_section_csr select {
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    font-size: 0.9rem !important;
+    margin: 6px 4px !important;
+}
 </style>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
@@ -172,13 +208,20 @@
             const placeholder = document.getElementById('readerPlaceholder');
             if (placeholder) placeholder.style.display = 'none';
 
+            const qrboxCalc = function(viewfinderWidth, viewfinderHeight) {
+                const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                const boxSize = Math.max(280, Math.floor(minEdge * 0.8));
+                return { width: boxSize, height: boxSize };
+            };
+
             html5QrcodeScanner = new Html5QrcodeScanner(
                 "reader", 
                 { 
-                    fps: 10, 
-                    qrbox: { width: 250, height: 250 },
+                    fps: 15, 
+                    qrbox: qrboxCalc,
                     aspectRatio: 1.0,
-                    showTorchButtonIfSupported: true
+                    showTorchButtonIfSupported: true,
+                    rememberLastUsedCamera: true
                 }, 
                 false
             );
