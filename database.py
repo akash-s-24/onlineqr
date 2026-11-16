@@ -993,13 +993,13 @@ def create_tables_and_seed():
                 'max_participants': 100,
                 'is_group': 1,
                 'min_team_size': 4,
-                'max_team_size': 8,
+                'max_team_size': 4,
                 'banner_image': '89e73e3fb00545329bed5ddb69478ea6.webp',
                 'event_fee': 400,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': (
-                    "Each team must have 4 to 8 players.\n"
+                    "Each team must have exactly 4 players.\n"
                     "Only handheld mobile smartphones (Android / iOS) are permitted; emulators, iPads, tablets, triggers, and external controllers are strictly prohibited.\n"
                     "Hacking and cheating are strictly prohibited; using third-party GFX tools, config files, aimbot, or ESP leads to instant team disqualification.\n"
                     "No teaming with other squads.\n"
@@ -1026,13 +1026,13 @@ def create_tables_and_seed():
                 'max_participants': 100,
                 'is_group': 1,
                 'min_team_size': 4,
-                'max_team_size': 8,
+                'max_team_size': 4,
                 'banner_image': 'freefire.jpeg',
                 'event_fee': 400,
                 'upi_id': Config.DEFAULT_UPI_ID,
                 'qr_code_image': None,
                 'rules_text': (
-                    "Each team must have 4 to 8 players.\n"
+                    "Each team must have exactly 4 players.\n"
                     "Only mobile smartphones are permitted; emulators, PC clients, tablets, iPads, external controllers, and macro triggers are strictly prohibited.\n"
                     "Hacking and cheating are strictly prohibited; scripts, auto-aim, wall hacks, and glitch exploits will result in immediate disqualification.\n"
                     "No teaming with other squads.\n"
@@ -1557,11 +1557,11 @@ def create_tables_and_seed():
             (Config.DEFAULT_UPI_ID,)
         )
 
-        # Update group event team bounds (BGMI & Free Fire 4-8 members)
+        # Update group event team bounds (BGMI & Free Fire strictly fixed 4 players)
         run_exec(
             """
             UPDATE events
-            SET min_team_size = 4, max_team_size = 8
+            SET min_team_size = 4, max_team_size = 4
             WHERE LOWER(TRIM(event_name)) IN ('bgmi', 'pubg', 'free fire', 'freefire')
             """
         )
@@ -1572,13 +1572,14 @@ def create_tables_and_seed():
         cursor.close()
         release_db_connection(conn)
 
-    # Seed sample competition teams (4 to 8 teams with 4 to 8 members each) if fewer than 8 exist
+    # Clean up any legacy dummy/seed data to ensure only real authentic registrations are stored
     try:
-        group_cnt = query_db("SELECT COUNT(*) as c FROM registrations WHERE is_group = 1 OR team_name IS NOT NULL", one=True)
-        if not group_cnt or group_cnt.get('c', 0) < 8:
-            seed_sample_teams()
+        execute_db("DELETE FROM certificates WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE '%@sda-fest.edu')")
+        execute_db("DELETE FROM attendance WHERE registration_id IN (SELECT id FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE '%@sda-fest.edu'))")
+        execute_db("DELETE FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE '%@sda-fest.edu')")
+        execute_db("DELETE FROM participants WHERE email LIKE '%@sda-fest.edu'")
     except Exception as e:
-        print(f"[Seed Teams Notice] {e}")
+        print(f"[DB Clean Notice] {e}")
 
 
 def seed_sample_teams(force=False):

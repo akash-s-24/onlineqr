@@ -1525,10 +1525,16 @@ def register_participant():
         is_group_event = 1 if (ev_record.get('is_group') == 1) else 0
 
         if is_group_event:
-            min_team_size = safe_int(ev_record.get('min_team_size'), 1)
-            max_team_size = safe_int(ev_record.get('max_team_size'), min_team_size)
+            is_fixed_four = event_name.strip().lower() in ('bgmi', 'pubg', 'free fire', 'freefire')
+            if is_fixed_four:
+                team_size = 4
+            min_team_size = 4 if is_fixed_four else safe_int(ev_record.get('min_team_size'), 1)
+            max_team_size = 4 if is_fixed_four else safe_int(ev_record.get('max_team_size'), min_team_size)
             if team_size < min_team_size or team_size > max_team_size:
-                flash(f'Team size must be between {min_team_size} and {max_team_size}.', 'danger')
+                if is_fixed_four:
+                    flash(f'{event_name} requires a fixed squad of exactly 4 players.', 'danger')
+                else:
+                    flash(f'Team size must be between {min_team_size} and {max_team_size}.', 'danger')
                 return render_template('register.html', events=events, selected_event_id=event_id, user_info=user_info)
             if not team_name:
                 flash('Enter a team name for this group event.', 'danger')
@@ -2261,7 +2267,7 @@ def send_receipt_email_route(reg_id):
 
 @app.route('/registration/<registration_uid>/whatsapp-receipt')
 def registration_whatsapp_receipt(registration_uid):
-    """Generate and redirect to a WhatsApp receipt click-to-chat URL."""
+    """Generate and redirect to a WhatsApp receipt click-to-chat URL or team broadcast URL."""
     reg = query_db("""
         SELECT r.*, p.full_name, p.phone, p.email, e.event_name, e.event_fee
         FROM registrations r
@@ -2272,15 +2278,22 @@ def registration_whatsapp_receipt(registration_uid):
     if not reg:
         abort(404)
     amount = reg.get('amount_paid') or reg.get('event_fee') or 0
+    share_mode = request.args.get('share', '').lower()
+    target_phone = request.args.get('phone') or reg.get('phone')
+    share_all = (share_mode == 'all')
     _, _, wa_url = send_whatsapp_receipt(
-        recipient_phone=reg.get('phone'),
+        recipient_phone=target_phone,
         participant_name=reg.get('full_name'),
         event_name=reg.get('event_name'),
         payment_method=reg.get('payment_method') or 'Verified',
         amount_paid=amount,
         utr_number=reg.get('utr_number'),
         registration_uid=reg.get('registration_uid'),
-        base_url=request.host_url.rstrip('/')
+        base_url=request.host_url.rstrip('/'),
+        team_name=reg.get('team_name'),
+        team_members=reg.get('team_members'),
+        is_group=bool(reg.get('is_group') or reg.get('team_name')),
+        share_all=share_all
     )
     return redirect(wa_url)
 
@@ -2585,7 +2598,11 @@ def team_certificates_whatsapp(reg_id):
             f"----------------------------------------"
         )
 
-    wa_url = f"https://api.whatsapp.com/send?phone={phone_digits}&text={urllib.parse.quote(msg)}"
+    share_mode = request.args.get('share', '').lower()
+    if share_mode == 'all' or not phone_digits:
+        wa_url = f"https://api.whatsapp.com/send?text={urllib.parse.quote(msg)}"
+    else:
+        wa_url = f"https://api.whatsapp.com/send?phone={phone_digits}&text={urllib.parse.quote(msg)}"
     return redirect(wa_url)
 
 
@@ -2618,30 +2635,10 @@ def download_all_teams_certificates_zip():
             'cert_code': f"SDA-2026-TEAM-{reg.get('registration_uid', uuid.uuid4().hex[:6].upper())}"
         })
 
-    # If no teams found, seed sample teams
+    # If no teams found, do not seed dummy data - return clear warning
     if not teams_data:
-        database.seed_sample_teams()
-        team_regs = query_db("""
-            SELECT r.*, p.college_name, p.department, p.semester, e.event_name, e.event_date
-            FROM registrations r
-            JOIN participants p ON r.participant_id = p.id
-            JOIN events e ON r.event_id = e.id
-            WHERE (r.is_group = 1 OR r.team_name IS NOT NULL) AND r.team_name != ''
-            ORDER BY r.id ASC
-        """)
-        for reg in (team_regs or []):
-            tname = (reg.get('team_name') or reg.get('full_name') or '').strip()
-            if not tname:
-                continue
-            teams_data.append({
-                'team_name': tname,
-                'event_name': reg.get('event_name') or 'Event',
-                'event_date': reg.get('event_date') or '25-26 Nov 2026',
-                'college_name': reg.get('college_name'),
-                'department': reg.get('department') or 'PCMC',
-                'semester': reg.get('semester') or 'Second PUC',
-                'cert_code': f"SDA-2026-TEAM-{reg.get('registration_uid', uuid.uuid4().hex[:6].upper())}"
-            })
+        flash("No team registrations found to generate certificates ZIP.", "warning")
+        return redirect(url_for('admin_certificates'))
 
     zip_bytes = generate_all_teams_certificates_zip(teams_data)
 

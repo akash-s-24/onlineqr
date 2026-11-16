@@ -441,12 +441,15 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
     elif place_text.lower() == 'participation':
         place_text = "Merit"
 
-    # Sanitize name to guarantee only the candidate name or team name appears (no 'Team:' prefix)
+    # Sanitize name to guarantee only the candidate name or team name appears (no 'Team:' prefix or '(Team Lead)' for solo)
     clean_p_name = p_name
     if clean_p_name.lower().startswith('team:'):
         clean_p_name = clean_p_name[5:].strip()
     elif clean_p_name.lower().startswith('team '):
         clean_p_name = clean_p_name[5:].strip()
+    clean_p_name = re.sub(r'(?i)\s*\(\s*team\s+lead\s*\)', '', clean_p_name)
+    clean_p_name = re.sub(r'(?i)\s*\(\s*lead\s*\)', '', clean_p_name)
+    clean_p_name = re.sub(r'(?i)^team\s+lead\s*:\s*', '', clean_p_name).strip()
 
     if has_custom_template:
         # User constraint: ONLY the participant's or team's name should appear in the placeholder dash,

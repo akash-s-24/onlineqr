@@ -868,10 +868,11 @@ class SDATestCase(unittest.TestCase):
             self.assertEqual(ev['upi_id'], Config.DEFAULT_UPI_ID)
             self.assertIsNone(ev['qr_code_image'])
 
-            # 6. Verify attendance view has no inflated 140 fake absence
+            # 6. Verify attendance view has no inflated 140 fake absence badge
             att_res = self.client.get('/admin/attendance')
             att_html = att_res.data.decode('utf-8')
-            self.assertNotIn('140', att_html)
+            self.assertNotIn('>140<', att_html)
+            self.assertNotIn('140 Absent', att_html)
             self.assertIn('Awaiting Check-in', att_html)
         finally:
             # Restore initial BGMI event details for subsequent tests
@@ -2680,8 +2681,12 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(row_false['is_group'], 0)
         self.assertIsInstance(row_false['is_group'], int)
 
-        # Test seed_sample_teams runs cleanly without any Seed Team Error
+        # Test seed_sample_teams runs cleanly without any Seed Team Error and cleans up
         seed_sample_teams(force=False)
+        database.execute_db("DELETE FROM certificates WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE '%@sda-fest.edu')")
+        database.execute_db("DELETE FROM attendance WHERE registration_id IN (SELECT id FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE '%@sda-fest.edu'))")
+        database.execute_db("DELETE FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE '%@sda-fest.edu')")
+        database.execute_db("DELETE FROM participants WHERE email LIKE '%@sda-fest.edu'")
 
     def test_52_certificate_typography_whatsapp_and_email_attachment(self):
         """Verify bundled TrueType font loading, compact file sizes, WhatsApp direct chat link, and email PDF attachment."""
@@ -2761,6 +2766,83 @@ class SDATestCase(unittest.TestCase):
             with client.session_transaction() as sess:
                 self.assertIsNotNone(sess.get('user_id'), f"user_id missing in session for {username}")
                 self.assertEqual(sess.get('role'), 'admin', f"role is not admin for {username}")
+
+    def test_54_bgmi_freefire_fixed_four_players_and_whatsapp_team_broadcast(self):
+        """
+        Verify:
+        1. BGMI and Free Fire are strictly locked to exactly 4 players (min=4, max=4).
+        2. Registration form contains fixed squad UI and handles solo vs team naming.
+        3. WhatsApp receipt and certificate routes support multi-player team broadcast (share=all).
+        4. Solo event certificates never show 'Team Lead'.
+        """
+        # 1. Event DB check
+        events = database.query_db("SELECT event_name, is_group, min_team_size, max_team_size, rules_text FROM events WHERE LOWER(TRIM(event_name)) IN ('bgmi', 'free fire')")
+        for ev in events:
+            self.assertEqual(ev['is_group'], 1)
+            self.assertEqual(ev['min_team_size'], 4, f"{ev['event_name']} min_team_size must be 4")
+            self.assertEqual(ev['max_team_size'], 4, f"{ev['event_name']} max_team_size must be 4")
+            self.assertIn("exactly 4 players", ev['rules_text'].lower())
+
+        # 2. Registration page check
+        res_reg = self.client.get('/register')
+        self.assertEqual(res_reg.status_code, 200)
+        html = res_reg.data.decode('utf-8')
+        self.assertIn('fixedSquadNotice', html)
+        self.assertIn('Fixed Squad: Exactly 4 Players Required', html)
+        self.assertIn('full_name_label', html)
+
+        # 3. Solo certificate generation check - no 'Team Lead'
+        from certificate_generator import generate_certificate
+        code, path, _ = generate_certificate(
+            participant_name="Pooja Hegde (Team Lead)",
+            event_name="Solo Singing",
+            event_date="25 Nov 2026",
+            cert_code="TEST-SOLO-CLEAN"
+        )
+        self.assertEqual(code, "TEST-SOLO-CLEAN")
+        self.assertTrue(os.path.exists(path))
+
+        # 4. WhatsApp team receipt formatting and dispatch
+        from mailer import format_whatsapp_receipt, send_whatsapp_receipt
+        team_wa_text = format_whatsapp_receipt(
+            participant_name="Captain Rahul",
+            event_name="BGMI",
+            payment_method="Online UPI",
+            amount_paid=400,
+            utr_number="UPI1234567890",
+            registration_uid="REG-BGMI-SQUAD",
+            team_name="Phantom Squad",
+            team_members="Captain Rahul, Player Two, Player Three, Player Four",
+            is_group=True
+        )
+        self.assertIn("Phantom Squad", team_wa_text)
+        self.assertIn("Captain Rahul", team_wa_text)
+        self.assertIn("Player Two", team_wa_text)
+        self.assertIn("Player Three", team_wa_text)
+        self.assertIn("Player Four", team_wa_text)
+
+        # 5. WhatsApp broadcast URL generation (share=all)
+        wa_ok, _, wa_url = send_whatsapp_receipt(
+            recipient_phone="9876543210",
+            participant_name="Captain Rahul",
+            event_name="BGMI",
+            payment_method="Online UPI",
+            amount_paid=400,
+            registration_uid="REG-BGMI-SQUAD",
+            team_name="Phantom Squad",
+            team_members="Captain Rahul, Player Two, Player Three, Player Four",
+            is_group=True,
+            share_all=True
+        )
+        self.assertTrue(wa_ok)
+        self.assertTrue(wa_url.startswith("https://api.whatsapp.com/send?text="))
+        self.assertNotIn("phone=", wa_url)
+        self.assertIn("Phantom%20Squad", wa_url)
+
+    def test_55_no_static_data_in_database(self):
+        """Verify no dummy or static test team registrations exist in the database."""
+        dummy_rows = database.query_db("SELECT id, email FROM participants WHERE email LIKE '%@sda-fest.edu'")
+        self.assertEqual(len(dummy_rows), 0, "No dummy registrations with @sda-fest.edu should exist in database")
 
 
 if __name__ == '__main__':

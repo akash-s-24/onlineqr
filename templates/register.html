@@ -1391,8 +1391,8 @@ line-height: 1.25 !important; }
                 </p>
 
                 <div class="f-form-row">
-                    <div class="f-form-group">
-                        <label class="f-label" for="team_size">Number of Participants *</label>
+                    <div class="f-form-group" id="teamSizeFormGroup">
+                        <label class="f-label" for="team_size" id="teamSizeLabel">Number of Participants *</label>
                         <select id="team_size" name="team_size" class="f-control f-select"
                             onchange="renderTeamMemberInputs()">
                             <option value="2">2 Participants (Duo)</option>
@@ -1413,6 +1413,10 @@ line-height: 1.25 !important; }
                                 <div class="cb-options" role="listbox"></div>
                             </div>
                         </div>
+                        <div id="fixedSquadNotice" style="display: none; padding: 12px 14px; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 8px; color: #1e3a8a;">
+                            <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 2px;">🎮 Fixed Squad: Exactly 4 Players Required</div>
+                            <div style="font-size: 0.82rem; color: #475569;">Squad capacity is locked to exactly 4 players. Dropdown selection removed.</div>
+                        </div>
                     </div>
                     <div class="f-form-group">
                         <label class="f-label" for="team_name">Team / Squad Name *</label>
@@ -1424,9 +1428,9 @@ line-height: 1.25 !important; }
                 <!-- Squad Members List -->
                 <div id="teamMembersList" style="margin-top: 10px;">
                     <label class="f-label" style="color: #000000;">Squad Members Roster</label>
-                    <div
+                    <div id="teamLeadNotice"
                         style="background: #ffffff; border: 1.5px dashed #d4d4d8; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #52525b;">
-                        <strong>Team Lead (Member 1):</strong> Captured automatically from the Registrant Details below.
+                        <strong>Player 1 (Team Lead / Captain):</strong> Captured automatically from the Registrant Details below.
                     </div>
                     <div id="additionalMembersContainer" style="display: flex; flex-direction: column; gap: 14px;">
                         <!-- Injected dynamically by JavaScript -->
@@ -1448,9 +1452,9 @@ line-height: 1.25 !important; }
                 <!-- ── PARTICIPANT DETAILS ── -->
                 <div class="f-form-row">
                     <div class="f-form-group">
-                        <label class="f-label" for="full_name">Team Lead Name *</label>
+                        <label class="f-label" for="full_name" id="full_name_label">Participant's Name / Team Lead Name *</label>
                         <input type="text" id="full_name" name="full_name" class="f-control"
-                            placeholder="e.g. Team Lead Name" required>
+                            placeholder="e.g. Participant's Name (or Team Lead)" required>
                     </div>
                     <div class="f-form-group">
                         <label class="f-label" for="email">Email Address *</label>
@@ -2144,36 +2148,79 @@ line-height: 1.25 !important; }
             if (payOfflineRadio) payOfflineRadio.required = false;
         }
 
-        // Group Event Card handling
+        // Group Event Card & Solo Participant Labels handling
         const groupCard = document.getElementById('groupEventCard');
         const teamNameInput = document.getElementById('team_name');
         const teamSizeSelect = document.getElementById('team_size');
+        const teamSizeLabel = document.getElementById('teamSizeLabel');
+        const teamSizeCbWrapper = document.querySelector('.cb-wrapper[data-cb-for="team_size"]');
+        const fixedSquadNotice = document.getElementById('fixedSquadNotice');
         const groupHeading = document.getElementById('groupEventHeading');
         const groupSizeBadge = document.getElementById('groupSizeBadge');
+        const fullNameLabel = document.getElementById('full_name_label');
+        const fullNameInput = document.getElementById('full_name');
+        const participantHeading = document.getElementById('participantDetailsHeading');
+
+        const cleanEvName = (eventName || '').toLowerCase().trim();
+        const isFixedFourSquad = cleanEvName.includes('bgmi') || cleanEvName.includes('free fire') || cleanEvName.includes('freefire') || cleanEvName.includes('pubg');
 
         if (isGroup && eventId) {
             if (groupCard) groupCard.style.display = 'block';
             if (teamNameInput) teamNameInput.required = true;
-            if (groupHeading) groupHeading.innerText = `👥 ${eventName} – Group Event Squad`;
-            if (groupSizeBadge) groupSizeBadge.innerText = `Capacity: ${minTeam} - ${maxTeam} Members`;
+            if (fullNameLabel) fullNameLabel.textContent = 'Team Lead Full Name *';
+            if (fullNameInput) fullNameInput.placeholder = 'e.g. Team Lead Name';
+            if (participantHeading) participantHeading.textContent = 'Team Lead & Participant details';
 
-            if (teamSizeSelect) {
-                teamSizeSelect.innerHTML = '';
-                for (let i = minTeam; i <= maxTeam; i++) {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    opt.innerText = `${i} Participants (${i === 2 ? 'Duo' : (i === 3 ? 'Trio' : 'Squad')} Team)`;
-                    if (i === Math.min(3, maxTeam)) opt.selected = true;
-                    teamSizeSelect.appendChild(opt);
+            if (isFixedFourSquad) {
+                // Remove dropdown selector and lock strictly to 4 players
+                if (teamSizeLabel) teamSizeLabel.style.display = 'none';
+                if (teamSizeCbWrapper) teamSizeCbWrapper.style.display = 'none';
+                if (teamSizeSelect) {
+                    teamSizeSelect.style.display = 'none';
+                    teamSizeSelect.innerHTML = '<option value="4" selected>4 Participants (Fixed Squad)</option>';
+                    teamSizeSelect.value = '4';
                 }
-                const teamCb = getCbInstance('team_size');
-                if (teamCb) teamCb.refresh();
+                if (fixedSquadNotice) {
+                    fixedSquadNotice.style.display = 'block';
+                    fixedSquadNotice.innerHTML = `
+                        <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 2px;">🎮 ${eventName}: Strictly 4 Players Required</div>
+                        <div style="font-size: 0.82rem; color: #475569;">Squad capacity is locked to exactly 4 players. Dropdown menu removed.</div>
+                    `;
+                }
+                if (groupHeading) groupHeading.innerText = `👥 ${eventName} – 4-Player Squad`;
+                if (groupSizeBadge) groupSizeBadge.innerText = 'Fixed Squad: 4 Players';
+            } else {
+                // Other group events: Display dropdown menu
+                if (fixedSquadNotice) fixedSquadNotice.style.display = 'none';
+                if (teamSizeLabel) teamSizeLabel.style.display = 'block';
+                if (teamSizeSelect) {
+                    teamSizeSelect.style.display = '';
+                    teamSizeSelect.innerHTML = '';
+                    for (let i = minTeam; i <= maxTeam; i++) {
+                        const opt = document.createElement('option');
+                        opt.value = i;
+                        opt.innerText = `${i} Participants (${i === 2 ? 'Duo' : (i === 3 ? 'Trio' : 'Squad')} Team)`;
+                        if (i === Math.min(3, maxTeam)) opt.selected = true;
+                        teamSizeSelect.appendChild(opt);
+                    }
+                }
+                if (teamSizeCbWrapper) {
+                    teamSizeCbWrapper.style.display = '';
+                    const teamCb = getCbInstance('team_size');
+                    if (teamCb) teamCb.refresh();
+                }
+                if (groupHeading) groupHeading.innerText = `👥 ${eventName} – Group Event Squad`;
+                if (groupSizeBadge) groupSizeBadge.innerText = `Capacity: ${minTeam} - ${maxTeam} Members`;
             }
 
             renderTeamMemberInputs();
         } else {
+            // Solo Event
             if (groupCard) groupCard.style.display = 'none';
             if (teamNameInput) teamNameInput.required = false;
+            if (fullNameLabel) fullNameLabel.textContent = "Participant's Full Name *";
+            if (fullNameInput) fullNameInput.placeholder = 'e.g. Your Full Name';
+            if (participantHeading) participantHeading.textContent = 'Participant details';
             const addContainer = document.getElementById('additionalMembersContainer');
             if (addContainer) addContainer.innerHTML = '';
         }
@@ -2181,7 +2228,7 @@ line-height: 1.25 !important; }
 
     function renderTeamMemberInputs() {
         const teamSizeEl = document.getElementById('team_size');
-        const teamSize = parseInt(teamSizeEl ? teamSizeEl.value : '2', 10);
+        const teamSize = parseInt(teamSizeEl ? teamSizeEl.value : '4', 10);
         const container = document.getElementById('additionalMembersContainer');
         if (!container) return;
         container.innerHTML = '';
@@ -2191,9 +2238,17 @@ line-height: 1.25 !important; }
             row.className = 'f-form-group';
             row.style.marginBottom = '0';
             row.innerHTML = `
-            <label class="f-label" for="member_${i}_name">Participant #${i} Full Name *</label>
-            <input type="text" id="member_${i}_name" name="member_${i}_name" class="f-control" placeholder="Enter Member #${i} Full Name" required>
-        `;
+                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;">
+                    <div>
+                        <label class="f-label" for="member_${i}_name" style="font-size:0.85rem; margin-bottom: 4px;">Player #${i} Full Name *</label>
+                        <input type="text" id="member_${i}_name" name="member_${i}_name" class="f-control" placeholder="Enter Player #${i} Full Name" required>
+                    </div>
+                    <div>
+                        <label class="f-label" for="member_${i}_phone" style="font-size:0.85rem; margin-bottom: 4px;">Player #${i} WhatsApp Number</label>
+                        <input type="tel" id="member_${i}_phone" name="member_${i}_phone" class="f-control" placeholder="10-digit mobile" pattern="[0-9]{10}">
+                    </div>
+                </div>
+            `;
             container.appendChild(row);
         }
     }

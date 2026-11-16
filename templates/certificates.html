@@ -191,7 +191,17 @@
                                 👁️ Preview All
                             </button>
 
-                            <!-- Direct WhatsApp chat window (Opens directly without zip download intercept) -->
+                            <!-- Direct WhatsApp chat window / Group broadcast -->
+                            {% if row.is_group %}
+                            <a href="{{ url_for('team_certificates_whatsapp', reg_id=row.registration_id, share='all') }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="candy-btn candy-btn-success"
+                                style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
+                                title="Send WhatsApp certificate link to all squad players / group">
+                                💬 WhatsApp (All)
+                            </a>
+                            {% else %}
                             <a href="{{ url_for('team_certificates_whatsapp', reg_id=row.registration_id) }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -200,6 +210,7 @@
                                 title="Open WhatsApp chat window to participant">
                                 💬 WhatsApp
                             </a>
+                            {% endif %}
 
                             <!-- Direct Email with all PDFs attached automatically -->
                             <form method="POST" action="{{ url_for('send_team_certificates_email', reg_id=row.registration_id) }}" style="display:inline;">

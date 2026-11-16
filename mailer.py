@@ -330,9 +330,10 @@ def get_effective_base_url(custom_base=None):
     return 'https://onlineqr.onrender.com'
 
 
-def format_whatsapp_receipt(participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None, base_url=None):
+def format_whatsapp_receipt(participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None, base_url=None, team_name=None, team_members=None, is_group=False):
     """
     Format a clean, official WhatsApp receipt message for Daksha Udbhav 2026.
+    Supports both individual participants and full team rosters.
     """
     base = get_effective_base_url(base_url)
     pass_link = f"{base}/payment-status/{registration_uid}" if registration_uid else base
@@ -340,12 +341,23 @@ def format_whatsapp_receipt(participant_name, event_name, payment_method, amount
     utr_text = f"\n💳 *Transaction / UTR:* {utr_number}" if utr_number else ""
     uid_text = f"\n🆔 *Registration ID:* {registration_uid}" if registration_uid else ""
 
+    if is_group and team_name:
+        title_line = "✨ *Daksha Udbhav 2026 - Official Team Invitation & Payment Receipt*"
+        participant_block = (
+            f"🏆 *Team Name:* {team_name}\n"
+            f"👑 *Team Lead:* {participant_name}\n"
+            f"👥 *Squad Players:* {team_members or participant_name}{uid_text}"
+        )
+    else:
+        title_line = "✨ *Daksha Udbhav 2026 - Official Payment Receipt*"
+        participant_block = f"👤 *Participant:* {participant_name}{uid_text}"
+
     message = (
         f"🎓 *SHREE DAKSHA ACADEMY*\n"
-        f"✨ *Daksha Udbhav 2026 - Official Payment Receipt*\n"
+        f"{title_line}\n"
         f"----------------------------------------\n"
         f"✅ *Status:* Confirmed & Verified\n\n"
-        f"👤 *Participant:* {participant_name}{uid_text}\n"
+        f"{participant_block}\n"
         f"🎪 *Event:* {event_name}\n"
         f"💰 *Amount Paid:* ₹{amount_paid}\n"
         f"💵 *Payment Mode:* {payment_method}{utr_text}\n"
@@ -450,12 +462,12 @@ def send_whatsapp_certificate(recipient_phone, participant_name, event_name, cer
     return True, f"Certificate link prepared for WhatsApp (+{raw_digits}).", wa_url
 
 
-def send_whatsapp_receipt(recipient_phone, participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None, base_url=None):
+def send_whatsapp_receipt(recipient_phone, participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None, base_url=None, team_name=None, team_members=None, is_group=False, share_all=False):
     """
-    Dispatches a payment receipt to the participant via WhatsApp.
+    Dispatches a payment receipt to the participant or entire team roster via WhatsApp.
     Supports:
     1. WhatsApp Business Cloud API / Webhook if configured in environment.
-    2. Click-to-chat URL (https://wa.me/<phone>?text=...) generation.
+    2. Click-to-chat URL (https://wa.me/<phone>?text=...) or group broadcast URL (https://api.whatsapp.com/send?text=...).
     3. Safe Demo Mode simulation when running tests or in development.
     Returns: (success: bool, message: str, wa_url: str)
     """
@@ -478,10 +490,16 @@ def send_whatsapp_receipt(recipient_phone, participant_name, event_name, payment
         amount_paid=amount_paid,
         utr_number=utr_number,
         registration_uid=registration_uid,
-        base_url=base_url
+        base_url=base_url,
+        team_name=team_name,
+        team_members=team_members,
+        is_group=is_group
     )
 
-    wa_url = f"https://wa.me/{raw_digits}?text={urllib.parse.quote(receipt_text)}"
+    if share_all:
+        wa_url = f"https://api.whatsapp.com/send?text={urllib.parse.quote(receipt_text)}"
+    else:
+        wa_url = f"https://wa.me/{raw_digits}?text={urllib.parse.quote(receipt_text)}"
 
     # Check for direct WhatsApp API integration (Cloud API or Webhook)
     wa_token = os.environ.get('WHATSAPP_API_TOKEN', getattr(Config, 'WHATSAPP_API_TOKEN', '')).strip()
