@@ -2478,23 +2478,37 @@ def download_certificate_file(filename):
     return send_from_directory(Config.CERTIFICATE_FOLDER, png_filename, as_attachment=as_att)
 
 
+@app.route('/certificates/team/<registration_uid>/zip')
+@app.route('/certificates/team/<int:reg_id>/zip')
 @app.route('/admin/certificates/team-zip/<int:reg_id>')
-@admin_required
-def download_team_certificates_zip(reg_id):
-    reg = query_db("""
-        SELECT r.*, e.event_name, e.event_date, p.college_name, p.department, p.semester, p.full_name
-        FROM registrations r
-        JOIN participants p ON r.participant_id = p.id
-        JOIN events e ON r.event_id = e.id
-        WHERE r.id = %s
-    """, (reg_id,), one=True)
+def download_team_certificates_zip(reg_id=None, registration_uid=None):
+    if registration_uid:
+        reg = query_db("""
+            SELECT r.*, e.event_name, e.event_date, p.college_name, p.department, p.semester, p.full_name
+            FROM registrations r
+            JOIN participants p ON r.participant_id = p.id
+            JOIN events e ON r.event_id = e.id
+            WHERE r.registration_uid = %s
+        """, (registration_uid,), one=True)
+    elif reg_id:
+        reg = query_db("""
+            SELECT r.*, e.event_name, e.event_date, p.college_name, p.department, p.semester, p.full_name
+            FROM registrations r
+            JOIN participants p ON r.participant_id = p.id
+            JOIN events e ON r.event_id = e.id
+            WHERE r.id = %s
+        """, (reg_id,), one=True)
+    else:
+        abort(404)
+
     if not reg:
         flash('Registration record not found.', 'warning')
-        return redirect(url_for('certificates_manager'))
+        return redirect(url_for('certificates_manager' if 'user_id' in session else 'events_list'))
 
+    target_reg_id = reg['id']
     existing_certs = query_db(
         "SELECT * FROM certificates WHERE registration_id = %s ORDER BY id ASC",
-        (reg_id,)
+        (target_reg_id,)
     )
 
     if existing_certs:
@@ -2550,7 +2564,7 @@ def download_team_certificates_zip(reg_id):
 @admin_required
 def team_certificates_whatsapp(reg_id):
     reg = query_db("""
-        SELECT r.*, p.phone, p.full_name as lead_name, e.event_name
+        SELECT r.*, p.phone, p.full_name as lead_name, p.college_name, p.department, p.semester, e.event_name, e.event_date
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
         JOIN events e ON r.event_id = e.id
@@ -2564,27 +2578,83 @@ def team_certificates_whatsapp(reg_id):
         phone_digits = '91' + phone_digits
 
     base_url = request.host_url.rstrip('/')
-    primary_cert = query_db(
-        "SELECT certificate_code FROM certificates WHERE registration_id = %s ORDER BY id ASC",
-        (reg_id,), one=True
-    )
-    cert_link = f"{base_url}/certificates/{primary_cert['certificate_code']}.pdf" if primary_cert else ""
 
-    team_or_name = reg.get('team_name') or reg.get('lead_name')
-    if reg.get('is_group') == 1 and reg.get('team_name'):
+    # Parse members list
+    members = []
+    if reg.get('is_group') == 1 and reg.get('team_members'):
+        members = [m.strip() for m in reg['team_members'].split(',') if m.strip()]
+    if not members and reg.get('lead_name'):
+        members = [reg['lead_name'].strip()]
+
+    # Fetch all certificates generated for this registration
+    certs = query_db(
+        "SELECT certificate_code, recipient_name FROM certificates WHERE registration_id = %s ORDER BY id ASC",
+        (reg_id,)
+    ) or []
+
+    # If any member certificates are missing, generate them now on demand
+    if len(certs) < len(members):
+        prefix = "".join([w[0] for w in reg['event_name'].split() if w]).upper()[:3]
+        for idx, member in enumerate(members):
+            clean_member = member.strip()
+            if clean_member.lower().startswith('team:'):
+                clean_member = clean_member[5:].strip()
+            elif clean_member.lower().startswith('team '):
+                clean_member = clean_member[5:].strip()
+
+            existing = query_db(
+                "SELECT id, certificate_code FROM certificates WHERE registration_id = %s AND (recipient_name = %s OR (recipient_name IS NULL AND %s = 0))",
+                (reg_id, clean_member, idx), one=True
+            )
+            code_suffix = f"-M{idx+1}" if len(members) > 1 else ""
+            cert_code = existing['certificate_code'] if existing else f"SDA-2026-{prefix}-{uuid.uuid4().hex[:6].upper()}{code_suffix}"
+
+            new_code, file_path, _ = generate_certificate(
+                participant_name=clean_member,
+                event_name=reg['event_name'],
+                event_date=reg['event_date'],
+                college_name=reg.get('college_name'),
+                cert_code=cert_code,
+                department=reg.get('department') or 'PCMC',
+                semester=reg.get('semester') or 'Second PUC'
+            )
+            if not existing:
+                execute_db("""
+                    INSERT INTO certificates (certificate_code, registration_id, participant_id, event_id, issue_date, file_path, email_status, recipient_name)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (new_code, reg_id, reg['participant_id'], reg['event_id'], reg['event_date'], file_path, 'pending', clean_member))
+
+        certs = query_db(
+            "SELECT certificate_code, recipient_name FROM certificates WHERE registration_id = %s ORDER BY id ASC",
+            (reg_id,)
+        ) or []
+
+    is_team = bool(reg.get('is_group') == 1 or len(members) > 1)
+    team_or_name = (reg.get('team_name') or reg.get('lead_name') or 'Team').strip()
+    if is_team:
         msg = (
             f"🎓 *SHREE DAKSHA ACADEMY*\n"
-            f"✨ *Official Certificate of Achievement*\n"
+            f"✨ *Official Certificates of Achievement*\n"
             f"----------------------------------------\n"
-            f"Congratulations to *{team_or_name}* for participating in *{reg['event_name']}*!\n\n"
+            f"Congratulations to Team *{team_or_name}* for participating in *{reg['event_name']}*!\n\n"
+            f"📄 *Teammates' Official Certificates (PDF Downloads):*\n"
         )
-        if cert_link:
-            msg += f"📄 *Download Official Certificate (PDF):*\n{cert_link}\n\n"
+        for idx, c in enumerate(certs):
+            rec_name = c.get('recipient_name') or (members[idx] if idx < len(members) else f"Player {idx+1}")
+            member_pdf_url = f"{base_url}/certificates/{c['certificate_code']}.pdf"
+            msg += f"• *{rec_name}:*\n  {member_pdf_url}\n\n"
+
+        zip_url = f"{base_url}/certificates/team/{reg.get('registration_uid')}/zip"
         msg += (
-            f"Official high-resolution certificates for all players have been issued.\n"
-            f"----------------------------------------"
+            f"📦 *Download All Team Certificates (ZIP Package):*\n"
+            f"{zip_url}\n\n"
+            f"Official high-resolution certificates for all players have been verified and issued.\n"
+            f"----------------------------------------\n"
+            f"Shree Daksha Academy, Bengaluru"
         )
     else:
+        cert_code = certs[0]['certificate_code'] if certs else ''
+        cert_link = f"{base_url}/certificates/{cert_code}.pdf" if cert_code else ""
         msg = (
             f"🎓 *SHREE DAKSHA ACADEMY*\n"
             f"✨ *Official Certificate of Achievement*\n"
@@ -2595,7 +2665,8 @@ def team_certificates_whatsapp(reg_id):
             msg += f"📄 *Download Official Certificate (PDF):*\n{cert_link}\n\n"
         msg += (
             f"Your official high-resolution certificate has been issued.\n"
-            f"----------------------------------------"
+            f"----------------------------------------\n"
+            f"Shree Daksha Academy, Bengaluru"
         )
 
     share_mode = request.args.get('share', '').lower()

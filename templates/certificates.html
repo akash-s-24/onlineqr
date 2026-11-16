@@ -193,13 +193,21 @@
 
                             <!-- Direct WhatsApp chat window / Group broadcast -->
                             {% if row.is_group %}
-                            <a href="{{ url_for('team_certificates_whatsapp', reg_id=row.registration_id, share='all') }}"
+                            <a href="{{ url_for('team_certificates_whatsapp', reg_id=row.registration_id) }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="candy-btn candy-btn-success"
                                 style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
-                                title="Send WhatsApp certificate link to all squad players / group">
-                                💬 WhatsApp (All)
+                                title="Send all teammates certificates via WhatsApp to Lead ({{ row.phone }})">
+                                💬 WhatsApp
+                            </a>
+                            <a href="{{ url_for('team_certificates_whatsapp', reg_id=row.registration_id, share='all') }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="candy-btn candy-btn-secondary"
+                                style="padding: 0.4rem 0.65rem; font-size: 0.78rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;"
+                                title="Share all teammates certificates to WhatsApp squad group or contacts">
+                                📢 Share
                             </a>
                             {% else %}
                             <a href="{{ url_for('team_certificates_whatsapp', reg_id=row.registration_id) }}"

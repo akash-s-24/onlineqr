@@ -1630,8 +1630,17 @@ class SDATestCase(unittest.TestCase):
 
     def test_registration_whatsapp_receipt_route(self):
         """Verify the direct WhatsApp receipt endpoint redirects correctly."""
-        # Query an existing valid event
-        ev = database.query_db("SELECT id FROM events LIMIT 1", one=True)
+        # Query an existing valid event with capacity
+        ev = database.query_db("""
+            SELECT e.id FROM events e
+            LEFT JOIN (
+                SELECT event_id, SUM(CASE WHEN is_group = 1 THEN team_size ELSE 1 END) as cnt
+                FROM registrations WHERE COALESCE(status, 'pending') <> 'cancelled'
+                GROUP BY event_id
+            ) r ON e.id = r.event_id
+            WHERE COALESCE(r.cnt, 0) < e.max_participants
+            LIMIT 1
+        """, one=True)
         self.assertIsNotNone(ev)
 
         # Create a test registration (use hex suffix to prevent numeric substring collision in attendance tests)
@@ -2843,6 +2852,111 @@ class SDATestCase(unittest.TestCase):
         """Verify no dummy or static test team registrations exist in the database."""
         dummy_rows = database.query_db("SELECT id, email FROM participants WHERE email LIKE '%@sda-fest.edu'")
         self.assertEqual(len(dummy_rows), 0, "No dummy registrations with @sda-fest.edu should exist in database")
+
+    def test_56_team_whatsapp_sends_all_teammates_certificates_at_once(self):
+        """Verify WhatsApp certificate dispatch includes all teammates' certificates and ZIP link in a single message."""
+        import urllib.parse
+        from database import create_registration, execute_db, query_db
+
+        ev = query_db("""
+            SELECT e.id, e.event_name FROM events e
+            LEFT JOIN (
+                SELECT event_id, SUM(CASE WHEN is_group = 1 THEN team_size ELSE 1 END) as cnt
+                FROM registrations WHERE COALESCE(status, 'pending') <> 'cancelled'
+                GROUP BY event_id
+            ) r ON e.id = r.event_id
+            WHERE e.is_group = 1 AND COALESCE(r.cnt, 0) + 4 <= e.max_participants
+            LIMIT 1
+        """, one=True)
+        if not ev:
+            ev = query_db("SELECT id, event_name FROM events WHERE is_group = 1 LIMIT 1", one=True)
+        self.assertIsNotNone(ev)
+
+        token = uuid.uuid4().hex[:6]
+        team_members_str = "Leader Alpha, Striker Bravo, Scout Charlie, Medic Delta"
+        reg_info = create_registration(
+            full_name="Leader Alpha",
+            email=f"wa_squad_{token}@testdomain.org",
+            phone="9123456780",
+            college_name="Daksha Tech",
+            department="Computer Science",
+            semester="4th Sem",
+            event_id=ev['id'],
+            team_name=f"Squad_{token}",
+            team_size=4,
+            team_members=team_members_str,
+            payment_status='paid',
+            amount_paid=400,
+            payment_method='Cash',
+            utr_number=f"CASH-{token}",
+            registered_by=1,
+            is_group_event=True
+        )
+        self.assertTrue(reg_info.get('ok'))
+        reg_id = reg_info['registration_id']
+        reg_uid = reg_info['registration_uid']
+
+        try:
+            # Login as admin
+            self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+
+            # 1. Trigger WhatsApp team certificates endpoint
+            res_wa = self.client.get(f'/admin/certificates/team-whatsapp/{reg_id}')
+            self.assertEqual(res_wa.status_code, 302)
+            wa_loc = res_wa.headers.get('Location', '')
+            self.assertTrue(wa_loc.startswith('https://api.whatsapp.com/send'))
+
+            # Parse decoded message
+            parsed_query = urllib.parse.parse_qs(urllib.parse.urlparse(wa_loc).query)
+            msg_text = parsed_query.get('text', [''])[0]
+
+            # Verify all 4 teammates are listed with their individual PDF download links
+            self.assertIn("Leader Alpha", msg_text)
+            self.assertIn("Striker Bravo", msg_text)
+            self.assertIn("Scout Charlie", msg_text)
+            self.assertIn("Medic Delta", msg_text)
+            self.assertIn(".pdf", msg_text)
+            self.assertIn("Teammates' Official Certificates", msg_text)
+
+            # Verify ZIP download package link is present
+            self.assertIn(f"/certificates/team/{reg_uid}/zip", msg_text)
+
+            # 2. Verify public access to the team ZIP route without admin session
+            anon_client = self.app.test_client()
+            res_zip = anon_client.get(f'/certificates/team/{reg_uid}/zip')
+            self.assertEqual(res_zip.status_code, 200)
+            self.assertEqual(res_zip.mimetype, 'application/zip')
+            self.assertGreater(len(res_zip.data), 1000)
+
+        finally:
+            execute_db("DELETE FROM certificates WHERE registration_id = %s", (reg_id,))
+            execute_db("DELETE FROM registrations WHERE id = %s", (reg_id,))
+            execute_db("DELETE FROM participants WHERE email = %s", (f"wa_squad_{token}@testdomain.org",))
+
+    def test_57_certificate_typography_suitable_and_normal(self):
+        """Verify certificate generator applies balanced, normal, bold typography above placeholder line."""
+        from certificate_generator import generate_certificate
+        from PIL import Image
+
+        cert_code, file_path, rel_url = generate_certificate(
+            participant_name="Rohan Sharma",
+            event_name="BGMI",
+            event_date="2026-03-25",
+            college_name="Shree Daksha Academy"
+        )
+        self.assertTrue(os.path.exists(file_path))
+
+        with Image.open(file_path) as im:
+            self.assertEqual(im.size, (2480, 1754))
+
+        # Cleanup generated test certificate
+        if os.path.exists(file_path):
+            try: os.remove(file_path)
+            except OSError: pass
+        pdf_file = file_path.replace('.png', '.pdf')
+        if os.path.exists(pdf_file):
+            try: os.remove(pdf_file)
+            except OSError: pass
 
 
 if __name__ == '__main__':

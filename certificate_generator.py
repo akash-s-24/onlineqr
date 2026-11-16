@@ -501,28 +501,28 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         if effective_lead and other_members:
             # Team Layout: Team lead on line 1, members on line 2 (and 3 if >4 members)
             lead_display = f"{effective_lead} (Team Lead)" if not effective_lead.lower().endswith('(team lead)') and not effective_lead.lower().endswith('(lead)') else effective_lead
-            f_lead, _ = fit_text_font(lead_display, "georgiab.ttf", 105, 42)
+            f_lead, _ = fit_text_font(lead_display, "georgiab.ttf", 66, 30)
 
             if len(other_members) <= 4:
                 mem_display = " • ".join(other_members)
-                f_mem, _ = fit_text_font(mem_display, "georgia.ttf", 60, 30)
+                f_mem, _ = fit_text_font(mem_display, "georgia.ttf", 46, 22)
 
-                draw.text((cx, line_y - 80), lead_display, fill=name_color, font=f_lead, anchor="mb")
-                draw.text((cx, line_y - 15), mem_display, fill=(30, 41, 59), font=f_mem, anchor="mb")
+                draw.text((cx, line_y - 65), lead_display, fill=name_color, font=f_lead, anchor="mb")
+                draw.text((cx, line_y - 14), mem_display, fill=(30, 41, 59), font=f_mem, anchor="mb")
             else:
                 mid = (len(other_members) + 1) // 2
                 mem_line1 = " • ".join(other_members[:mid])
                 mem_line2 = " • ".join(other_members[mid:])
-                f_mem1, _ = fit_text_font(mem_line1, "georgia.ttf", 52, 26)
-                f_mem2, _ = fit_text_font(mem_line2, "georgia.ttf", 52, 26)
+                f_mem1, _ = fit_text_font(mem_line1, "georgia.ttf", 42, 20)
+                f_mem2, _ = fit_text_font(mem_line2, "georgia.ttf", 42, 20)
 
-                draw.text((cx, line_y - 100), lead_display, fill=name_color, font=f_lead, anchor="mb")
-                draw.text((cx, line_y - 52), mem_line1, fill=(30, 41, 59), font=f_mem1, anchor="mb")
+                draw.text((cx, line_y - 82), lead_display, fill=name_color, font=f_lead, anchor="mb")
+                draw.text((cx, line_y - 44), mem_line1, fill=(30, 41, 59), font=f_mem1, anchor="mb")
                 draw.text((cx, line_y - 12), mem_line2, fill=(30, 41, 59), font=f_mem2, anchor="mb")
         else:
-            # Solo Participant: Prominently displayed enlarged name sitting right above the line
-            f_solo, _ = fit_text_font(clean_p_name, "georgiab.ttf", 160, 48)
-            draw.text((cx, line_y - 15), clean_p_name, fill=name_color, font=f_solo, anchor="mb")
+            # Solo Participant / Individual Member: Clean, bold, authoritative serif name sitting naturally above the line
+            f_solo, _ = fit_text_font(clean_p_name, "georgiab.ttf", 88, 36)
+            draw.text((cx, line_y - 14), clean_p_name, fill=name_color, font=f_solo, anchor="mb")
 
     else:
 
