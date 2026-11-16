@@ -414,7 +414,7 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
 
         coords = {
             'name_x': 1573,
-            'name_y': 835
+            'name_y': 825
         }
         coords_path = os.path.join(
             "static", "uploads", "cert_coordinates.json")
@@ -429,8 +429,8 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
             except Exception:
                 pass
 
-        # Dynamic font scaling starting at size 165 for dramatic, bold prominence
-        font_size = 165
+        # Dynamic font scaling starting at size 180 for maximum prominent visibility
+        font_size = 180
         font_candidate = get_font_by_name("georgiab.ttf", font_size)
         bbox = draw.textbbox((0, 0), clean_p_name, font=font_candidate)
         text_w = bbox[2] - bbox[0]
@@ -441,7 +441,7 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
             text_w = bbox[2] - bbox[0]
 
         # Draw the dramatically enlarged name centered above the placeholder dash
-        draw.text((coords['name_x'], coords.get('name_y', 835)), clean_p_name,
+        draw.text((coords['name_x'], coords.get('name_y', 825)), clean_p_name,
                   fill=name_color, font=font_candidate, anchor="mm")
 
     else:
@@ -622,46 +622,63 @@ if __name__ == '__main__':
 
 def generate_team_certificates_zip(team_members_str, event_name, event_date, college_name=None, cert_code_base=None, department="PCMC", semester="Second PUC", team_name=None):
     """
-    Generates a single certificate for the team (using the team name),
-    and returns a ZIP file containing the certificate as raw bytes.
+    Generates high-resolution PNG & PDF certificates for ALL individual members in the team
+    (all 4 to 8 players, each with their own personalized name in prominent bold serif font),
+    and returns a clean ZIP file containing all certificates as raw bytes.
     """
-    target_name = (team_name or team_members_str or 'Team').strip()
-    if target_name.lower().startswith('team:'):
-        target_name = target_name[5:].strip()
-    elif target_name.lower().startswith('team '):
-        target_name = target_name[5:].strip()
-
     if not cert_code_base:
         cert_code_base = "TEAM-" + uuid.uuid4().hex[:8].upper()
 
+    # Parse individual team members from string or list
+    raw_members = []
+    if isinstance(team_members_str, list):
+        raw_members = [str(m).strip() for m in team_members_str if str(m).strip()]
+    elif team_members_str:
+        raw_members = [m.strip() for m in str(team_members_str).split(',') if m.strip()]
+
+    # If no individual members parsed, fallback to team name
+    if not raw_members:
+        raw_members = [(team_name or 'Team Member').strip()]
+
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
-        _, png_filepath, _ = generate_certificate(
-            participant_name=target_name,
-            event_name=event_name,
-            event_date=event_date,
-            college_name=college_name,
-            cert_code=cert_code_base,
-            department=department,
-            semester=semester
-        )
+        for idx, member in enumerate(raw_members):
+            clean_member = member.strip()
+            if clean_member.lower().startswith('team:'):
+                clean_member = clean_member[5:].strip()
+            elif clean_member.lower().startswith('team '):
+                clean_member = clean_member[5:].strip()
 
-        safe_name = re.sub(r'[^A-Za-z0-9._-]+', '_', target_name).strip('._') or "Team"
-        safe_ev = re.sub(r'[^A-Za-z0-9._-]+', '_', str(event_name or 'Event')).strip('._') or "Event"
+            member_code = f"{cert_code_base}-{idx+1}"
 
-        try:
-            with open(png_filepath, 'rb') as f:
-                zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.png", f.read())
-        except Exception:
-            pass
+            _, png_filepath, _ = generate_certificate(
+                participant_name=clean_member,
+                event_name=event_name,
+                event_date=event_date,
+                college_name=college_name,
+                cert_code=member_code,
+                department=department,
+                semester=semester
+            )
 
-        try:
-            with Image.open(png_filepath) as img:
-                pdf_buffer = io.BytesIO()
-                img.convert('RGB').save(pdf_buffer, format='PDF', resolution=100.0)
-                zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.pdf", pdf_buffer.getvalue())
-        except Exception as e:
-            print(f"Error converting cert for {target_name}: {e}")
+            safe_name = re.sub(r'[^A-Za-z0-9._-]+', '_', clean_member).strip('._') or f"Member_{idx+1}"
+            safe_ev = re.sub(r'[^A-Za-z0-9._-]+', '_', str(event_name or 'Event')).strip('._') or "Event"
+
+            # Add PNG to ZIP
+            try:
+                with open(png_filepath, 'rb') as f:
+                    zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.png", f.read())
+            except Exception as e:
+                print(f"Error reading PNG for {clean_member}: {e}")
+
+            # Add PDF to ZIP
+            try:
+                with Image.open(png_filepath) as img:
+                    pdf_buffer = io.BytesIO()
+                    img.convert('RGB').save(pdf_buffer, format='PDF', resolution=100.0)
+                    zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.pdf", pdf_buffer.getvalue())
+            except Exception as e:
+                print(f"Error converting cert for {clean_member}: {e}")
 
     return zip_buffer.getvalue()
 

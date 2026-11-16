@@ -1780,34 +1780,57 @@ def delete_attendance_record(registration_id):
 @app.route('/admin/certificates')
 @admin_required
 def certificates_manager():
-    # Load coordinates
-    coords = {}
-    coords_path = os.path.join(app.root_path, 'static', 'uploads', 'cert_coordinates.json')
-    if os.path.exists(coords_path):
-        try:
-            import json
-            with open(coords_path, 'r') as f:
-                coords = json.load(f)
-        except Exception:
-            pass
-
-    cert_list = query_db("""
-        SELECT r.id as registration_id, r.is_group, r.team_name, r.team_size, r.team_members,
+    # Fetch distinct registrations
+    regs = query_db("""
+        SELECT r.id as registration_id, r.registration_uid, r.is_group, r.team_name, r.team_size, r.team_members,
                p.id as participant_id, p.full_name, p.email, p.phone, p.college_name, p.department, p.semester,
                e.id as event_id, e.event_name, e.event_date,
-               COALESCE(a.status, 'absent') as att_status,
-               c.id as cert_id, c.certificate_code, c.email_status, c.sent_at, c.recipient_name
+               COALESCE(a.status, 'absent') as att_status
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
         JOIN events e ON r.event_id = e.id
         LEFT JOIN attendance a ON a.registration_id = r.id
-        LEFT JOIN certificates c ON c.registration_id = r.id
         WHERE r.status = 'approved'
-        ORDER BY e.id ASC, r.id ASC, c.id ASC
+        ORDER BY e.id ASC, r.id ASC
     """)
+
+    cert_list = []
+    for reg in (regs or []):
+        r_dict = dict(reg)
+        # Parse members
+        if r_dict.get('is_group') == 1 and r_dict.get('team_members'):
+            members = [m.strip() for m in r_dict['team_members'].split(',') if m.strip()]
+        else:
+            members = [r_dict['full_name'].strip()]
+        r_dict['members_list'] = members
+
+        # Fetch generated certificates for this registration
+        certs = query_db(
+            "SELECT id as cert_id, certificate_code, file_path, recipient_name, email_status, sent_at FROM certificates WHERE registration_id = %s ORDER BY id ASC",
+            (r_dict['registration_id'],)
+        ) or []
+        r_dict['certs'] = [dict(c) for c in certs]
+        r_dict['cert_count'] = len(certs)
+        r_dict['expected_count'] = len(members)
+        r_dict['is_generated'] = len(certs) > 0 and len(certs) >= len(members)
+        r_dict['primary_cert_code'] = certs[0]['certificate_code'] if certs else None
+
+        # Check aggregate email status
+        if certs:
+            if all(c.get('email_status') == 'sent' for c in certs):
+                r_dict['email_status'] = 'sent'
+            elif any(c.get('email_status') == 'failed' for c in certs):
+                r_dict['email_status'] = 'failed'
+            else:
+                r_dict['email_status'] = 'pending'
+        else:
+            r_dict['email_status'] = None
+
+        cert_list.append(r_dict)
+
     events = query_db("SELECT * FROM events ORDER BY id ASC")
     smtp_info = get_smtp_info()
-    return render_template('certificates.html', cert_list=cert_list, events=events, smtp_info=smtp_info, coords=coords)
+    return render_template('certificates.html', cert_list=cert_list, events=events, smtp_info=smtp_info)
 
 @app.route('/admin/settings/certificate-coords', methods=['POST'])
 @admin_required
@@ -1893,54 +1916,65 @@ def generate_single_certificate(reg_id):
         flash('Registration record not found.', 'danger')
         return redirect(url_for('certificates_manager'))
 
-    # Single certificate per team (with ONLY the team name displayed) or individual participant
-    if reg.get('is_group') == 1 and reg.get('team_name'):
-        cert_recipient = reg['team_name'].strip()
-    else:
-        cert_recipient = reg['full_name'].strip()
-
-    if cert_recipient.lower().startswith('team:'):
-        cert_recipient = cert_recipient[5:].strip()
-    elif cert_recipient.lower().startswith('team '):
-        cert_recipient = cert_recipient[5:].strip()
+    # Parse individual team members or default to solo participant
+    members = []
+    if reg.get('is_group') == 1 and reg.get('team_members'):
+        members = [m.strip() for m in reg['team_members'].split(',') if m.strip()]
+    if not members:
+        members = [reg['full_name'].strip()]
 
     prefix = "".join([w[0] for w in reg['event_name'].split() if w]).upper()[:3]
-    existing = query_db(
-        "SELECT id, certificate_code, file_path FROM certificates WHERE registration_id = %s",
-        (reg_id,), one=True
-    )
-    cert_code = existing['certificate_code'] if existing else f"SDA-2026-{prefix}-{uuid.uuid4().hex[:6].upper()}"
+    generated_count = 0
 
-    new_code, file_path, rel_url = generate_certificate(
-        participant_name=cert_recipient,
-        event_name=reg['event_name'],
-        event_date=reg['event_date'],
-        college_name=reg['college_name'],
-        cert_code=cert_code,
-        department=reg.get('department') or 'PCMC',
-        semester=reg.get('semester') or 'Second PUC',
-        team_name=None
-    )
+    for idx, member in enumerate(members):
+        clean_member = member.strip()
+        if clean_member.lower().startswith('team:'):
+            clean_member = clean_member[5:].strip()
+        elif clean_member.lower().startswith('team '):
+            clean_member = clean_member[5:].strip()
 
-    if existing:
-        execute_db("""
-            UPDATE certificates 
-            SET certificate_code = %s, issue_date = %s, file_path = %s, email_status = %s, recipient_name = %s
-            WHERE id = %s
-        """, (new_code, reg['event_date'], file_path, 'pending', cert_recipient, existing['id']))
+        existing = query_db(
+            "SELECT id, certificate_code, file_path FROM certificates WHERE registration_id = %s AND (recipient_name = %s OR (recipient_name IS NULL AND %s = 0))",
+            (reg_id, clean_member, idx), one=True
+        )
+
+        code_suffix = f"-M{idx+1}" if len(members) > 1 else ""
+        cert_code = existing['certificate_code'] if existing else f"SDA-2026-{prefix}-{uuid.uuid4().hex[:6].upper()}{code_suffix}"
+
+        new_code, file_path, rel_url = generate_certificate(
+            participant_name=clean_member,
+            event_name=reg['event_name'],
+            event_date=reg['event_date'],
+            college_name=reg['college_name'],
+            cert_code=cert_code,
+            department=reg.get('department') or 'PCMC',
+            semester=reg.get('semester') or 'Second PUC'
+        )
+
+        if existing:
+            execute_db("""
+                UPDATE certificates 
+                SET certificate_code = %s, issue_date = %s, file_path = %s, email_status = %s, recipient_name = %s
+                WHERE id = %s
+            """, (new_code, reg['event_date'], file_path, 'pending', clean_member, existing['id']))
+        else:
+            execute_db("""
+                INSERT INTO certificates (certificate_code, registration_id, participant_id, event_id, issue_date, file_path, email_status, recipient_name)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (new_code, reg_id, reg['participant_id'], reg['event_id'], reg['event_date'], file_path, 'pending', clean_member))
+        generated_count += 1
+
+    if len(members) > 1:
+        flash(f"Generated {generated_count} certificates for all players in '{reg.get('team_name') or 'Team'}'!", 'success')
     else:
-        execute_db("""
-            INSERT INTO certificates (certificate_code, registration_id, participant_id, event_id, issue_date, file_path, email_status, recipient_name)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (new_code, reg_id, reg['participant_id'], reg['event_id'], reg['event_date'], file_path, 'pending', cert_recipient))
+        flash(f"Certificate generated successfully for {members[0]}!", 'success')
 
-    flash(f"Certificate generated successfully for {cert_recipient}! Certificate ID: {cert_code}", 'success')
     return redirect(url_for('certificates_manager'))
 
 @app.route('/admin/certificates/generate-bulk', methods=['POST'])
 @admin_required
 def generate_bulk_certificates():
-    # Direct generation for all registered participants and teams
+    # Direct generation for all registered participants and team members
     eligible = query_db("""
         SELECT r.id as registration_id, r.participant_id, r.event_id, r.team_name, r.is_group, r.team_members,
                p.full_name, p.college_name, p.department, p.semester,
@@ -1953,52 +1987,96 @@ def generate_bulk_certificates():
 
     count = 0
     for reg in eligible or []:
-        if reg.get('is_group') == 1 and reg.get('team_name'):
-            cert_recipient = reg['team_name'].strip()
-        else:
-            cert_recipient = reg['full_name'].strip()
-
-        if cert_recipient.lower().startswith('team:'):
-            cert_recipient = cert_recipient[5:].strip()
-        elif cert_recipient.lower().startswith('team '):
-            cert_recipient = cert_recipient[5:].strip()
+        members = []
+        if reg.get('is_group') == 1 and reg.get('team_members'):
+            members = [m.strip() for m in reg['team_members'].split(',') if m.strip()]
+        if not members:
+            members = [reg['full_name'].strip()]
 
         prefix = "".join([w[0] for w in reg['event_name'].split() if w]).upper()[:3]
-        existing = query_db(
-            "SELECT id, certificate_code, file_path FROM certificates WHERE registration_id = %s",
-            (reg['registration_id'],), one=True
-        )
+        for idx, member in enumerate(members):
+            clean_member = member.strip()
+            if clean_member.lower().startswith('team:'):
+                clean_member = clean_member[5:].strip()
+            elif clean_member.lower().startswith('team '):
+                clean_member = clean_member[5:].strip()
 
-        cert_code = existing['certificate_code'] if existing else f"SDA-2026-{prefix}-{uuid.uuid4().hex[:6].upper()}"
+            existing = query_db(
+                "SELECT id, certificate_code, file_path FROM certificates WHERE registration_id = %s AND (recipient_name = %s OR (recipient_name IS NULL AND %s = 0))",
+                (reg['registration_id'], clean_member, idx), one=True
+            )
 
-        new_code, file_path, rel_url = generate_certificate(
-            participant_name=cert_recipient,
-            event_name=reg['event_name'],
-            event_date=reg['event_date'],
-            college_name=reg['college_name'],
-            cert_code=cert_code,
-            department=reg.get('department') or 'PCMC',
-            semester=reg.get('semester') or 'Second PUC',
-            team_name=None
-        )
-        if existing:
-            execute_db("""
-                UPDATE certificates 
-                SET certificate_code = %s, issue_date = %s, file_path = %s, email_status = %s, recipient_name = %s
-                WHERE id = %s
-            """, (new_code, reg['event_date'], file_path, 'pending', cert_recipient, existing['id']))
-        else:
-            execute_db("""
-                INSERT INTO certificates (certificate_code, registration_id, participant_id, event_id, issue_date, file_path, email_status, recipient_name)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """, (new_code, reg['registration_id'], reg['participant_id'], reg['event_id'], reg['event_date'], file_path, 'pending', cert_recipient))
-        count += 1
+            code_suffix = f"-M{idx+1}" if len(members) > 1 else ""
+            cert_code = existing['certificate_code'] if existing else f"SDA-2026-{prefix}-{uuid.uuid4().hex[:6].upper()}{code_suffix}"
+
+            new_code, file_path, rel_url = generate_certificate(
+                participant_name=clean_member,
+                event_name=reg['event_name'],
+                event_date=reg['event_date'],
+                college_name=reg['college_name'],
+                cert_code=cert_code,
+                department=reg.get('department') or 'PCMC',
+                semester=reg.get('semester') or 'Second PUC'
+            )
+            if existing:
+                execute_db("""
+                    UPDATE certificates 
+                    SET certificate_code = %s, issue_date = %s, file_path = %s, email_status = %s, recipient_name = %s
+                    WHERE id = %s
+                """, (new_code, reg['event_date'], file_path, 'pending', clean_member, existing['id']))
+            else:
+                execute_db("""
+                    INSERT INTO certificates (certificate_code, registration_id, participant_id, event_id, issue_date, file_path, email_status, recipient_name)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (new_code, reg['registration_id'], reg['participant_id'], reg['event_id'], reg['event_date'], file_path, 'pending', clean_member))
+            count += 1
 
     if count > 0:
-        flash(f"Successfully generated {count} certificate(s) for all participants and teams!", 'success')
+        flash(f"Successfully generated {count} certificate(s) for all participants and team players!", 'success')
     else:
         flash("All registrations already have valid certificates generated.", 'info')
 
+    return redirect(url_for('certificates_manager'))
+
+@app.route('/admin/certificates/send-team-email/<int:reg_id>', methods=['POST'])
+@admin_required
+def send_team_certificates_email(reg_id):
+    reg = query_db("""
+        SELECT r.*, p.full_name, p.email, p.phone, e.event_name
+        FROM registrations r
+        JOIN participants p ON r.participant_id = p.id
+        JOIN events e ON r.event_id = e.id
+        WHERE r.id = %s
+    """, (reg_id,), one=True)
+    if not reg:
+        flash("Registration not found.", "danger")
+        return redirect(url_for('certificates_manager'))
+
+    certs = query_db(
+        "SELECT * FROM certificates WHERE registration_id = %s",
+        (reg_id,)
+    )
+    if not certs:
+        flash("No certificates generated for this registration yet.", "warning")
+        return redirect(url_for('certificates_manager'))
+
+    sent_count = 0
+    for cert in certs:
+        success, _ = send_certificate_email(
+            recipient_email=reg['email'],
+            participant_name=cert.get('recipient_name') or reg['full_name'],
+            event_name=reg['event_name'],
+            certificate_path=cert['file_path'],
+            certificate_code=cert['certificate_code']
+        )
+        if success:
+            execute_db(
+                "UPDATE certificates SET email_status = 'sent', sent_at = CURRENT_TIMESTAMP WHERE id = %s",
+                (cert['id'],)
+            )
+            sent_count += 1
+
+    flash(f"Successfully dispatched {sent_count} certificate email(s) to {reg['email']}!", 'success')
     return redirect(url_for('certificates_manager'))
 
 @app.route('/admin/certificates/send-email/<int:cert_id>', methods=['POST'])
@@ -2275,7 +2353,7 @@ def download_certificate_file(filename):
 @admin_required
 def download_team_certificates_zip(reg_id):
     reg = query_db("""
-        SELECT r.*, e.event_name, e.event_date, p.college_name, p.department, p.semester
+        SELECT r.*, e.event_name, e.event_date, p.college_name, p.department, p.semester, p.full_name
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
         JOIN events e ON r.event_id = e.id
@@ -2285,22 +2363,52 @@ def download_team_certificates_zip(reg_id):
         flash('Registration record not found.', 'warning')
         return redirect(url_for('certificates_manager'))
 
-    team_name = (reg.get('team_name') or reg.get('team_members') or 'Team').strip()
+    members_str = reg.get('team_members') or reg.get('full_name') or 'Team'
     zip_bytes = generate_team_certificates_zip(
-        team_members_str=team_name,
+        team_members_str=members_str,
         event_name=reg['event_name'],
         event_date=reg['event_date'],
         college_name=reg['college_name'],
         cert_code_base=f"TEAM-{reg['registration_uid']}",
         department=reg.get('department') or 'PCMC',
         semester=reg.get('semester') or 'Second PUC',
-        team_name=team_name
+        team_name=reg.get('team_name')
     )
-    safe_team = secure_filename(team_name) or 'Team'
+    safe_team = secure_filename(reg.get('team_name') or reg.get('full_name') or 'Team') or 'Team'
     response = make_response(zip_bytes)
     response.headers['Content-Type'] = 'application/zip'
     response.headers['Content-Disposition'] = f'attachment; filename=Team_{safe_team}_Certificates.zip'
     return response
+
+
+@app.route('/admin/certificates/team-whatsapp/<int:reg_id>')
+@admin_required
+def team_certificates_whatsapp(reg_id):
+    reg = query_db("""
+        SELECT r.*, p.phone, p.full_name as lead_name, e.event_name
+        FROM registrations r
+        JOIN participants p ON r.participant_id = p.id
+        JOIN events e ON r.event_id = e.id
+        WHERE r.id = %s
+    """, (reg_id,), one=True)
+    if not reg:
+        abort(404)
+
+    phone_digits = re.sub(r'\D', '', str(reg.get('phone') or ''))
+    if len(phone_digits) == 10:
+        phone_digits = '91' + phone_digits
+
+    team_or_name = reg.get('team_name') or reg.get('lead_name')
+    msg = (
+        f"🎓 *SHREE DAKSHA ACADEMY*\n"
+        f"✨ *Official Certificates of Achievement*\n"
+        f"----------------------------------------\n"
+        f"Congratulations to *{team_or_name}* for participating in *{reg['event_name']}*!\n\n"
+        f"Official high-resolution certificates for all players are attached.\n"
+        f"----------------------------------------"
+    )
+    wa_url = f"https://wa.me/{phone_digits}?text={urllib.parse.quote(msg)}"
+    return redirect(wa_url)
 
 
 @app.route('/admin/certificates/teams-zip')

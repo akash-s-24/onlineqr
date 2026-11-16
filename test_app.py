@@ -2400,13 +2400,17 @@ class SDATestCase(unittest.TestCase):
         gen_res = self.client.post(f'/admin/certificates/generate/{reg_id}', follow_redirects=True)
         self.assertEqual(gen_res.status_code, 200)
 
-        # Check database: exactly 1 single certificate created with team name
+        # Check database: individual certificates generated for all 4 players
         certs = database.query_db(
             "SELECT * FROM certificates WHERE registration_id = %s ORDER BY id ASC",
             (reg_id,)
         )
-        self.assertEqual(len(certs), 1, "Exactly one certificate per team must be generated")
-        self.assertEqual(certs[0]['recipient_name'], 'Alpha Squad Test')
+        self.assertEqual(len(certs), 4, "Individual certificates for all 4 team players must be generated")
+        recipients = [c['recipient_name'] for c in certs]
+        self.assertIn('Lead Captain', recipients)
+        self.assertIn('Alex Rider', recipients)
+        self.assertIn('Priya Sharma', recipients)
+        self.assertIn('Rohan Verma', recipients)
 
         # Test team-zip download
         res_zip = self.client.get(f'/admin/certificates/team-zip/{reg_id}')
@@ -2518,6 +2522,28 @@ class SDATestCase(unittest.TestCase):
         self.assertTrue(any('Alpha_Squad' in n for n in names))
         self.assertTrue(any(n.endswith('.png') for n in names))
         self.assertTrue(any(n.endswith('.pdf') for n in names))
+
+    def test_47_single_row_team_certificates_and_direct_dispatch(self):
+        """Verify certificates hub displays team as a single row with all member chips and preview modal."""
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        res = self.client.get('/admin/certificates')
+        self.assertEqual(res.status_code, 200)
+        html = res.data.decode('utf-8')
+
+        # Verify no unwanted elements at top
+        self.assertNotIn('📦 Download All Teams ZIP', html)
+        self.assertNotIn('2. Text Coordinates', html)
+        self.assertNotIn('name_x', html)
+        self.assertNotIn('rank_x', html)
+
+        # Verify single row squad elements
+        self.assertIn('Alpha Squad', html)
+        self.assertIn('Players (', html)
+        self.assertIn('Preview All', html)
+        self.assertIn('WhatsApp', html)
+        self.assertIn('Email', html)
+        self.assertIn('openPreviewModal', html)
+        self.assertIn('shareTeamZip', html)
 
 
 if __name__ == '__main__':

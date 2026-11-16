@@ -6,8 +6,7 @@
 <div class="page-header">
     <div class="page-title">
         <h1>Certificate of Achievement Hub</h1>
-        <p>Generate high-resolution Shree Daksha Academy certificates for present attendees and dispatch via SMTP email
-        </p>
+        <p>Generate high-resolution Shree Daksha Academy certificates for present attendees and dispatch directly to participants and teams.</p>
     </div>
     <div class="page-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
         <button type="button" class="candy-btn candy-btn-secondary" onclick="window.history.back()"
@@ -16,14 +15,11 @@
         </button>
         <a href="{{ url_for('attendance_manager') }}" class="candy-btn"
             style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">&larr; Back to Attendance Tracker</a>
-        <a href="{{ url_for('download_all_teams_certificates_zip') }}" class="candy-btn"
-            style="padding: 0.6rem 1.2rem; font-size: 0.95rem; background: #6366f1; color: #ffffff;"
-            title="Download certificates for all teams in a single ZIP file">📦 Download All Teams ZIP</a>
         <form method="POST" action="{{ url_for('generate_bulk_certificates') }}" style="display: inline;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="candy-btn candy-btn-success"
                 style="padding: 0.6rem 1.2rem; font-size: 0.95rem;"
-                onclick="if(confirm('Generate certificates for all participants?')) { showGlobalLoading('Generating certificates...'); return true; } return false;">⚡
+                onclick="if(confirm('Generate certificates for all participants and team players?')) { showGlobalLoading('Generating certificates...'); return true; } return false;">⚡
                 Generate All</button>
         </form>
         <form method="POST" action="{{ url_for('send_bulk_certificate_emails') }}" style="display: inline;">
@@ -47,17 +43,14 @@
             <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
                 <span>Email Dispatch:</span>
                 {% if smtp_info and smtp_info.is_demo %}
-                <span class="badge badge-info" style="font-size: 0.78rem; padding: 3px 10px; border-radius: 20px;">Safe
-                    Demo Mode (Simulated)</span>
+                <span class="badge badge-info" style="font-size: 0.78rem; padding: 3px 10px; border-radius: 20px;">Safe Demo Mode (Simulated)</span>
                 {% else %}
-                <span class="badge badge-success"
-                    style="font-size: 0.78rem; padding: 3px 10px; border-radius: 20px;">Live Gmail SMTP Active</span>
+                <span class="badge badge-success" style="font-size: 0.78rem; padding: 3px 10px; border-radius: 20px;">Live Gmail SMTP Active</span>
                 {% endif %}
             </div>
             <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
                 {% if smtp_info and smtp_info.is_demo %}
-                Clicking <strong>Email</strong> simulates full delivery with no SMTP credentials needed. Ideal for vivas
-                & presentations.
+                Clicking <strong>Email</strong> simulates full delivery with no SMTP credentials needed.
                 {% else %}
                 Live delivery active via Gmail SMTP ({{ smtp_info.username }}).
                 {% endif %}
@@ -72,95 +65,31 @@
     </div>
 </div>
 
-<div class="table-card">
-    <div class="table-header"
-        style="border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 30px;">
-        <!-- Template Upload -->
-        <div style="flex: 1; min-width: 240px;">
-            <div class="page-title" style="margin-bottom: 10px;">
-                <h3 style="margin: 0; font-size: 1.15rem;">1. Background Template</h3>
-                <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted);">Upload a custom background
-                    image (A4 size recommended).</p>
-            </div>
-            <form method="POST" action="{{ url_for('upload_certificate_template') }}" enctype="multipart/form-data"
-                style="display: flex; gap: 10px; align-items: center;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="file" name="template_image" accept="image/png, image/jpeg" required class="form-control"
-                    style="width: auto; max-width: 250px; font-size: 0.85rem;">
-                <button type="submit" class="candy-btn candy-btn-success"
-                    style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">Upload Template</button>
-            </form>
+<!-- Template Upload Section (Streamlined, zero clutter) -->
+<div class="table-card" style="margin-bottom: 1.5rem;">
+    <div style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text, #0f172a);">Certificate Template</h3>
+            <p style="margin: 4px 0 0; font-size: 0.84rem; color: var(--text-muted);">High-resolution background template (A4 format). Only candidate names are printed prominently on the dash line.</p>
         </div>
-
-        <!-- Coordinates Settings -->
-        <div style="flex: 2; min-width: 260px;">
-            <div class="page-title" style="margin-bottom: 10px;">
-                <h3 style="margin: 0; font-size: 1.15rem;">2. Text Coordinates (X, Y)</h3>
-                <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted);">Set the pixel coordinates to
-                    center the text variables onto your custom design.</p>
-            </div>
-            <form method="POST" action="{{ url_for('save_certificate_coords') }}"
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; align-items: end;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                <div>
-                    <label
-                        style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Participant
-                        Name (X, Y)</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="number" name="name_x" value="{{ coords.get('name_x', 1240) }}" class="form-control"
-                            style="padding: 4px 8px; font-size: 0.85rem;" placeholder="X">
-                        <input type="number" name="name_y" value="{{ coords.get('name_y', 610) }}" class="form-control"
-                            style="padding: 4px 8px; font-size: 0.85rem;" placeholder="Y">
-                    </div>
-                </div>
-                <div>
-                    <label
-                        style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Rank /
-                        Place (X, Y)</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="number" name="rank_x" value="{{ coords.get('rank_x', 1240) }}" class="form-control"
-                            style="padding: 4px 8px; font-size: 0.85rem;" placeholder="X">
-                        <input type="number" name="rank_y" value="{{ coords.get('rank_y', 740) }}" class="form-control"
-                            style="padding: 4px 8px; font-size: 0.85rem;" placeholder="Y">
-                    </div>
-                </div>
-                <div>
-                    <label
-                        style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Event
-                        Name (X, Y)</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="number" name="event_x" value="{{ coords.get('event_x', 1240) }}"
-                            class="form-control" style="padding: 4px 8px; font-size: 0.85rem;" placeholder="X">
-                        <input type="number" name="event_y" value="{{ coords.get('event_y', 870) }}"
-                            class="form-control" style="padding: 4px 8px; font-size: 0.85rem;" placeholder="Y">
-                    </div>
-                </div>
-                <div>
-                    <label
-                        style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Date
-                        (X, Y)</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="number" name="date_x" value="{{ coords.get('date_x', 115) }}" class="form-control"
-                            style="padding: 4px 8px; font-size: 0.85rem;" placeholder="X">
-                        <input type="number" name="date_y" value="{{ coords.get('date_y', 1540) }}" class="form-control"
-                            style="padding: 4px 8px; font-size: 0.85rem;" placeholder="Y">
-                    </div>
-                </div>
-
-                <button type="submit" class="candy-btn candy-btn-success"
-                    style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">Save Coords</button>
-            </form>
-        </div>
+        <form method="POST" action="{{ url_for('upload_certificate_template') }}" enctype="multipart/form-data"
+            style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="file" name="template_image" accept="image/png, image/jpeg" required class="form-control"
+                style="width: auto; max-width: 250px; font-size: 0.85rem;">
+            <button type="submit" class="candy-btn candy-btn-success"
+                style="padding: 0.45rem 1rem; font-size: 0.85rem; border-radius: 6px;">Upload Custom Template</button>
+        </form>
     </div>
 </div>
 
+<!-- Main Certificates Table (Single row per registration / team) -->
 <div class="table-card">
     <div class="table-header">
         <div class="table-filters">
             <div class="search-input-group">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="tableSearchInput" placeholder="Search by name, team, cert ID, or event...">
+                <input type="text" id="tableSearchInput" placeholder="Search by name, team, or event...">
             </div>
 
             <select id="eventFilterSelect" class="form-control" style="width: auto; min-width: 220px;">
@@ -171,7 +100,7 @@
             </select>
         </div>
         <div>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Direct Certificate Hub &bull; Generate & Dispatch to Attendees</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Direct Certificate Hub &bull; 1 Set per Team &bull; Individual Player PDFs</span>
         </div>
     </div>
 
@@ -180,10 +109,10 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Participant Details</th>
-                    <th>Event & Squad Details</th>
+                    <th>Participant / Squad Details</th>
+                    <th>Event Details</th>
                     <th>Attendance</th>
-                    <th>Generated</th>
+                    <th>Certificates Status</th>
                     <th>Email Status</th>
                     <th style="text-align: right;">Actions</th>
                 </tr>
@@ -194,29 +123,32 @@
                     <td>{{ loop.index }}</td>
                     <td>
                         {% if row.is_group and row.team_name %}
-                        <strong style="color: #0f172a; font-size: 0.95rem;">🏆 {{ row.team_name }}</strong>
-                        <div style="font-size: 0.76rem; color: #2563eb; font-weight: 600;">👥 Team Certificate (Lead: {{ row.full_name }})</div>
-                        {% elif row.recipient_name and row.recipient_name != row.full_name %}
-                        <strong style="color: #0f172a; font-size: 0.95rem;">{{ row.recipient_name }}</strong>
-                        <div style="font-size: 0.76rem; color: #2563eb; font-weight: 600;">👥 Team Member (Lead: {{ row.full_name }})</div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <strong style="color: #1e3a8a; font-size: 1.05rem;">🏆 {{ row.team_name }}</strong>
+                            <span class="badge badge-info" style="font-size: 0.72rem; padding: 2px 8px;">Group Event</span>
+                        </div>
+                        <div style="font-size: 0.82rem; color: #334155; margin-top: 4px;">
+                            👑 <strong>Lead:</strong> {{ row.full_name }} &bull; 📞 {{ row.phone }} &bull; ✉️ {{ row.email }}
+                        </div>
+                        <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center;">
+                            <span style="font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase;">Players ({{ row.members_list|length }}):</span>
+                            {% for m in row.members_list %}
+                            <span class="badge" style="background: #e0e7ff; color: #3730a3; font-size: 0.74rem; font-weight: 600; padding: 2px 7px; border-radius: 4px;">{{ m }}</span>
+                            {% endfor %}
+                        </div>
                         {% else %}
-                        <strong style="color: #0f172a; font-size: 0.95rem;">{{ row.full_name }}</strong>
-                        {% if row.is_group %}<span class="badge badge-info" style="font-size: 0.68rem; margin-left: 4px;">Team Lead</span>{% endif %}
+                        <strong style="color: #0f172a; font-size: 0.95rem;">👤 {{ row.full_name }}</strong>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                            📞 {{ row.phone }} &bull; ✉️ {{ row.email }}
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 1px;">
+                            {{ row.department }} &bull; {{ row.semester }} &bull; {{ row.college_name }}
+                        </div>
                         {% endif %}
-                        <div style="font-size: 0.78rem; color: var(--text-muted);">{{ row.email }}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ row.department }} &bull; {{ row.semester }}</div>
                     </td>
                     <td>
                         <span class="badge badge-primary">{{ row.event_name }}</span>
-                        {% if row.is_group or row.team_name %}
-                        <div style="margin-top: 4px;">
-                            <span class="badge badge-info" style="font-size: 0.72rem;">👥 Group ({{ row.team_size }} Participants)</span>
-                            <div style="font-size: 0.8rem; font-weight: 700; color: #1e40af;">
-                                Team: {{ row.team_name if row.team_name else 'Squad' }}
-                            </div>
-                        </div>
-                        {% endif %}
-                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">{{ row.event_date }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 3px;">{{ row.event_date }}</div>
                     </td>
                     <td>
                         {% if row.att_status == 'present' %}
@@ -226,13 +158,15 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if row.cert_id %}
-                        <span style="font-weight: 700; color: var(--primary);">
-                            Yes
-                        </span>
-                        <div style="font-family: monospace; font-size: 0.72rem; color: #64748b;">{{ row.certificate_code }}</div>
+                        {% if row.is_generated %}
+                        <span class="badge badge-success" style="font-weight: 700;">✓ ALL GENERATED ({{ row.cert_count }}/{{ row.expected_count }})</span>
+                        <div style="font-family: monospace; font-size: 0.72rem; color: #64748b; margin-top: 3px;">
+                            Code: {{ row.primary_cert_code }}
+                        </div>
+                        {% elif row.cert_count > 0 %}
+                        <span class="badge badge-warning">PARTIAL ({{ row.cert_count }}/{{ row.expected_count }})</span>
                         {% else %}
-                        <span style="color: var(--text-muted); font-size: 0.82rem;">No</span>
+                        <span class="badge badge-secondary" style="background: #f1f5f9; color: #64748b;">NOT GENERATED</span>
                         {% endif %}
                     </td>
                     <td>
@@ -240,70 +174,53 @@
                         <span class="badge badge-success">EMAIL SENT</span>
                         {% elif row.email_status == 'failed' %}
                         <span class="badge badge-danger">FAILED</span>
-                        {% elif row.cert_id %}
+                        {% elif row.is_generated %}
                         <span class="badge badge-warning">NOT SENT</span>
                         {% else %}
                         <span style="color: var(--text-muted); font-size: 0.82rem;">-</span>
                         {% endif %}
                     </td>
                     <td style="text-align: right;">
-                        <div style="display: inline-flex; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end;">
-                            {% if row.cert_id %}
-                            <!-- View / Preview Modal -->
-                            <button type="button" class="candy-btn candy-btn-secondary cert-preview-trigger"
+                        <div style="display: inline-flex; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end; align-items: center;">
+                            {% if row.is_generated %}
+                            <!-- Preview All Modal Trigger -->
+                            <button type="button" class="candy-btn candy-btn-secondary"
                                 style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px;"
-                                data-image-src="{{ url_for('download_certificate_file', filename=row.certificate_code + '.png')|e }}"
-                                data-cert-code="{{ row.certificate_code|e }}">
-                                👁️ Preview
+                                onclick='openPreviewModal({{ row.certs|tojson|safe }}, "{{ (row.team_name or row.full_name)|e }}")'
+                                title="Preview all certificates for this team/participant">
+                                👁️ Preview All
                             </button>
 
-                            <!-- Download Button -->
-                            <a href="{{ url_for('download_certificate_file', filename=row.certificate_code + '.png') }}"
-                                download class="candy-btn"
-                                style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px;">
-                                ⬇️ Download
-                            </a>
+                            <!-- Direct WhatsApp with file attachment -->
+                            <button type="button" class="candy-btn candy-btn-success"
+                                style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px;"
+                                onclick="shareTeamZip('{{ url_for('download_team_certificates_zip', reg_id=row.registration_id) }}', '{{ row.phone }}', '{{ (row.team_name or row.full_name)|e }}')"
+                                title="Send all certificates directly via WhatsApp file attachment">
+                                💬 WhatsApp
+                            </button>
 
-                            <!-- Send Email Button -->
-                            <form method="POST"
-                                action="{{ url_for('send_certificate_email_route', cert_id=row.cert_id) }}"
-                                style="display:inline;">
+                            <!-- Direct Email with all PDFs attached -->
+                            <form method="POST" action="{{ url_for('send_team_certificates_email', reg_id=row.registration_id) }}" style="display:inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="candy-btn"
-                                    style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px;">📧 Email</button>
+                                    style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px;"
+                                    title="Email all certificate PDFs to recipient"
+                                    onclick="return confirm('Email all certificate PDFs to {{ row.email }}?');">
+                                    ✉️ Email
+                                </button>
                             </form>
-
-                            <!-- Send WA Cert Button with direct verified certificate link -->
-                            <a href="{{ url_for('certificate_whatsapp', certificate_code=row.certificate_code) }}"
-                                target="_blank" rel="noopener noreferrer" class="candy-btn candy-btn-success"
-                                style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px;" title="Send WhatsApp Message with direct Certificate link">📱 WA</a>
-
-                            <!-- Attach & Share button for Mobile / Web Share API -->
-                            <button type="button" class="candy-btn"
-                                style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; background: #0284c7; color: #ffffff;"
-                                onclick="shareCertFile('{{ url_for('download_certificate_file', filename=row.certificate_code + '.png') }}', '{{ (row.recipient_name or row.full_name)|e }}', '{{ row.event_name|e }}', '{{ row.certificate_code|e }}')"
-                                title="Attach certificate image file directly to WhatsApp / Apps">📎 Attach</button>
-
-                            <!-- Download Team ZIP if group event -->
-                            {% if row.is_group and (row.team_name or row.team_members) %}
-                            <a href="{{ url_for('download_team_certificates_zip', reg_id=row.registration_id) }}"
-                                class="candy-btn"
-                                style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; background: #4f46e5; color: #ffffff;"
-                                title="Download team certificate package in ZIP format">📦 Team ZIP</a>
-                            {% endif %}
 
                             {% else %}
                             {% if row.att_status == 'present' %}
-                            <form method="POST"
-                                action="{{ url_for('generate_single_certificate', reg_id=row.registration_id) }}">
+                            <form method="POST" action="{{ url_for('generate_single_certificate', reg_id=row.registration_id) }}" style="display:inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="candy-btn candy-btn-success"
-                                    style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">Generate
-                                    {% if row.is_group %}Team Certificates{% else %}Certificate{% endif %}</button>
+                                    style="padding: 0.4rem 0.95rem; font-size: 0.84rem; border-radius: 6px;">
+                                    ⚡ Generate {{ 'Team Certificates' if row.is_group else 'Certificate' }}
+                                </button>
                             </form>
                             {% else %}
-                            <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">Mark Present
-                                to Generate</span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">Mark Present to Generate</span>
                             {% endif %}
                             {% endif %}
                         </div>
@@ -311,12 +228,36 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">No participants
-                        available for certification.</td>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">No approved registrations available for certification.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Dynamic Multi-Certificate Preview Modal -->
+<div id="certPreviewModal"
+    style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+    <div
+        style="background: #ffffff; width: 92%; max-width: 880px; border-radius: 16px; padding: 24px 28px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-height: 90vh; display: flex; flex-direction: column;">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 18px;">
+            <h3 id="previewModalTitle"
+                style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                👁️ Certificate Preview
+            </h3>
+            <button type="button" onclick="closePreviewModal()"
+                style="background: none; border: none; font-size: 1.6rem; line-height: 1; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+
+        <div id="previewModalBody" style="overflow-y: auto; flex: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px; padding: 4px;">
+            <!-- Rendered dynamically via JavaScript -->
+        </div>
+
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: 16px; text-align: right;">
+            <button type="button" class="btn btn-secondary" onclick="closePreviewModal()">Close Preview</button>
+        </div>
     </div>
 </div>
 
@@ -375,24 +316,9 @@
                 </form>
             </div>
             <p style="font-size: 0.78rem; color: #64748b; margin-top: 6px;">
-                * In <strong>Safe Demo Mode</strong>, email dispatches are instantly simulated and marked successful
+                * In <strong>Safe Demo Mode</strong>, email dispatches are simulated and marked successful
                 without requiring a Gmail password.
             </p>
-        </div>
-
-        <div
-            style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 14px 18px; margin-bottom: 18px;">
-            <h5 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #166534;">📖 How to Setup Live Gmail Delivery:</h5>
-            <ol style="margin: 0; padding-left: 18px; font-size: 0.82rem; color: #166534; line-height: 1.6;">
-                <li>Open your <strong>Google Account</strong> &rsaquo; <strong>Security</strong>.</li>
-                <li>Turn ON <strong>2-Step Verification</strong> if not already enabled.</li>
-                <li>Under 2-Step Verification, click <strong>App passwords</strong>.</li>
-                <li>Create an app named <code>Shree Daksha Academy</code> and copy the 16-letter password.</li>
-                <li>In your <code>.env</code> file, set:<br>
-                    <code>SMTP_MODE=live</code><br>
-                    <code>SMTP_PASSWORD=your_16_letter_code</code>
-                </li>
-            </ol>
         </div>
 
         <div style="text-align: right;">
@@ -402,6 +328,114 @@
 </div>
 
 <script>
+    // Search & Filter
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('tableSearchInput');
+        const eventSelect = document.getElementById('eventFilterSelect');
+        const rows = document.querySelectorAll('tbody tr[data-event-name]');
+
+        function filterTable() {
+            const query = (searchInput?.value || '').toLowerCase().trim();
+            const selectedEvent = eventSelect?.value || '';
+
+            rows.forEach(row => {
+                const eventName = row.getAttribute('data-event-name') || '';
+                const text = row.innerText.toLowerCase();
+
+                const matchesQuery = !query || text.includes(query);
+                const matchesEvent = !selectedEvent || eventName === selectedEvent;
+
+                row.style.display = matchesQuery && matchesEvent ? '' : 'none';
+            });
+        }
+
+        searchInput?.addEventListener('input', filterTable);
+        eventSelect?.addEventListener('change', filterTable);
+    });
+
+    // Preview Modal Logic
+    function openPreviewModal(certs, title) {
+        const modal = document.getElementById('certPreviewModal');
+        const titleEl = document.getElementById('previewModalTitle');
+        const bodyEl = document.getElementById('previewModalBody');
+        if (!modal || !bodyEl) return;
+
+        titleEl.innerText = `👁️ Preview Certificates: ${title}`;
+        bodyEl.innerHTML = '';
+
+        if (!certs || certs.length === 0) {
+            bodyEl.innerHTML = '<p style="color: #64748b; text-align: center; grid-column: 1/-1;">No certificates generated yet.</p>';
+        } else {
+            certs.forEach((cert, idx) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; background: #f8fafc; display: flex; flex-direction: column; gap: 8px;';
+                const fileUrl = `/certificate/download/${cert.certificate_code}.png`;
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="color: #1e293b; font-size: 0.95rem;">${cert.recipient_name || 'Participant ' + (idx+1)}</strong>
+                        <span style="font-family: monospace; font-size: 0.72rem; color: #64748b;">${cert.certificate_code}</span>
+                    </div>
+                    <div style="width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; background: #ffffff;">
+                        <img src="${fileUrl}" alt="Certificate Preview" style="width: 100%; height: auto; display: block;" loading="lazy">
+                    </div>
+                    <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px;">
+                        <a href="${fileUrl}" download class="candy-btn" style="padding: 0.35rem 0.8rem; font-size: 0.8rem; border-radius: 6px;">⬇️ PNG</a>
+                    </div>
+                `;
+                bodyEl.appendChild(item);
+            });
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    function closePreviewModal() {
+        const modal = document.getElementById('certPreviewModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    // Direct WhatsApp share with ZIP file (no links shared)
+    async function shareTeamZip(zipUrl, phone, teamOrName) {
+        let cleanPhone = (phone || '').replace(/\D/g, '');
+        if (cleanPhone.length === 10) cleanPhone = '91' + cleanPhone;
+
+        // Try downloading/fetching the zip file to share directly via Web Share API
+        if (navigator.share && navigator.canShare) {
+            try {
+                const resp = await fetch(zipUrl);
+                const blob = await resp.blob();
+                const safeName = (teamOrName || 'Team').replace(/[^a-zA-Z0-9]/g, '_');
+                const file = new File([blob], `${safeName}_Certificates.zip`, { type: 'application/zip' });
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: `Official Certificates - ${teamOrName}`,
+                        text: `🎓 Shree Daksha Academy: Official Certificates of Achievement for ${teamOrName}`
+                    });
+                    return;
+                }
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+                console.log('Web share fallback:', err);
+            }
+        }
+
+        // Direct Download & WhatsApp redirect fallback
+        const link = document.createElement('a');
+        link.href = zipUrl;
+        link.download = `${(teamOrName || 'Team').replace(/[^a-zA-Z0-9]/g, '_')}_Certificates.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Open WhatsApp chat to recipient
+        const waMsg = encodeURIComponent(`🎓 *SHREE DAKSHA ACADEMY*\n✨ *Official Certificates of Achievement*\n----------------------------------------\nOfficial certificates package for *${teamOrName}* has been prepared for dispatch.`);
+        window.open(`https://wa.me/${cleanPhone}?text=${waMsg}`, '_blank');
+    }
+
+    // Alias shareCertFile to shareTeamZip for backwards compatibility
+    window.shareCertFile = shareTeamZip;
+
     function openSmtpModal() {
         const modal = document.getElementById('smtpSettingsModal');
         if (modal) modal.style.display = 'flex';
@@ -410,37 +444,12 @@
         const modal = document.getElementById('smtpSettingsModal');
         if (modal) modal.style.display = 'none';
     }
-    // Close modal on click outside
-    window.addEventListener('click', function (e) {
-        const modal = document.getElementById('smtpSettingsModal');
-        if (e.target === modal) modal.style.display = 'none';
-    });
 
-    async function shareCertFile(fileUrl, recipientName, eventName, certCode) {
-        if (navigator.share) {
-            try {
-                const resp = await fetch(fileUrl);
-                const blob = await resp.blob();
-                const safeName = (recipientName || 'Participant').replace(/[^a-zA-Z0-9]/g, '_');
-                const file = new File([blob], `${safeName}_Certificate.png`, { type: 'image/png' });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: `Certificate of Participation - ${recipientName}`,
-                        text: `🎓 Official Certificate of Participation for *${recipientName}* in *${eventName}* - Shree Daksha Academy\nCertificate ID: ${certCode}`
-                    });
-                    return;
-                }
-            } catch (err) {
-                if (err.name !== 'AbortError') {
-                    console.log('Native share fallback:', err);
-                } else {
-                    return;
-                }
-            }
-        }
-        window.open(`/certificate/${certCode}/whatsapp`, '_blank');
-    }
+    window.addEventListener('click', function (e) {
+        const pModal = document.getElementById('certPreviewModal');
+        if (e.target === pModal) pModal.style.display = 'none';
+        const sModal = document.getElementById('smtpSettingsModal');
+        if (e.target === sModal) sModal.style.display = 'none';
+    });
 </script>
 {% endblock %}
-

@@ -88,13 +88,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 5. Attendance Toggle AJAX Handler
+  // 5. Attendance Toggle AJAX Handler with Optimistic UI updates (instant response, zero latency)
   window.toggleAttendance = async function(registrationId, currentStatus, buttonElement) {
     const newStatus = (currentStatus === 'present') ? 'absent' : 'present';
-    buttonElement.disabled = true;
-    const originalText = buttonElement.innerHTML;
-    buttonElement.innerHTML = 'Updating...';
+    const originalStatus = currentStatus;
+    const row = buttonElement.closest('tr');
+    const badge = row ? row.querySelector('.attendance-badge') : null;
+    const presEl = document.getElementById('statPresentCount');
+    const absEl = document.getElementById('statAbsentCount');
 
+    // 1. OPTIMISTIC UPDATE: Update button, badge, and counts immediately (0ms delay)
+    buttonElement.disabled = true;
+    if (newStatus === 'present') {
+      if (badge) {
+        badge.className = 'badge badge-success attendance-badge';
+        badge.innerText = 'PRESENT';
+      }
+      buttonElement.className = 'candy-btn candy-btn-warning';
+      buttonElement.style.padding = '0.4rem 1rem';
+      buttonElement.style.fontSize = '0.85rem';
+      buttonElement.style.borderRadius = '6px';
+      buttonElement.innerHTML = 'Mark Absent';
+      buttonElement.setAttribute('onclick', `toggleAttendance(${registrationId}, 'present', this)`);
+      if (presEl) presEl.innerText = parseInt(presEl.innerText || '0', 10) + 1;
+      if (absEl) absEl.innerText = Math.max(0, parseInt(absEl.innerText || '0', 10) - 1);
+    } else {
+      if (badge) {
+        badge.className = 'badge badge-danger attendance-badge';
+        badge.innerText = 'ABSENT';
+      }
+      buttonElement.className = 'candy-btn candy-btn-success';
+      buttonElement.style.padding = '0.4rem 1rem';
+      buttonElement.style.fontSize = '0.85rem';
+      buttonElement.style.borderRadius = '6px';
+      buttonElement.innerHTML = 'Mark Present';
+      buttonElement.setAttribute('onclick', `toggleAttendance(${registrationId}, 'absent', this)`);
+      if (presEl) presEl.innerText = Math.max(0, parseInt(presEl.innerText || '0', 10) - 1);
+      if (absEl) absEl.innerText = parseInt(absEl.innerText || '0', 10) + 1;
+    }
+
+    // 2. Network synchronization in background
     try {
       const response = await fetch('/attendance/toggle', {
         method: 'POST',
@@ -109,52 +142,27 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       const data = await response.json();
-      if (data.success) {
-        // Update UI badge & button
-        const row = buttonElement.closest('tr');
-        const badge = row.querySelector('.attendance-badge');
-        
-        if (newStatus === 'present') {
-          badge.className = 'badge badge-success attendance-badge';
-          badge.innerText = 'PRESENT';
-          buttonElement.className = 'candy-btn candy-btn-warning';
-          buttonElement.style.padding = '0.4rem 1rem';
-          buttonElement.style.fontSize = '0.85rem';
-          buttonElement.style.borderRadius = '6px';
-          buttonElement.innerHTML = 'Mark Absent';
-          buttonElement.setAttribute('onclick', `toggleAttendance(${registrationId}, 'present', this)`);
-
-          // Update metric counts
-          const presEl = document.getElementById('statPresentCount');
-          const absEl = document.getElementById('statAbsentCount');
-          if (presEl) presEl.innerText = parseInt(presEl.innerText || '0', 10) + 1;
-          if (absEl) absEl.innerText = Math.max(0, parseInt(absEl.innerText || '0', 10) - 1);
-        } else {
-          badge.className = 'badge badge-danger attendance-badge';
-          badge.innerText = 'ABSENT';
-          buttonElement.className = 'candy-btn candy-btn-success';
-          buttonElement.style.padding = '0.4rem 1rem';
-          buttonElement.style.fontSize = '0.85rem';
-          buttonElement.style.borderRadius = '6px';
-          buttonElement.innerHTML = 'Mark Present';
-          buttonElement.setAttribute('onclick', `toggleAttendance(${registrationId}, 'absent', this)`);
-
-          // Update metric counts
-          const presEl = document.getElementById('statPresentCount');
-          const absEl = document.getElementById('statAbsentCount');
-          if (presEl) presEl.innerText = Math.max(0, parseInt(presEl.innerText || '0', 10) - 1);
-          if (absEl) absEl.innerText = parseInt(absEl.innerText || '0', 10) + 1;
-        }
-
-        // Show toast notification
-        showToast(data.message || `Attendance updated to ${newStatus.toUpperCase()}`, 'success');
-      } else {
-        showToast(data.error || 'Failed to update attendance', 'danger');
-        buttonElement.innerHTML = originalText;
+      if (!data.success) {
+        throw new Error(data.error || 'Server rejected status update');
       }
+      showToast(data.message || `Attendance updated to ${newStatus.toUpperCase()}`, 'success');
     } catch (err) {
-      showToast('Network error while updating attendance', 'danger');
-      buttonElement.innerHTML = originalText;
+      // ROLLBACK OPTIMISTIC UPDATE ON FAILURE
+      if (badge) {
+        badge.className = (originalStatus === 'present') ? 'badge badge-success attendance-badge' : 'badge badge-danger attendance-badge';
+        badge.innerText = originalStatus.toUpperCase();
+      }
+      buttonElement.className = (originalStatus === 'present') ? 'candy-btn candy-btn-warning' : 'candy-btn candy-btn-success';
+      buttonElement.innerHTML = (originalStatus === 'present') ? 'Mark Absent' : 'Mark Present';
+      buttonElement.setAttribute('onclick', `toggleAttendance(${registrationId}, '${originalStatus}', this)`);
+      if (newStatus === 'present') {
+        if (presEl) presEl.innerText = Math.max(0, parseInt(presEl.innerText || '0', 10) - 1);
+        if (absEl) absEl.innerText = parseInt(absEl.innerText || '0', 10) + 1;
+      } else {
+        if (presEl) presEl.innerText = parseInt(presEl.innerText || '0', 10) + 1;
+        if (absEl) absEl.innerText = Math.max(0, parseInt(absEl.innerText || '0', 10) - 1);
+      }
+      showToast(err.message || 'Network error while updating attendance', 'danger');
     } finally {
       buttonElement.disabled = false;
     }
