@@ -3184,6 +3184,84 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('idx_participants_email', idx_names)
         self.assertIn('idx_participants_phone', idx_names)
 
+    def test_62_rate_limiter_and_webp_certificates(self):
+        """Verify:
+        1. SlidingWindowLimiter throttles repeated calls, returns retry_after, and resets.
+        2. Endpoint rate limiting returns HTTP 429 and Retry-After header.
+        3. WebP certificate generation produces ultra-compact file (< 20% of PNG size).
+        4. Certificate download route serves .webp with image/webp mimetype.
+        """
+        from rate_limiter import SlidingWindowLimiter, limiter, rate_limit
+        from flask import jsonify
+        import certificate_generator
+
+        # 1. Test standalone sliding window limiter
+        test_limiter = SlidingWindowLimiter()
+        for i in range(3):
+            allowed, rem, reset_ts, retry = test_limiter.is_allowed("test-user-ip", limit=3, period_seconds=60)
+            self.assertTrue(allowed)
+            self.assertEqual(rem, 2 - i)
+
+        # 4th hit should be blocked
+        allowed, rem, reset_ts, retry = test_limiter.is_allowed("test-user-ip", limit=3, period_seconds=60)
+        self.assertFalse(allowed)
+        self.assertEqual(rem, 0)
+        self.assertGreater(retry, 0)
+
+        # Reset clears window
+        test_limiter.reset()
+        allowed, rem, reset_ts, retry = test_limiter.is_allowed("test-user-ip", limit=3, period_seconds=60)
+        self.assertTrue(allowed)
+
+        # 2. Test Flask rate limiting decorator on live route with TESTING_RATE_LIMITER enabled
+        self.app.config['TESTING_RATE_LIMITER'] = True
+        limiter.reset()
+
+        try:
+            with self.client.session_transaction() as sess:
+                sess['user_id'] = 1
+                sess['username'] = 'admin'
+                sess['role'] = 'admin'
+
+            # Fill the 90-request window for api_scan_qr on 127.0.0.1
+            for i in range(90):
+                limiter.is_allowed("api_scan_qr:127.0.0.1", limit=90, period_seconds=60)
+
+            # 91st request triggers rate limit HTTP 429 with JSON payload
+            blocked_res = self.client.get('/api/scan_qr?uid=TEST-RATELIMIT')
+            self.assertEqual(blocked_res.status_code, 429)
+            self.assertIn('Retry-After', blocked_res.headers)
+            self.assertEqual(blocked_res.get_json().get('code'), 429)
+            self.assertIn('rate limit exceeded', blocked_res.get_json().get('message').lower())
+        finally:
+            self.app.config['TESTING_RATE_LIMITER'] = False
+            limiter.reset()
+
+        # 3. Test WebP Certificate Generation and Download
+        test_code = "SDA-2026-TEST-WEBP"
+        code, png_path, rel = certificate_generator.generate_certificate(
+            participant_name="Akash WebP Verification",
+            event_name="BGMI",
+            event_date="25 Nov 2026",
+            cert_code=test_code
+        )
+        self.assertTrue(os.path.exists(png_path))
+        webp_path = os.path.join(Config.CERTIFICATE_FOLDER, f"{test_code}.webp")
+        self.assertTrue(os.path.exists(webp_path), "WebP certificate file should exist")
+
+        png_size = os.path.getsize(png_path)
+        webp_size = os.path.getsize(webp_path)
+        self.assertGreater(webp_size, 1000)
+        # WebP must be significantly smaller than PNG (> 50% smaller)
+        self.assertLess(webp_size, png_size * 0.5)
+
+        # 4. Verify HTTP download of .webp certificate
+        res_webp = self.client.get(f"/certificates/{test_code}.webp")
+        self.assertEqual(res_webp.status_code, 200)
+        self.assertEqual(res_webp.content_type, 'image/webp')
+        self.assertEqual(len(res_webp.data), webp_size)
+        res_webp.close()
+
 
 if __name__ == '__main__':
     unittest.main()

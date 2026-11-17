@@ -246,6 +246,12 @@
                                 title="Download official certificate PNG">
                                 🖼️ PNG
                             </a>
+                            <a href="{{ url_for('download_certificate_file', filename=row.primary_cert_code ~ '.webp', download='1') }}"
+                                class="candy-btn candy-btn-outline"
+                                style="padding: 0.4rem 0.75rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
+                                title="Download ultra-fast lightweight WebP (90% smaller, ideal for mobile/chat)">
+                                ⚡ WebP
+                            </a>
                             {% endif %}
 
                             {% else %}

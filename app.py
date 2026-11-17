@@ -26,6 +26,7 @@ import database
 from database import query_db, execute_db, create_registration
 from certificate_generator import generate_certificate, generate_team_certificates_zip, generate_all_teams_certificates_zip
 from mailer import send_certificate_email, get_smtp_info, send_receipt_email, send_whatsapp_receipt
+from rate_limiter import rate_limit, limiter
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -468,6 +469,7 @@ def healthz():
     return jsonify({'status': 'ok', 'database': database.DB_MODE}), 200
 
 @app.route('/login', methods=['GET', 'POST'])
+@rate_limit(limit=10, period=60, methods=['POST'], message="Too many login attempts.")
 def login():
     if session.get('role') == 'admin':
         return redirect(url_for('admin_dashboard'))
@@ -1449,6 +1451,7 @@ def delete_event(event_id):
 # Participant Registration
 # ---------------------------------------------------------
 @app.route('/register', methods=['GET', 'POST'])
+@rate_limit(limit=15, period=60, methods=['POST'], message="Too many registration submissions.")
 def register_participant():
     events = get_public_events()
     selected_event_id = request.args.get('event_id', '')
@@ -2457,7 +2460,8 @@ def download_certificate_file(filename):
     is_pdf = safe_filename.lower().endswith('.pdf')
     is_png = safe_filename.lower().endswith('.png')
     is_jpg = safe_filename.lower().endswith('.jpg') or safe_filename.lower().endswith('.jpeg')
-    if not (is_pdf or is_png or is_jpg):
+    is_webp = safe_filename.lower().endswith('.webp')
+    if not (is_pdf or is_png or is_jpg or is_webp):
         abort(404)
 
     code = os.path.splitext(safe_filename)[0]
@@ -2467,6 +2471,8 @@ def download_certificate_file(filename):
     pdf_path = os.path.join(Config.CERTIFICATE_FOLDER, pdf_filename)
     jpg_filename = f"{code}.jpg"
     jpg_path = os.path.join(Config.CERTIFICATE_FOLDER, jpg_filename)
+    webp_filename = f"{code}.webp"
+    webp_path = os.path.join(Config.CERTIFICATE_FOLDER, webp_filename)
 
     if not os.path.exists(png_path) or os.path.getsize(png_path) < 100:
         # On-demand regeneration if file missing on disk (e.g. Render restart/ephemeral disk)
@@ -2524,6 +2530,21 @@ def download_certificate_file(filename):
         elif os.path.exists(png_path):
             as_att = request.args.get('download') == '1'
             return send_from_directory(Config.CERTIFICATE_FOLDER, png_filename, as_attachment=as_att)
+        abort(404)
+
+    if is_webp:
+        if os.path.exists(webp_path):
+            as_att = request.args.get('download') == '1'
+            return send_from_directory(Config.CERTIFICATE_FOLDER, webp_filename, mimetype='image/webp', as_attachment=as_att)
+        elif os.path.exists(png_path):
+            try:
+                with Image.open(png_path) as im:
+                    im.save(webp_path, "WEBP", quality=90, method=6)
+                as_att = request.args.get('download') == '1'
+                return send_from_directory(Config.CERTIFICATE_FOLDER, webp_filename, mimetype='image/webp', as_attachment=as_att)
+            except Exception as e:
+                app.logger.error(f"Error converting certificate {png_filename} to WebP: {e}")
+                abort(500)
         abort(404)
 
     if not os.path.exists(png_path):
@@ -3100,6 +3121,7 @@ def qr_scanner():
 
 @app.route('/api/scan_qr')
 @member_required
+@rate_limit(limit=90, period=60, message="Scanner query rate limit exceeded.")
 def api_scan_qr():
     uid = request.args.get('uid', '').strip()
     if not uid:
@@ -3123,6 +3145,7 @@ def api_scan_qr():
 
 @app.route('/api/mark_attended', methods=['POST'])
 @member_required
+@rate_limit(limit=90, period=60, message="Attendance action rate limit exceeded.")
 def api_mark_attended():
     data = request.get_json() or {}
     reg_id = data.get('registration_id')

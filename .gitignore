@@ -25,6 +25,7 @@ certificates/*.png
 certificates/*.pdf
 certificates/*.jpg
 certificates/*.jpeg
+certificates/*.webp
 certificates/*.zip
 *.zip
 !certificates/.gitkeep
