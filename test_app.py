@@ -3436,7 +3436,7 @@ class SDATestCase(unittest.TestCase):
         # Check that sponsors section renders in public events page
         events_html = res_events.data.decode('utf-8')
         self.assertIn('id="sponsors"', events_html)
-        self.assertIn('Supported by Industry Leaders', events_html)
+        self.assertIn('Official Fest Partners', events_html)
         self.assertIn('NexGen Cloud', events_html)
         self.assertIn('HyperZone Esports', events_html)
         self.assertIn('DAKSHA-NEXGEN', events_html)
