@@ -3350,7 +3350,7 @@ class SDATestCase(unittest.TestCase):
         5. Public event page CDN edge caching (/events has s-maxage=1800, Vary: Cookie) when unauthenticated.
         6. Sensitive routes (admin, login, register, payment-status, api) strictly enforce no-store at edge.
         7. Cloudflare CF-Connecting-IP proxy-aware client resolution.
-        8. Fest commercial sponsorship engine & attendee coupon perks render correctly.
+        8. Clean navigation and UI without sponsor, partner, or commercial callouts.
         """
         from rate_limiter import limiter
         from app import get_real_client_ip
@@ -3429,26 +3429,28 @@ class SDATestCase(unittest.TestCase):
             self.assertEqual(limiter.get_client_ip(), '203.0.113.195')
             self.assertEqual(get_real_client_ip(), '203.0.113.195')
 
-        # 8. Sponsorship Engine & Monetization
-        self.assertTrue(Config.ENABLE_SPONSORS)
-        self.assertGreaterEqual(len(Config.SPONSORS), 3)
+        # 8. Complete removal of Sponsors, Partners, and Industry Leaders content
+        self.assertFalse(Config.ENABLE_SPONSORS)
+        self.assertEqual(len(Config.SPONSORS), 0)
 
-        # Check that sponsors section renders in public events page
+        # Check that sponsors section is NOT rendered in public events page
         events_html = res_events.data.decode('utf-8')
-        self.assertIn('id="sponsors"', events_html)
-        self.assertIn('Official Fest Partners', events_html)
-        self.assertIn('NexGen Cloud', events_html)
-        self.assertIn('HyperZone Esports', events_html)
-        self.assertIn('DAKSHA-NEXGEN', events_html)
-        self.assertIn('HYPER-DAKSHA26', events_html)
+        self.assertNotIn('id="sponsors"', events_html)
+        self.assertNotIn('Official Fest Partners', events_html)
+        self.assertNotIn('Supported by Industry Leaders', events_html)
+        self.assertNotIn('Sponsors &amp; Collaborators', events_html)
+        self.assertNotIn('data-section="sponsors"', events_html)
+        self.assertNotIn('>Partners</a>', events_html)
+        self.assertNotIn('NexGen Cloud', events_html)
+        self.assertNotIn('HyperZone Esports', events_html)
         res_events.close()
 
-        # Check attendee Gate Pass / Payment Status sponsor vouchers
+        # Check attendee Gate Pass / Payment Status does NOT contain sponsor perks
         uid_token = uuid.uuid4().hex[:8]
         ev = database.query_db("SELECT id, event_name, event_fee FROM events LIMIT 1", one=True)
         reg_info = database.create_registration(
-            full_name="Monetization Test Student",
-            email=f"monetize_{uid_token}@testdomain.org",
+            full_name="Clean UI Test Student",
+            email=f"cleanui_{uid_token}@testdomain.org",
             phone="9876543210",
             college_name="Test College",
             department="PCMB",
@@ -3460,7 +3462,7 @@ class SDATestCase(unittest.TestCase):
             payment_status='paid',
             amount_paid=ev['event_fee'],
             payment_method='Online',
-            utr_number=f"UTRMONETIZE{uid_token}",
+            utr_number=f"UTRCLEAN{uid_token}",
             registered_by=1,
             is_group_event=False
         )
@@ -3471,23 +3473,25 @@ class SDATestCase(unittest.TestCase):
             pass_res = self.client.get(f'/payment-status/{test_uid}')
             self.assertEqual(pass_res.status_code, 200)
             pass_html = pass_res.data.decode('utf-8')
-            # Verify sponsor perks card exists on attendee gate pass
-            self.assertIn('sponsor-pass-perks', pass_html)
-            self.assertIn('Exclusive Fest Partner Perks & Vouchers', pass_html)
-            self.assertIn('INFINIX-BITE20', pass_html)
-            self.assertIn('HYPER-DAKSHA26', pass_html)
+            # Verify sponsor perks card is completely removed from attendee gate pass
+            self.assertNotIn('sponsor-pass-perks', pass_html)
+            self.assertNotIn('Exclusive Fest Partner Perks', pass_html)
+            self.assertNotIn('INFINIX-BITE20', pass_html)
+            self.assertNotIn('HYPER-DAKSHA26', pass_html)
             pass_res.close()
         finally:
             database.execute_db("DELETE FROM registrations WHERE registration_uid = %s", (test_uid,))
-            database.execute_db("DELETE FROM participants WHERE email = %s", (f"monetize_{uid_token}@testdomain.org",))
+            database.execute_db("DELETE FROM participants WHERE email = %s", (f"cleanui_{uid_token}@testdomain.org",))
 
-        # Check admin dashboard Edge CDN & Sponsorship Monetization panel
+        # Check admin dashboard Edge CDN Delivery panel (no sponsors/monetization)
         self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
         dash_res = self.client.get('/admin/dashboard')
         self.assertEqual(dash_res.status_code, 200)
         dash_html = dash_res.data.decode('utf-8')
         self.assertIn('Edge CDN Acceleration', dash_html)
-        self.assertIn('Sponsorship Monetization', dash_html)
+        self.assertIn('Delivery Hub', dash_html)
+        self.assertNotIn('Sponsorship Monetization', dash_html)
+        self.assertNotIn('Active Fest Sponsors', dash_html)
         self.assertIn('Edge CDN: Active', dash_html)
         self.assertIn('RFC 9213', dash_html)
         dash_res.close()

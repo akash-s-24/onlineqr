@@ -372,15 +372,15 @@
             </section>
         </div>
 
-        <!-- ── Edge CDN & Commercial Sponsorship Monetization Hub ── -->
+        <!-- ── Edge CDN Acceleration & Delivery Hub ── -->
         <section class="dash-panel" style="margin-bottom: 18px;">
             <div class="dash-panel-head">
                 <div>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 1.15rem;">⚡</span>
-                        <h2 class="dash-panel-title">Edge CDN Acceleration & Sponsorship Monetization</h2>
+                        <h2 class="dash-panel-title">Edge CDN Acceleration & Delivery Hub</h2>
                     </div>
-                    <p class="dash-panel-note">Global edge caching metrics (RFC 9213) and active commercial partner sponsorship tiers.</p>
+                    <p class="dash-panel-note">Global edge caching performance (RFC 9213) and Cloudflare proxy delivery status.</p>
                 </div>
                 <div style="display: flex; gap: 6px; align-items: center;">
                     <span class="dash-badge good" style="font-size: 0.76rem; font-weight: 750;">● Edge CDN: Active</span>
@@ -390,9 +390,9 @@
 
             <div class="dash-stat-strip">
                 <div class="dash-mini-stat">
-                    <span class="dash-mini-stat-label">Active Partners</span>
-                    <span class="dash-mini-stat-val" style="color: var(--dash-blue);">{{ config.SPONSORS|length }}</span>
-                    <span class="dash-mini-stat-sub">Commercial sponsors</span>
+                    <span class="dash-mini-stat-label">Edge Cache Policy</span>
+                    <span class="dash-mini-stat-val" style="color: var(--dash-blue);">RFC 9213</span>
+                    <span class="dash-mini-stat-sub">CDN-Cache-Control</span>
                 </div>
                 <div class="dash-mini-stat">
                     <span class="dash-mini-stat-label">Edge Cache Lifetime</span>
@@ -405,31 +405,9 @@
                     <span class="dash-mini-stat-sub">Served from Edge proxy</span>
                 </div>
                 <div class="dash-mini-stat">
-                    <span class="dash-mini-stat-label">Gate Pass Monetization</span>
+                    <span class="dash-mini-stat-label">Origin Offload</span>
                     <span class="dash-mini-stat-val" style="color: var(--dash-ink);">Enabled</span>
-                    <span class="dash-mini-stat-sub">Vouchers on student passes</span>
-                </div>
-            </div>
-
-            <div style="padding: 14px 18px;">
-                <div style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dash-muted); margin-bottom: 10px;">
-                    Active Fest Sponsors & Partner Coupon Codes
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
-                    {% for sp in config.SPONSORS %}
-                    <div style="background: #ffffff; border: 1px solid var(--dash-line); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                <span class="dash-badge" style="font-size: 0.68rem; padding: 1px 6px;">{{ sp.tier }}</span>
-                                {% if sp.discount_code %}
-                                <code style="font-family: monospace; font-size: 0.72rem; color: #047857; background: #ecfdf5; padding: 1px 5px; border-radius: 3px; font-weight: 700;">{{ sp.discount_code }}</code>
-                                {% endif %}
-                            </div>
-                            <strong style="font-size: 0.86rem; color: var(--dash-ink); display: block;">{{ sp.name }}</strong>
-                            <span style="font-size: 0.76rem; color: var(--dash-muted); display: block; line-height: 1.35; margin-top: 3px;">{{ sp.perk_title }}</span>
-                        </div>
-                    </div>
-                    {% endfor %}
+                    <span class="dash-mini-stat-sub">30m TTL on events page</span>
                 </div>
             </div>
         </section>

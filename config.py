@@ -111,79 +111,10 @@ class Config:
     RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '').strip()
     RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', '').strip()
 
-    # Fest Commercial Sponsorship & Partner Monetization
-    ENABLE_SPONSORS = os.environ.get('ENABLE_SPONSORS', 'true').strip().lower() in ('true', '1', 'yes')
+    # Edge CDN Acceleration & Delivery
     CDN_ENABLED = os.environ.get('CDN_ENABLED', 'true').strip().lower() in ('true', '1', 'yes')
-
-    # Default Official Fest Sponsors & Commercial Partners
-    _DEFAULT_SPONSORS = [
-        {
-            'id': 'title_sponsor',
-            'name': 'NexGen Cloud & AI Labs',
-            'tier': 'Title Sponsor',
-            'tier_key': 'title',
-            'tagline': 'Powering Student Innovation, Cloud Computing & AI Research',
-            'logo_icon': 'fa-solid fa-microchip',
-            'badge': 'TITLE SPONSOR',
-            'website': 'https://shreedakshaacademyedu.in',
-            'discount_code': 'DAKSHA-NEXGEN',
-            'perk_title': '₹5,000 Cloud Sandbox Credits & AI Workshop Access',
-            'perk_description': 'Complimentary cloud sandbox access for all registered Daksha Infinix participants.',
-            'featured': True,
-        },
-        {
-            'id': 'gaming_partner',
-            'name': 'HyperZone Esports',
-            'tier': 'Official Gaming Partner',
-            'tier_key': 'gaming',
-            'tagline': 'Pro Gaming Gear, Tournaments & Live Streaming Arena',
-            'logo_icon': 'fa-solid fa-gamepad',
-            'badge': 'ESPORTS PARTNER',
-            'website': 'https://shreedakshaacademyedu.in',
-            'discount_code': 'HYPER-DAKSHA26',
-            'perk_title': 'Flat 20% Off Gaming Gear & Custom Tournament Kits',
-            'perk_description': 'Exclusive tournament starter pack for all BGMI and Free Fire squads.',
-            'featured': True,
-        },
-        {
-            'id': 'food_partner',
-            'name': 'Campus Brew & Bites',
-            'tier': 'Official Food & Refreshment Partner',
-            'tier_key': 'beverage_food',
-            'tagline': 'Artisanal Coffee, Fresh Snacks & Healthy Refreshments on Campus',
-            'logo_icon': 'fa-solid fa-mug-hot',
-            'badge': 'REFRESHMENT PARTNER',
-            'website': 'https://shreedakshaacademyedu.in',
-            'discount_code': 'INFINIX-BITE20',
-            'perk_title': 'Flat 20% Off at Fest Stalls with Gate Pass',
-            'perk_description': 'Show your verified digital Gate Pass QR code at any campus food stall to redeem instantly.',
-            'featured': True,
-        },
-        {
-            'id': 'career_partner',
-            'name': 'DevPath Academy',
-            'tier': 'Career & Upskilling Partner',
-            'tier_key': 'tech',
-            'tagline': 'Full-Stack Development, Cloud Architecture & Placements',
-            'logo_icon': 'fa-solid fa-laptop-code',
-            'badge': 'CAREER PARTNER',
-            'website': 'https://shreedakshaacademyedu.in',
-            'discount_code': 'DAKSHA-DEV30',
-            'perk_title': 'Free 1-Month Full Stack Dev Bootcamp Voucher',
-            'perk_description': 'Redeemable by all participants with their Registration UID after fest day.',
-            'featured': False,
-        }
-    ]
-
-    _sponsors_env = os.environ.get('SPONSORS_JSON', '').strip()
-    if _sponsors_env:
-        try:
-            import json
-            SPONSORS = json.loads(_sponsors_env)
-        except Exception:
-            SPONSORS = _DEFAULT_SPONSORS
-    else:
-        SPONSORS = _DEFAULT_SPONSORS
+    ENABLE_SPONSORS = False
+    SPONSORS = []
 
 
 if Config.APP_ENV == 'production':

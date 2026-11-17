@@ -98,41 +98,6 @@
             </div>
         {% endif %}
 
-        <!-- Sponsor Perks & Student Discount Vouchers on Digital Gate Pass -->
-        {% if config.ENABLE_SPONSORS and config.SPONSORS %}
-        <div class="sponsor-pass-perks" style="margin: 1.75rem 0 1rem; padding: 1.25rem 1.4rem; background: linear-gradient(145deg, #f8fafc, #f1f5f9); border: 1.5px solid #e2e8f0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 1.35rem;">🎁</span>
-                    <strong style="font-size: 1.05rem; color: #0f172a;">Exclusive Fest Partner Perks & Vouchers</strong>
-                </div>
-                <span style="font-size: 0.74rem; background: #e0e7ff; color: #4338ca; padding: 3px 10px; border-radius: 9999px; font-weight: 750; border: 1px solid #c7d2fe;">Included with Your Gate Pass</span>
-            </div>
-            <p style="font-size: 0.84rem; color: #64748b; margin-top: 0; margin-bottom: 1rem; line-height: 1.45;">
-                Show this verified digital gate pass or use reference <code>{{ registration.registration_uid }}</code> to claim special festival privileges from our official partners:
-            </p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
-                {% for sp in config.SPONSORS %}
-                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                    <div>
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                            <span style="font-size: 0.7rem; font-weight: 750; text-transform: uppercase; color: #6366f1; letter-spacing: 0.05em;">{{ sp.tier }}</span>
-                            {% if sp.discount_code %}
-                            <span style="font-family: monospace; font-size: 0.75rem; background: #ecfdf5; color: #047857; padding: 2px 7px; border-radius: 4px; font-weight: 750; border: 1px dashed #10b981;">{{ sp.discount_code }}</span>
-                            {% endif %}
-                        </div>
-                        <h4 style="margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 750; color: #1e293b;">{{ sp.name }}</h4>
-                        <p style="margin: 0; font-size: 0.82rem; color: #475569; line-height: 1.4; font-weight: 600;">{{ sp.perk_title }}</p>
-                    </div>
-                    {% if sp.perk_description %}
-                    <small style="margin-top: 8px; font-size: 0.74rem; color: #64748b; display: block; border-top: 1px solid #f1f5f9; padding-top: 6px;">{{ sp.perk_description }}</small>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
         <a href="{{ url_for('events_list') }}" class="btn btn-primary" style="margin-top:1.5rem; display: inline-flex; align-items: center; gap: 6px; padding: 0.75rem 1.5rem; font-weight: 600;">← Return to Normal / Events</a>
     </div>
 </section>
