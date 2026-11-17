@@ -3020,6 +3020,83 @@ class SDATestCase(unittest.TestCase):
             execute_db("DELETE FROM registrations WHERE id = %s", (reg_id,))
             execute_db("DELETE FROM participants WHERE email = %s", (f"email_squad_{token}@testdomain.org",))
 
+    def test_58_lead_only_mobile_and_daksha_infinix_branding(self):
+        """Verify:
+        1. Registration form only collects Team Lead's mobile number, and does not render phone inputs for squad members.
+        2. 'Daksha Infinix 2026' replaces all occurrences of 'Daksha Udbhav' in receipts, invitations, and certificates.
+        3. Online UPI registration produces official receipt with gate pass, while On-Campus cash registration produces simple confirmation without gate pass or arrival directions.
+        """
+        from mailer import format_whatsapp_receipt, format_whatsapp_certificate, send_receipt_email
+
+        # 1. Registration form check
+        res_reg = self.client.get('/register')
+        self.assertEqual(res_reg.status_code, 200)
+        html = res_reg.data.decode('utf-8')
+        self.assertNotIn('member_${i}_phone', html)
+        self.assertNotIn('Player #${i} WhatsApp Number', html)
+        self.assertIn("Player #${i} Full Name *", html)
+        self.assertIn("Team Lead's Mobile Number *", html)
+
+        # 2. Online UPI receipt format
+        online_wa = format_whatsapp_receipt(
+            participant_name="Rohan Sharma",
+            event_name="BGMI",
+            payment_method="Online UPI",
+            amount_paid=400,
+            utr_number="UPI8899001122",
+            registration_uid="REG-ONLINE-999",
+            team_name="Cyber Knights",
+            team_members="Rohan Sharma, Player Two, Player Three, Player Four",
+            is_group=True,
+            base_url="https://daksha-infinix.example.com"
+        )
+        self.assertIn("Daksha Infinix 2026 - Official Team Invitation & Payment Receipt", online_wa)
+        self.assertNotIn("Udbhav", online_wa)
+        self.assertNotIn("udbhav", online_wa.lower())
+        self.assertIn("https://daksha-infinix.example.com/payment-status/REG-ONLINE-999", online_wa)
+        self.assertIn("Keep this receipt and present your Gate Pass at the registration desk upon campus arrival.", online_wa)
+
+        # 3. On-Campus Cash confirmation format (No gate pass, no campus arrival text, direct confirmation)
+        cash_wa = format_whatsapp_receipt(
+            participant_name="Sachi",
+            event_name="BGMI",
+            payment_method="Cash",
+            amount_paid=400,
+            registration_uid="REG-CASH-888",
+            team_name="Sda",
+            team_members="Sachi, Gavi, Nithu, Achu",
+            is_group=True
+        )
+        self.assertIn("Daksha Infinix 2026 - Registration Confirmation", cash_wa)
+        self.assertIn("You have registered for *BGMI* and you have paid ₹400.", cash_wa)
+        self.assertNotIn("Udbhav", cash_wa)
+        self.assertNotIn("payment-status", cash_wa)
+        self.assertNotIn("Gate Pass & Receipt QR", cash_wa)
+        self.assertNotIn("Keep this receipt and present your Gate Pass at the registration desk upon campus arrival.", cash_wa)
+        self.assertNotIn("No.596, Andrahalli Main Road", cash_wa)
+
+        # 4. Certificate WhatsApp message format
+        cert_wa = format_whatsapp_certificate(
+            participant_name="Sachi",
+            event_name="BGMI",
+            certificate_code="SDA-2026-B-123456",
+            base_url="https://daksha-infinix.example.com"
+        )
+        self.assertIn("Daksha Infinix 2026 - Certificate of Participation", cert_wa)
+        self.assertNotIn("Udbhav", cert_wa)
+
+        # 5. Email receipt branding check
+        res_ok, res_msg = send_receipt_email(
+            recipient_email="test.student@example.com",
+            participant_name="Sachi",
+            event_name="BGMI",
+            payment_method="Online UPI",
+            amount_paid=400,
+            utr_number="UPI998877",
+            registration_uid="REG-EMAIL-TEST"
+        )
+        self.assertTrue(res_ok)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -2683,21 +2683,21 @@ def team_certificates_whatsapp(reg_id):
         zip_url = f"{base_url}/certificates/team/{reg.get('registration_uid')}/zip"
         msg = (
             f"🎓 *SHREE DAKSHA ACADEMY*\n"
-            f"✨ *Official Certificate of Achievement*\n"
+            f"✨ *Daksha Infinix 2026 - Official Certificate of Achievement*\n"
             f"----------------------------------------\n"
             f"Congratulations to Team *{team_or_name}* for participating in *{reg['event_name']}*!\n\n"
             f"📦 *Download Team Certificates (ZIP Package):*\n"
             f"{zip_url}\n\n"
             f"This package contains official high-resolution PNG certificates for all team members.\n"
             f"----------------------------------------\n"
-            f"Shree Daksha Academy, Bengaluru"
+            f"Daksha Infinix 2026 • Shree Daksha Academy"
         )
     else:
         cert_code = certs[0]['certificate_code'] if certs else ''
         cert_link = f"{base_url}/certificates/{cert_code}.png" if cert_code else ""
         msg = (
             f"🎓 *SHREE DAKSHA ACADEMY*\n"
-            f"✨ *Official Certificate of Achievement*\n"
+            f"✨ *Daksha Infinix 2026 - Official Certificate of Achievement*\n"
             f"----------------------------------------\n"
             f"Congratulations to *{team_or_name}* for participating in *{reg['event_name']}*!\n\n"
         )
@@ -2706,7 +2706,7 @@ def team_certificates_whatsapp(reg_id):
         msg += (
             f"Your official high-resolution certificate has been verified and issued.\n"
             f"----------------------------------------\n"
-            f"Shree Daksha Academy, Bengaluru"
+            f"Daksha Infinix 2026 • Shree Daksha Academy"
         )
 
     share_mode = request.args.get('share', '').lower()

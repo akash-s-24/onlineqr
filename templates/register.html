@@ -2170,6 +2170,8 @@ line-height: 1.25 !important; }
             if (fullNameLabel) fullNameLabel.textContent = 'Team Lead Full Name *';
             if (fullNameInput) fullNameInput.placeholder = 'e.g. Team Lead Name';
             if (participantHeading) participantHeading.textContent = 'Team Lead & Participant details';
+            const phoneLabel = document.querySelector('label[for="phone"]');
+            if (phoneLabel) phoneLabel.textContent = "Team Lead's Mobile Number *";
 
             if (isFixedFourSquad) {
                 // Remove dropdown selector and lock strictly to 4 players
@@ -2221,6 +2223,8 @@ line-height: 1.25 !important; }
             if (fullNameLabel) fullNameLabel.textContent = "Participant's Full Name *";
             if (fullNameInput) fullNameInput.placeholder = 'e.g. Your Full Name';
             if (participantHeading) participantHeading.textContent = 'Participant details';
+            const phoneLabel = document.querySelector('label[for="phone"]');
+            if (phoneLabel) phoneLabel.textContent = "Phone / Mobile Number *";
             const addContainer = document.getElementById('additionalMembersContainer');
             if (addContainer) addContainer.innerHTML = '';
         }
@@ -2236,17 +2240,11 @@ line-height: 1.25 !important; }
         for (let i = 2; i <= teamSize; i++) {
             const row = document.createElement('div');
             row.className = 'f-form-group';
-            row.style.marginBottom = '0';
+            row.style.marginBottom = '12px';
             row.innerHTML = `
-                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;">
-                    <div>
-                        <label class="f-label" for="member_${i}_name" style="font-size:0.85rem; margin-bottom: 4px;">Player #${i} Full Name *</label>
-                        <input type="text" id="member_${i}_name" name="member_${i}_name" class="f-control" placeholder="Enter Player #${i} Full Name" required>
-                    </div>
-                    <div>
-                        <label class="f-label" for="member_${i}_phone" style="font-size:0.85rem; margin-bottom: 4px;">Player #${i} WhatsApp Number</label>
-                        <input type="tel" id="member_${i}_phone" name="member_${i}_phone" class="f-control" placeholder="10-digit mobile" pattern="[0-9]{10}">
-                    </div>
+                <div>
+                    <label class="f-label" for="member_${i}_name" style="font-size:0.85rem; margin-bottom: 4px;">Player #${i} Full Name *</label>
+                    <input type="text" id="member_${i}_name" name="member_${i}_name" class="f-control" placeholder="Enter Player #${i} Full Name" required>
                 </div>
             `;
             container.appendChild(row);

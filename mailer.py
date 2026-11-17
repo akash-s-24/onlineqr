@@ -347,8 +347,10 @@ def get_effective_base_url(custom_base=None):
 
 def format_whatsapp_receipt(participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None, base_url=None, team_name=None, team_members=None, is_group=False):
     """
-    Format a clean, official WhatsApp receipt message for Daksha Udbhav 2026.
+    Format a clean, official WhatsApp receipt message for Daksha Infinix 2026.
     Supports both individual participants and full team rosters.
+    Distinguishes between online UPI payments (official receipt + gate pass)
+    and on-campus spot registrations (lightweight direct confirmation).
     """
     base = get_effective_base_url(base_url)
     pass_link = f"{base}/payment-status/{registration_uid}" if registration_uid else base
@@ -356,15 +358,50 @@ def format_whatsapp_receipt(participant_name, event_name, payment_method, amount
     utr_text = f"\n💳 *Transaction / UTR:* {utr_number}" if utr_number else ""
     uid_text = f"\n🆔 *Registration ID:* {registration_uid}" if registration_uid else ""
 
+    is_cash_or_spot = str(payment_method or '').strip().lower() in (
+        'cash', 'spot', 'desk', 'offline', 'on-campus', 'on campus', 'pay at college', 'college desk'
+    )
+
+    if is_cash_or_spot:
+        # On-campus spot registration confirmation: simple, clear, no pre-arrival gate pass or postal address
+        if is_group and team_name:
+            title_line = "✨ *Daksha Infinix 2026 - Registration Confirmation*"
+            participant_block = (
+                f"🏆 *Team Name:* {team_name}\n"
+                f"👑 *Team Lead:* {participant_name}\n"
+                f"👥 *Squad Players:* {team_members or participant_name}{uid_text}"
+            )
+        else:
+            title_line = "✨ *Daksha Infinix 2026 - Registration Confirmation*"
+            participant_block = f"👤 *Participant:* {participant_name}{uid_text}"
+
+        message = (
+            f"🎓 *SHREE DAKSHA ACADEMY*\n"
+            f"{title_line}\n"
+            f"----------------------------------------\n"
+            f"✅ *Status:* Confirmed & Registered on Campus\n\n"
+            f"{participant_block}\n"
+            f"🎪 *Event:* {event_name}\n"
+            f"💰 *Amount Paid:* ₹{amount_paid}\n"
+            f"💵 *Payment Mode:* Cash / Spot Desk\n"
+            f"📅 *Date:* {datetime.date.today().strftime('%d %B %Y')}\n\n"
+            f"You have registered for *{event_name}* and you have paid ₹{amount_paid}.\n"
+            f"Your on-campus registration is verified and complete.\n"
+            f"----------------------------------------\n"
+            f"Daksha Infinix 2026 • Shree Daksha Academy"
+        )
+        return message
+
+    # Online registration receipt (UPI) with gate pass and arrival details
     if is_group and team_name:
-        title_line = "✨ *Daksha Udbhav 2026 - Official Team Invitation & Payment Receipt*"
+        title_line = "✨ *Daksha Infinix 2026 - Official Team Invitation & Payment Receipt*"
         participant_block = (
             f"🏆 *Team Name:* {team_name}\n"
             f"👑 *Team Lead:* {participant_name}\n"
             f"👥 *Squad Players:* {team_members or participant_name}{uid_text}"
         )
     else:
-        title_line = "✨ *Daksha Udbhav 2026 - Official Payment Receipt*"
+        title_line = "✨ *Daksha Infinix 2026 - Official Payment Receipt*"
         participant_block = f"👤 *Participant:* {participant_name}{uid_text}"
 
     message = (
@@ -379,7 +416,7 @@ def format_whatsapp_receipt(participant_name, event_name, payment_method, amount
         f"📅 *Date:* {datetime.date.today().strftime('%d %B %Y')}\n\n"
         f"🎟️ *Your Gate Pass & Receipt QR:* \n"
         f"{pass_link}\n\n"
-        f"📍 *Venue:* No.596, Andrahalli Main Road, Opp. D.Group Layout Arch, Bengaluru - 560091\n\n"
+        f"📍 *Venue:* Shree Daksha Academy Campus, Bengaluru\n\n"
         f"📞 *Event Coordinators:*\n"
         f"• NARASIMHAREDDY Y V: 6362436295\n"
         f"• PREETI P: 79752 87515\n"
@@ -398,7 +435,7 @@ def format_whatsapp_certificate(participant_name, event_name, certificate_code, 
 
     message = (
         f"🎓 *SHREE DAKSHA ACADEMY*\n"
-        f"🏆 *Daksha Udbhav 2026 - Certificate of Participation*\n"
+        f"🏆 *Daksha Infinix 2026 - Certificate of Participation*\n"
         f"----------------------------------------\n"
         f"Dear *{participant_name}*,\n\n"
         f"Congratulations on your outstanding participation in *{event_name}*!\n\n"
@@ -407,7 +444,7 @@ def format_whatsapp_certificate(participant_name, event_name, certificate_code, 
         f"{cert_download_url}\n\n"
         f"Please save and keep this certificate for your academic and extracurricular records.\n"
         f"----------------------------------------\n"
-        f"Shree Daksha Academy, Bengaluru"
+        f"Daksha Infinix 2026 • Shree Daksha Academy"
     )
     return message
 
@@ -674,7 +711,7 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
                 <div class="header">
                     <h1>{safe_college_name}</h1>
                     <p class="subtitle">Recognized by Govt. of Karnataka | Affiliated to Bangalore University | Approved by AICTE</p>
-                    <div class="badge">Official Payment Receipt • Daksha Udbhav 2026</div>
+                    <div class="badge">Official Payment Receipt • Daksha Infinix 2026</div>
                 </div>
                 <div class="content">
                     <h2 style="margin: 0 0 12px; font-size: 18px; color: #0f172a;">Dear {safe_participant_name},</h2>
