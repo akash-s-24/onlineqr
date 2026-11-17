@@ -17,9 +17,12 @@ class SlidingWindowLimiter:
 
     def get_client_ip(self):
         """
-        Extract client IP address safely, taking into account X-Forwarded-For
-        when running behind reverse proxies (Render, AWS ALB, Cloudflare, etc.).
+        Extract client IP address safely, taking into account Cloudflare (CF-Connecting-IP)
+        and reverse proxies (X-Forwarded-For, X-Real-IP) when running on Render/Cloudflare CDN.
         """
+        cf_ip = request.headers.get('CF-Connecting-IP')
+        if cf_ip and cf_ip.strip():
+            return cf_ip.strip()
         forwarded = request.headers.get('X-Forwarded-For')
         if forwarded:
             ip = forwarded.split(',')[0].strip()

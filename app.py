@@ -366,9 +366,34 @@ def _should_compress(response, request):
         return False
 
 
+def get_real_client_ip():
+    """Extract client IP taking into account Cloudflare (CF-Connecting-IP) and reverse proxies (X-Forwarded-For, X-Real-IP)."""
+    cf_ip = request.headers.get('CF-Connecting-IP')
+    if cf_ip and cf_ip.strip():
+        return cf_ip.strip()
+    forwarded = request.headers.get('X-Forwarded-For')
+    if forwarded:
+        ip = forwarded.split(',')[0].strip()
+        if ip:
+            return ip
+    real_ip = request.headers.get('X-Real-IP')
+    if real_ip:
+        return real_ip.strip()
+    return request.remote_addr or '127.0.0.1'
+
+
+def _add_vary_header(response, header_name):
+    """Safely append a header name to the Vary response header."""
+    current = response.headers.get('Vary')
+    if not current:
+        response.headers['Vary'] = header_name
+    elif header_name.lower() not in [v.strip().lower() for v in current.split(',')]:
+        response.headers['Vary'] = f"{current}, {header_name}"
+
+
 @app.after_request
 def add_security_headers(response):
-    """Add browser-side defenses to every response."""
+    """Add browser-side defenses and RFC 9213 / Edge CDN caching directives to every response."""
     response.headers.setdefault('X-Content-Type-Options', 'nosniff')
     response.headers.setdefault('X-Frame-Options', 'SAMEORIGIN')
     response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
@@ -388,24 +413,66 @@ def add_security_headers(response):
     if request.is_secure:
         response.headers.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
 
-    # Static assets are cache-busted via ?v=... query strings, so we serve them
-    # with a long browser/edge cache lifetime. Admin/member/login pages must
-    # never be cached. Everything else falls back to the framework default.
-    if request.path.startswith('/static/'):
+    # -------------------------------------------------------------------------
+    # RFC 9213 / Edge CDN Caching & Browser Cache-Control Directives
+    # -------------------------------------------------------------------------
+    # 1. Root Service Worker must NEVER be cached by edge or browser
+    if request.path == '/sw.js':
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['CDN-Cache-Control'] = 'no-store'
+        response.headers['Cloudflare-CDN-Cache-Control'] = 'no-store'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+
+    # 2. Static assets (/static/...)
+    elif request.path.startswith('/static/'):
         if request.args.get('v'):
-            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+            response.headers['Cache-Control'] = 'public, max-age=31536000, s-maxage=31536000, immutable'
+            response.headers['CDN-Cache-Control'] = 'public, max-age=31536000'
+            response.headers['Cloudflare-CDN-Cache-Control'] = 'max-age=31536000'
         else:
-            response.headers['Cache-Control'] = 'public, max-age=120, must-revalidate'
-        # Allow gzip buffering of static text assets (Flask streams these via
-        # passthrough, which bypasses compression). Removing passthrough makes
-        # the small text/CSS/JS files below compressible, so a mobile browser
-        # downloads far fewer bytes for the same cached asset.
+            response.headers['Cache-Control'] = 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400'
+            response.headers['CDN-Cache-Control'] = 'public, max-age=86400'
+            response.headers['Cloudflare-CDN-Cache-Control'] = 'max-age=86400'
+        # Allow gzip buffering of static text assets
         if response.mimetype and response.mimetype.startswith(
-            ('text/', 'application/javascript', 'application/json')
+            ('text/', 'application/javascript', 'application/json', 'image/svg+xml')
         ):
             response.direct_passthrough = False
-    elif request.path.startswith(('/admin', '/member', '/login')):
-        response.headers['Cache-Control'] = 'no-store'
+
+    # 3. Certificates (/certificates/... or /certificate/...)
+    elif request.path.startswith(('/certificates/', '/certificate/')) and not request.path.startswith(('/admin/certificates', '/certificates/team/')):
+        # Individual certificate files (webp, png, pdf, jpg, jpeg) are immutable
+        if request.path.lower().endswith(('.webp', '.png', '.pdf', '.jpg', '.jpeg')):
+            response.headers['Cache-Control'] = 'public, max-age=86400, s-maxage=31536000, stale-while-revalidate=604800'
+            response.headers['CDN-Cache-Control'] = 'public, max-age=31536000'
+            response.headers['Cloudflare-CDN-Cache-Control'] = 'max-age=31536000'
+        else:
+            response.headers['Cache-Control'] = 'private, no-cache, no-store, must-revalidate'
+            response.headers['CDN-Cache-Control'] = 'no-store'
+            response.headers['Cloudflare-CDN-Cache-Control'] = 'no-store'
+
+    # 4. Public marketing and event pages (/ and /events)
+    elif request.path in ('/', '/events') and request.method in ('GET', 'HEAD'):
+        # Only cache at edge when visitor is unauthenticated and has no pending flash messages
+        if 'user_id' not in session and '_flashes' not in session:
+            response.headers['Cache-Control'] = 'public, max-age=300, s-maxage=1800, stale-while-revalidate=3600'
+            response.headers['CDN-Cache-Control'] = 'public, max-age=1800'
+            response.headers['Cloudflare-CDN-Cache-Control'] = 'max-age=1800'
+            _add_vary_header(response, 'Cookie')
+            _add_vary_header(response, 'Accept-Encoding')
+        else:
+            response.headers['Cache-Control'] = 'private, no-cache, no-store, must-revalidate'
+            response.headers['CDN-Cache-Control'] = 'no-store'
+            response.headers['Cloudflare-CDN-Cache-Control'] = 'no-store'
+
+    # 5. Sensitive dynamic routes (admin, member, login, registration, payments, APIs)
+    elif request.path.startswith(('/admin', '/member', '/login', '/register', '/api/', '/payment-status/', '/verify/', '/task/')):
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, private'
+        response.headers['CDN-Cache-Control'] = 'no-store'
+        response.headers['Cloudflare-CDN-Cache-Control'] = 'no-store'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
 
     # gzip-compress large text responses when the client supports it.
     if _should_compress(response, request):
@@ -414,7 +481,7 @@ def add_security_headers(response):
         # Only keep compression when it actually makes the payload smaller.
         if len(compressed) < len(payload):
             response.headers['Content-Encoding'] = 'gzip'
-            response.headers['Vary'] = 'Accept-Encoding'
+            _add_vary_header(response, 'Accept-Encoding')
             response.set_data(compressed)
 
     return response
@@ -478,7 +545,7 @@ def login():
         return redirect(url_for('member_dashboard'))
 
     if request.method == 'POST':
-        client_key = request.remote_addr or 'unknown-client'
+        client_key = get_real_client_ip()
         identifier = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
 
@@ -2825,7 +2892,7 @@ def download_all_teams_certificates_zip():
     # If no teams found, do not seed dummy data - return clear warning
     if not teams_data:
         flash("No team registrations found to generate certificates ZIP.", "warning")
-        return redirect(url_for('admin_certificates'))
+        return redirect(url_for('certificates_manager'))
 
     zip_bytes = generate_all_teams_certificates_zip(teams_data)
 

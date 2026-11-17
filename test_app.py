@@ -2533,6 +2533,7 @@ class SDATestCase(unittest.TestCase):
 
     def test_46_all_teams_zip_download(self):
         """Verify downloading the all-teams certificates ZIP packages PNG certificates for all teams without PDFs."""
+        database.seed_sample_teams(force=True)
         self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
         res_zip = self.client.get('/admin/certificates/teams-zip')
         self.assertEqual(res_zip.status_code, 200)
@@ -2549,25 +2550,32 @@ class SDATestCase(unittest.TestCase):
 
     def test_47_single_row_team_certificates_and_direct_dispatch(self):
         """Verify certificates hub displays team as a single row with all member chips and preview modal."""
-        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
-        res = self.client.get('/admin/certificates')
-        self.assertEqual(res.status_code, 200)
-        html = res.data.decode('utf-8')
+        database.seed_sample_teams(force=False)
+        try:
+            self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+            res = self.client.get('/admin/certificates')
+            self.assertEqual(res.status_code, 200)
+            html = res.data.decode('utf-8')
 
-        # Verify no unwanted elements at top
-        self.assertNotIn('📦 Download All Teams ZIP', html)
-        self.assertNotIn('2. Text Coordinates', html)
-        self.assertNotIn('name_x', html)
-        self.assertNotIn('rank_x', html)
+            # Verify no unwanted elements at top
+            self.assertNotIn('📦 Download All Teams ZIP', html)
+            self.assertNotIn('2. Text Coordinates', html)
+            self.assertNotIn('name_x', html)
+            self.assertNotIn('rank_x', html)
 
-        # Verify single row squad elements
-        self.assertIn('Alpha Squad', html)
-        self.assertIn('Players (', html)
-        self.assertIn('Preview All', html)
-        self.assertIn('WhatsApp', html)
-        self.assertIn('Email', html)
-        self.assertIn('openPreviewModal', html)
-        self.assertIn('shareTeamZip', html)
+            # Verify single row squad elements
+            self.assertIn('Alpha Squad', html)
+            self.assertIn('Players (', html)
+            self.assertIn('Preview All', html)
+            self.assertIn('WhatsApp', html)
+            self.assertIn('Email', html)
+            self.assertIn('openPreviewModal', html)
+            self.assertIn('shareTeamZip', html)
+        finally:
+            database.execute_db("DELETE FROM certificates WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s)", ('%@sda-fest.edu',))
+            database.execute_db("DELETE FROM attendance WHERE registration_id IN (SELECT id FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s))", ('%@sda-fest.edu',))
+            database.execute_db("DELETE FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s)", ('%@sda-fest.edu',))
+            database.execute_db("DELETE FROM participants WHERE email LIKE %s", ('%@sda-fest.edu',))
 
     def test_48_certificate_download_routes_png_and_pdf(self):
         """Verify /certificate/download/... and /certificates/... serve PNG and PDF reliably."""
@@ -2643,59 +2651,72 @@ class SDATestCase(unittest.TestCase):
         ev_id = ev['id'] if ev else 1
 
         # Test with is_group_event=True (boolean expression)
-        reg_true = create_registration(
-            full_name="Postgres Bool Test Lead",
-            email=f"lead_{secrets.token_hex(4)}@test.com",
-            phone="9988776655",
-            college_name="Test College",
-            department="PCMC",
-            semester="Second PUC",
-            event_id=ev_id,
-            team_name=f"BoolTeam_{secrets.token_hex(3)}",
-            team_size=4,
-            team_members="Lead, Member 2, Member 3, Member 4",
-            payment_status="paid",
-            amount_paid=400,
-            payment_method="Online",
-            utr_number=f"UTR{secrets.token_hex(4).upper()}",
-            registered_by=1,
-            is_group_event=True  # Python boolean
-        )
-        self.assertTrue(reg_true['ok'])
-        row_true = query_db("SELECT is_group FROM registrations WHERE id = %s", (reg_true['registration_id'],), one=True)
-        self.assertEqual(row_true['is_group'], 1)
-        self.assertIsInstance(row_true['is_group'], int)
+        reg_true_id = None
+        reg_false_id = None
+        try:
+            reg_true = create_registration(
+                full_name="Postgres Bool Test Lead",
+                email=f"lead_{secrets.token_hex(4)}@test.com",
+                phone="9988776655",
+                college_name="Test College",
+                department="PCMC",
+                semester="Second PUC",
+                event_id=ev_id,
+                team_name=f"BoolTeam_{secrets.token_hex(3)}",
+                team_size=4,
+                team_members="Lead, Member 2, Member 3, Member 4",
+                payment_status="paid",
+                amount_paid=400,
+                payment_method="Online",
+                utr_number=f"UTR{secrets.token_hex(4).upper()}",
+                registered_by=1,
+                is_group_event=True  # Python boolean
+            )
+            self.assertTrue(reg_true['ok'])
+            reg_true_id = reg_true['registration_id']
+            row_true = query_db("SELECT is_group FROM registrations WHERE id = %s", (reg_true['registration_id'],), one=True)
+            self.assertEqual(row_true['is_group'], 1)
+            self.assertIsInstance(row_true['is_group'], int)
 
-        # Test with is_group_event=False (boolean expression)
-        reg_false = create_registration(
-            full_name="Postgres Bool Test Solo",
-            email=f"solo_{secrets.token_hex(4)}@test.com",
-            phone="9988776654",
-            college_name="Test College",
-            department="PCMC",
-            semester="Second PUC",
-            event_id=ev_id,
-            team_name=None,
-            team_size=1,
-            team_members=None,
-            payment_status="paid",
-            amount_paid=100,
-            payment_method="Cash",
-            utr_number=None,
-            registered_by=1,
-            is_group_event=False  # Python boolean
-        )
-        self.assertTrue(reg_false['ok'])
-        row_false = query_db("SELECT is_group FROM registrations WHERE id = %s", (reg_false['registration_id'],), one=True)
-        self.assertEqual(row_false['is_group'], 0)
-        self.assertIsInstance(row_false['is_group'], int)
+            # Test with is_group_event=False (boolean expression)
+            reg_false = create_registration(
+                full_name="Postgres Bool Test Solo",
+                email=f"solo_{secrets.token_hex(4)}@test.com",
+                phone="9988776654",
+                college_name="Test College",
+                department="PCMC",
+                semester="Second PUC",
+                event_id=ev_id,
+                team_name=None,
+                team_size=1,
+                team_members=None,
+                payment_status="paid",
+                amount_paid=100,
+                payment_method="Cash",
+                utr_number=None,
+                registered_by=1,
+                is_group_event=False  # Python boolean
+            )
+            self.assertTrue(reg_false['ok'])
+            reg_false_id = reg_false['registration_id']
+            row_false = query_db("SELECT is_group FROM registrations WHERE id = %s", (reg_false['registration_id'],), one=True)
+            self.assertEqual(row_false['is_group'], 0)
+            self.assertIsInstance(row_false['is_group'], int)
+        finally:
+            if reg_true_id:
+                database.execute_db("DELETE FROM registrations WHERE id = %s", (reg_true_id,))
+            if reg_false_id:
+                database.execute_db("DELETE FROM registrations WHERE id = %s", (reg_false_id,))
 
         # Test seed_sample_teams runs cleanly without any Seed Team Error and cleans up
-        seed_sample_teams(force=False)
-        database.execute_db("DELETE FROM certificates WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s)", ('%@sda-fest.edu',))
-        database.execute_db("DELETE FROM attendance WHERE registration_id IN (SELECT id FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s))", ('%@sda-fest.edu',))
-        database.execute_db("DELETE FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s)", ('%@sda-fest.edu',))
-        database.execute_db("DELETE FROM participants WHERE email LIKE %s", ('%@sda-fest.edu',))
+        try:
+            seed_sample_teams(force=True)
+            self.assertGreaterEqual(len(query_db("SELECT id FROM registrations WHERE team_name = %s", ('Alpha Squad',))), 1)
+        finally:
+            database.execute_db("DELETE FROM certificates WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s)", ('%@sda-fest.edu',))
+            database.execute_db("DELETE FROM attendance WHERE registration_id IN (SELECT id FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s))", ('%@sda-fest.edu',))
+            database.execute_db("DELETE FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s)", ('%@sda-fest.edu',))
+            database.execute_db("DELETE FROM participants WHERE email LIKE %s", ('%@sda-fest.edu',))
 
     def test_52_certificate_typography_whatsapp_and_email_attachment(self):
         """Verify bundled TrueType font loading, compact file sizes, WhatsApp direct chat link, and email PDF attachment."""
@@ -3319,6 +3340,164 @@ class SDATestCase(unittest.TestCase):
         async_data = async_res.get_json()
         self.assertEqual(async_data.get('status'), 'started')
         self.assertTrue(bool(async_data.get('task_id')))
+
+    def test_64_edge_cdn_caching_and_monetization(self):
+        """Verify:
+        1. RFC 9213 / Edge CDN headers on versioned static assets (s-maxage, CDN-Cache-Control, immutable).
+        2. Edge CDN headers on unversioned static assets.
+        3. Root Service Worker cache isolation (no-store / no-cache).
+        4. Long-lifetime edge caching on generated certificates (.png, .webp, .pdf).
+        5. Public event page CDN edge caching (/events has s-maxage=1800, Vary: Cookie) when unauthenticated.
+        6. Sensitive routes (admin, login, register, payment-status, api) strictly enforce no-store at edge.
+        7. Cloudflare CF-Connecting-IP proxy-aware client resolution.
+        8. Fest commercial sponsorship engine & attendee coupon perks render correctly.
+        """
+        from rate_limiter import limiter
+        from app import get_real_client_ip
+        from certificate_generator import generate_certificate
+
+        # 1. Versioned static asset edge caching
+        res_v = self.client.get('/static/css/theme.css?v=20261111_v1')
+        self.assertEqual(res_v.status_code, 200)
+        cc_v = res_v.headers.get('Cache-Control', '')
+        self.assertIn('public', cc_v)
+        self.assertIn('s-maxage=31536000', cc_v)
+        self.assertIn('immutable', cc_v)
+        self.assertEqual(res_v.headers.get('CDN-Cache-Control'), 'public, max-age=31536000')
+        self.assertEqual(res_v.headers.get('Cloudflare-CDN-Cache-Control'), 'max-age=31536000')
+        res_v.close()
+
+        # 2. Unversioned static asset edge caching
+        res_unv = self.client.get('/static/css/theme.css')
+        self.assertEqual(res_unv.status_code, 200)
+        cc_unv = res_unv.headers.get('Cache-Control', '')
+        self.assertIn('public', cc_unv)
+        self.assertIn('s-maxage=86400', cc_unv)
+        self.assertIn('stale-while-revalidate=86400', cc_unv)
+        self.assertEqual(res_unv.headers.get('CDN-Cache-Control'), 'public, max-age=86400')
+        res_unv.close()
+
+        # 3. Service Worker must never be cached at the edge
+        res_sw = self.client.get('/sw.js')
+        self.assertEqual(res_sw.status_code, 200)
+        self.assertIn('no-store', res_sw.headers.get('Cache-Control', ''))
+        self.assertEqual(res_sw.headers.get('CDN-Cache-Control'), 'no-store')
+        res_sw.close()
+
+        # 4. Certificates edge caching
+        # Generate or find a certificate to test
+        cert_code = "SDA-2026-BB-TESTDL"
+        png_path = os.path.join(Config.CERTIFICATE_FOLDER, f"{cert_code}.png")
+        if not os.path.exists(png_path):
+            generate_certificate(
+                participant_name="CDN Test Student",
+                event_name="Battle of the Bands",
+                event_date="17 November 2026",
+                college_name="Shree Daksha Academy",
+                cert_code=cert_code
+            )
+        res_cert = self.client.get(f"/certificates/{cert_code}.png")
+        self.assertEqual(res_cert.status_code, 200)
+        cc_cert = res_cert.headers.get('Cache-Control', '')
+        self.assertIn('public', cc_cert)
+        self.assertIn('s-maxage=31536000', cc_cert)
+        self.assertEqual(res_cert.headers.get('CDN-Cache-Control'), 'public, max-age=31536000')
+        self.assertEqual(res_cert.headers.get('Cloudflare-CDN-Cache-Control'), 'max-age=31536000')
+        res_cert.close()
+
+        # 5. Public event page edge caching
+        res_events = self.client.get('/events')
+        self.assertEqual(res_events.status_code, 200)
+        cc_events = res_events.headers.get('Cache-Control', '')
+        self.assertIn('public', cc_events)
+        self.assertIn('s-maxage=1800', cc_events)
+        self.assertEqual(res_events.headers.get('CDN-Cache-Control'), 'public, max-age=1800')
+        vary = res_events.headers.get('Vary', '')
+        self.assertIn('Cookie', vary)
+        self.assertIn('Accept-Encoding', vary)
+
+        # 6. Sensitive routes never cached
+        for route in ('/login', '/register', '/admin/dashboard'):
+            res_sens = self.client.get(route)
+            cc_sens = res_sens.headers.get('Cache-Control', '')
+            self.assertIn('no-store', cc_sens)
+            self.assertEqual(res_sens.headers.get('CDN-Cache-Control'), 'no-store')
+            self.assertEqual(res_sens.headers.get('Cloudflare-CDN-Cache-Control'), 'no-store')
+
+        # 7. Cloudflare CF-Connecting-IP proxy-aware client resolution
+        with app.test_request_context('/', headers={'CF-Connecting-IP': '203.0.113.195', 'X-Forwarded-For': '198.51.100.2'}):
+            self.assertEqual(limiter.get_client_ip(), '203.0.113.195')
+            self.assertEqual(get_real_client_ip(), '203.0.113.195')
+
+        # 8. Sponsorship Engine & Monetization
+        self.assertTrue(Config.ENABLE_SPONSORS)
+        self.assertGreaterEqual(len(Config.SPONSORS), 3)
+
+        # Check that sponsors section renders in public events page
+        events_html = res_events.data.decode('utf-8')
+        self.assertIn('id="sponsors"', events_html)
+        self.assertIn('Supported by Industry Leaders', events_html)
+        self.assertIn('NexGen Cloud', events_html)
+        self.assertIn('HyperZone Esports', events_html)
+        self.assertIn('DAKSHA-NEXGEN', events_html)
+        self.assertIn('HYPER-DAKSHA26', events_html)
+        res_events.close()
+
+        # Check attendee Gate Pass / Payment Status sponsor vouchers
+        uid_token = uuid.uuid4().hex[:8]
+        ev = database.query_db("SELECT id, event_name, event_fee FROM events LIMIT 1", one=True)
+        reg_info = database.create_registration(
+            full_name="Monetization Test Student",
+            email=f"monetize_{uid_token}@testdomain.org",
+            phone="9876543210",
+            college_name="Test College",
+            department="PCMB",
+            semester="II PUC",
+            event_id=ev['id'],
+            team_name=None,
+            team_size=1,
+            team_members=None,
+            payment_status='paid',
+            amount_paid=ev['event_fee'],
+            payment_method='Online',
+            utr_number=f"UTRMONETIZE{uid_token}",
+            registered_by=1,
+            is_group_event=False
+        )
+        self.assertTrue(reg_info.get('ok'))
+        test_uid = reg_info['registration_uid']
+
+        try:
+            pass_res = self.client.get(f'/payment-status/{test_uid}')
+            self.assertEqual(pass_res.status_code, 200)
+            pass_html = pass_res.data.decode('utf-8')
+            # Verify sponsor perks card exists on attendee gate pass
+            self.assertIn('sponsor-pass-perks', pass_html)
+            self.assertIn('Exclusive Fest Partner Perks & Vouchers', pass_html)
+            self.assertIn('INFINIX-BITE20', pass_html)
+            self.assertIn('HYPER-DAKSHA26', pass_html)
+            pass_res.close()
+        finally:
+            database.execute_db("DELETE FROM registrations WHERE registration_uid = %s", (test_uid,))
+            database.execute_db("DELETE FROM participants WHERE email = %s", (f"monetize_{uid_token}@testdomain.org",))
+
+        # Check admin dashboard Edge CDN & Sponsorship Monetization panel
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        dash_res = self.client.get('/admin/dashboard')
+        self.assertEqual(dash_res.status_code, 200)
+        dash_html = dash_res.data.decode('utf-8')
+        self.assertIn('Edge CDN Acceleration', dash_html)
+        self.assertIn('Sponsorship Monetization', dash_html)
+        self.assertIn('Edge CDN: Active', dash_html)
+        self.assertIn('RFC 9213', dash_html)
+        dash_res.close()
+
+        # Check that authenticated visitors receive private, no-store for /events to prevent leaking user context
+        auth_events = self.client.get('/events')
+        self.assertEqual(auth_events.status_code, 200)
+        self.assertIn('private', auth_events.headers.get('Cache-Control', ''))
+        self.assertEqual(auth_events.headers.get('CDN-Cache-Control'), 'no-store')
+        auth_events.close()
 
 
 if __name__ == '__main__':
