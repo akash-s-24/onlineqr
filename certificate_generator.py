@@ -501,28 +501,28 @@ def generate_certificate(participant_name, event_name, event_date, college_name=
         if effective_lead and other_members:
             # Team Layout: Team lead on line 1, members on line 2 (and 3 if >4 members)
             lead_display = f"{effective_lead} (Team Lead)" if not effective_lead.lower().endswith('(team lead)') and not effective_lead.lower().endswith('(lead)') else effective_lead
-            f_lead, _ = fit_text_font(lead_display, "georgiab.ttf", 66, 30)
+            f_lead, _ = fit_text_font(lead_display, "georgia.ttf", 52, 26)
 
             if len(other_members) <= 4:
                 mem_display = " • ".join(other_members)
-                f_mem, _ = fit_text_font(mem_display, "georgia.ttf", 46, 22)
+                f_mem, _ = fit_text_font(mem_display, "georgia.ttf", 38, 20)
 
-                draw.text((cx, line_y - 65), lead_display, fill=name_color, font=f_lead, anchor="mb")
-                draw.text((cx, line_y - 14), mem_display, fill=(30, 41, 59), font=f_mem, anchor="mb")
+                draw.text((cx, line_y - 58), lead_display, fill=name_color, font=f_lead, anchor="mb")
+                draw.text((cx, line_y - 18), mem_display, fill=(30, 41, 59), font=f_mem, anchor="mb")
             else:
                 mid = (len(other_members) + 1) // 2
                 mem_line1 = " • ".join(other_members[:mid])
                 mem_line2 = " • ".join(other_members[mid:])
-                f_mem1, _ = fit_text_font(mem_line1, "georgia.ttf", 42, 20)
-                f_mem2, _ = fit_text_font(mem_line2, "georgia.ttf", 42, 20)
+                f_mem1, _ = fit_text_font(mem_line1, "georgia.ttf", 34, 18)
+                f_mem2, _ = fit_text_font(mem_line2, "georgia.ttf", 34, 18)
 
-                draw.text((cx, line_y - 82), lead_display, fill=name_color, font=f_lead, anchor="mb")
-                draw.text((cx, line_y - 44), mem_line1, fill=(30, 41, 59), font=f_mem1, anchor="mb")
-                draw.text((cx, line_y - 12), mem_line2, fill=(30, 41, 59), font=f_mem2, anchor="mb")
+                draw.text((cx, line_y - 74), lead_display, fill=name_color, font=f_lead, anchor="mb")
+                draw.text((cx, line_y - 42), mem_line1, fill=(30, 41, 59), font=f_mem1, anchor="mb")
+                draw.text((cx, line_y - 14), mem_line2, fill=(30, 41, 59), font=f_mem2, anchor="mb")
         else:
-            # Solo Participant / Individual Member: Clean, bold, authoritative serif name sitting naturally above the line
-            f_solo, _ = fit_text_font(clean_p_name, "georgiab.ttf", 88, 36)
-            draw.text((cx, line_y - 14), clean_p_name, fill=name_color, font=f_solo, anchor="mb")
+            # Solo Participant / Individual Member: Clean, elegant, medium/regular serif matching website style with proper spacing
+            f_solo, _ = fit_text_font(clean_p_name, "georgia.ttf", 56, 30)
+            draw.text((cx, line_y - 18), clean_p_name, fill=name_color, font=f_solo, anchor="mb")
 
     else:
 
@@ -773,30 +773,13 @@ def generate_team_certificates_zip(team_members_str, event_name, event_date, col
             except Exception as e:
                 print(f"Error reading PNG for {clean_member}: {e}")
 
-            # Add PDF to ZIP
-            pdf_path = png_filepath.replace('.png', '.pdf')
-            if os.path.exists(pdf_path):
-                try:
-                    with open(pdf_path, 'rb') as f:
-                        zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.pdf", f.read())
-                except Exception as e:
-                    print(f"Error reading PDF for {clean_member}: {e}")
-            else:
-                try:
-                    with Image.open(png_filepath) as img:
-                        pdf_buffer = io.BytesIO()
-                        img.convert('RGB').save(pdf_buffer, format='PDF', resolution=100.0)
-                        zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.pdf", pdf_buffer.getvalue())
-                except Exception as e:
-                    print(f"Error converting cert for {clean_member}: {e}")
-
     return zip_buffer.getvalue()
 
 
 def generate_all_teams_certificates_zip(teams_data):
     """
-    Generates a high-resolution PNG & PDF certificate for each team (single certificate per team,
-    with ONLY the team name displayed), and packages them into a clean ZIP file.
+    Generates high-resolution PNG certificates for each team (single certificate per team,
+    with ONLY the team name displayed), and packages them into a clean ZIP file (PNG only).
     teams_data: list of dicts with keys: team_name, event_name, event_date, college_name, cert_code, etc.
     """
     zip_buffer = io.BytesIO()
@@ -832,22 +815,5 @@ def generate_all_teams_certificates_zip(teams_data):
                     zip_file.writestr(f"{safe_team}_{safe_ev}_Certificate.png", f.read())
             except Exception as e:
                 print(f"Error reading PNG for {clean_team}: {e}")
-
-            # Add PDF to ZIP
-            pdf_path = png_filepath.replace('.png', '.pdf')
-            if os.path.exists(pdf_path):
-                try:
-                    with open(pdf_path, 'rb') as f:
-                        zip_file.writestr(f"{safe_team}_{safe_ev}_Certificate.pdf", f.read())
-                except Exception as e:
-                    print(f"Error reading PDF for {clean_team}: {e}")
-            else:
-                try:
-                    with Image.open(png_filepath) as img:
-                        pdf_buffer = io.BytesIO()
-                        img.convert('RGB').save(pdf_buffer, format='PDF', resolution=100.0)
-                        zip_file.writestr(f"{safe_team}_{safe_ev}_Certificate.pdf", pdf_buffer.getvalue())
-                except Exception as e:
-                    print(f"Error converting cert to PDF for {clean_team}: {e}")
 
     return zip_buffer.getvalue()

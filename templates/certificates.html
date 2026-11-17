@@ -220,31 +220,31 @@
                             </a>
                             {% endif %}
 
-                            <!-- Direct Email with all PDFs attached automatically -->
+                            <!-- Direct Email with ZIP for team or PNG for solo -->
                             <form method="POST" action="{{ url_for('send_team_certificates_email', reg_id=row.registration_id) }}" style="display:inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="candy-btn"
                                     style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px;"
-                                    title="Email certificate PDF(s) to recipient with file attached"
-                                    onclick="return confirm('Email certificate PDF(s) to {{ row.email }}?');">
+                                    title="Email certificate (ZIP package for teams, PNG for solo)"
+                                    onclick="return confirm('Email certificate to {{ row.email }}?');">
                                     ✉️ Email
                                 </button>
                             </form>
 
-                            <!-- Direct Download: ZIP for teams, PDF for solo -->
+                            <!-- Direct Download: ZIP for teams, PNG for solo -->
                             {% if row.is_group %}
                             <a href="{{ url_for('download_team_certificates_zip', reg_id=row.registration_id) }}"
                                 class="candy-btn candy-btn-secondary"
                                 style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
-                                title="Download team certificates ZIP package">
+                                title="Download team certificates ZIP package (PNG only)">
                                 📦 ZIP
                             </a>
                             {% else %}
-                            <a href="{{ url_for('download_certificate_file', filename=row.primary_cert_code ~ '.pdf') }}"
+                            <a href="{{ url_for('download_certificate_file', filename=row.primary_cert_code ~ '.png', download='1') }}"
                                 class="candy-btn candy-btn-secondary"
                                 style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
-                                title="Download official certificate PDF">
-                                📄 PDF
+                                title="Download official certificate PNG">
+                                🖼️ PNG
                             </a>
                             {% endif %}
 

@@ -2442,12 +2442,12 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(res_zip.content_type, 'application/zip')
         self.assertIn('Alpha_Squad_Test_Certificates.zip', res_zip.headers.get('Content-Disposition', ''))
 
-        # Inspect ZIP content
+        # Inspect ZIP content: must contain strictly PNG files, NO PDFs
         import io, zipfile
         zf = zipfile.ZipFile(io.BytesIO(res_zip.data))
         zip_namelist = zf.namelist()
         self.assertTrue(any(n.endswith('.png') for n in zip_namelist))
-        self.assertTrue(any(n.endswith('.pdf') for n in zip_namelist))
+        self.assertFalse(any(n.endswith('.pdf') for n in zip_namelist), "The ZIP should contain only PNG files, not PDFs")
 
         # Clean up
         for c in certs:
@@ -2532,7 +2532,7 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(res2.status_code, 200)
 
     def test_46_all_teams_zip_download(self):
-        """Verify downloading the all-teams certificates ZIP packages PNG and PDF for all teams."""
+        """Verify downloading the all-teams certificates ZIP packages PNG certificates for all teams without PDFs."""
         self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
         res_zip = self.client.get('/admin/certificates/teams-zip')
         self.assertEqual(res_zip.status_code, 200)
@@ -2542,10 +2542,10 @@ class SDATestCase(unittest.TestCase):
         import io, zipfile
         zf = zipfile.ZipFile(io.BytesIO(res_zip.data))
         names = zf.namelist()
-        self.assertGreaterEqual(len(names), 8, "Expected certificates for all 4 to 8 teams")
+        self.assertGreaterEqual(len(names), 4, "Expected certificates for all teams")
         self.assertTrue(any('Alpha_Squad' in n for n in names))
-        self.assertTrue(any(n.endswith('.png') for n in names))
-        self.assertTrue(any(n.endswith('.pdf') for n in names))
+        self.assertTrue(all(n.endswith('.png') for n in names), "ZIP should contain strictly PNG files")
+        self.assertFalse(any(n.endswith('.pdf') for n in names), "ZIP should not contain any PDF files")
 
     def test_47_single_row_team_certificates_and_direct_dispatch(self):
         """Verify certificates hub displays team as a single row with all member chips and preview modal."""
@@ -2854,7 +2854,7 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(len(dummy_rows), 0, "No dummy registrations with @sda-fest.edu should exist in database")
 
     def test_56_team_whatsapp_sends_all_teammates_certificates_at_once(self):
-        """Verify WhatsApp certificate dispatch includes all teammates' certificates and ZIP link in a single message."""
+        """Verify WhatsApp certificate dispatch for teams sends only the team ZIP package (PNG only), while solo sends direct certificate link."""
         import urllib.parse
         from database import create_registration, execute_db, query_db
 
@@ -2910,16 +2910,11 @@ class SDATestCase(unittest.TestCase):
             parsed_query = urllib.parse.parse_qs(urllib.parse.urlparse(wa_loc).query)
             msg_text = parsed_query.get('text', [''])[0]
 
-            # Verify all 4 teammates are listed with their individual PDF download links
-            self.assertIn("Leader Alpha", msg_text)
-            self.assertIn("Striker Bravo", msg_text)
-            self.assertIn("Scout Charlie", msg_text)
-            self.assertIn("Medic Delta", msg_text)
-            self.assertIn(".pdf", msg_text)
-            self.assertIn("Teammates' Official Certificates", msg_text)
-
-            # Verify ZIP download package link is present
+            # Verify ONLY the team ZIP package link is sent, NO separate per-member file links
             self.assertIn(f"/certificates/team/{reg_uid}/zip", msg_text)
+            self.assertIn("Download Team Certificates (ZIP Package)", msg_text)
+            self.assertNotIn("Striker Bravo:", msg_text)
+            self.assertNotIn(".pdf", msg_text)
 
             # 2. Verify public access to the team ZIP route without admin session
             anon_client = self.app.test_client()
@@ -2928,13 +2923,21 @@ class SDATestCase(unittest.TestCase):
             self.assertEqual(res_zip.mimetype, 'application/zip')
             self.assertGreater(len(res_zip.data), 1000)
 
+            # Verify the ZIP contains strictly PNG files, NO PDF files
+            import io, zipfile
+            zf = zipfile.ZipFile(io.BytesIO(res_zip.data))
+            namelist = zf.namelist()
+            self.assertGreater(len(namelist), 0)
+            self.assertTrue(all(n.endswith('.png') for n in namelist), "ZIP must contain strictly PNG files")
+            self.assertFalse(any(n.endswith('.pdf') for n in namelist), "ZIP must not contain any PDF files")
+
         finally:
             execute_db("DELETE FROM certificates WHERE registration_id = %s", (reg_id,))
             execute_db("DELETE FROM registrations WHERE id = %s", (reg_id,))
             execute_db("DELETE FROM participants WHERE email = %s", (f"wa_squad_{token}@testdomain.org",))
 
     def test_57_certificate_typography_suitable_and_normal(self):
-        """Verify certificate generator applies balanced, normal, bold typography above placeholder line."""
+        """Verify certificate generator applies reduced size, regular serif typography with proper spacing above placeholder line."""
         from certificate_generator import generate_certificate
         from PIL import Image
 
@@ -2957,6 +2960,65 @@ class SDATestCase(unittest.TestCase):
         if os.path.exists(pdf_file):
             try: os.remove(pdf_file)
             except OSError: pass
+
+    def test_58_team_certificates_email_sends_zip_only(self):
+        """Verify team certificate email dispatches a single ZIP attachment with PNG files only, while solo sends PNG."""
+        from database import create_registration, execute_db, query_db
+
+        ev = query_db("""
+            SELECT e.id, e.event_name FROM events e
+            LEFT JOIN (
+                SELECT event_id, SUM(CASE WHEN is_group = 1 THEN team_size ELSE 1 END) as cnt
+                FROM registrations WHERE COALESCE(status, 'pending') <> 'cancelled'
+                GROUP BY event_id
+            ) r ON e.id = r.event_id
+            WHERE e.is_group = 1 AND COALESCE(r.cnt, 0) + 4 <= e.max_participants
+            LIMIT 1
+        """, one=True)
+        self.assertIsNotNone(ev)
+
+        token = uuid.uuid4().hex[:6]
+        team_members_str = "Leader Alpha, Striker Bravo, Scout Charlie, Medic Delta"
+        reg_info = create_registration(
+            full_name="Email Squad Lead",
+            email=f"email_squad_{token}@testdomain.org",
+            phone="9123456781",
+            college_name="Daksha Tech",
+            department="Computer Science",
+            semester="4th Sem",
+            event_id=ev['id'],
+            team_name=f"EmailSquad_{token}",
+            team_size=4,
+            team_members=team_members_str,
+            payment_status='paid',
+            amount_paid=400,
+            payment_method='Cash',
+            utr_number=f"CASH-{token}",
+            registered_by=1,
+            is_group_event=True
+        )
+        self.assertTrue(reg_info.get('ok'))
+        reg_id = reg_info['registration_id']
+
+        try:
+            self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+            # Generate certs first
+            self.client.post(f'/admin/certificates/generate/{reg_id}', follow_redirects=True)
+
+            # Send team email
+            res_email = self.client.post(f'/admin/certificates/team-email/{reg_id}', follow_redirects=True)
+            self.assertEqual(res_email.status_code, 200)
+            self.assertIn("Successfully emailed team certificates ZIP package", res_email.data.decode('utf-8'))
+
+            # Check all certificates are marked sent
+            certs = query_db("SELECT email_status FROM certificates WHERE registration_id = %s", (reg_id,))
+            self.assertEqual(len(certs), 4)
+            self.assertTrue(all(c['email_status'] == 'sent' for c in certs))
+
+        finally:
+            execute_db("DELETE FROM certificates WHERE registration_id = %s", (reg_id,))
+            execute_db("DELETE FROM registrations WHERE id = %s", (reg_id,))
+            execute_db("DELETE FROM participants WHERE email = %s", (f"email_squad_{token}@testdomain.org",))
 
 
 if __name__ == '__main__':

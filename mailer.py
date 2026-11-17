@@ -230,8 +230,15 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
 
         # Attach Certificate File if exists
         if attachment_bytes and safe_attach_name:
-            is_pdf = safe_attach_name.lower().endswith('.pdf')
-            part = MIMEBase("application", "pdf" if is_pdf else "octet-stream")
+            if safe_attach_name.lower().endswith('.pdf'):
+                maintype, subtype = "application", "pdf"
+            elif safe_attach_name.lower().endswith('.zip'):
+                maintype, subtype = "application", "zip"
+            elif safe_attach_name.lower().endswith('.png'):
+                maintype, subtype = "image", "png"
+            else:
+                maintype, subtype = "application", "octet-stream"
+            part = MIMEBase(maintype, subtype)
             part.set_payload(attachment_bytes)
             encoders.encode_base64(part)
             part.add_header(
@@ -241,8 +248,16 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
             msg.attach(part)
         elif certificate_path and os.path.exists(certificate_path):
             with open(certificate_path, "rb") as attachment:
-                is_pdf = certificate_path.lower().endswith('.pdf')
-                part = MIMEBase("application", "pdf" if is_pdf else "octet-stream")
+                base_fn = os.path.basename(certificate_path).lower()
+                if base_fn.endswith('.pdf'):
+                    maintype, subtype = "application", "pdf"
+                elif base_fn.endswith('.zip'):
+                    maintype, subtype = "application", "zip"
+                elif base_fn.endswith('.png'):
+                    maintype, subtype = "image", "png"
+                else:
+                    maintype, subtype = "application", "octet-stream"
+                part = MIMEBase(maintype, subtype)
                 part.set_payload(attachment.read())
             encoders.encode_base64(part)
             part.add_header(

@@ -2077,10 +2077,11 @@ def generate_bulk_certificates():
     return redirect(url_for('certificates_manager'))
 
 @app.route('/admin/certificates/send-team-email/<int:reg_id>', methods=['POST'])
+@app.route('/admin/certificates/team-email/<int:reg_id>', methods=['POST'])
 @admin_required
 def send_team_certificates_email(reg_id):
     reg = query_db("""
-        SELECT r.*, p.full_name, p.email, p.phone, e.event_name
+        SELECT r.*, p.full_name, p.email, p.phone, p.college_name, p.department, p.semester, e.event_name, e.event_date
         FROM registrations r
         JOIN participants p ON r.participant_id = p.id
         JOIN events e ON r.event_id = e.id
@@ -2098,33 +2099,87 @@ def send_team_certificates_email(reg_id):
         flash("No certificates generated for this registration yet.", "warning")
         return redirect(url_for('certificates_manager'))
 
-    sent_count = 0
-    for cert in certs:
-        file_path = cert.get('file_path')
-        pdf_path = os.path.splitext(file_path)[0] + '.pdf' if file_path else None
-        if not (pdf_path and os.path.exists(pdf_path)) and file_path and os.path.exists(file_path):
-            try:
-                with Image.open(file_path) as im:
-                    im.convert('RGB').save(pdf_path, format='PDF', resolution=150.0)
-            except Exception:
-                pass
-        attach_path = pdf_path if (pdf_path and os.path.exists(pdf_path)) else file_path
+    is_team = bool(reg.get('is_group') == 1 or len(certs) > 1)
+    team_or_name = (reg.get('team_name') or reg.get('full_name') or 'Team').strip()
 
-        success, _ = send_certificate_email(
+    if is_team:
+        safe_team = secure_filename(team_or_name) or 'Team'
+        zip_filename = f"Team_{safe_team}_Certificates.zip"
+
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as zip_file:
+            for idx, c in enumerate(certs):
+                rec_name = c.get('recipient_name') or reg.get('full_name') or f"Member_{idx+1}"
+                png_file = os.path.join(Config.CERTIFICATE_FOLDER, f"{c['certificate_code']}.png")
+                if not os.path.exists(png_file) or os.path.getsize(png_file) < 100:
+                    generate_certificate(
+                        participant_name=rec_name,
+                        event_name=reg['event_name'],
+                        event_date=reg['event_date'],
+                        college_name=reg.get('college_name'),
+                        cert_code=c['certificate_code'],
+                        department=reg.get('department') or 'PCMC',
+                        semester=reg.get('semester') or 'Second PUC'
+                    )
+                safe_name = re.sub(r'[^A-Za-z0-9._-]+', '_', rec_name).strip('._') or f"Member_{idx+1}"
+                safe_ev = re.sub(r'[^A-Za-z0-9._-]+', '_', str(reg['event_name'] or 'Event')).strip('._') or "Event"
+                if os.path.exists(png_file):
+                    with open(png_file, 'rb') as f:
+                        zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.png", f.read())
+
+        zip_bytes = zip_buffer.getvalue()
+
+        success, msg = send_certificate_email(
+            recipient_email=reg['email'],
+            participant_name=f"Team {team_or_name}",
+            event_name=reg['event_name'],
+            certificate_path=None,
+            certificate_code=f"TEAM-{reg['registration_uid']}",
+            attachment_bytes=zip_bytes,
+            attachment_filename=zip_filename
+        )
+        if success:
+            execute_db(
+                "UPDATE certificates SET email_status = 'sent', sent_at = CURRENT_TIMESTAMP WHERE registration_id = %s",
+                (reg_id,)
+            )
+            flash(f"Successfully emailed team certificates ZIP package (PNG only) to {reg['email']}!", 'success')
+        else:
+            flash(f"Failed to email certificates: {msg}", 'danger')
+    else:
+        cert = certs[0]
+        png_file = os.path.join(Config.CERTIFICATE_FOLDER, f"{cert['certificate_code']}.png")
+        if not os.path.exists(png_file) or os.path.getsize(png_file) < 100:
+            generate_certificate(
+                participant_name=cert.get('recipient_name') or reg['full_name'],
+                event_name=reg['event_name'],
+                event_date=reg['event_date'],
+                college_name=reg.get('college_name'),
+                cert_code=cert['certificate_code'],
+                department=reg.get('department') or 'PCMC',
+                semester=reg.get('semester') or 'Second PUC'
+            )
+        safe_name = re.sub(r'[^A-Za-z0-9._-]+', '_', cert.get('recipient_name') or reg['full_name']).strip('._') or "Certificate"
+        safe_ev = re.sub(r'[^A-Za-z0-9._-]+', '_', str(reg['event_name'] or 'Event')).strip('._') or "Event"
+        png_filename = f"{safe_name}_{safe_ev}_Certificate.png"
+
+        success, msg = send_certificate_email(
             recipient_email=reg['email'],
             participant_name=cert.get('recipient_name') or reg['full_name'],
             event_name=reg['event_name'],
-            certificate_path=attach_path,
-            certificate_code=cert['certificate_code']
+            certificate_path=png_file,
+            certificate_code=cert['certificate_code'],
+            attachment_filename=png_filename
         )
         if success:
             execute_db(
                 "UPDATE certificates SET email_status = 'sent', sent_at = CURRENT_TIMESTAMP WHERE id = %s",
                 (cert['id'],)
             )
-            sent_count += 1
+            flash(f"Successfully emailed certificate to {reg['email']}!", 'success')
+        else:
+            flash(f"Failed to email certificate: {msg}", 'danger')
 
-    flash(f"Successfully dispatched {sent_count} certificate email(s) with PDF attachment to {reg['email']}!", 'success')
     return redirect(url_for('certificates_manager'))
 
 @app.route('/admin/certificates/send-email/<int:cert_id>', methods=['POST'])
@@ -2533,13 +2588,6 @@ def download_team_certificates_zip(reg_id=None, registration_uid=None):
                 if os.path.exists(png_file):
                     with open(png_file, 'rb') as f:
                         zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.png", f.read())
-                    try:
-                        with Image.open(png_file) as im:
-                            pdf_buf = io.BytesIO()
-                            im.convert('RGB').save(pdf_buf, format='PDF', resolution=100.0)
-                            zip_file.writestr(f"{safe_name}_{safe_ev}_Certificate.pdf", pdf_buf.getvalue())
-                    except Exception as e:
-                        app.logger.warning(f"Could not convert {png_file} to PDF: {e}")
         zip_bytes = zip_buffer.getvalue()
     else:
         members_str = reg.get('team_members') or reg.get('full_name') or 'Team'
@@ -2632,39 +2680,31 @@ def team_certificates_whatsapp(reg_id):
     is_team = bool(reg.get('is_group') == 1 or len(members) > 1)
     team_or_name = (reg.get('team_name') or reg.get('lead_name') or 'Team').strip()
     if is_team:
+        zip_url = f"{base_url}/certificates/team/{reg.get('registration_uid')}/zip"
         msg = (
             f"🎓 *SHREE DAKSHA ACADEMY*\n"
-            f"✨ *Official Certificates of Achievement*\n"
+            f"✨ *Official Certificate of Achievement*\n"
             f"----------------------------------------\n"
             f"Congratulations to Team *{team_or_name}* for participating in *{reg['event_name']}*!\n\n"
-            f"📄 *Teammates' Official Certificates (PDF Downloads):*\n"
-        )
-        for idx, c in enumerate(certs):
-            rec_name = c.get('recipient_name') or (members[idx] if idx < len(members) else f"Player {idx+1}")
-            member_pdf_url = f"{base_url}/certificates/{c['certificate_code']}.pdf"
-            msg += f"• *{rec_name}:*\n  {member_pdf_url}\n\n"
-
-        zip_url = f"{base_url}/certificates/team/{reg.get('registration_uid')}/zip"
-        msg += (
-            f"📦 *Download All Team Certificates (ZIP Package):*\n"
+            f"📦 *Download Team Certificates (ZIP Package):*\n"
             f"{zip_url}\n\n"
-            f"Official high-resolution certificates for all players have been verified and issued.\n"
+            f"This package contains official high-resolution PNG certificates for all team members.\n"
             f"----------------------------------------\n"
             f"Shree Daksha Academy, Bengaluru"
         )
     else:
         cert_code = certs[0]['certificate_code'] if certs else ''
-        cert_link = f"{base_url}/certificates/{cert_code}.pdf" if cert_code else ""
+        cert_link = f"{base_url}/certificates/{cert_code}.png" if cert_code else ""
         msg = (
             f"🎓 *SHREE DAKSHA ACADEMY*\n"
             f"✨ *Official Certificate of Achievement*\n"
             f"----------------------------------------\n"
-            f"Congratulations *{team_or_name}* for participating in *{reg['event_name']}*!\n\n"
+            f"Congratulations to *{team_or_name}* for participating in *{reg['event_name']}*!\n\n"
         )
         if cert_link:
-            msg += f"📄 *Download Official Certificate (PDF):*\n{cert_link}\n\n"
+            msg += f"🖼️ *Download Official Certificate (PNG):*\n{cert_link}\n\n"
         msg += (
-            f"Your official high-resolution certificate has been issued.\n"
+            f"Your official high-resolution certificate has been verified and issued.\n"
             f"----------------------------------------\n"
             f"Shree Daksha Academy, Bengaluru"
         )
