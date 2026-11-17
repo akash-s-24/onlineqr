@@ -2692,10 +2692,10 @@ class SDATestCase(unittest.TestCase):
 
         # Test seed_sample_teams runs cleanly without any Seed Team Error and cleans up
         seed_sample_teams(force=False)
-        database.execute_db("DELETE FROM certificates WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE '%@sda-fest.edu')")
-        database.execute_db("DELETE FROM attendance WHERE registration_id IN (SELECT id FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE '%@sda-fest.edu'))")
-        database.execute_db("DELETE FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE '%@sda-fest.edu')")
-        database.execute_db("DELETE FROM participants WHERE email LIKE '%@sda-fest.edu'")
+        database.execute_db("DELETE FROM certificates WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s)", ('%@sda-fest.edu',))
+        database.execute_db("DELETE FROM attendance WHERE registration_id IN (SELECT id FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s))", ('%@sda-fest.edu',))
+        database.execute_db("DELETE FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s)", ('%@sda-fest.edu',))
+        database.execute_db("DELETE FROM participants WHERE email LIKE %s", ('%@sda-fest.edu',))
 
     def test_52_certificate_typography_whatsapp_and_email_attachment(self):
         """Verify bundled TrueType font loading, compact file sizes, WhatsApp direct chat link, and email PDF attachment."""
@@ -2850,7 +2850,7 @@ class SDATestCase(unittest.TestCase):
 
     def test_55_no_static_data_in_database(self):
         """Verify no dummy or static test team registrations exist in the database."""
-        dummy_rows = database.query_db("SELECT id, email FROM participants WHERE email LIKE '%@sda-fest.edu'")
+        dummy_rows = database.query_db("SELECT id, email FROM participants WHERE email LIKE %s", ('%@sda-fest.edu',))
         self.assertEqual(len(dummy_rows), 0, "No dummy registrations with @sda-fest.edu should exist in database")
 
     def test_56_team_whatsapp_sends_all_teammates_certificates_at_once(self):
@@ -3122,6 +3122,34 @@ class SDATestCase(unittest.TestCase):
 
         # Standard clean hint present
         self.assertIn("Upload screenshot of completed UPI transfer showing amount and UTR number.", html)
+
+    def test_60_postgres_literal_percent_and_empty_args_query_db(self):
+        """Verify:
+        1. query_db and execute_db safely handle queries with literal '%' wildcards without crashing with 'tuple index out of range'.
+        2. Parameterized queries with %s and args bind properly.
+        3. init_db runs cleanly with no tuple index out of range exceptions.
+        """
+        from database import query_db, execute_db, init_db
+
+        # 1. Unparameterized query with literal % and default empty args=()
+        test_query = "SELECT id, email FROM participants WHERE email LIKE '%@nonexistent-domain.edu'"
+        res = query_db(test_query)
+        self.assertEqual(len(res), 0)
+
+        # 2. Parameterized query with %s and args
+        param_query = "SELECT id, email FROM participants WHERE email LIKE %s"
+        res_param = query_db(param_query, ('%@nonexistent-domain.edu',))
+        self.assertEqual(len(res_param), 0)
+
+        # 3. execute_db delete query with %s
+        del_count = execute_db("DELETE FROM certificates WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s)", ('%@sda-fest.edu',))
+        self.assertIsInstance(del_count, int)
+
+        # 4. init_db runs cleanly without exception
+        try:
+            init_db()
+        except Exception as e:
+            self.fail(f"init_db raised unexpected exception: {e}")
 
 
 if __name__ == '__main__':

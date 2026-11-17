@@ -187,7 +187,10 @@ def query_db(query, args=(), one=False, commit=False):
             sqlite_query = sqlite_query.replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT')
             cursor = conn.cursor()
             try:
-                cursor.execute(sqlite_query, args)
+                if args:
+                    cursor.execute(sqlite_query, args)
+                else:
+                    cursor.execute(sqlite_query)
                 if commit:
                     conn.commit()
                     if sqlite_query.lstrip().upper().startswith('INSERT'):
@@ -206,7 +209,10 @@ def query_db(query, args=(), one=False, commit=False):
         else:
             cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             try:
-                cursor.execute(query, args)
+                if args:
+                    cursor.execute(query, args)
+                else:
+                    cursor.execute(query)
                 if commit:
                     conn.commit()
                     last_id = cursor.rowcount
@@ -1574,10 +1580,10 @@ def create_tables_and_seed():
 
     # Clean up any legacy dummy/seed data to ensure only real authentic registrations are stored
     try:
-        execute_db("DELETE FROM certificates WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE '%@sda-fest.edu')")
-        execute_db("DELETE FROM attendance WHERE registration_id IN (SELECT id FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE '%@sda-fest.edu'))")
-        execute_db("DELETE FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE '%@sda-fest.edu')")
-        execute_db("DELETE FROM participants WHERE email LIKE '%@sda-fest.edu'")
+        execute_db("DELETE FROM certificates WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s)", ('%@sda-fest.edu',))
+        execute_db("DELETE FROM attendance WHERE registration_id IN (SELECT id FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s))", ('%@sda-fest.edu',))
+        execute_db("DELETE FROM registrations WHERE participant_id IN (SELECT id FROM participants WHERE email LIKE %s)", ('%@sda-fest.edu',))
+        execute_db("DELETE FROM participants WHERE email LIKE %s", ('%@sda-fest.edu',))
     except Exception as e:
         print(f"[DB Clean Notice] {e}")
 
