@@ -826,6 +826,17 @@ def create_tables_and_seed():
             "ON registrations (registration_uid)"
         )
 
+        # Performance Indexes for Fast Lookups, Zero 502 Timeouts, and High Concurrency
+        run_exec("CREATE INDEX IF NOT EXISTS idx_registrations_event_id ON registrations (event_id)")
+        run_exec("CREATE INDEX IF NOT EXISTS idx_registrations_participant_id ON registrations (participant_id)")
+        run_exec("CREATE INDEX IF NOT EXISTS idx_registrations_status ON registrations (status)")
+        run_exec("CREATE INDEX IF NOT EXISTS idx_registrations_payment_status ON registrations (payment_status)")
+        run_exec("CREATE INDEX IF NOT EXISTS idx_certificates_reg_id ON certificates (registration_id)")
+        run_exec("CREATE INDEX IF NOT EXISTS idx_certificates_code ON certificates (certificate_code)")
+        run_exec("CREATE INDEX IF NOT EXISTS idx_attendance_reg_id ON attendance (registration_id)")
+        run_exec("CREATE INDEX IF NOT EXISTS idx_participants_email ON participants (email)")
+        run_exec("CREATE INDEX IF NOT EXISTS idx_participants_phone ON participants (phone)")
+
         # Allow multiple certificates per registration for team event members
         if not is_sqlite:
             try:

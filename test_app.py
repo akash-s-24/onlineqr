@@ -3151,6 +3151,39 @@ class SDATestCase(unittest.TestCase):
         except Exception as e:
             self.fail(f"init_db raised unexpected exception: {e}")
 
+    def test_61_error_handlers_and_database_indexes(self):
+        """Verify:
+        1. Custom 404 handler returns 404 status and branded error page.
+        2. API requests to non-existent route return 404 JSON.
+        3. Core performance indexes exist in database schema.
+        """
+        # 1. HTML 404
+        res_404 = self.client.get('/definitely-nonexistent-endpoint-xyz')
+        self.assertEqual(res_404.status_code, 404)
+        html_404 = res_404.data.decode('utf-8')
+        self.assertIn("Page Not Found", html_404)
+        self.assertIn("404", html_404)
+        self.assertIn("Back to Events", html_404)
+
+        # 2. JSON API 404
+        res_api_404 = self.client.get('/api/definitely-nonexistent-endpoint', headers={'Accept': 'application/json'})
+        self.assertEqual(res_api_404.status_code, 404)
+        self.assertTrue(res_api_404.is_json)
+        data = res_api_404.get_json()
+        self.assertEqual(data.get('code'), 404)
+        self.assertEqual(data.get('status'), 'error')
+
+        # 3. Database performance indexes exist
+        indexes = database.query_db("SELECT name FROM sqlite_master WHERE type='index'")
+        idx_names = {row['name'] for row in indexes}
+        self.assertIn('idx_registrations_event_id', idx_names)
+        self.assertIn('idx_registrations_participant_id', idx_names)
+        self.assertIn('idx_registrations_status', idx_names)
+        self.assertIn('idx_certificates_reg_id', idx_names)
+        self.assertIn('idx_attendance_reg_id', idx_names)
+        self.assertIn('idx_participants_email', idx_names)
+        self.assertIn('idx_participants_phone', idx_names)
+
 
 if __name__ == '__main__':
     unittest.main()

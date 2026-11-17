@@ -796,15 +796,19 @@ def generate_all_teams_certificates_zip(teams_data):
             ev_date = t.get('event_date') or '25-26 Nov 2026'
             cert_code = t.get('cert_code') or t.get('certificate_code') or f"SDA-2026-TEAM-{uuid.uuid4().hex[:6].upper()}"
 
-            _, png_filepath, _ = generate_certificate(
-                participant_name=clean_team,
-                event_name=ev_name,
-                event_date=ev_date,
-                college_name=t.get('college_name'),
-                cert_code=cert_code,
-                department=t.get('department') or 'PCMC',
-                semester=t.get('semester') or 'Second PUC'
-            )
+            expected_file = os.path.join(Config.CERTIFICATE_FOLDER, f"{cert_code}.png")
+            if os.path.exists(expected_file) and os.path.getsize(expected_file) > 1000:
+                png_filepath = expected_file
+            else:
+                _, png_filepath, _ = generate_certificate(
+                    participant_name=clean_team,
+                    event_name=ev_name,
+                    event_date=ev_date,
+                    college_name=t.get('college_name'),
+                    cert_code=cert_code,
+                    department=t.get('department') or 'PCMC',
+                    semester=t.get('semester') or 'Second PUC'
+                )
 
             safe_team = re.sub(r'[^A-Za-z0-9._-]+', '_', clean_team).strip('._') or f"Team_{idx+1}"
             safe_ev = re.sub(r'[^A-Za-z0-9._-]+', '_', str(ev_name)).strip('._') or "Event"

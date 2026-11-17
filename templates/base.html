@@ -781,7 +781,7 @@
             <div style="font-size: 0.85rem; color: var(--text-muted);">
                 <span>Shree Daksha Academy Portal</span> &rsaquo; <span
                     style="color: var(--primary); font-weight: 600;">{{
-                    request.endpoint.replace('_', ' ').title() }}</span>
+                    (request.endpoint.replace('_', ' ').title() if request.endpoint else (title or 'Page')) }}</span>
             </div>
         </div>
         {% endif %}
@@ -800,6 +800,17 @@
         </div>
         {% endif %}
         {% endwith %}
+
+        {% if error_code %}
+        <div style="max-width: 600px; margin: 40px auto; padding: 36px; text-align: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+            <div style="font-size: 3.5rem; font-weight: 900; color: #1e3a8a; line-height: 1; margin-bottom: 12px;">{{ error_code }}</div>
+            <h2 style="font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;">{{ title or 'Error' }}</h2>
+            <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px;">{{ error_message or 'An unexpected error occurred.' }}</p>
+            <a href="{{ url_for('events_list') }}" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; text-decoration: none; border-radius: 8px; background: #1e3a8a; color: #ffffff; font-weight: 600;">
+                &larr; Back to Events
+            </a>
+        </div>
+        {% endif %}
 
         {% block content %}{% endblock %}
     </main>

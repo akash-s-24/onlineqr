@@ -3261,6 +3261,32 @@ def api_mark_attended():
         message += f'. {receipt_warning} An administrator can resend the receipt.'
     return jsonify({'status': 'success', 'message': message})
 
+# ============================================================
+# Resilient Branded Error Handlers (404, 403, 500)
+# ============================================================
+@app.errorhandler(404)
+def handle_not_found_error(err):
+    if request.path.startswith('/api/') or request.is_json:
+        return jsonify({'status': 'error', 'message': 'The requested resource was not found.', 'code': 404}), 404
+    return render_template('base.html', title='Page Not Found', error_code=404, error_message='The page or resource you are looking for does not exist.'), 404
+
+
+@app.errorhandler(403)
+def handle_forbidden_error(err):
+    if request.path.startswith('/api/') or request.is_json:
+        return jsonify({'status': 'error', 'message': 'Access to this resource is forbidden.', 'code': 403}), 403
+    return render_template('base.html', title='Access Forbidden', error_code=403, error_message='You do not have permission to access that resource.'), 403
+
+
+@app.errorhandler(500)
+def handle_internal_server_error(err):
+    import traceback
+    print(f"[Internal Server Error 500] {err}\n{traceback.format_exc()}")
+    if request.path.startswith('/api/') or request.is_json:
+        return jsonify({'status': 'error', 'message': 'A temporary server error occurred. Please try again.', 'code': 500}), 500
+    return render_template('base.html', title='Server Error', error_code=500, error_message='A temporary system error occurred. Please try again or contact event support.'), 500
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
     print("=" * 60)
