@@ -3262,6 +3262,64 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(len(res_webp.data), webp_size)
         res_webp.close()
 
+    def test_63_async_background_task_queue(self):
+        """Verify:
+        1. task_manager runs background tasks asynchronously without blocking.
+        2. Progress callback updates task state and progress percent.
+        3. GET /admin/tasks/status/<task_id> returns real-time JSON status.
+        4. POST /admin/certificates/generate-bulk?async=1 starts background task.
+        """
+        from task_queue import task_manager
+        import time
+
+        # 1. Test standalone BackgroundTaskManager execution
+        def sample_worker_task(progress_callback=None):
+            for step in range(1, 4):
+                if progress_callback:
+                    progress_callback(step, 3, f"Step {step} of 3")
+                time.sleep(0.05)
+            return {"items_processed": 3}
+
+        task_id = task_manager.run_async(sample_worker_task, name="Sample Async Worker")
+        self.assertIsNotNone(task_id)
+
+        # Immediate task state should be pending or running
+        t_init = task_manager.get_task(task_id)
+        self.assertIn(t_init['status'], ('pending', 'running', 'completed'))
+
+        # Wait for task completion (max 2 seconds)
+        for _ in range(30):
+            t_curr = task_manager.get_task(task_id)
+            if t_curr['status'] == 'completed':
+                break
+            time.sleep(0.05)
+
+        t_done = task_manager.get_task(task_id)
+        self.assertEqual(t_done['status'], 'completed')
+        self.assertEqual(t_done['progress'], 100)
+        self.assertEqual(t_done['result'], {"items_processed": 3})
+
+        # 2. Test status endpoint as admin
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        status_res = self.client.get(f"/admin/tasks/status/{task_id}")
+        self.assertEqual(status_res.status_code, 200)
+        self.assertTrue(status_res.is_json)
+        status_data = status_res.get_json()
+        self.assertEqual(status_data['status'], 'completed')
+        self.assertEqual(status_data['progress'], 100)
+
+        # 3. Test non-existent task status returns 404
+        not_found_res = self.client.get('/admin/tasks/status/non-existent-task-id-123')
+        self.assertEqual(not_found_res.status_code, 404)
+
+        # 4. Test POST /admin/certificates/generate-bulk?async=1
+        async_res = self.client.post('/admin/certificates/generate-bulk?async=1')
+        self.assertEqual(async_res.status_code, 200)
+        self.assertTrue(async_res.is_json)
+        async_data = async_res.get_json()
+        self.assertEqual(async_data.get('status'), 'started')
+        self.assertTrue(bool(async_data.get('task_id')))
+
 
 if __name__ == '__main__':
     unittest.main()

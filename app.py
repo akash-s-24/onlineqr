@@ -27,6 +27,7 @@ from database import query_db, execute_db, create_registration
 from certificate_generator import generate_certificate, generate_team_certificates_zip, generate_all_teams_certificates_zip
 from mailer import send_certificate_email, get_smtp_info, send_receipt_email, send_whatsapp_receipt
 from rate_limiter import rate_limit, limiter
+from task_queue import task_manager
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -2002,10 +2003,8 @@ def generate_single_certificate(reg_id):
 
     return redirect(url_for('certificates_manager'))
 
-@app.route('/admin/certificates/generate-bulk', methods=['POST'])
-@admin_required
-def generate_bulk_certificates():
-    # Direct generation for all registered participants and team members
+def perform_bulk_certificate_generation(progress_callback=None):
+    """Core logic to generate certificates for all approved registrations with progress updates."""
     eligible = query_db("""
         SELECT r.id as registration_id, r.participant_id, r.event_id, r.team_name, r.is_group, r.team_members,
                p.full_name, p.college_name, p.department, p.semester,
@@ -2016,8 +2015,12 @@ def generate_bulk_certificates():
         WHERE r.status = 'approved'
     """)
 
+    total_eligible = len(eligible or [])
+    if progress_callback:
+        progress_callback(0, total_eligible, f"Identified {total_eligible} approved registration(s)...")
+
     count = 0
-    for reg in eligible or []:
+    for reg_idx, reg in enumerate(eligible or []):
         members = []
         if reg.get('is_group') == 1 and reg.get('team_members'):
             members = [m.strip() for m in reg['team_members'].split(',') if m.strip()]
@@ -2069,9 +2072,27 @@ def generate_bulk_certificates():
                 """, (new_code, reg['registration_id'], reg['participant_id'], reg['event_id'], reg['event_date'], file_path, 'pending', clean_member))
             count += 1
 
+        if progress_callback:
+            progress_callback(reg_idx + 1, total_eligible, f"Processed {reg_idx + 1} of {total_eligible} registrations ({count} certificates ready)...")
+
     import gc
     gc.collect()
+    return count
 
+
+@app.route('/admin/certificates/generate-bulk', methods=['POST'])
+@admin_required
+def generate_bulk_certificates():
+    is_async = request.args.get('async') == '1' or request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if is_async:
+        task_id = task_manager.run_async(perform_bulk_certificate_generation, name="Generate Bulk Certificates")
+        return jsonify({
+            'status': 'started',
+            'task_id': task_id,
+            'message': 'Bulk certificate generation running in background.'
+        })
+
+    count = perform_bulk_certificate_generation()
     if count > 0:
         flash(f"Successfully processed {count} certificate(s) for all participants and team players!", 'success')
     else:
@@ -2355,10 +2376,8 @@ def registration_whatsapp_receipt(registration_uid):
     )
     return redirect(wa_url)
 
-@app.route('/admin/certificates/send-bulk', methods=['POST'])
-@admin_required
-def send_bulk_certificate_emails():
-    # Find all generated certificates that have not been emailed yet
+def perform_bulk_email_dispatch(progress_callback=None):
+    """Core logic to dispatch emails for all pending certificates with progress tracking."""
     pending = query_db("""
         SELECT c.*, p.full_name, p.email, p.college_name, p.department, p.semester,
                e.event_name, e.event_date, r.team_name
@@ -2369,12 +2388,15 @@ def send_bulk_certificate_emails():
         WHERE c.email_status != 'sent' OR c.email_status IS NULL
     """)
 
+    total_pending = len(pending or [])
+    if progress_callback:
+        progress_callback(0, total_pending, f"Identified {total_pending} pending certificate email(s)...")
+
     if not pending:
-        flash("All generated certificates have already been emailed!", "info")
-        return redirect(url_for('certificates_manager'))
+        return 0
 
     sent_count = 0
-    for cert in pending:
+    for idx, cert in enumerate(pending):
         # Regenerate file if missing from disk
         if not cert.get('file_path') or not os.path.exists(cert['file_path']):
             _, file_path, _ = generate_certificate(
@@ -2413,9 +2435,32 @@ def send_bulk_certificate_emails():
             )
             sent_count += 1
 
-    smtp_info = get_smtp_info()
-    mode_text = "Safe Demo Mode" if smtp_info['is_demo'] else f"Live {smtp_info['mode'].upper()}"
-    flash(f"Successfully emailed {sent_count} certificate(s) via {mode_text}!", 'success')
+        if progress_callback:
+            progress_callback(idx + 1, total_pending, f"Emailed {idx + 1} of {total_pending} certificates ({sent_count} sent)...")
+
+    return sent_count
+
+
+@app.route('/admin/certificates/send-bulk', methods=['POST'])
+@admin_required
+def send_bulk_certificate_emails():
+    is_async = request.args.get('async') == '1' or request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if is_async:
+        task_id = task_manager.run_async(perform_bulk_email_dispatch, name="Send Bulk Certificate Emails")
+        return jsonify({
+            'status': 'started',
+            'task_id': task_id,
+            'message': 'Bulk certificate emailing running in background.'
+        })
+
+    sent_count = perform_bulk_email_dispatch()
+    if sent_count == 0:
+        flash("All generated certificates have already been emailed!", "info")
+    else:
+        smtp_info = get_smtp_info()
+        mode_text = "Safe Demo Mode" if smtp_info['is_demo'] else f"Live {smtp_info['mode'].upper()}"
+        flash(f"Successfully emailed {sent_count} certificate(s) via {mode_text}!", 'success')
+
     return redirect(url_for('certificates_manager'))
 
 @app.route('/admin/certificates/toggle-mode', methods=['POST'])
@@ -2444,6 +2489,16 @@ def toggle_smtp_mode():
 
     flash(f"Email Dispatch Mode updated to: {new_mode.upper()}", 'info')
     return redirect(url_for('certificates_manager'))
+
+
+@app.route('/admin/tasks/status/<task_id>')
+@admin_required
+def get_admin_task_status(task_id):
+    """Poll the real-time status of an asynchronous background task."""
+    task = task_manager.get_task(task_id)
+    if not task:
+        return jsonify({'status': 'not_found', 'message': 'Task not found'}), 404
+    return jsonify(task)
 
 # ---------------------------------------------------------
 # Certificate Downloads

@@ -15,19 +15,28 @@
         </button>
         <a href="{{ url_for('attendance_manager') }}" class="candy-btn"
             style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">&larr; Back to Attendance Tracker</a>
-        <form method="POST" action="{{ url_for('generate_bulk_certificates') }}" style="display: inline;">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="candy-btn candy-btn-success"
-                style="padding: 0.6rem 1.2rem; font-size: 0.95rem;"
-                onclick="if(confirm('Generate certificates for all participants and team players?')) { showGlobalLoading('Generating certificates...'); return true; } return false;">⚡
-                Generate All</button>
-        </form>
-        <form method="POST" action="{{ url_for('send_bulk_certificate_emails') }}" style="display: inline;">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="candy-btn" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;"
-                onclick="return confirm('Email all generated certificates to participants?');">📧 Email All
-                Generated</button>
-        </form>
+        <button type="button" class="candy-btn candy-btn-success"
+            style="padding: 0.6rem 1.2rem; font-size: 0.95rem;"
+            onclick="if(confirm('Generate certificates for all participants and team players in background?')) { startAsyncTask('/admin/certificates/generate-bulk?async=1', '⚡ Generating All Certificates'); }">⚡
+            Generate All</button>
+        <button type="button" class="candy-btn" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;"
+            onclick="if(confirm('Email all generated certificates to participants in background?')) { startAsyncTask('/admin/certificates/send-bulk?async=1', '📧 Dispatching Certificate Emails'); }">📧 Email All
+            Generated</button>
+    </div>
+</div>
+
+<!-- Live Background Task Progress Tracker -->
+<div id="asyncTaskCard" style="display: none; margin-bottom: 1.5rem; background: var(--surface, #ffffff); border: 1.5px solid var(--primary, #1e3a8a); border-radius: 12px; padding: 18px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span id="asyncTaskTitle" style="font-weight: 700; color: var(--primary, #1e3a8a); font-size: 1rem;">Task in Progress...</span>
+        <span id="asyncTaskPercent" style="font-weight: 800; color: var(--primary, #1e3a8a); font-size: 1.1rem;">0%</span>
+    </div>
+    <div style="background: rgba(0,0,0,0.08); border-radius: 8px; height: 10px; overflow: hidden; width: 100%;">
+        <div id="asyncProgressBar" style="width: 0%; height: 100%; background: #2563eb; transition: width 0.3s ease; border-radius: 8px;"></div>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.85rem; color: var(--text-muted, #64748b);">
+        <span id="asyncTaskMessage">Initializing background task...</span>
+        <span id="asyncTaskCount"></span>
     </div>
 </div>
 
@@ -476,8 +485,74 @@
     // Alias shareCertFile to shareTeamZip for backwards compatibility
     window.shareCertFile = shareTeamZip;
 
-    // Alias shareCertFile to shareTeamZip for backwards compatibility
-    window.shareCertFile = shareTeamZip;
+    // Asynchronous Background Task Poller & UI Progress Updater
+    async function startAsyncTask(endpointUrl, taskTitle) {
+        const card = document.getElementById('asyncTaskCard');
+        const titleEl = document.getElementById('asyncTaskTitle');
+        const barEl = document.getElementById('asyncProgressBar');
+        const percentEl = document.getElementById('asyncTaskPercent');
+        const msgEl = document.getElementById('asyncTaskMessage');
+        const countEl = document.getElementById('asyncTaskCount');
+
+        if (!card) return;
+        card.style.display = 'block';
+        titleEl.innerText = taskTitle;
+        barEl.style.width = '5%';
+        barEl.style.background = '#2563eb';
+        percentEl.innerText = '5%';
+        msgEl.innerText = 'Initiating background worker...';
+        countEl.innerText = '';
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        try {
+            const res = await fetch(endpointUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({})
+            });
+            const data = await res.json();
+            if (data.status !== 'started' || !data.task_id) {
+                msgEl.innerText = data.message || 'Task failed to initialize.';
+                return;
+            }
+
+            const taskId = data.task_id;
+            const pollInterval = setInterval(async () => {
+                try {
+                    const statusRes = await fetch(`/admin/tasks/status/${taskId}`);
+                    const task = await statusRes.json();
+                    
+                    barEl.style.width = `${task.progress}%`;
+                    percentEl.innerText = `${task.progress}%`;
+                    msgEl.innerText = task.message || 'Processing...';
+                    if (task.total > 0) {
+                        countEl.innerText = `${task.current} / ${task.total}`;
+                    }
+
+                    if (task.status === 'completed') {
+                        clearInterval(pollInterval);
+                        barEl.style.width = '100%';
+                        barEl.style.background = '#10b981';
+                        percentEl.innerText = '100%';
+                        msgEl.innerText = 'All items finished successfully! Refreshing...';
+                        setTimeout(() => window.location.reload(), 1200);
+                    } else if (task.status === 'failed') {
+                        clearInterval(pollInterval);
+                        barEl.style.background = '#ef4444';
+                        msgEl.innerText = `Error: ${task.error || task.message}`;
+                    }
+                } catch (pollErr) {
+                    console.error('Task poll error:', pollErr);
+                }
+            }, 800);
+        } catch (err) {
+            msgEl.innerText = `Network error: ${err.message}`;
+        }
+    }
 
     function openSmtpModal() {
         const modal = document.getElementById('smtpSettingsModal');

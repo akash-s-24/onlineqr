@@ -50,17 +50,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. Modal Handlers (Certificate Preview)
+  // 4. Modal Handlers (Certificate Preview with Ultra-Fast WebP Support)
   window.openCertModal = function(imageSrc, certCode) {
     const modal = document.getElementById('certPreviewModal');
     const modalImg = document.getElementById('modalCertImage');
     const modalTitle = document.getElementById('modalCertTitle');
     const modalDownload = document.getElementById('modalDownloadBtn');
+    const modalDownloadWebp = document.getElementById('modalDownloadWebpBtn');
 
     if (modal && modalImg) {
-      modalImg.src = imageSrc;
+      // Derive ultra-compact WebP URL for instant sub-second preview loading
+      const webpSrc = imageSrc.replace(/\.png$/i, '.webp').replace(/\.jpg$/i, '.webp');
+      modalImg.src = webpSrc;
+      // Seamless fallback to original PNG if WebP is unavailable
+      modalImg.onerror = function() {
+        modalImg.onerror = null;
+        modalImg.src = imageSrc;
+      };
       if (modalTitle) modalTitle.innerText = `Certificate Preview - ${certCode}`;
       if (modalDownload) modalDownload.href = imageSrc;
+      if (modalDownloadWebp) modalDownloadWebp.href = webpSrc;
       modal.classList.add('active');
     }
   };
