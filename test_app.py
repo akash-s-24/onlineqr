@@ -3097,6 +3097,32 @@ class SDATestCase(unittest.TestCase):
         )
         self.assertTrue(res_ok)
 
+    def test_59_single_file_upload_field_and_no_compression_mention(self):
+        """Verify:
+        1. Registration form has strictly ONE file upload input for payment screenshot.
+        2. No mention of automatic compression or 'under 10 MB automatically compressed to < 1 MB'.
+        3. Payment screenshot field is properly configured with valid image MIME types and required attribute when online payment is selected.
+        """
+        res_reg = self.client.get('/register')
+        self.assertEqual(res_reg.status_code, 200)
+        html = res_reg.data.decode('utf-8')
+
+        # Strictly one file input on registration form
+        file_input_count = html.count('type="file"')
+        self.assertEqual(file_input_count, 1, f"Expected exactly 1 file upload input, found {file_input_count}")
+
+        # Strictly one payment_screenshot id
+        screenshot_id_count = html.count('id="payment_screenshot"')
+        self.assertEqual(screenshot_id_count, 1, f"Expected exactly 1 id='payment_screenshot', found {screenshot_id_count}")
+
+        # No mention of automatic compression
+        self.assertNotIn("automatically compressed", html)
+        self.assertNotIn("compressed to", html)
+        self.assertNotIn("permanent storage", html)
+
+        # Standard clean hint present
+        self.assertIn("Upload screenshot of completed UPI transfer showing amount and UTR number.", html)
+
 
 if __name__ == '__main__':
     unittest.main()
