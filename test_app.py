@@ -3503,6 +3503,59 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(auth_events.headers.get('CDN-Cache-Control'), 'no-store')
         auth_events.close()
 
+    def test_65_event_timings_removed_only_dates_displayed(self):
+        """Verify:
+        1. /events cards and disc cascade display ONLY dates (25–26 November 2026) and no timings.
+        2. /register displays 'Event Date' and date value without time strings.
+        3. /admin/dashboard event configuration hub displays only the event date without time suffixes.
+        4. Event editing and creation forms support optional timings without forcing time inputs.
+        """
+        # 1. Check public /events
+        res = self.client.get('/events')
+        self.assertEqual(res.status_code, 200)
+        html = res.data.decode('utf-8')
+        
+        # Verify dates are present
+        self.assertIn('25–26 November 2026', html)
+        
+        # Verify timings are NOT rendered in the event details or disc cascade
+        self.assertNotIn('· 10:00 AM', html)
+        self.assertNotIn('· 11:00 AM', html)
+        self.assertNotIn('data-time="10:00 AM"', html)
+        self.assertNotIn('data-time="11:00 AM"', html)
+        self.assertIn('id="discCascadeWhen">25–26 November 2026</dd>', html)
+        res.close()
+
+        # 2. Check /register for a specific event
+        ev = database.query_db("SELECT id, event_name, event_date FROM events LIMIT 1", one=True)
+        res_reg = self.client.get(f"/register?event_id={ev['id']}")
+        self.assertEqual(res_reg.status_code, 200)
+        reg_html = res_reg.data.decode('utf-8')
+        self.assertIn('Event Date', reg_html)
+        self.assertNotIn('Date &amp; Time', reg_html)
+        self.assertNotIn('Date & Time', reg_html)
+        self.assertNotIn('@ 10:00 AM', reg_html)
+        self.assertNotIn('@ 11:00 AM', reg_html)
+        res_reg.close()
+
+        # 3. Check /admin/dashboard
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        dash_res = self.client.get('/admin/dashboard')
+        self.assertEqual(dash_res.status_code, 200)
+        dash_html = dash_res.data.decode('utf-8')
+        self.assertIn('📅 <strong>Date:</strong>', dash_html)
+        self.assertNotIn('@ 10:00 AM', dash_html)
+        self.assertNotIn('@ 11:00 AM', dash_html)
+        dash_res.close()
+
+        # 4. Check /admin/events/add and edit forms have optional event_time
+        add_res = self.client.get('/admin/events/add')
+        self.assertEqual(add_res.status_code, 200)
+        add_html = add_res.data.decode('utf-8')
+        self.assertIn('Event Time (Optional)', add_html)
+        self.assertNotIn('Event Time *', add_html)
+        add_res.close()
+
 
 if __name__ == '__main__':
     unittest.main()

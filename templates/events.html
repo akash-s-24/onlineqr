@@ -6414,8 +6414,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         </div>
                         <div class="disc-cascade-meta-row">
                             <dt>When</dt>
-                            <dd id="discCascadeWhen">25–26 November 2026 · {{
-                                events[0].event_time if events else 'Details inside' }}</dd>
+                            <dd id="discCascadeWhen">25–26 November 2026</dd>
                         </div>
                         <div class="disc-cascade-meta-row">
                             <dt>Venue</dt>
@@ -6432,7 +6431,6 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         data-fee="{% if ev.event_fee and ev.event_fee > 0 %}₹ {{ ev.event_fee }}{% else %}Free entry{% endif %}"
                         data-venue="{{ ev.venue|e }}" data-date="25–26 Nov 2026"
                         data-palette-category="{{ ev.category_key }}"
-                        data-time="{{ ev.event_time|e }}"
                         data-description="{{ (ev.description or 'Bring your best idea and make the stage yours.')|e }}"
                         data-rules="{{ ev.rules_text|default('', true)|e }}"
                         data-faculty-name="{{ ev.faculty_name|default(config.EVENT_COORDINATOR_PRIMARY_NAME, true)|e }}"
@@ -6558,8 +6556,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                                     <line x1="8" y1="2" x2="8" y2="6"></line>
                                     <line x1="3" y1="10" x2="21" y2="10"></line>
                                 </svg>
-                                <span>25–26 November 2026{% if ev.event_time
-                                    %} · {{ ev.event_time }}{% endif %}</span>
+                                <span>25–26 November 2026</span>
                             </div>
                             <div class="event-detail-item">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -7338,7 +7335,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     setText('discCascadeFormat', data.format);
                     setText('discCascadeFee', data.fee);
                     setText('discCascadeFeeBadge', `ENTRY · ${data.fee || 'Free entry'}`);
-                    setText('discCascadeWhen', `${data.date || 'Registration open'} · ${data.time || 'Details inside'}`);
+                    setText('discCascadeWhen', data.date || '25–26 November 2026');
                     setText('discCascadeVenue', data.venue);
                     setText('discCascadeDescription', data.description || 'Bring your best idea and make the stage yours.');
                     const rulesButton = document.getElementById('discCascadeRules');

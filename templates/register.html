@@ -1220,9 +1220,8 @@ line-height: 1.25 !important; }
                             <div class="meta-item">
                                 <span class="meta-icon">📅</span>
                                 <div>
-                                    <span class="meta-label">Date & Time</span>
-                                    <span class="meta-val">{{ selected_event.event_date }}{% if
-                                        selected_event.event_time %} @ {{ selected_event.event_time }}{% endif %}</span>
+                                    <span class="meta-label">Event Date</span>
+                                    <span class="meta-val">{{ selected_event.event_date }}</span>
                                 </div>
                             </div>
                             <div class="meta-item">
@@ -1337,7 +1336,7 @@ line-height: 1.25 !important; }
                             <div class="meta-item">
                                 <span class="meta-icon">📅</span>
                                 <div>
-                                    <span class="meta-label">Date & Time</span>
+                                    <span class="meta-label">Event Date</span>
                                     <span id="dynEvDateTime" class="meta-val">--</span>
                                 </div>
                             </div>
@@ -1413,7 +1412,8 @@ line-height: 1.25 !important; }
                                 <div class="cb-options" role="listbox"></div>
                             </div>
                         </div>
-                        <div id="fixedSquadNotice" style="display: none; padding: 12px 14px; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 8px; color: #1e3a8a;">
+                        <div id="fixedSquadNotice"
+                            style="display: none; padding: 12px 14px; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 8px; color: #1e3a8a;">
                             <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 2px;">🎮 Fixed Squad: Exactly 4 Players Required</div>
                             <div style="font-size: 0.82rem; color: #475569;">Squad capacity is locked to exactly 4 players. Dropdown selection removed.</div>
                         </div>
@@ -1430,7 +1430,8 @@ line-height: 1.25 !important; }
                     <label class="f-label" style="color: #000000;">Squad Members Roster</label>
                     <div id="teamLeadNotice"
                         style="background: #ffffff; border: 1.5px dashed #d4d4d8; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #52525b;">
-                        <strong>Player 1 (Team Lead / Captain):</strong> Captured automatically from the Registrant Details below.
+                        <strong>Player 1 (Team Lead / Captain):</strong> Captured automatically from the Registrant
+                        Details below.
                     </div>
                     <div id="additionalMembersContainer" style="display: flex; flex-direction: column; gap: 14px;">
                         <!-- Injected dynamically by JavaScript -->
@@ -1443,7 +1444,8 @@ line-height: 1.25 !important; }
                     style="display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 4px; margin: 4px 0 18px; width: 100%;">
                     <div style="width: 100%; text-align: left;">
                         <h2 id="participantDetailsHeading"
-                            style="margin: 0 0 4px; text-align: left; font-size: 1.35rem; font-weight: 700;">Participant details</h2>
+                            style="margin: 0 0 4px; text-align: left; font-size: 1.35rem; font-weight: 700;">Participant
+                            details</h2>
                         <p style="margin: 0; text-align: left; color: #64748b; font-size: 0.9rem; line-height: 1.5;">
                             Tell us who is taking part and where they study.</p>
                     </div>
@@ -2073,7 +2075,7 @@ line-height: 1.25 !important; }
                 if (dynType) dynType.textContent = eventType;
                 if (dynFormat) dynFormat.textContent = isGroup ? `👥 Group Event (${minTeam}–${maxTeam} Members)` : '👤 Individual / Solo';
                 if (dynFee) dynFee.textContent = eventFee > 0 ? `₹ ${eventFee} Fee` : 'Free Entry';
-                if (dynDateTime) dynDateTime.textContent = `${eventDate} ${eventTime ? '@ ' + eventTime : ''}`.trim() || 'Scheduled Date';
+                if (dynDateTime) dynDateTime.textContent = eventDate.trim() || 'Scheduled Date';
                 if (dynVenue) dynVenue.textContent = venue;
                 if (dynCapacity) dynCapacity.textContent = isGroup ? `Team Squad (${minTeam}–${maxTeam} Members)` : 'Solo Participant';
                 if (dynFeeDetail) dynFeeDetail.textContent = eventFee > 0 ? `₹ ${eventFee} per ${isGroup ? 'Team' : 'Head'}` : 'Free Entry';

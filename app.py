@@ -1397,7 +1397,7 @@ def add_event():
         event_name = request.form.get('event_name', '').strip()
         event_type = request.form.get('event_type', '').strip()
         event_date = request.form.get('event_date', '').strip()
-        event_time = request.form.get('event_time', '').strip()
+        event_time = request.form.get('event_time', '').strip() or 'TBD'
         venue = request.form.get('venue', '').strip()
         description = request.form.get('description', '').strip()
         max_participants = max(1, safe_int(request.form.get('max_participants', ''), 100))
@@ -1451,7 +1451,7 @@ def edit_event(event_id):
         event_name = request.form.get('event_name', '').strip()
         event_type = request.form.get('event_type', '').strip()
         event_date = request.form.get('event_date', '').strip()
-        event_time = request.form.get('event_time', '').strip()
+        event_time = request.form.get('event_time', '').strip() or 'TBD'
         venue = request.form.get('venue', '').strip()
         description = request.form.get('description', '').strip()
         max_participants = max(1, safe_int(request.form.get('max_participants', ''), 100))
