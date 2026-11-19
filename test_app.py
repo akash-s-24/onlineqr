@@ -3556,6 +3556,112 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('Event Time *', add_html)
         add_res.close()
 
+    def test_66_independent_receipt_dispatch_and_smtp_diagnostics(self):
+        """Verify:
+        1. mailer._diagnose_smtp_error accurately categorizes 535 Bad Credentials, disconnections, and port blocks.
+        2. /admin/receipts/send-email/<id> handles paid vs unpaid registrations correctly.
+        3. Email and WhatsApp channels are completely independent: email failure does not prevent WhatsApp URL preparation.
+        4. admin_dashboard.html features dual-channel trigger (onsubmit window.open for WhatsApp + POST for email).
+        """
+        import smtplib
+        from mailer import _diagnose_smtp_error
+
+        # 1. Test SMTP error diagnostics
+        auth_err = smtplib.SMTPAuthenticationError(535, b'5.7.8 Username and Password not accepted (BadCredentials)')
+        diag_auth = _diagnose_smtp_error(auth_err, smtp_username="levelupgamerz28@gmail.com")
+        self.assertIn("535 Bad Credentials", diag_auth)
+        self.assertIn("https://myaccount.google.com/apppasswords", diag_auth)
+
+        disc_err = smtplib.SMTPServerDisconnected("Connection unexpectedly closed")
+        diag_disc = _diagnose_smtp_error(disc_err, smtp_server="smtp.gmail.com")
+        self.assertIn("SMTP Server Disconnected", diag_disc)
+        self.assertIn("smtp.gmail.com", diag_disc)
+
+        net_err = TimeoutError("Connection timed out")
+        diag_net = _diagnose_smtp_error(net_err, smtp_server="smtp.gmail.com", smtp_port=587)
+        self.assertIn("SMTP Network/Port Blocked", diag_net)
+        self.assertIn("Render", diag_net)
+
+        # 2. Login as admin
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+
+        # 3. Create or find participant and registration for testing
+        test_uid = f"TEST-RCPT-{uuid.uuid4().hex[:8].upper()}"
+        part_id = database.execute_db(
+            """
+            INSERT INTO participants (full_name, email, phone, college_name, department, semester)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """,
+            ("Receipt Tester", "receipt.test@college.edu", "9988776655", "SDA College", "PCMC", "Second PUC")
+        )
+        ev = database.query_db("SELECT id FROM events LIMIT 1", one=True)
+        reg_id = database.execute_db(
+            """
+            INSERT INTO registrations (registration_uid, participant_id, event_id, payment_status, amount_paid, payment_method, status)
+            VALUES (%s, %s, %s, 'unpaid', 0, 'Online', 'pending')
+            """,
+            (test_uid, part_id, ev['id'])
+        )
+
+        # 4. Cannot send receipt for unpaid registration
+        unpaid_res = self.client.post(
+            f"/admin/receipts/send-email/{reg_id}",
+            headers={'X-Requested-With': 'XMLHttpRequest'}
+        )
+        self.assertEqual(unpaid_res.status_code, 400)
+        unpaid_data = json.loads(unpaid_res.data)
+        self.assertEqual(unpaid_data['status'], 'error')
+        self.assertIn("unpaid", unpaid_data['message'])
+        unpaid_res.close()
+
+        # 5. Mark registration as paid and approved, then test successful dual dispatch
+        database.execute_db(
+            "UPDATE registrations SET payment_status = 'paid', status = 'approved', amount_paid = 100 WHERE id = %s",
+            (reg_id,)
+        )
+        paid_res = self.client.post(
+            f"/admin/receipts/send-email/{reg_id}",
+            headers={'X-Requested-With': 'XMLHttpRequest'}
+        )
+        self.assertEqual(paid_res.status_code, 200)
+        paid_data = json.loads(paid_res.data)
+        self.assertEqual(paid_data['status'], 'success')
+        self.assertTrue(paid_data['email_ok'])
+        self.assertIn("wa.me/919988776655", paid_data['wa_url'])
+        paid_res.close()
+
+        # Verify DB updated
+        check_reg = database.query_db("SELECT receipt_delivery_status FROM registrations WHERE id = %s", (reg_id,), one=True)
+        self.assertEqual(check_reg['receipt_delivery_status'], 'sent')
+
+        # 6. Test independent channels: mock email failure, verify WhatsApp still generates URL and error is handled gracefully
+        with patch('app.send_receipt_email', return_value=(False, "Gmail SMTP Authentication Failed: 535 Bad Credentials")):
+            fail_res = self.client.post(
+                f"/admin/receipts/send-email/{reg_id}",
+                headers={'X-Requested-With': 'XMLHttpRequest'}
+            )
+            self.assertEqual(fail_res.status_code, 200)
+            fail_data = json.loads(fail_res.data)
+            self.assertEqual(fail_data['status'], 'email_failed')
+            self.assertFalse(fail_data['email_ok'])
+            self.assertIn("535 Bad Credentials", fail_data['email_msg'])
+            self.assertTrue(fail_data['wa_ok'])
+            self.assertIn("wa.me/919988776655", fail_data['wa_url'])
+            fail_res.close()
+
+            # DB updated to failed for email tracking
+            fail_db = database.query_db("SELECT receipt_delivery_status FROM registrations WHERE id = %s", (reg_id,), one=True)
+            self.assertEqual(fail_db['receipt_delivery_status'], 'failed')
+
+        # 7. Check admin dashboard HTML for independent WhatsApp onsubmit trigger
+        dash_res = self.client.get('/admin/dashboard')
+        self.assertEqual(dash_res.status_code, 200)
+        dash_html = dash_res.data.decode('utf-8')
+        self.assertIn('Receipt (Email + WA)', dash_html)
+        self.assertIn('onsubmit="window.open(', dash_html)
+        self.assertIn('whatsapp-receipt', dash_html)
+        dash_res.close()
+
 
 if __name__ == '__main__':
     unittest.main()

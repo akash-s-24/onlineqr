@@ -370,7 +370,8 @@
             </div>
             <p style="font-size: 0.78rem; color: #64748b; margin-top: 6px;">
                 * In <strong>Safe Demo Mode</strong>, email dispatches are simulated and marked successful
-                without requiring a Gmail password.
+                without requiring an external SMTP connection or password.<br>
+                * In <strong>Live Mode</strong>, ensure a valid 16-character Google App Password from <code>myaccount.google.com/apppasswords</code> is configured in <code>.env</code>. Note that cloud platforms (like Render) block outbound SMTP ports (25/465/587); use Resend HTTPS API (<code>RESEND_API_KEY</code>) for cloud deployment.
             </p>
         </div>
 

@@ -2359,7 +2359,8 @@ def send_certificate_email_route(cert_id):
 @admin_required
 def send_receipt_email_route(reg_id):
     """
-    Sends the payment receipt to the participant via both Email and WhatsApp.
+    Sends the payment receipt to the participant via Email and prepares WhatsApp.
+    Email and WhatsApp channels are completely independent.
     """
     reg = query_db("""
         SELECT r.*, p.full_name, p.email, p.phone, e.event_name
@@ -2370,13 +2371,18 @@ def send_receipt_email_route(reg_id):
     """, (reg_id,), one=True)
     
     if not reg:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'status': 'error', 'message': 'Registration not found.'}), 404
         flash("Registration not found.", "danger")
         return redirect(request.referrer or url_for('admin_dashboard'))
     
     if reg['payment_status'] != 'paid':
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'status': 'error', 'message': 'Cannot send receipt for unpaid registration.'}), 400
         flash("Cannot send receipt for unpaid registration.", "warning")
         return redirect(request.referrer or url_for('admin_dashboard'))
 
+    # 1. Independent Email Dispatch
     email_ok, email_msg = send_receipt_email(
         recipient_email=reg['email'],
         participant_name=reg['full_name'],
@@ -2386,6 +2392,8 @@ def send_receipt_email_route(reg_id):
         utr_number=reg['utr_number'],
         registration_uid=reg['registration_uid']
     )
+
+    # 2. Independent WhatsApp URL & API Dispatch
     wa_ok, wa_msg, wa_url = send_whatsapp_receipt(
         recipient_phone=reg['phone'],
         participant_name=reg['full_name'],
@@ -2393,21 +2401,36 @@ def send_receipt_email_route(reg_id):
         payment_method=reg['payment_method'],
         amount_paid=reg['amount_paid'],
         utr_number=reg['utr_number'],
-        registration_uid=reg['registration_uid']
+        registration_uid=reg['registration_uid'],
+        base_url=request.host_url.rstrip('/'),
+        team_name=reg.get('team_name'),
+        team_members=reg.get('team_members'),
+        is_group=bool(reg.get('is_group')),
+        share_all=bool(reg.get('is_group') and reg.get('team_name'))
     )
     
-    if email_ok or wa_ok:
+    # 3. Independent Status Tracking & Flash Feedback
+    if email_ok:
         execute_db(
             "UPDATE registrations SET receipt_sent_at = CURRENT_TIMESTAMP, receipt_delivery_status = 'sent' WHERE id = %s",
             (reg_id,)
         )
-        flash(f"Receipt dispatched successfully via Email ({reg['email']}) and WhatsApp ({reg['phone']}).", 'success')
+        flash(f"✅ Receipt email dispatched successfully to {reg['email']}! WhatsApp chat opened in a new tab.", 'success')
     else:
         execute_db(
             "UPDATE registrations SET receipt_delivery_status = 'failed' WHERE id = %s",
             (reg_id,)
         )
-        flash(f"Receipt dispatch error: {email_msg}", 'danger')
+        flash(f"⚠️ WhatsApp chat opened for {reg['phone']}. Email delivery failed: {email_msg}", 'warning')
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({
+            'status': 'success' if email_ok else 'email_failed',
+            'email_ok': email_ok,
+            'email_msg': email_msg,
+            'wa_ok': wa_ok,
+            'wa_url': wa_url
+        })
         
     return redirect(request.referrer or url_for('admin_dashboard'))
 

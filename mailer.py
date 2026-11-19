@@ -33,6 +33,45 @@ def _sanitize_header_value(value):
     return re.sub(r'[\r\n]+', ' ', str(value or '')).strip()
 
 
+def _diagnose_smtp_error(error, smtp_username=None, smtp_server=None, smtp_port=None):
+    """
+    Produce a precise, human-actionable error explanation for SMTP failures.
+    Distinguishes invalid/expired Google App Passwords, connection drops, and cloud firewall port blocks.
+    """
+    err_str = str(error)
+    err_type = type(error).__name__
+
+    # 1. Gmail / Provider Authentication Failure (535 Bad Credentials or login rejected)
+    if isinstance(error, smtplib.SMTPAuthenticationError) or '535' in err_str or 'BadCredentials' in err_str or 'Username and Password not accepted' in err_str:
+        user_info = f" for '{smtp_username}'" if smtp_username else ""
+        return (
+            f"Gmail SMTP Authentication Failed{user_info}: 535 Bad Credentials. "
+            f"The Google App Password in .env is invalid or has expired. "
+            f"To resolve: (1) Go to https://myaccount.google.com/apppasswords with 2-Step Verification enabled, "
+            f"(2) Generate a new 16-character App Password, and (3) Update SMTP_PASSWORD in .env; "
+            f"or set SMTP_MODE=demo for Safe Demo Mode."
+        )
+
+    # 2. Connection closed unexpectedly (Gmail drops connection immediately upon 535 Bad Credentials)
+    if isinstance(error, smtplib.SMTPServerDisconnected):
+        return (
+            f"SMTP Server Disconnected: The mail server ({smtp_server or 'smtp.gmail.com'}) closed the connection unexpectedly. "
+            f"This typically occurs when Gmail rejects the App Password credentials (535 Bad Credentials) or terminates the session. "
+            f"Please verify your 16-character Google App Password in .env, or set SMTP_MODE=demo in .env for Safe Demo Mode."
+        )
+
+    # 3. Network unreachable / Port blocked (e.g. Render blocks ports 25, 465, 587)
+    if isinstance(error, (TimeoutError, ConnectionRefusedError, OSError)) or any(kw in err_str for kw in ['timed out', 'refused', 'nodename nor servname', 'Network is unreachable', 'Errno 8', 'Errno 61']):
+        return (
+            f"SMTP Network/Port Blocked: Could not establish connection to {smtp_server or 'smtp.gmail.com'}:{smtp_port or 587} ({err_str}). "
+            f"Note: Cloud hosting platforms (such as Render) block outbound SMTP ports 25, 465, and 587. "
+            f"For live cloud emails on Render, configure RESEND_API_KEY and RESEND_FROM_EMAIL in .env, "
+            f"or set SMTP_MODE=demo for Safe Demo Mode."
+        )
+
+    return f"SMTP Delivery Failed ({err_type}): {err_str}"
+
+
 def is_demo_mode():
     """
     Determines whether email sending should operate in Safe Demo Mode (simulation)
@@ -305,13 +344,10 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
 
         return True, f"Certificate successfully emailed to {clean_recipient} via Gmail SMTP!"
 
-    except smtplib.SMTPAuthenticationError as auth_err:
-        print(f"[SMTP Auth Error] {auth_err}")
-        return False, 'SMTP authentication failed; configure the provider credentials.'
-
     except Exception as e:
-        print(f"[SMTP Connection Error] {e}")
-        return False, 'SMTP delivery failed; the certificate remains queued for retry.'
+        diagnostic_msg = _diagnose_smtp_error(e, smtp_username=smtp_username, smtp_server=smtp_server, smtp_port=smtp_port)
+        print(f"[SMTP Certificate Error] {diagnostic_msg}")
+        return False, diagnostic_msg
 
 
 def get_effective_base_url(custom_base=None):
@@ -785,10 +821,7 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
 
         return True, f"Receipt successfully emailed to {clean_recipient}!"
 
-    except smtplib.SMTPAuthenticationError as auth_err:
-        print(f"[SMTP Auth Error] {auth_err}. Falling back smoothly to Safe Demo Mode.")
-        return False, f"SMTP authentication failed for {clean_recipient}."
-
     except Exception as e:
-        print(f"[SMTP Connection Error] {e}.")
-        return False, f"SMTP delivery failed: {e}"
+        diagnostic_msg = _diagnose_smtp_error(e, smtp_username=smtp_username, smtp_server=smtp_server, smtp_port=smtp_port)
+        print(f"[SMTP Receipt Error] {diagnostic_msg}")
+        return False, diagnostic_msg
