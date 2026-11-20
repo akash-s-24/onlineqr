@@ -110,6 +110,8 @@ class Config:
     SMTP_USE_SSL = os.environ.get('SMTP_USE_SSL', 'False').lower() in ('true', '1', 't')
     RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '').strip()
     RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', '').strip()
+    BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '').strip()
+    BREVO_SENDER_EMAIL = os.environ.get('BREVO_SENDER_EMAIL', os.environ.get('SMTP_SENDER_EMAIL', os.environ.get('SMTP_USERNAME', ''))).strip()
 
     # Edge CDN Acceleration & Delivery
     CDN_ENABLED = os.environ.get('CDN_ENABLED', 'true').strip().lower() in ('true', '1', 'yes')
@@ -132,8 +134,9 @@ if Config.APP_ENV == 'production':
         production_errors.append('SESSION_COOKIE_SECURE must be enabled')
     smtp_ready = (Config.SMTP_MODE == 'demo') or (Config.SMTP_MODE == 'live' and Config.SMTP_USERNAME and Config.SMTP_PASSWORD)
     resend_ready = bool(Config.RESEND_API_KEY and Config.RESEND_FROM_EMAIL)
-    if not smtp_ready and not resend_ready:
-        production_errors.append('live SMTP or Resend email credentials must be configured (or SMTP_MODE set to demo)')
+    brevo_ready = bool(Config.BREVO_API_KEY and Config.BREVO_SENDER_EMAIL)
+    if not smtp_ready and not resend_ready and not brevo_ready:
+        production_errors.append('live SMTP, Resend, or Brevo email credentials must be configured (or SMTP_MODE set to demo)')
     if not Config.ADMIN_PASSWORD:
         production_errors.append('ADMIN_PASSWORD must be configured before production sign-in is enabled')
     elif len(Config.ADMIN_PASSWORD) < 8:

@@ -65,7 +65,7 @@ def _diagnose_smtp_error(error, smtp_username=None, smtp_server=None, smtp_port=
         return (
             f"SMTP Network/Port Blocked: Could not establish connection to {smtp_server or 'smtp.gmail.com'}:{smtp_port or 587} ({err_str}). "
             f"Note: Cloud hosting platforms (such as Render) block outbound SMTP ports 25, 465, and 587. "
-            f"For live cloud emails on Render, configure RESEND_API_KEY and RESEND_FROM_EMAIL in .env, "
+            f"For live cloud emails on Render, configure BREVO_API_KEY (free, 0 domain needed) or RESEND_API_KEY in Render Environment Variables, "
             f"or set SMTP_MODE=demo for Safe Demo Mode."
         )
 
@@ -96,9 +96,11 @@ def is_demo_mode():
     smtp_password = re.sub(r'\s+', '', os.environ.get('SMTP_PASSWORD', getattr(Config, 'SMTP_PASSWORD', '')).strip())
     resend_key = os.environ.get('RESEND_API_KEY', getattr(Config, 'RESEND_API_KEY', '')).strip()
     resend_sender = os.environ.get('RESEND_FROM_EMAIL', getattr(Config, 'RESEND_FROM_EMAIL', '')).strip()
+    brevo_key = os.environ.get('BREVO_API_KEY', getattr(Config, 'BREVO_API_KEY', '')).strip()
+    brevo_sender = os.environ.get('BREVO_SENDER_EMAIL', getattr(Config, 'BREVO_SENDER_EMAIL', '')).strip()
 
-    if resend_key and resend_sender:
-        return False, 'Resend HTTPS email credentials detected'
+    if (resend_key and resend_sender) or (brevo_key and brevo_sender):
+        return False, 'HTTPS email credentials detected (Resend / Brevo)'
 
     if smtp_mode == 'demo':
         return True, "Safe Demo Mode is active in .env (SMTP_MODE=demo)"
@@ -124,17 +126,67 @@ def get_smtp_info():
     smtp_sender = os.environ.get('SMTP_SENDER_EMAIL', getattr(Config, 'SMTP_SENDER_EMAIL', smtp_username or 'info@shreedakshaacademyedu.in')).strip()
     resend_sender = os.environ.get('RESEND_FROM_EMAIL', getattr(Config, 'RESEND_FROM_EMAIL', '')).strip()
     resend_configured = bool(os.environ.get('RESEND_API_KEY', getattr(Config, 'RESEND_API_KEY', '')).strip() and resend_sender)
+    brevo_sender = os.environ.get('BREVO_SENDER_EMAIL', getattr(Config, 'BREVO_SENDER_EMAIL', '')).strip()
+    brevo_configured = bool(os.environ.get('BREVO_API_KEY', getattr(Config, 'BREVO_API_KEY', '')).strip() and brevo_sender)
+
+    active_mode = 'brevo' if brevo_configured else ('resend' if resend_configured else ('demo' if is_demo else 'smtp'))
 
     return {
-        'mode': 'resend' if resend_configured else ('demo' if is_demo else 'smtp'),
-        'is_demo': is_demo and not resend_configured,
+        'mode': active_mode,
+        'is_demo': is_demo and not (resend_configured or brevo_configured),
         'reason': reason,
         'server': os.environ.get('SMTP_SERVER', Config.SMTP_SERVER),
         'port': int(os.environ.get('SMTP_PORT', Config.SMTP_PORT)),
         'username': smtp_username,
-        'sender': resend_sender or smtp_sender,
-        'has_password': bool(resend_configured or not is_demo)
+        'sender': brevo_sender or resend_sender or smtp_sender,
+        'has_password': bool(brevo_configured or resend_configured or not is_demo)
     }
+
+
+def _send_via_brevo(recipient_email, subject, html_content, attachments=None):
+    """Send transactional mail through Brevo's (Sendinblue) HTTPS API (port 443) without SMTP ports."""
+    api_key = os.environ.get('BREVO_API_KEY', getattr(Config, 'BREVO_API_KEY', '')).strip()
+    sender_email = os.environ.get('BREVO_SENDER_EMAIL', getattr(Config, 'BREVO_SENDER_EMAIL', os.environ.get('SMTP_SENDER_EMAIL', os.environ.get('SMTP_USERNAME', '')))).strip()
+    sender_name = getattr(Config, 'COLLEGE_NAME', 'Shree Daksha Academy')
+    if not api_key or not sender_email:
+        return None
+
+    clean_recipient = _sanitize_header_value(recipient_email)
+    payload = {
+        'sender': {'name': sender_name, 'email': sender_email},
+        'to': [{'email': clean_recipient}],
+        'subject': _sanitize_header_value(subject),
+        'htmlContent': html_content,
+    }
+    if attachments:
+        payload['attachment'] = [
+            {'name': a.get('filename') or a.get('name', 'attachment'), 'content': a.get('content')}
+            for a in attachments
+            if a.get('content')
+        ]
+
+    req = urllib.request.Request(
+        'https://api.brevo.com/v3/smtp/email',
+        data=json.dumps(payload).encode('utf-8'),
+        headers={
+            'api-key': api_key,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        method='POST',
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as response:
+            if 200 <= response.status < 300:
+                return True, f'Email successfully delivered to {clean_recipient} via Brevo HTTPS!'
+            return False, f'Brevo returned HTTP {response.status}.'
+    except urllib.error.HTTPError as error:
+        detail = error.read().decode('utf-8', errors='replace')[:240]
+        print(f'[Brevo HTTP Error] {error.code}: {detail}')
+        return False, f'Brevo rejected the email request: {detail}'
+    except (urllib.error.URLError, TimeoutError, OSError) as error:
+        print(f'[Brevo Connection Error] {error}')
+        return False, 'Brevo could not be reached; retry delivery later.'
 
 
 def _send_via_resend(recipient_email, subject, html_content, attachments=None):
@@ -317,6 +369,15 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
                     'filename': os.path.basename(certificate_path),
                     'content': base64.b64encode(attachment.read()).decode('ascii'),
                 })
+
+        brevo_result = _send_via_brevo(
+            clean_recipient,
+            subject_line,
+            html_content,
+            resend_attachments,
+        )
+        if brevo_result is not None:
+            return brevo_result
 
         resend_result = _send_via_resend(
             clean_recipient,
@@ -816,6 +877,14 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
         </html>
         """
         msg.attach(MIMEText(html_content, 'html'))
+
+        brevo_result = _send_via_brevo(
+            clean_recipient,
+            f"Payment Receipt: Registration Confirmed for {subject_event_name} - Shree Daksha Academy",
+            html_content,
+        )
+        if brevo_result is not None:
+            return brevo_result
 
         resend_result = _send_via_resend(
             clean_recipient,
