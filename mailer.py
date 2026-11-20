@@ -199,6 +199,33 @@ def _send_via_brevo(recipient_email, subject, html_content, attachments=None):
         return False, 'Brevo could not be reached; retry delivery later.'
 
 
+def _sync_to_gmail_sent(msg):
+    """
+    Appends a copy of an outgoing email directly to Gmail's '[Gmail]/Sent Mail' folder via IMAP
+    so that the sender can visibly see it in their personal Gmail Sent folder.
+    Fails silently if network or credentials restrict IMAP.
+    """
+    try:
+        username = os.environ.get('SMTP_USERNAME', '').strip()
+        password = re.sub(r'\s+', '', os.environ.get('SMTP_PASSWORD', '').strip())
+        if not (username and password and '@gmail.com' in username):
+            return
+
+        import imaplib, time
+        mail = imaplib.IMAP4_SSL('imap.gmail.com', 993, timeout=8)
+        mail.login(username, password)
+        for folder in ['"[Gmail]/Sent Mail"', '"[Gmail]/Sent"']:
+            try:
+                status, _ = mail.append(folder, '\\Seen', imaplib.Time2Internaldate(time.time()), msg.as_bytes())
+                if status == 'OK':
+                    break
+            except Exception:
+                continue
+        mail.logout()
+    except Exception as e:
+        print(f"[IMAP Sent Sync Notice] {e}")
+
+
 def _send_via_resend(recipient_email, subject, html_content, attachments=None):
     """Send transactional mail through Resend's HTTPS API without SMTP ports."""
     api_key = os.environ.get('RESEND_API_KEY', getattr(Config, 'RESEND_API_KEY', '')).strip()
@@ -387,6 +414,8 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
             resend_attachments,
         )
         if brevo_result is not None:
+            if brevo_result[0]:
+                _sync_to_gmail_sent(msg)
             return brevo_result
 
         resend_result = _send_via_resend(
@@ -894,6 +923,8 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
             html_content,
         )
         if brevo_result is not None:
+            if brevo_result[0]:
+                _sync_to_gmail_sent(msg)
             return brevo_result
 
         resend_result = _send_via_resend(
