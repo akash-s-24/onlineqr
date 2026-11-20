@@ -6429,7 +6429,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         data-title="{{ ev.event_name|e }}"
                         data-format="{{ 'Group event' if ev.is_group else 'Solo event' }}"
                         data-fee="{% if ev.event_fee and ev.event_fee > 0 %}₹ {{ ev.event_fee }}{% else %}Free entry{% endif %}"
-                        data-venue="{{ ev.venue|e }}" data-date="25–26 Nov 2026"
+                        data-venue="{{ ev.venue|e }}" data-date="{{ ev.event_date|e }}"
                         data-palette-category="{{ ev.category_key }}"
                         data-description="{{ (ev.description or 'Bring your best idea and make the stage yours.')|e }}"
                         data-rules="{{ ev.rules_text|default('', true)|e }}"
@@ -6556,7 +6556,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                                     <line x1="8" y1="2" x2="8" y2="6"></line>
                                     <line x1="3" y1="10" x2="21" y2="10"></line>
                                 </svg>
-                                <span>25–26 November 2026</span>
+                                <span>{{ ev.event_date }}</span>
                             </div>
                             <div class="event-detail-item">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"

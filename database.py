@@ -840,6 +840,10 @@ def create_tables_and_seed():
         # Allow multiple certificates per registration for team event members
         if not is_sqlite:
             try:
+                run_exec("ALTER TABLE events ALTER COLUMN event_date TYPE VARCHAR(100);")
+            except Exception:
+                pass
+            try:
                 run_exec("ALTER TABLE certificates DROP CONSTRAINT IF EXISTS certificates_registration_id_key;")
             except Exception:
                 pass
@@ -1003,7 +1007,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'BGMI',
                 'event_type': 'Gaming',
-                'event_date': '25-26-nov-2026',
+                'event_date': '25 November 2026 (Wednesday)',
                 'event_time': '10:00 AM',
                 'venue': 'Computer Lab 3',
                 'description': 'A premier battle royale tournament where four-player squads deploy across high-stakes battlegrounds, demonstrating tactical positioning, precision shooting, strategic communication, and relentless survival instincts to claim the ultimate championship.',
@@ -1036,7 +1040,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Free Fire',
                 'event_type': 'Gaming',
-                'event_date': '25-26-nov-2026',
+                'event_date': '25 November 2026 (Wednesday)',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'A fast-paced battle royale competition where teams compete through precision, strategy, and teamwork.',
@@ -1068,7 +1072,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Pencil Sketching',
                 'event_type': 'Art',
-                'event_date': '25-26-nov-2026',
+                'event_date': '25 November 2026 (Wednesday)',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'An individual sketching challenge celebrating observation, composition, detail, and artistic expression.',
@@ -1098,7 +1102,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Get the Shield',
                 'event_type': 'Technical & Strategy',
-                'event_date': '25-26-nov-2026',
+                'event_date': '26 November 2026 (Thursday)',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'A two-person team challenge following clues in sequence and solving tasks to reach the final treasure.',
@@ -1126,7 +1130,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Photography',
                 'event_type': 'Art',
-                'event_date': '25-26-nov-2026',
+                'event_date': '25–26 November 2026',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'Capture a compelling visual story using composition, lighting, timing, and creative perspective.',
@@ -1154,7 +1158,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Content Creator',
                 'event_type': 'Social Media',
-                'event_date': '25-26-nov-2026',
+                'event_date': '25–26 November 2026',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'Create an engaging short-form piece that combines originality, storytelling, visual quality, and audience appeal.',
@@ -1181,7 +1185,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Solo Dance',
                 'event_type': 'Dancing',
-                'event_date': '25-26-nov-2026',
+                'event_date': '25 November 2026 (Wednesday)',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'Showcase expressive choreography, rhythm, stage presence, and musical interpretation in a solo routine.',
@@ -1208,7 +1212,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Group Dance',
                 'event_type': 'Dancing',
-                'event_date': '25-26-nov-2026',
+                'event_date': '26 November 2026 (Thursday)',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'A high-energy team dance showcase judged on synchrony, formation complexity, energy, and style.',
@@ -1237,7 +1241,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Beat Boxing',
                 'event_type': 'Cultural & Performance',
-                'event_date': '25-26-nov-2026',
+                'event_date': '25 November 2026 (Wednesday)',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'Vocal percussion battles celebrating musicality, technical precision, groove, and crowd energy.',
@@ -1265,7 +1269,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Face Painting',
                 'event_type': 'Art',
-                'event_date': '25-26-nov-2026',
+                'event_date': '26 November 2026 (Thursday)',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'Transform a face into an expressive artwork through concept, technique, color, and finishing detail.',
@@ -1296,7 +1300,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Tech Quiz',
                 'event_type': 'Technical & Strategy',
-                'event_date': '25-26-nov-2026',
+                'event_date': '26 November 2026 (Thursday)',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'A rapid-fire technology quiz covering computing fundamentals, innovation, logic, and current digital trends.',
@@ -1322,7 +1326,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Solo Singing',
                 'event_type': 'Cultural & Performance',
-                'event_date': '25-26-nov-2026',
+                'event_date': '26 November 2026 (Thursday)',
                 'event_time': 'To be announced',
                 'venue': 'To be announced',
                 'description': 'A soulful solo singing competition celebrating vocal brilliance, melodic expression, rhythm, and stage presence, inviting vocalists to perform iconic songs from Indian cinema.',
@@ -1352,7 +1356,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Mad Ads',
                 'event_type': 'Art',
-                'event_date': '25-26-nov-2026',
+                'event_date': '26 November 2026 (Thursday)',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'Develop and perform a memorable advertisement that combines a clear message, creativity, humor, and teamwork.',
@@ -1381,7 +1385,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Mono Acting',
                 'event_type': 'Art',
-                'event_date': '25-26-nov-2026',
+                'event_date': '25 November 2026 (Wednesday)',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'A solo acting performance focused on character, voice, body language, expression, and storytelling.',
@@ -1410,7 +1414,7 @@ def create_tables_and_seed():
             {
                 'event_name': 'Fashion Walk',
                 'event_type': 'Cultural & Performance',
-                'event_date': '25-26-nov-2026',
+                'event_date': '25 November 2026 (Wednesday)',
                 'event_time': '11:00 AM',
                 'venue': 'Seminar Hall 1',
                 'description': 'A fashion walk for teams of 6 to 8, themed around Seasons of Style.',
@@ -1452,6 +1456,7 @@ def create_tables_and_seed():
                 'solosinging': 'solosinging',
                 'singingsolo': 'solosinging',
                 'singing': 'solosinging',
+                'contentcreation': 'contentcreator',
             }
             return aliases.get(normalized, normalized)
 
@@ -1492,14 +1497,14 @@ def create_tables_and_seed():
                 run_exec(
                     """
                     UPDATE events SET
-                        event_name = %s, event_type = %s, is_group = %s, min_team_size = %s, max_team_size = %s,
+                        event_name = %s, event_type = %s, event_date = %s, is_group = %s, min_team_size = %s, max_team_size = %s,
                         event_fee = %s, upi_id = %s, qr_code_image = NULL,
                         description = %s, rules_text = %s, banner_image = %s,
                         faculty_name = %s, faculty_phone = %s, student_name = %s, student_phone = %s
                     WHERE event_name = %s
                     """,
                     (
-                        ev['event_name'], ev['event_type'], int(ev.get('is_group') or 0), ev['min_team_size'], ev['max_team_size'],
+                        ev['event_name'], ev['event_type'], ev['event_date'], int(ev.get('is_group') or 0), ev['min_team_size'], ev['max_team_size'],
                         ev['event_fee'], Config.DEFAULT_UPI_ID, ev['description'], ev['rules_text'], ev['banner_image'],
                         ev['faculty_name'], ev['faculty_phone'], ev['student_name'], ev['student_phone'],
                         existing_name
@@ -1507,16 +1512,40 @@ def create_tables_and_seed():
                 )
 
 
-        # Carry forward the confirmed two-day schedule to official/legacy
-        # dates, including duplicate PUBG/BGMI aliases. Preserve custom dates
-        # that do not match one of these known legacy values.
+        # Carry forward legacy/placeholder dates while preserving custom non-legacy dates
         run_exec(
             """
             UPDATE events SET event_date = %s
-            WHERE LOWER(TRIM(event_date)) IN (%s, %s, %s, %s)
+            WHERE LOWER(TRIM(event_date)) IN (%s, %s, %s, %s, %s)
             """,
-            ('25-26-nov-2026', '26-nov-2026', '18-sep-2026', '19-sep-2026', '20-sep-2026')
+            ('25 November 2026 (Wednesday)', '25-26-nov-2026', '26-nov-2026', '18-sep-2026', '19-sep-2026', '20-sep-2026')
         )
+
+        # Enforce exact confirmed event dates across all official events (and aliases)
+        schedule_sync = [
+            # Day 1: 25 November 2026 (Wednesday) - 7 single-day events + 2 two-day events = 9 events
+            ('25 November 2026 (Wednesday)', [
+                'Solo Dance', 'Fashion Walk', 'Mono Acting', 'Beat Boxing',
+                'Free Fire', 'BGMI', 'Pencil Sketching'
+            ]),
+            # Day 2: 26 November 2026 (Thursday) - 6 single-day events + 2 two-day events = 8 events
+            ('26 November 2026 (Thursday)', [
+                'Group Dance', 'Mad Ads', 'Solo Singing', 'Face Painting',
+                'Get the Shield', 'Tech Quiz'
+            ]),
+            # Two-day events: 25 & 26 November 2026 (Wednesday & Thursday)
+            ('25–26 November 2026', [
+                'Photography', 'Content Creator'
+            ]),
+        ]
+        for target_date, event_list in schedule_sync:
+            for item_name in event_list:
+                item_ident = event_identity(item_name)
+                canonical = existing_by_identity.get(item_ident, item_name)
+                run_exec(
+                    "UPDATE events SET event_date = %s WHERE LOWER(TRIM(event_name)) IN (LOWER(%s), LOWER(%s))",
+                    (target_date, item_name, canonical)
+                )
 
         # Set official Event Coordinators across all events uniformly
         run_exec(

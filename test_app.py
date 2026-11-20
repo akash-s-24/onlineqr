@@ -842,7 +842,7 @@ class SDATestCase(unittest.TestCase):
             edit_post_res = self.client.post(f"/admin/events/edit/{bgmi_event['id']}", data={
                 'event_name': 'BGMI',
                 'event_type': 'Gaming',
-                'event_date': '25-26-nov-2026',
+                'event_date': '25 November 2026 (Wednesday)',
                 'event_time': '10:00 AM',
                 'venue': 'Computer Lab 3',
                 'max_participants': '100',
@@ -881,6 +881,7 @@ class SDATestCase(unittest.TestCase):
                 UPDATE events
                 SET description = %s,
                     rules_text = %s,
+                    event_date = '25 November 2026 (Wednesday)',
                     faculty_name = 'RANJITHA B K',
                     faculty_phone = '88615 91085',
                     student_name = 'SINDHU M R',
@@ -1171,9 +1172,24 @@ class SDATestCase(unittest.TestCase):
         if database.DB_MODE != 'sqlite':
             self.skipTest('This regression checks the isolated SQLite seed.')
 
-        dates = database.query_db("SELECT DISTINCT event_date FROM events")
+        events = database.query_db("SELECT event_name, event_date FROM events")
+        self.assertEqual(len(events), 15)
 
-        self.assertEqual(dates, [{'event_date': '25-26-nov-2026'}])
+        # 9 events on 25 November 2026 (Wednesday): 7 single-day + 2 two-day
+        nov_25_events = [e['event_name'] for e in events if '25 November' in e['event_date'] or '25–26' in e['event_date']]
+        self.assertEqual(len(nov_25_events), 9)
+
+        # 8 events on 26 November 2026 (Thursday): 6 single-day + 2 two-day
+        nov_26_events = [e['event_name'] for e in events if '26 November' in e['event_date'] or '25–26' in e['event_date']]
+        self.assertEqual(len(nov_26_events), 8)
+
+        # Distinct event date formats
+        dates = {e['event_date'] for e in events}
+        self.assertEqual(dates, {
+            '25 November 2026 (Wednesday)',
+            '26 November 2026 (Thursday)',
+            '25–26 November 2026'
+        })
 
     def test_seed_migrates_all_legacy_event_dates(self):
         if database.DB_MODE != 'sqlite':
@@ -1199,7 +1215,7 @@ class SDATestCase(unittest.TestCase):
                 "SELECT event_date FROM events WHERE event_name = %s",
                 (fixture_name,), one=True
             )
-            self.assertEqual(migrated['event_date'], '25-26-nov-2026')
+            self.assertEqual(migrated['event_date'], '25 November 2026 (Wednesday)')
             custom = database.query_db(
                 "SELECT event_date FROM events WHERE event_name = %s",
                 (custom_fixture_name,), one=True

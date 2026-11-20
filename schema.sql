@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS events (
     id SERIAL PRIMARY KEY,
     event_name VARCHAR(100) NOT NULL,
     event_type VARCHAR(50) NOT NULL,
-    event_date VARCHAR(30) NOT NULL,
+    event_date VARCHAR(50) NOT NULL,
     event_time VARCHAR(30) NOT NULL,
     venue VARCHAR(100) NOT NULL,
     description TEXT,
