@@ -365,23 +365,6 @@ def send_certificate_email(recipient_email, participant_name, event_name, certif
             except Exception as ssl_err:
                 print(f"[SMTP SSL Fallback Error] {ssl_err}")
 
-        # If cloud hosting physically blocks raw SMTP sockets entirely (e.g. Render free tier blocks 25, 465, 587):
-        # Auto-fall back to Safe Demo Mode simulation so the admin/attendee workflow is NOT blocked
-        if is_port_blocked:
-            print("=" * 60)
-            print("[Cloud Host Blocked] Falling back to Safe Demo Simulation")
-            print("=" * 60)
-            print(f" - Recipient Email : {clean_recipient}")
-            print(f" - Participant Name: {participant_name}")
-            print(f" - Event Name      : {event_name}")
-            print(f" - Certificate ID  : {certificate_code or 'N/A'}")
-            print(f" - Note            : Cloud host blocked outbound SMTP ({e})")
-            print("=" * 60)
-            return True, (
-                f"Certificate recorded successfully (Safe Mode simulation): Cloud host (Render) blocks outbound SMTP ports 25/465/587 ([Errno 101]). "
-                f"To send live emails on Render, add a free RESEND_API_KEY in Render Environment Variables."
-            )
-
         diagnostic_msg = _diagnose_smtp_error(e, smtp_username=smtp_username, smtp_server=smtp_server, smtp_port=smtp_port)
         print(f"[SMTP Certificate Error] {diagnostic_msg}")
         return False, diagnostic_msg
@@ -880,25 +863,7 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
             except Exception as ssl_err:
                 print(f"[SMTP SSL Fallback Error] {ssl_err}")
 
-        # If cloud hosting physically blocks raw SMTP sockets entirely (e.g. Render blocks 25, 465, 587):
-        # Auto-fall back to Safe Demo Mode simulation so the admin/attendee workflow is NOT blocked
-        if is_port_blocked:
-            print("=" * 60)
-            print("[Cloud Host Blocked] Falling back to Safe Demo Simulation")
-            print("=" * 60)
-            print(f" - Recipient Email : {clean_recipient}")
-            print(f" - Participant Name: {participant_name}")
-            print(f" - Event Name      : {event_name}")
-            print(f" - Amount Paid     : ₹{amount_paid}")
-            print(f" - Registration ID : {registration_uid or 'N/A'}")
-            print(f" - Note            : Cloud host blocked outbound SMTP ({e})")
-            print("=" * 60)
-            return True, (
-                f"Receipt recorded successfully (Safe Mode simulation): Cloud host (Render) blocks outbound SMTP ports 25/465/587 ([Errno 101]). "
-                f"To send live emails on Render, add a free RESEND_API_KEY in Render Environment Variables."
-            )
-
-        # If it was an authentication failure or other error, diagnose and report
+        # If it was a port block, authentication failure, or other error, diagnose and report accurately
         diagnostic_msg = _diagnose_smtp_error(e, smtp_username=smtp_username, smtp_server=smtp_server, smtp_port=smtp_port)
         print(f"[SMTP Receipt Error] {diagnostic_msg}")
         return False, diagnostic_msg
