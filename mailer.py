@@ -158,6 +158,10 @@ def _send_via_brevo(recipient_email, subject, html_content, attachments=None):
         'subject': _sanitize_header_value(subject),
         'htmlContent': html_content,
     }
+    # BCC sender so a copy also arrives in the admin's Gmail inbox for confirmation
+    if sender_email and clean_recipient.lower() != sender_email.lower():
+        payload['bcc'] = [{'email': sender_email}]
+
     if attachments:
         payload['attachment'] = [
             {'name': a.get('filename') or a.get('name', 'attachment'), 'content': a.get('content')}
@@ -183,6 +187,12 @@ def _send_via_brevo(recipient_email, subject, html_content, attachments=None):
     except urllib.error.HTTPError as error:
         detail = error.read().decode('utf-8', errors='replace')[:240]
         print(f'[Brevo HTTP Error] {error.code}: {detail}')
+        if error.code == 401 and 'unrecognised IP address' in detail:
+            return False, (
+                "Brevo Security Block: Unrecognized IP address. "
+                "Please go to https://app.brevo.com/security/authorised_ips and click 'Deactivate blocking' "
+                "so Brevo accepts emails from Render's cloud servers."
+            )
         return False, f'Brevo rejected the email request: {detail}'
     except (urllib.error.URLError, TimeoutError, OSError) as error:
         print(f'[Brevo Connection Error] {error}')
