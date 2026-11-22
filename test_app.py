@@ -2569,6 +2569,9 @@ class SDATestCase(unittest.TestCase):
         database.seed_sample_teams(force=False)
         try:
             self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+            alpha = database.query_db("SELECT id FROM registrations WHERE team_name = 'Alpha Squad'", one=True)
+            if alpha:
+                self.client.post(f'/admin/certificates/generate/{alpha["id"]}', follow_redirects=True)
             res = self.client.get('/admin/certificates')
             self.assertEqual(res.status_code, 200)
             html = res.data.decode('utf-8')

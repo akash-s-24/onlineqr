@@ -742,11 +742,7 @@
                                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                             <button class="dashboard-btn small" type="submit" title="Send official payment receipt via Email to {{ reg.email }}">✉️ Email Receipt</button>
                                         </form>
-                                        {% if reg.is_group and reg.team_name %}
-                                        <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=reg.registration_uid, share='all') }}" target="_blank" rel="noopener noreferrer" class="dashboard-btn small" style="text-decoration:none; background:#15803d; color:#ffffff;" title="Send WhatsApp receipt & pass to all squad players / group">📱 WhatsApp (All)</a>
-                                        {% else %}
-                                        <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=reg.registration_uid) }}" target="_blank" rel="noopener noreferrer" class="dashboard-btn small" style="text-decoration:none; background:#15803d; color:#ffffff;" title="Open WhatsApp Receipt">📱 WhatsApp</a>
-                                        {% endif %}
+                                        <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=reg.registration_uid) }}" target="_blank" rel="noopener noreferrer" class="dashboard-btn small" style="text-decoration:none; background:#15803d; color:#ffffff;" title="Send official WhatsApp receipt to {% if reg.is_group and reg.team_name %}Team Lead ({{ reg.phone }}){% else %}{{ reg.phone }}{% endif %}">📱 WhatsApp</a>
                                         {% endif %}
                                         <button type="button" class="dashboard-btn small danger"
                                             data-reg-id="{{ reg.registration_id }}" data-full-name="{{ reg.full_name|e }}" onclick="confirmDeleteOne(this.dataset.regId, this.dataset.fullName)">Delete</button>
@@ -891,11 +887,7 @@
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <button class="dashboard-btn small" type="submit" title="Resend official payment receipt via Email to {{ reg.email }}">✉️ Email Receipt</button>
                                     </form>
-                                    {% if reg.is_group and reg.team_name %}
-                                    <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=reg.registration_uid, share='all') }}" target="_blank" rel="noopener noreferrer" class="dashboard-btn small" style="text-decoration:none; background:#15803d; color:#ffffff;" title="Send WhatsApp receipt & pass to all squad players / group">📱 WhatsApp (All)</a>
-                                    {% else %}
-                                    <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=reg.registration_uid) }}" target="_blank" rel="noopener noreferrer" class="dashboard-btn small" style="text-decoration:none; background:#15803d; color:#ffffff;" title="Open WhatsApp Receipt">📱 WhatsApp</a>
-                                    {% endif %}
+                                    <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=reg.registration_uid) }}" target="_blank" rel="noopener noreferrer" class="dashboard-btn small" style="text-decoration:none; background:#15803d; color:#ffffff;" title="Send official WhatsApp receipt to {% if reg.is_group and reg.team_name %}Team Lead ({{ reg.phone }}){% else %}{{ reg.phone }}{% endif %}">📱 WhatsApp</a>
                                     {% endif %}
                                 </div>
                             </td>
@@ -955,11 +947,7 @@
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <button class="dashboard-btn small" type="submit" title="Resend official payment receipt via Email to {{ reg.email }}">✉️ Email Receipt</button>
                                     </form>
-                                    {% if reg.is_group and reg.team_name %}
-                                    <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=reg.registration_uid, share='all') }}" target="_blank" rel="noopener noreferrer" class="dashboard-btn small" style="text-decoration:none; background:#15803d; color:#ffffff;" title="Send WhatsApp receipt & pass to all squad players / group">📱 WhatsApp (All)</a>
-                                    {% else %}
-                                    <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=reg.registration_uid) }}" target="_blank" rel="noopener noreferrer" class="dashboard-btn small" style="text-decoration:none; background:#15803d; color:#ffffff;" title="Open WhatsApp Receipt">📱 WhatsApp</a>
-                                    {% endif %}
+                                    <a href="{{ url_for('registration_whatsapp_receipt', registration_uid=reg.registration_uid) }}" target="_blank" rel="noopener noreferrer" class="dashboard-btn small" style="text-decoration:none; background:#15803d; color:#ffffff;" title="Send official WhatsApp receipt to {% if reg.is_group and reg.team_name %}Team Lead ({{ reg.phone }}){% else %}{{ reg.phone }}{% endif %}">📱 WhatsApp</a>
                                     {% else %}
                                     <form method="POST"
                                         action="{{ url_for('toggle_payment', reg_id=reg.registration_id) }}"

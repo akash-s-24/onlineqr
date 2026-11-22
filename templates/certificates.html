@@ -200,34 +200,15 @@
                                 👁️ Preview All
                             </button>
 
-                            <!-- Direct WhatsApp chat window / Group broadcast -->
-                            {% if row.is_group %}
+                            <!-- Direct WhatsApp chat window to Lead (receives all certificates) -->
                             <a href="{{ url_for('team_certificates_whatsapp', reg_id=row.registration_id) }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="candy-btn candy-btn-success"
                                 style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
-                                title="Send all teammates certificates via WhatsApp to Lead ({{ row.phone }})">
+                                title="Send certificate(s) via WhatsApp to {% if row.is_group %}Team Lead ({{ row.phone }}){% else %}Participant ({{ row.phone }}){% endif %}">
                                 💬 WhatsApp
                             </a>
-                            <a href="{{ url_for('team_certificates_whatsapp', reg_id=row.registration_id, share='all') }}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="candy-btn candy-btn-secondary"
-                                style="padding: 0.4rem 0.65rem; font-size: 0.78rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;"
-                                title="Share all teammates certificates to WhatsApp squad group or contacts">
-                                📢 Share
-                            </a>
-                            {% else %}
-                            <a href="{{ url_for('team_certificates_whatsapp', reg_id=row.registration_id) }}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="candy-btn candy-btn-success"
-                                style="padding: 0.4rem 0.85rem; font-size: 0.82rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
-                                title="Open WhatsApp chat window to participant">
-                                💬 WhatsApp
-                            </a>
-                            {% endif %}
 
                             <!-- Direct Email with ZIP for team or PNG for solo -->
                             <form method="POST" action="{{ url_for('send_team_certificates_email', reg_id=row.registration_id) }}" style="display:inline;">

@@ -782,10 +782,11 @@ def send_whatsapp_receipt(recipient_phone, participant_name, event_name, payment
     return True, f"Receipt prepared for WhatsApp (+{raw_digits}).", wa_url
 
 
-def send_receipt_email(recipient_email, participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None):
+def send_receipt_email(recipient_email, participant_name, event_name, payment_method, amount_paid, utr_number=None, registration_uid=None, team_name=None, team_members=None, is_group=False):
     """
     Send a flawless email receipt for event registration payment.
     Includes registration UID, gate pass link, college branding, and coordinator details.
+    For team events, delivers to the Team Lead and lists all squad players.
     """
     load_dotenv(override=True)
     is_demo, demo_reason = is_demo_mode()
@@ -798,6 +799,9 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
         print("=" * 60)
         print(f" - Recipient Email : {clean_recipient}")
         print(f" - Participant Name: {participant_name}")
+        if team_name:
+            print(f" - Team Name       : {team_name}")
+            print(f" - Squad Players   : {team_members or participant_name}")
         print(f" - Event Name      : {event_name}")
         print(f" - Registration ID : {registration_uid or 'N/A'}")
         print(f" - Amount Paid     : ₹{amount_paid}")
@@ -841,6 +845,33 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
         </tr>
         """ if registration_uid else ""
 
+        team_rows = ""
+        if team_name:
+            team_rows = f"""
+            <tr>
+                <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Team Name</td>
+                <td style="padding: 10px 0; font-weight: 700; color: #1e3a8a; text-align: right; border-bottom: 1px solid #f1f5f9;">{escape(str(team_name))}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Team Lead</td>
+                <td style="padding: 10px 0; font-weight: 600; color: #0f172a; text-align: right; border-bottom: 1px solid #f1f5f9;">{safe_participant_name}</td>
+            </tr>
+            """
+            if team_members:
+                team_rows += f"""
+                <tr>
+                    <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Squad Players</td>
+                    <td style="padding: 10px 0; font-weight: 500; color: #334155; text-align: right; border-bottom: 1px solid #f1f5f9;">{escape(str(team_members))}</td>
+                </tr>
+                """
+
+        if team_name:
+            greeting_header = f"Dear {safe_participant_name} (Team Lead - {escape(str(team_name))}),"
+            greeting_body = f"Your team registration and payment for <strong>{safe_event_name}</strong> have been successfully verified and confirmed!"
+        else:
+            greeting_header = f"Dear {safe_participant_name},"
+            greeting_body = f"Your registration and payment for <strong>{safe_event_name}</strong> have been successfully verified and confirmed!"
+
         html_content = f"""
         <!DOCTYPE html>
         <html>
@@ -870,12 +901,13 @@ def send_receipt_email(recipient_email, participant_name, event_name, payment_me
                     <div class="badge">Official Payment Receipt • Daksha Infinix 2026</div>
                 </div>
                 <div class="content">
-                    <h2 style="margin: 0 0 12px; font-size: 18px; color: #0f172a;">Dear {safe_participant_name},</h2>
-                    <p style="margin: 0 0 18px; color: #334155;">Your registration and payment for <strong>{safe_event_name}</strong> have been successfully verified and confirmed!</p>
+                    <h2 style="margin: 0 0 12px; font-size: 18px; color: #0f172a;">{greeting_header}</h2>
+                    <p style="margin: 0 0 18px; color: #334155;">{greeting_body}</p>
                     
                     <div class="receipt-card">
                         <table class="receipt-table">
                             {uid_row}
+                            {team_rows}
                             <tr>
                                 <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Event Name</td>
                                 <td style="padding: 10px 0; font-weight: 600; color: #0f172a; text-align: right; border-bottom: 1px solid #f1f5f9;">{safe_event_name}</td>

@@ -2389,7 +2389,10 @@ def send_receipt_email_route(reg_id):
         payment_method=reg['payment_method'],
         amount_paid=reg['amount_paid'],
         utr_number=reg['utr_number'],
-        registration_uid=reg['registration_uid']
+        registration_uid=reg['registration_uid'],
+        team_name=reg.get('team_name'),
+        team_members=reg.get('team_members'),
+        is_group=bool(reg.get('is_group') or reg.get('team_name'))
     )
 
     # Status Tracking & Feedback
@@ -2428,9 +2431,8 @@ def registration_whatsapp_receipt(registration_uid):
     if not reg:
         abort(404)
     amount = reg.get('amount_paid') or reg.get('event_fee') or 0
-    share_mode = request.args.get('share', '').lower()
     target_phone = request.args.get('phone') or reg.get('phone')
-    share_all = (share_mode == 'all')
+    share_all = False
     _, _, wa_url = send_whatsapp_receipt(
         recipient_phone=target_phone,
         participant_name=reg.get('full_name'),
@@ -2856,11 +2858,10 @@ def team_certificates_whatsapp(reg_id):
             f"Daksha Infinix 2026 • Shree Daksha Academy"
         )
 
-    share_mode = request.args.get('share', '').lower()
-    if share_mode == 'all' or not phone_digits:
-        wa_url = f"https://api.whatsapp.com/send?text={urllib.parse.quote(msg)}"
-    else:
+    if phone_digits:
         wa_url = f"https://api.whatsapp.com/send?phone={phone_digits}&text={urllib.parse.quote(msg)}"
+    else:
+        wa_url = f"https://api.whatsapp.com/send?text={urllib.parse.quote(msg)}"
     return redirect(wa_url)
 
 
