@@ -1038,11 +1038,6 @@ color: #ffffff !important;
 [data-theme="dark"] #offlinePaymentDetails p {
 color: #ffffff !important;
 }
-[data-theme="dark"] #displayUpiId {
-background: #27272a !important;
-border-color: #3f3f46 !important;
-color: #ffffff !important;
-}
 /* ── Green Highlight for Amount in Payment Section ── */
 #displayEventFee {
 color: #16a34a !important;
@@ -1613,17 +1608,6 @@ line-height: 1.25 !important; }
                         <span>Open UPI App to Pay</span>
                     </a>
 
-                    <!-- UPI ID & One-Click Copy -->
-                    <div
-                        style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
-                        <span style="font-size: 0.9rem; color: #475569;"><strong>UPI ID:</strong></span>
-                        <code id="displayUpiId"
-                            style="font-family: monospace; font-weight: 700; background: #f4f4f5; padding: 4px 10px; border-radius: 6px; border: 1px solid #d4d4d8; color: #0f172a;">{{ config.DEFAULT_UPI_ID }}</code>
-                        <button type="button" id="copyUpiBtn" data-no-liquid
-                            style="padding: 5px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; border: 1.5px solid #2563eb; background: #eff6ff; color: #2563eb; cursor: pointer; transition: all 0.2s ease;">📋
-                            Copy ID</button>
-                    </div>
-
                     <div class="f-form-group" style="text-align: left; max-width: 440px; margin: 0 auto 18px;">
                         <label class="f-label" for="utr_number">UPI transaction reference *</label>
                         <input type="text" id="utr_number" name="utr_number" class="f-control"
@@ -2097,7 +2081,6 @@ line-height: 1.25 !important; }
         const displayFee = document.getElementById('displayEventFee');
         const upiQrCode = document.getElementById('upiQrCode');
         const upiPayButton = document.getElementById('upiPayButton');
-        const displayUpiId = document.getElementById('displayUpiId');
         const utrInput = document.getElementById('utr_number');
         const payOnlineRadio = document.getElementById('payOnlineRadio');
         const payOfflineRadio = document.getElementById('payOfflineRadio');
@@ -2122,7 +2105,6 @@ line-height: 1.25 !important; }
         if (eventFee > 0 && eventId) {
             if (paymentSection) paymentSection.style.display = 'block';
             if (displayFee) displayFee.innerText = `₹ ${eventFee}`;
-            if (displayUpiId) displayUpiId.innerText = upiId;
 
             if (upiQrCode) upiQrCode.src = `{{ url_for('static', filename='images/federal-upi-qr.png') }}`;
             if (upiPayButton) {
@@ -2367,35 +2349,6 @@ line-height: 1.25 !important; }
             upiBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 triggerUpiPayment('generic');
-            });
-        }
-
-        const copyBtn = document.getElementById('copyUpiBtn');
-        if (copyBtn) {
-            copyBtn.addEventListener('click', function () {
-                const upiIdSpan = document.getElementById('displayUpiId');
-                const upiText = (upiIdSpan ? upiIdSpan.textContent : '').trim();
-                if (upiText) {
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                        navigator.clipboard.writeText(upiText).then(() => {
-                            const originalText = copyBtn.innerHTML;
-                            copyBtn.innerHTML = '✓ Copied!';
-                            copyBtn.style.background = '#dcfce7';
-                            copyBtn.style.color = '#15803d';
-                            copyBtn.style.borderColor = '#86efac';
-                            setTimeout(() => {
-                                copyBtn.innerHTML = originalText;
-                                copyBtn.style.background = '#eff6ff';
-                                copyBtn.style.color = '#2563eb';
-                                copyBtn.style.borderColor = '#2563eb';
-                            }, 2000);
-                        }).catch(() => {
-                            prompt('Copy your UPI ID:', upiText);
-                        });
-                    } else {
-                        prompt('Copy your UPI ID:', upiText);
-                    }
-                }
             });
         }
 

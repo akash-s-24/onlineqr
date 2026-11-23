@@ -1905,12 +1905,14 @@ class SDATestCase(unittest.TestCase):
         self.assertNotIn('class="btn-card-register" data-no-liquid', events_html)
         self.assertNotIn('id="discCascadeRegister" class="disc-cascade-register" data-no-liquid', events_html)
 
-        # 5. Verify register.html targets
+        # 5. Verify register.html targets (UPI ID removed, QR code and direct UPI app button present)
         res_reg = self.client.get('/register')
         reg_html = res_reg.data.decode('utf-8')
         self.assertIn('id="submitBtn" class="clean-black-submit-btn"', reg_html)
         self.assertIn('id="upiPayButton" href="#" class="clean-black-submit-btn" data-no-liquid', reg_html)
-        self.assertIn('id="copyUpiBtn" data-no-liquid', reg_html)
+        self.assertNotIn('UPI ID:', reg_html)
+        self.assertNotIn('id="copyUpiBtn"', reg_html)
+        self.assertIn('id="upiQrCode"', reg_html)
 
     def test_35_refined_liquid_buttons_and_countdown_live_state(self):
         """Verify button styling palettes, dark mode explore visibility, active nav pill highlight, and Fest is Live timer."""
