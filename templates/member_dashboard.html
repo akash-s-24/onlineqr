@@ -5,12 +5,202 @@
 {% set total_regs = registrations|length %}
 {% set paid_regs = registrations|selectattr('payment_status', 'equalto', 'paid')|list|length %}
 {% set pending_approvals = registrations|selectattr('approval_status', 'equalto', 'pending')|list|length %}
+{% set total_collected = registrations|selectattr('payment_status', 'equalto', 'paid')|map(attribute='amount_paid')|sum %}
 <div class="dashboard-shell">
     <header class="dashboard-topbar"><div><h1 class="dashboard-title">Your registrations</h1><p class="dashboard-subtitle">Track participants you registered, payment verification, and receipt delivery from one compact workspace.</p></div><div class="dashboard-actions"><a class="dashboard-btn" href="{{ url_for('qr_scanner') }}">Open QR Scanner</a><a class="dashboard-btn" href="{{ url_for('events_list') }}">Browse events</a><a class="dashboard-btn primary" href="{{ url_for('register_participant') }}">Register participant</a></div></header>
+    
+    <!-- Quick Desk Action Banner -->
+    <div class="dash-callout" style="margin: 0 0 16px; background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%); border-left: 4px solid #2563eb; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 14px 18px; border-radius: 8px; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);">
+        <div>
+            <strong style="color: #1e3a8a; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+                <span>📱</span> Desk Check-in & Scanner Ready
+            </strong>
+            <span style="color: #475569; font-size: 0.84rem; display: block; margin-top: 2px;">
+                Scan attendee QR passes on mobile or tablet with the square camera viewfinder to collect cash & mark attendance.
+            </span>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a href="{{ url_for('qr_scanner') }}" class="dashboard-btn primary small" style="display: inline-flex; align-items: center; gap: 5px; font-weight: 700;">
+                <span>📷</span> Open QR Scanner
+            </a>
+            <a href="{{ url_for('register_participant') }}" class="dashboard-btn small" style="display: inline-flex; align-items: center; gap: 5px;">
+                <span>➕</span> Register Walk-in
+            </a>
+        </div>
+    </div>
+
     <nav class="dashboard-nav" aria-label="Member sections"><a class="active" href="#summary">Summary</a><a href="#records">Registration records</a><a href="{{ url_for('members_list') }}">Team directory</a></nav>
     <section id="summary" aria-labelledby="summary-title"><h2 id="summary-title" class="sr-only">Summary</h2><div class="dash-grid metrics"><div class="metric info"><span class="metric-label">Registrations</span><span class="metric-value">{{ total_regs }}</span><span class="metric-meta">Participants you added</span></div><div class="metric good"><span class="metric-label">Paid</span><span class="metric-value">{{ paid_regs }}</span><span class="metric-meta">Verified by administrator</span></div><div class="metric warn"><span class="metric-label">Approval pending</span><span class="metric-value">{{ pending_approvals }}</span><span class="metric-meta">Awaiting admin review</span></div><div class="metric"><span class="metric-label">Receipts</span><span class="metric-value">{{ registrations|selectattr('receipt_delivery_status', 'equalto', 'sent')|list|length }}</span><span class="metric-meta">Email receipts sent</span></div><div class="metric"><span class="metric-label">Next step</span><span class="metric-value" style="font-size:1.15rem; letter-spacing:-.02em;">{% if pending_approvals %}Review{% elif paid_regs < total_regs %}Collect{% else %}Ready{% endif %}</span><span class="metric-meta">Based on your records</span></div></div></section>
 
-    <section id="records" class="dash-panel" style="margin-top:18px;" aria-labelledby="records-title"><div class="dash-panel-head"><div><h2 id="records-title" class="dash-panel-title">Registration records</h2><p class="dash-panel-note">Payment is not considered complete until an administrator verifies the submitted evidence.</p></div><a class="dashboard-btn small" href="{{ url_for('events_list') }}">View public events</a></div>{% if registrations %}<div class="dash-table-wrap"><table class="dash-table"><thead><tr><th>Reference</th><th>Participant</th><th>Event</th><th>Approval</th><th>Payment</th><th>Receipt</th></tr></thead><tbody>{% for reg in registrations %}<tr><td><a class="dash-id" href="{{ url_for('payment_status', registration_uid=reg.registration_uid) }}">{{ reg.registration_uid }}</a><br><span class="dash-muted">Open status</span></td><td><strong>{{ reg.full_name }}</strong><br><span class="dash-muted">{{ reg.email }}<br>{{ reg.college_name }}{% if reg.department %} · {{ reg.department }}{% endif %}</span></td><td>{{ reg.event_name }}{% if reg.team_name %}<br><span class="dash-muted">{{ reg.team_name }}</span>{% endif %}{% if reg.team_members %}<br><span style="font-size:0.75rem; color:var(--dash-muted);" title="{{ reg.team_members }}"><strong>Members:</strong> {{ reg.team_members }}</span>{% endif %}</td><td>{% if reg.approval_status == 'approved' %}<span class="dash-badge good">Approved</span>{% else %}<span class="dash-badge warn">Pending review</span>{% endif %}</td><td>{% if reg.payment_status == 'paid' %}<span class="dash-badge good">Paid · ₹{{ reg.amount_paid }}</span>{% elif reg.payment_status == 'pending' %}<span class="dash-badge info">UTR submitted</span>{% elif reg.payment_status == 'pay_on_site' %}<span class="dash-badge warn">Pay on site</span>{% else %}<span class="dash-badge warn">Unpaid</span>{% endif %}{% if reg.utr_number %}<br><span class="dash-id">{{ reg.utr_number }}</span>{% endif %}{% if reg.payment_verified_at %}<br><span class="dash-muted">Verified {{ reg.payment_verified_at }}</span>{% endif %}</td><td>{% if reg.receipt_delivery_status == 'sent' %}<span class="dash-badge good">Sent</span>{% elif reg.receipt_delivery_status == 'failed' %}<span class="dash-badge bad">Delivery failed</span>{% elif reg.payment_status == 'paid' %}<span class="dash-badge warn">Pending send</span>{% else %}<span class="dash-muted">After verification</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="dash-empty">No registrations yet. Start by choosing an event.</div>{% endif %}</section>
-    <section class="dash-panel" style="margin-top:18px;"><div class="dash-panel-head"><div><h2 class="dash-panel-title">What happens next</h2><p class="dash-panel-note">A simple, reliable handoff for every registration.</p></div></div><div class="dash-grid two" style="padding:16px 18px;"><div class="dash-callout" style="margin:0;"><strong>1. Record</strong><br>Keep the registration reference and UTR safe.</div><div class="dash-callout" style="margin:0;"><strong>2. Verify</strong><br>The administrator checks the bank record.</div><div class="dash-callout" style="margin:0;"><strong>3. Receive</strong><br>The receipt status updates after delivery.</div><div class="dash-callout" style="margin:0;"><strong>4. Attend</strong><br>Use the approved record at the event.</div></div></section>
+    <section id="records" class="dash-panel" style="margin-top:18px;" aria-labelledby="records-title">
+        <div class="dash-panel-head">
+            <div>
+                <h2 id="records-title" class="dash-panel-title">Registration records</h2>
+                <p class="dash-panel-note">Payment is not considered complete until an administrator verifies the submitted evidence.</p>
+            </div>
+            <a class="dashboard-btn small" href="{{ url_for('events_list') }}">View public events</a>
+        </div>
+
+        {% if registrations %}
+        <!-- Fast Live Search & Quick Filter Controls -->
+        <div style="padding: 12px 18px 6px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: #fafafa; border-bottom: 1px solid #f1f5f9;">
+            <div style="flex: 1; min-width: 220px;">
+                <input type="text" id="memberTableSearch" placeholder="🔍 Search participant, UID, event, college..." 
+                       oninput="filterMemberRecords()" 
+                       style="width: 100%; padding: 0.55rem 0.85rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;" />
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;" id="memberFilterPills">
+                <button type="button" class="dashboard-btn small filter-pill active" onclick="setMemberFilter('all', this)">All ({{ total_regs }})</button>
+                <button type="button" class="dashboard-btn small filter-pill" onclick="setMemberFilter('paid', this)">Paid ({{ paid_regs }})</button>
+                <button type="button" class="dashboard-btn small filter-pill" onclick="setMemberFilter('pending', this)">Pending ({{ total_regs - paid_regs }})</button>
+                <button type="button" class="dashboard-btn small filter-pill" onclick="setMemberFilter('approved', this)">Approved</button>
+            </div>
+        </div>
+
+        <div class="dash-table-wrap">
+            <table class="dash-table" id="memberRegistrationsTable">
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Participant</th>
+                        <th>Event</th>
+                        <th>Approval</th>
+                        <th>Payment</th>
+                        <th>Receipt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reg in registrations %}
+                    <tr class="member-reg-row" 
+                        data-payment="{{ reg.payment_status }}" 
+                        data-approval="{{ reg.approval_status }}" 
+                        data-search="{{ reg.registration_uid|lower }} {{ reg.full_name|lower }} {{ reg.email|lower }} {{ reg.college_name|lower }} {{ reg.event_name|lower }}{% if reg.team_name %} {{ reg.team_name|lower }}{% endif %}">
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <a class="dash-id" href="{{ url_for('payment_status', registration_uid=reg.registration_uid) }}">{{ reg.registration_uid }}</a>
+                                <button type="button" onclick="copyUid('{{ reg.registration_uid }}', this)" 
+                                        style="border: 1px solid #cbd5e1; background: #ffffff; color: #475569; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; cursor: pointer; line-height: 1;" title="Copy UID">
+                                    📋
+                                </button>
+                            </div>
+                            <span class="dash-muted">Open status</span>
+                        </td>
+                        <td>
+                            <strong>{{ reg.full_name }}</strong><br>
+                            <span class="dash-muted">{{ reg.email }}<br>{{ reg.college_name }}{% if reg.department %} · {{ reg.department }}{% endif %}</span>
+                        </td>
+                        <td>
+                            {{ reg.event_name }}
+                            {% if reg.team_name %}<br><span class="dash-muted">{{ reg.team_name }}</span>{% endif %}
+                            {% if reg.team_members %}<br><span style="font-size:0.75rem; color:var(--dash-muted);" title="{{ reg.team_members }}"><strong>Members:</strong> {{ reg.team_members }}</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if reg.approval_status == 'approved' %}
+                            <span class="dash-badge good">Approved</span>
+                            {% else %}
+                            <span class="dash-badge warn">Pending review</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if reg.payment_status == 'paid' %}
+                            <span class="dash-badge good">Paid · ₹{{ reg.amount_paid }}</span>
+                            {% elif reg.payment_status == 'pending' %}
+                            <span class="dash-badge info">UTR submitted</span>
+                            {% elif reg.payment_status == 'pay_on_site' %}
+                            <span class="dash-badge warn">Pay on site</span>
+                            {% else %}
+                            <span class="dash-badge warn">Unpaid</span>
+                            {% endif %}
+                            {% if reg.utr_number %}<br><span class="dash-id">{{ reg.utr_number }}</span>{% endif %}
+                            {% if reg.payment_verified_at %}<br><span class="dash-muted">Verified {{ reg.payment_verified_at }}</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if reg.receipt_delivery_status == 'sent' %}
+                            <span class="dash-badge good">Sent</span>
+                            {% elif reg.receipt_delivery_status == 'failed' %}
+                            <span class="dash-badge bad">Delivery failed</span>
+                            {% elif reg.payment_status == 'paid' %}
+                            <span class="dash-badge warn">Pending send</span>
+                            {% else %}
+                            <span class="dash-muted">After verification</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="dash-empty">No registrations yet. Start by choosing an event.</div>
+        {% endif %}
+    </section>
+
+    <section class="dash-panel" style="margin-top:18px;">
+        <div class="dash-panel-head">
+            <div>
+                <h2 class="dash-panel-title">What happens next</h2>
+                <p class="dash-panel-note">A simple, reliable handoff for every registration.</p>
+            </div>
+        </div>
+        <div class="dash-grid two" style="padding:16px 18px;">
+            <div class="dash-callout" style="margin:0;"><strong>1. Record</strong><br>Keep the registration reference and UTR safe.</div>
+            <div class="dash-callout" style="margin:0;"><strong>2. Verify</strong><br>The administrator checks the bank record.</div>
+            <div class="dash-callout" style="margin:0;"><strong>3. Receive</strong><br>The receipt status updates after delivery.</div>
+            <div class="dash-callout" style="margin:0;"><strong>4. Attend</strong><br>Use the approved record at the event.</div>
+        </div>
+    </section>
 </div>
+
+<script>
+let currentMemberFilter = 'all';
+
+function setMemberFilter(filter, btn) {
+    currentMemberFilter = filter;
+    document.querySelectorAll('#memberFilterPills .filter-pill').forEach(b => {
+        b.style.background = '';
+        b.style.color = '';
+        b.style.fontWeight = 'normal';
+    });
+    if (btn) {
+        btn.style.background = '#2563eb';
+        btn.style.color = '#ffffff';
+        btn.style.fontWeight = '700';
+    }
+    filterMemberRecords();
+}
+
+function filterMemberRecords() {
+    const query = (document.getElementById('memberTableSearch')?.value || '').toLowerCase().trim();
+    const rows = document.querySelectorAll('#memberRegistrationsTable tbody tr.member-reg-row');
+    
+    rows.forEach(row => {
+        const rowSearch = row.getAttribute('data-search') || '';
+        const payment = row.getAttribute('data-payment') || '';
+        const approval = row.getAttribute('data-approval') || '';
+
+        let matchesSearch = !query || rowSearch.includes(query);
+        let matchesFilter = true;
+
+        if (currentMemberFilter === 'paid') {
+            matchesFilter = (payment === 'paid');
+        } else if (currentMemberFilter === 'pending') {
+            matchesFilter = (payment !== 'paid');
+        } else if (currentMemberFilter === 'approved') {
+            matchesFilter = (approval === 'approved');
+        }
+
+        row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+    });
+}
+
+function copyUid(uid, btn) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(uid).then(() => {
+            const orig = btn.innerText;
+            btn.innerText = '✔';
+            setTimeout(() => { btn.innerText = orig; }, 1200);
+        });
+    }
+}
+</script>
 {% endblock %}

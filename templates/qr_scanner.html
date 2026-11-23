@@ -45,8 +45,8 @@
             <span id="cameraStatusBadge" class="badge" style="background: #f1f5f9; color: #64748b; font-size: 0.75rem;">Idle</span>
         </div>
 
-        <div id="reader" style="width: 100%; max-width: 620px; border-radius: 14px; overflow: hidden; background: #0b1528; border: 2.5px solid #2563eb; min-height: 380px; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);">
-            <div id="readerPlaceholder" style="color: #94a3b8; text-align: center; padding: 2.5rem 1.5rem;">
+        <div id="reader" style="width: 100%; max-width: 620px; aspect-ratio: 1 / 1; border-radius: 14px; overflow: hidden; background: #0b1528; border: 2.5px solid #2563eb; min-height: 380px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12); margin: 0 auto;">
+            <div id="readerPlaceholder" style="color: #94a3b8; text-align: center; padding: 2.5rem 1.5rem; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box;">
                 <div style="font-size: 3.5rem; margin-bottom: 0.75rem;">📸</div>
                 <h4 style="color: #f8fafc; font-size: 1.15rem; margin: 0 0 6px; font-weight: 700;">Camera Viewfinder Ready</h4>
                 <p style="margin: 0; font-size: 0.9rem; color: #94a3b8;">Tap the button below to activate your camera and start instant scanning.</p>
@@ -163,21 +163,83 @@
 
 #reader {
     width: 100% !important;
+    max-width: 620px !important;
+    min-height: 380px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    background: #0b1528 !important;
+    border: 2.5px solid #2563eb !important;
+    position: relative !important;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12) !important;
+    margin: 0 auto !important;
 }
+
+#readerPlaceholder {
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 2rem 1.5rem !important;
+    box-sizing: border-box !important;
+}
+
+#reader__scan_region {
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    position: relative !important;
+    overflow: hidden !important;
+    background: #000000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto !important;
+}
+
+#reader__scan_region video,
 #reader video {
     width: 100% !important;
-    height: auto !important;
-    min-height: 360px !important;
-    max-height: 480px !important;
+    height: 100% !important;
+    aspect-ratio: 1 / 1 !important;
     object-fit: cover !important;
-    border-radius: 12px !important;
+    border-radius: 0 !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
-#reader__scan_region {
-    background: transparent !important;
+
+#reader__scan_region canvas {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    pointer-events: none !important;
 }
+
+#reader__dashboard {
+    width: 100% !important;
+    background: #f8fafc !important;
+    border-top: 1px solid #e2e8f0 !important;
+    padding: 10px 8px !important;
+    box-sizing: border-box !important;
+}
+
 #reader__dashboard_section_csr {
-    padding: 10px 0 !important;
+    padding: 6px 0 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
 }
+
 #reader__dashboard_section_csr button {
     background: #2563eb !important;
     color: #ffffff !important;
@@ -185,15 +247,42 @@
     padding: 8px 16px !important;
     border-radius: 8px !important;
     font-weight: 600 !important;
-    margin: 6px 4px !important;
+    margin: 4px !important;
     cursor: pointer !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2) !important;
 }
+
 #reader__dashboard_section_csr select {
     padding: 8px 12px !important;
     border-radius: 8px !important;
     border: 1.5px solid #cbd5e1 !important;
     font-size: 0.9rem !important;
-    margin: 6px 4px !important;
+    margin: 4px !important;
+    max-width: 90% !important;
+    background: #ffffff !important;
+}
+
+@media (max-width: 640px) {
+    #reader {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: auto !important;
+    }
+    #readerPlaceholder {
+        aspect-ratio: 1 / 1 !important;
+        min-height: 280px !important;
+    }
+    #reader__scan_region {
+        width: 100% !important;
+        aspect-ratio: 1 / 1 !important;
+    }
+    #reader__scan_region video,
+    #reader video {
+        width: 100% !important;
+        height: 100% !important;
+        aspect-ratio: 1 / 1 !important;
+        object-fit: cover !important;
+    }
 }
 </style>
 
@@ -210,7 +299,7 @@
 
             const qrboxCalc = function(viewfinderWidth, viewfinderHeight) {
                 const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                const boxSize = Math.max(280, Math.floor(minEdge * 0.8));
+                const boxSize = Math.floor(minEdge * 0.78);
                 return { width: boxSize, height: boxSize };
             };
 
@@ -221,7 +310,11 @@
                     qrbox: qrboxCalc,
                     aspectRatio: 1.0,
                     showTorchButtonIfSupported: true,
-                    rememberLastUsedCamera: true
+                    rememberLastUsedCamera: true,
+                    videoConstraints: {
+                        facingMode: "environment",
+                        aspectRatio: 1.0
+                    }
                 }, 
                 false
             );
