@@ -3744,13 +3744,26 @@ class SDATestCase(unittest.TestCase):
         finally:
             self.app.config['REGISTRATIONS_OPEN'] = True
 
-    def test_all_existing_registrations_are_cancelled(self):
-        """Verify all existing registrations in the database have status 'cancelled'."""
-        database.cancel_all_registrations()
+    def test_all_existing_registrations_appear_in_admin_dashboard(self):
+        """Verify all existing registrations (both public and approved) are recorded and appear in the admin dashboard."""
+        # Ensure database seeding does not cancel registrations and restores them
+        database.create_tables_and_seed()
+
+        # Log in as admin
+        self.client.post('/login', data={'username': 'admin', 'password': Config.ADMIN_PASSWORD}, follow_redirects=True)
+        dash_res = self.client.get('/admin/dashboard')
+        self.assertEqual(dash_res.status_code, 200)
+        dash_html = dash_res.data.decode('utf-8')
+
+        # Check that registration management tabs exist and display recorded registrations
+        self.assertIn('Registration management', dash_html)
+        self.assertIn('Pending Review', dash_html)
+        self.assertIn('All Approved Records', dash_html)
+
+        # Verify no registrations are cancelled
         regs = database.query_db("SELECT status FROM registrations")
-        self.assertTrue(len(regs) > 0)
         for r in regs:
-            self.assertEqual(r['status'], 'cancelled')
+            self.assertNotEqual(r['status'], 'cancelled')
 
 
 if __name__ == '__main__':

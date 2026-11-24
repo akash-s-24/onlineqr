@@ -1527,8 +1527,18 @@ def create_tables_and_seed():
                 ('Dates will be revealed when registrations open', ev['event_name'])
             )
 
-        # Cancel all existing registrations per directive
-        run_exec("UPDATE registrations SET status = 'cancelled' WHERE status != 'cancelled';")
+        # Ensure all registrations are properly recorded and visible in admin dashboard:
+        # Restore any records that were marked cancelled back to their active/recorded state
+        run_exec(
+            """
+            UPDATE registrations
+            SET status = CASE
+                WHEN payment_status = 'paid' OR payment_verified_at IS NOT NULL OR registered_by IS NOT NULL THEN 'approved'
+                ELSE 'pending'
+            END
+            WHERE status = 'cancelled';
+            """
+        )
 
         # Set official Event Coordinators across all events uniformly
         run_exec(

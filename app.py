@@ -673,7 +673,7 @@ def admin_dashboard():
     pending_cert_emails = max(0, total_certificates - total_sent - total_failed)
 
     # 5. Approved and Pending Counts
-    appr_res = query_db("SELECT COUNT(*) as count FROM registrations WHERE status = 'approved'", one=True)
+    appr_res = query_db("SELECT COUNT(*) as count FROM registrations WHERE status != 'pending'", one=True)
     total_approved = appr_res['count'] if appr_res else 0
 
     pend_res = query_db("SELECT COUNT(*) as count FROM registrations WHERE status = 'pending'", one=True)
@@ -747,7 +747,7 @@ def admin_dashboard():
                COUNT(DISTINCT c.id) as certs_generated,
                COUNT(DISTINCT CASE WHEN c.email_status = 'sent' THEN c.id END) as certs_sent
         FROM events e
-        LEFT JOIN registrations r ON e.id = r.event_id AND r.status = 'approved'
+        LEFT JOIN registrations r ON e.id = r.event_id AND r.status != 'pending'
         LEFT JOIN attendance a ON a.registration_id = r.id
         LEFT JOIN certificates c ON c.registration_id = r.id
         GROUP BY e.id, e.event_name, e.event_date
@@ -802,7 +802,7 @@ def admin_dashboard():
         JOIN events e ON r.event_id = e.id
         LEFT JOIN attendance a ON a.registration_id = r.id
         LEFT JOIN users u ON r.registered_by = u.id
-        WHERE r.status = 'approved'
+        WHERE r.status != 'pending'
         ORDER BY r.id DESC
     """)
 
