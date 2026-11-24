@@ -6021,10 +6021,10 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
     <!-- Hero -->
     <div class="hero-wrapper" id="hero-atmosphere" style="perspective: 1000px;">
         <section class="hero-section" id="hero" style="position: relative; z-index: 2;">
-            <!-- Registration Open Indicator Badge -->
-            <a class="hero-badge-pill" href="#events" title="Explore Events">
-                <span class="registration-dot" aria-hidden="true"></span>
-                <span class="hero-badge-text">Registrations Open &bull; Daksha Infinix</span>
+            <!-- Registration Status Indicator Badge -->
+            <a class="hero-badge-pill" href="#events" title="Registrations will open soon">
+                <span class="registration-dot" aria-hidden="true" style="background: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.35), 0 0 10px rgba(245, 158, 11, 0.8);"></span>
+                <span class="hero-badge-text">Registrations will open soon &bull; Daksha Infinix</span>
             </a>
 
             <div class="hero-title-wrap">
@@ -6040,7 +6040,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
             </p>
 
             <!-- Event Timing & Countdown Module -->
-            <div class="hero-countdown-block" id="heroCountdownBlock" aria-label="Daksha Infinix timing and countdown">
+            <div class="hero-countdown-block" id="heroCountdownBlock" aria-label="Daksha Infinix timing and schedule">
                 <p class="hero-date-line">
                     <span class="hero-date-pill">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; color:#60a5fa;">
@@ -6049,32 +6049,13 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                             <line x1="8" y1="2" x2="8" y2="6"></line>
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
-                        <span class="hero-date-highlight">Starts on 25, 26 November 2026, Bengaluru</span>
+                        <span class="hero-date-highlight">Dates will be revealed when registrations open</span>
                     </span>
                 </p>
 
-                <div class="hero-timer-capsule" id="symposiumCountdown" aria-label="Countdown to 25th November 2026">
-                    <div class="timer-digits-strip" id="timerDigitsStrip">
-                        <div class="timer-unit">
-                            <span class="timer-val" id="cdDays">00</span>
-                            <span class="timer-lbl">d</span>
-                        </div>
-                        <span class="timer-colon" aria-hidden="true">:</span>
-                        <div class="timer-unit">
-                            <span class="timer-val" id="cdHours">00</span>
-                            <span class="timer-lbl">h</span>
-                        </div>
-                        <span class="timer-colon" aria-hidden="true">:</span>
-                        <div class="timer-unit">
-                            <span class="timer-val" id="cdMinutes">00</span>
-                            <span class="timer-lbl">m</span>
-                        </div>
-                        <span class="timer-colon" aria-hidden="true">:</span>
-                        <div class="timer-unit timer-unit-sec">
-                            <span class="timer-val timer-sec-val" id="cdSeconds">00</span>
-                            <span class="timer-lbl">s</span>
-                        </div>
-                    </div>
+                <div class="hero-timer-capsule" id="symposiumCountdown" style="padding: 10px 22px; font-weight: 700; color: #93c5fd; background: rgba(37, 99, 235, 0.14); border: 1.5px solid rgba(96, 165, 250, 0.35); border-radius: 9999px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                    <span>📢 Event dates will be revealed when registrations open</span>
+                    <span style="display:none;" aria-hidden="true"><span id="cdDays">00</span><span id="cdHours">00</span><span id="cdMinutes">00</span><span id="cdSeconds">00</span>Fest is Live</span>
                 </div>
             </div>
 
@@ -6314,6 +6295,13 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 squad at Shree Daksha Academy.' }}</p>
         </div>
 
+        <!-- Registrations Status Notice -->
+        <div class="events-status-notice-banner" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%); border: 2px solid #3b82f6; border-radius: 16px; padding: 1.5rem 2rem; margin: 0 20px 2rem; text-align: center; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);">
+            <span style="display: inline-block; font-size: 1.8rem; margin-bottom: 6px;">📢</span>
+            <h3 style="color: #60a5fa; margin: 0 0 6px; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.01em;">Registrations will open soon.</h3>
+            <p style="color: #cbd5e1; margin: 0; font-size: 0.98rem; line-height: 1.5;">Registration is currently paused for all events. All event dates and detailed schedule timings will be revealed when registrations open.</p>
+        </div>
+
         <!-- View Mode Switcher: Choice between 3D Disc Carousel and All Events Grid -->
         <div class="events-view-switcher-bar">
             <div class="events-view-switcher-inner">
@@ -6414,7 +6402,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         </div>
                         <div class="disc-cascade-meta-row">
                             <dt>When</dt>
-                            <dd id="discCascadeWhen">25–26 November 2026</dd>
+                            <dd id="discCascadeWhen">Dates will be revealed when registrations open</dd>
                         </div>
                         <div class="disc-cascade-meta-row">
                             <dt>Venue</dt>
@@ -6480,8 +6468,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         data-faculty-phone="{{ events[0].faculty_phone|default(config.EVENT_COORDINATOR_PRIMARY_PHONE, true)|e if events else config.EVENT_COORDINATOR_PRIMARY_PHONE|e }}"
                         data-student-name="{{ events[0].student_name|default(config.EVENT_COORDINATOR_SECONDARY_NAME, true)|e if events else config.EVENT_COORDINATOR_SECONDARY_NAME|e }}"
                         data-student-phone="{{ events[0].student_phone|default(config.EVENT_COORDINATOR_SECONDARY_PHONE, true)|e if events else config.EVENT_COORDINATOR_SECONDARY_PHONE|e }}">Contact</button>
-                    <a id="discCascadeRegister" class="disc-cascade-register"
-                        href="{{ url_for('register_participant') }}{% if events %}?event_id={{ events[0].id }}{% endif %}">Register for this event ↗</a>
+                    <a id="discCascadeRegister" class="disc-cascade-register" style="opacity: 0.75; cursor: not-allowed; pointer-events: none;"
+                        href="javascript:void(0);">Registrations will open soon</a>
                 </div>
                 <div class="disc-cascade-controls">
                     <button type="button" id="discCascadePrev" aria-label="Previous event">←</button>
@@ -6579,8 +6567,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                                     data-student-name="{{ ev.student_name|default(config.EVENT_COORDINATOR_SECONDARY_NAME, true)|e }}"
                                     data-student-phone="{{ ev.student_phone|default(config.EVENT_COORDINATOR_SECONDARY_PHONE, true)|e }}">Contact</button>
                             </div>
-                            <a href="{{ url_for('register_participant') }}?event_id={{ ev.id }}"
-                                class="btn-card-register">Register ↗</a>
+                            <button type="button" class="btn-card-register" style="opacity: 0.75; cursor: not-allowed; background: #334155; color: #94a3b8; border: 1px solid #475569;" disabled title="Registrations will open soon">Registrations will open soon</button>
                         </div>
                     </div>
                 </article>
@@ -6747,8 +6734,8 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                 </div>
 
                 <div class="track-footer">
-                    <a href="{{ url_for('register_participant') }}" class="track-btn track-btn-primary">
-                        <span>Register Online Only</span>
+                    <a href="javascript:void(0);" class="track-btn track-btn-primary" aria-label="Register Online Only" style="opacity: 0.85; cursor: default;">
+                        <span>Registrations will open soon</span>
                     </a>
                 </div>
             </div>
@@ -7335,7 +7322,7 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                     setText('discCascadeFormat', data.format);
                     setText('discCascadeFee', data.fee);
                     setText('discCascadeFeeBadge', `ENTRY · ${data.fee || 'Free entry'}`);
-                    setText('discCascadeWhen', data.date || '25–26 November 2026');
+                    setText('discCascadeWhen', data.date || 'Dates will be revealed when registrations open');
                     setText('discCascadeVenue', data.venue);
                     setText('discCascadeDescription', data.description || 'Bring your best idea and make the stage yours.');
                     const rulesButton = document.getElementById('discCascadeRules');
@@ -7357,7 +7344,10 @@ DISC CASCADE RESPONSIVE & MOBILE REDESIGN
                         nextBtn.removeAttribute('aria-disabled');
                     }
                     const register = document.getElementById('discCascadeRegister');
-                    if (register) register.href = data.registerUrl || '#';
+                    if (register) {
+                        register.href = 'javascript:void(0);';
+                        register.textContent = 'Registrations will open soon';
+                    }
                     document.querySelectorAll('#discCascadeIndexMenu [data-index]').forEach((item) => {
                         const isItemActive = Number(item.dataset.index) === active;
                         item.classList.toggle('active', isItemActive);

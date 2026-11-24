@@ -15,6 +15,7 @@ class SDATestCase(unittest.TestCase):
         self.client = self.app.test_client()
         self.app.config['TESTING'] = True
         self.app.config['WTF_CSRF_ENABLED'] = False
+        self.app.config['REGISTRATIONS_OPEN'] = True
         os.environ['FLASK_TESTING'] = 'True'
         os.environ['TESTING'] = 'True'
 
@@ -31,7 +32,8 @@ class SDATestCase(unittest.TestCase):
         self.assertIn(b'BGMI', response.data)
         self.assertIn(b'Free Fire', response.data)
         self.assertIn(b'Pencil Sketch', response.data)
-        self.assertIn(b'25\xe2\x80\x9326 November 2026', response.data)
+        self.assertIn(b'Dates will be revealed when registrations open', response.data)
+        self.assertIn(b'Registrations will open soon', response.data)
         self.assertIn(b'Govt. of Karnataka', response.data)
         self.assertNotIn(b'Pre-University College', response.data)
         self.assertNotIn(b'BCA', response.data)
@@ -229,14 +231,13 @@ class SDATestCase(unittest.TestCase):
 
         # 1. Event Dates & Hero Subtitle
         self.assertIn('Daksha Infinix', data)
-        self.assertIn('Registrations Open &bull; Daksha Infinix', data)
+        self.assertIn('Registrations will open soon &bull; Daksha Infinix', data)
         self.assertNotIn('Daksha Infinitx', data)
         self.assertNotIn('Daksha Infinitix', data)
         self.assertNotIn('SDA 2026-27', data)
         self.assertNotIn('2026-27', data)
         self.assertNotIn('Annual Symposium 2026-27', data)
-        self.assertIn('Starts on 25, 26 November 2026, Bengaluru', data)
-        self.assertTrue('Bengaluru' in data or 'Bangalore' in data)
+        self.assertIn('Dates will be revealed when registrations open', data)
         self.assertIn('hero-date-highlight', data)
         self.assertNotIn('November 19th', data)
         self.assertNotIn('November 20th', data)
@@ -700,9 +701,9 @@ class SDATestCase(unittest.TestCase):
         self.assertTrue('Overall Championship Trophy' not in html)
         self.assertTrue('data-title="Solo Singing"' in html)
         self.assertTrue('data-target="12"' in html)
-        self.assertTrue('Register Online Only' in html)
+        self.assertTrue('Registrations will open soon' in html)
         self.assertTrue('data-no-liquid' in html)
-        self.assertTrue('25–26 November 2026' in html)
+        self.assertTrue('Dates will be revealed when registrations open' in html)
         self.assertTrue('26th/27th Nov' not in html)
         self.assertTrue('30 minutes before inauguration' in html)
         self.assertTrue('General Championship' in html)
@@ -842,7 +843,7 @@ class SDATestCase(unittest.TestCase):
             edit_post_res = self.client.post(f"/admin/events/edit/{bgmi_event['id']}", data={
                 'event_name': 'BGMI',
                 'event_type': 'Gaming',
-                'event_date': '25 November 2026 (Wednesday)',
+                'event_date': 'Dates will be revealed when registrations open',
                 'event_time': '10:00 AM',
                 'venue': 'Computer Lab 3',
                 'max_participants': '100',
@@ -881,7 +882,7 @@ class SDATestCase(unittest.TestCase):
                 UPDATE events
                 SET description = %s,
                     rules_text = %s,
-                    event_date = '25 November 2026 (Wednesday)',
+                    event_date = 'Dates will be revealed when registrations open',
                     faculty_name = 'RANJITHA B K',
                     faculty_phone = '88615 91085',
                     student_name = 'SINDHU M R',
@@ -1074,17 +1075,17 @@ class SDATestCase(unittest.TestCase):
         html = res.data.decode('utf-8')
 
         # 1. Top Hero action buttons and countdown
-        self.assertIn('Starts on 25, 26 November 2026, Bengaluru', html)
+        self.assertIn('Dates will be revealed when registrations open', html)
         self.assertIn('Explore Events', html)
         self.assertIn('Rules &amp; Guidelines', html)
         self.assertIn('Contact Organizers', html)
         self.assertIn('hero-explore-btn', html)
         self.assertIn('hero-rules-btn', html)
         self.assertIn('hero-contact-btn', html)
-        self.assertIn('Register for Event', html)
+        self.assertIn('Registrations will open soon', html)
 
         # 2. Disc cascade action buttons
-        self.assertIn('Register for this event ↗', html)
+        self.assertIn('Registrations will open soon', html)
         self.assertIn('id="discCascadeRegister"', html)
         self.assertIn('id="discCascadeRules"', html)
         self.assertIn('id="discCascadeCall"', html)
@@ -1175,21 +1176,9 @@ class SDATestCase(unittest.TestCase):
         events = database.query_db("SELECT event_name, event_date FROM events")
         self.assertEqual(len(events), 15)
 
-        # 9 events on 25 November 2026 (Wednesday): 7 single-day + 2 two-day
-        nov_25_events = [e['event_name'] for e in events if '25 November' in e['event_date'] or '25–26' in e['event_date']]
-        self.assertEqual(len(nov_25_events), 9)
-
-        # 8 events on 26 November 2026 (Thursday): 6 single-day + 2 two-day
-        nov_26_events = [e['event_name'] for e in events if '26 November' in e['event_date'] or '25–26' in e['event_date']]
-        self.assertEqual(len(nov_26_events), 8)
-
-        # Distinct event date formats
-        dates = {e['event_date'] for e in events}
-        self.assertEqual(dates, {
-            '25 November 2026 (Wednesday)',
-            '26 November 2026 (Thursday)',
-            '25–26 November 2026'
-        })
+        # All 15 events have 'Dates will be revealed when registrations open'
+        for e in events:
+            self.assertEqual(e['event_date'], 'Dates will be revealed when registrations open')
 
     def test_seed_migrates_all_legacy_event_dates(self):
         if database.DB_MODE != 'sqlite':
@@ -1215,7 +1204,7 @@ class SDATestCase(unittest.TestCase):
                 "SELECT event_date FROM events WHERE event_name = %s",
                 (fixture_name,), one=True
             )
-            self.assertEqual(migrated['event_date'], '25 November 2026 (Wednesday)')
+            self.assertEqual(migrated['event_date'], 'Dates will be revealed when registrations open')
             custom = database.query_db(
                 "SELECT event_date FROM events WHERE event_name = %s",
                 (custom_fixture_name,), one=True
@@ -1921,8 +1910,8 @@ class SDATestCase(unittest.TestCase):
         self.assertEqual(res_events.status_code, 200)
         events_html = res_events.data.decode('utf-8')
 
-        self.assertIn('Starts on 25, 26 November 2026, Bengaluru', events_html)
-        self.assertIn('Registrations Open &bull; Daksha Infinix', events_html)
+        self.assertIn('Dates will be revealed when registrations open', events_html)
+        self.assertIn('Registrations will open soon &bull; Daksha Infinix', events_html)
         self.assertNotIn('Important Payment & Receipt Terms', events_html)
         self.assertIn('No physical hard copy receipt is required', events_html)
         self.assertIn('View Campus Location', events_html)
@@ -2117,7 +2106,7 @@ class SDATestCase(unittest.TestCase):
         # 2. Daksha and Infinix structure
         self.assertIn('class="hero-title-daksha"', html)
         self.assertIn('class="hero-title-infinix"', html)
-        self.assertIn('Starts on 25, 26 November 2026, Bengaluru', html)
+        self.assertIn('Dates will be revealed when registrations open', html)
 
         # 3. CSS checks for circular toggle and mobile layout
         res_css = self.client.get('/static/css/daksha-theme.css')
@@ -2150,8 +2139,8 @@ class SDATestCase(unittest.TestCase):
         events_html = res_events.data.decode('utf-8')
 
         # 1. Date text format
-        self.assertIn('Starts on 25, 26 November 2026, Bengaluru', events_html)
-        self.assertNotIn('Starts on 25th, 26th November 2026, Bengaluru.', events_html)
+        self.assertIn('Dates will be revealed when registrations open', events_html)
+        self.assertNotIn('Starts on 25, 26 November 2026, Bengaluru', events_html)
 
         # 2. Hero Contact Organizers button redirects to #contact section
         self.assertIn('onclick="scrollToSection(\'contact\', event)" class="candy-btn hero-contact-btn"', events_html)
@@ -3537,14 +3526,14 @@ class SDATestCase(unittest.TestCase):
         html = res.data.decode('utf-8')
         
         # Verify dates are present
-        self.assertIn('25–26 November 2026', html)
+        self.assertIn('Dates will be revealed when registrations open', html)
         
         # Verify timings are NOT rendered in the event details or disc cascade
         self.assertNotIn('· 10:00 AM', html)
         self.assertNotIn('· 11:00 AM', html)
         self.assertNotIn('data-time="10:00 AM"', html)
         self.assertNotIn('data-time="11:00 AM"', html)
-        self.assertIn('id="discCascadeWhen">25–26 November 2026</dd>', html)
+        self.assertIn('id="discCascadeWhen">Dates will be revealed when registrations open</dd>', html)
         res.close()
 
         # 2. Check /register for a specific event
@@ -3726,6 +3715,42 @@ class SDATestCase(unittest.TestCase):
         self.assertIn('Your registrations', member_html)
         self.assertIn('dash-grid metrics', member_html)
         member_res.close()
+
+    def test_registration_paused_by_default(self):
+        """Verify that when REGISTRATIONS_OPEN is False, registration is stopped and 'Registrations will open soon' is displayed."""
+        self.app.config['REGISTRATIONS_OPEN'] = False
+        try:
+            # 1. GET /register shows 'Registrations will open soon.' and hides submission form
+            res_get = self.client.get('/register')
+            self.assertEqual(res_get.status_code, 200)
+            get_html = res_get.data.decode('utf-8')
+            self.assertIn('Registrations will open soon.', get_html)
+            self.assertNotIn('id="submitBtn"', get_html)
+            self.assertNotIn('<button type="submit"', get_html)
+
+            # 2. POST /register is blocked with flash warning and redirected to /events
+            res_post = self.client.post('/register', data={
+                'full_name': 'Blocked Student',
+                'email': 'blocked@example.com',
+                'phone': '9876543210',
+                'college_name': 'Test College',
+                'department': 'PCMC',
+                'semester': 'II PUC',
+                'event_id': 1
+            }, follow_redirects=True)
+            self.assertEqual(res_post.status_code, 200)
+            post_html = res_post.data.decode('utf-8')
+            self.assertIn('Registrations will open soon.', post_html)
+        finally:
+            self.app.config['REGISTRATIONS_OPEN'] = True
+
+    def test_all_existing_registrations_are_cancelled(self):
+        """Verify all existing registrations in the database have status 'cancelled'."""
+        database.cancel_all_registrations()
+        regs = database.query_db("SELECT status FROM registrations")
+        self.assertTrue(len(regs) > 0)
+        for r in regs:
+            self.assertEqual(r['status'], 'cancelled')
 
 
 if __name__ == '__main__':

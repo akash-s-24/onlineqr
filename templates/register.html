@@ -1113,6 +1113,14 @@ line-height: 1.25 !important; }
         <h1 class="form-title">Event Registration</h1>
         <p class="form-subtitle">Secure your official Daksha Infinix challenge pass and entry credentials.</p>
 
+        {% if registrations_open is defined and not registrations_open %}
+        <div class="alert alert-warning" style="padding: 2rem 2.5rem; border-radius: 16px; background: #fffbeb; border: 2px solid #f59e0b; color: #92400e; margin: 20px 0 28px; text-align: center; box-shadow: 0 4px 18px rgba(245, 158, 11, 0.15);">
+            <span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">⏳</span>
+            <h2 style="margin: 0 0 10px; font-size: 1.55rem; font-weight: 800; color: #b45309; letter-spacing: -0.01em;">Registrations will open soon.</h2>
+            <p style="margin: 0 0 20px; font-size: 1.05rem; color: #78350f; line-height: 1.6;">Registration is currently paused for all events. All event dates and schedule timings will be revealed when registrations open.</p>
+            <a href="{{ url_for('events_list') }}" class="back-btn-ghost" style="display: inline-flex; justify-content: center; padding: 10px 24px; font-size: 0.95rem; font-weight: 700;">&larr; Return to Events Lineup</a>
+        </div>
+        {% else %}
         <!-- Registration Guide Card -->
         <div class="help-guide-card">
             <div>
@@ -1650,6 +1658,7 @@ line-height: 1.25 !important; }
             <!-- Submit Button -->
             <button type="submit" id="submitBtn" class="clean-black-submit-btn">Submit Registration →</button>
         </form>
+        {% endif %}
     </div>
 </section>
 {% endblock %}

@@ -1518,6 +1518,9 @@ def delete_event(event_id):
 # ---------------------------------------------------------
 # Participant Registration
 # ---------------------------------------------------------
+REGISTRATIONS_OPEN = os.environ.get('REGISTRATIONS_OPEN', 'false').lower() in ('true', '1', 'yes')
+app.config.setdefault('REGISTRATIONS_OPEN', REGISTRATIONS_OPEN)
+
 @app.route('/register', methods=['GET', 'POST'])
 @rate_limit(limit=15, period=60, methods=['POST'], message="Too many registration submissions.")
 def register_participant():
@@ -1530,6 +1533,19 @@ def register_participant():
             'full_name': session.get('full_name', ''),
             'email': session.get('email', '')
         }
+
+    registrations_open = app.config.get('REGISTRATIONS_OPEN', False)
+    if not registrations_open:
+        if request.method == 'POST':
+            flash('Registrations will open soon. Registration is currently paused for all events.', 'warning')
+            return redirect(url_for('events_list'))
+        return render_template(
+            'register.html',
+            events=events,
+            selected_event_id=selected_event_id,
+            user_info=user_info,
+            registrations_open=False
+        )
 
     if request.method == 'POST':
         full_name = request.form.get('full_name', '').strip()
@@ -2887,7 +2903,7 @@ def download_all_teams_certificates_zip():
         teams_data.append({
             'team_name': tname,
             'event_name': reg.get('event_name') or 'Event',
-            'event_date': reg.get('event_date') or '25-26 Nov 2026',
+            'event_date': reg.get('event_date') or 'Dates will be revealed when registrations open',
             'college_name': reg.get('college_name'),
             'department': reg.get('department') or 'PCMC',
             'semester': reg.get('semester') or 'Second PUC',
